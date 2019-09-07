@@ -36,7 +36,7 @@
 #   define COLOR_RGB    39
 #   define SET_COLOR(p_Color) std::cout << "\033[" << p_Color << "m" << std::flush;
 #endif
-#define GET_COLOR(Mode) (Mode == LogType::Error ? COLOR_RED : (Mode == LogType::Warning ? COLOR_BLUE : (Mode == LogType::Info ? COLOR_GREEN : COLOR_BASE)))
+#define GET_COLOR(Mode) (Mode == LogType::Assert ? COLOR_RED : Mode == LogType::Error ? COLOR_RED : (Mode == LogType::Warning ? COLOR_BLUE : (Mode == LogType::Info ? COLOR_GREEN : COLOR_BASE)))
 
 namespace SteerStone  { namespace Core { namespace Logger {
 
@@ -61,15 +61,23 @@ namespace SteerStone  { namespace Core { namespace Logger {
     //////////////////////////////////////////////////////////////////////////
 
     /// Report a message
-    /// @p_Type     : Log type
-    /// @p_System   : Message sender
-    /// @p_Message  : Message to report
+    /// @p_Type         : Log type
+    /// @p_System       : Message sender
+    /// @p_Function     : Function name of caller
+    /// @p_FunctionLine : Function line of caller
+    /// @p_Message      : Message to report
     void Base::Report(LogType p_LogType, std::string const& p_System, std::string_view const p_Function, int32 const p_FunctionLine, std::string const& p_Message)
     {
         if (p_LogType > m_LogLevel)
             return;
 
         std::lock_guard<std::recursive_mutex> l_Lock(m_Mutex);
+
+        if (p_LogType == LogType::Assert)
+        {
+            ReportAssert(p_System, p_Function, p_FunctionLine, p_Message);
+            return;
+        }
 
         /// Constant always true variables
         const std::string l_Time      = GetTime();
@@ -100,6 +108,42 @@ namespace SteerStone  { namespace Core { namespace Logger {
 
         for (auto l_Appender : m_Appenders)
             l_Appender->OnReport(this, l_Time, p_LogType, p_System, p_Message);
+    }
+    /// Report assert message
+    /// @p_System       : Message sender
+    /// @p_Function     : Function name of caller
+    /// @p_FunctionLine : Function line of caller
+    /// @p_Message      : Message to report
+    void Base::ReportAssert(std::string const& p_System, std::string_view const p_Function, int32 const p_FunctionLine, std::string const& p_Message)
+    {
+        /// Constant always true variables
+        const std::string l_Time = GetTime();
+        const std::string l_System = "[" + p_System + "]";
+        const std::string l_Message = " << " + p_Message;
+
+        /// Message Output
+        {
+            SET_COLOR(COLOR_BASE);
+
+            if (CanLogTime())
+                std::clog << l_Time + " | ";
+
+            if (CanLogThreadId())
+                std::clog << "Thread Id: " << Utils::GetThreadId() << " | ";
+
+            if (CanLogFunction())
+                std::clog << p_Function << "::" << p_FunctionLine << " | ";
+
+            SET_COLOR(GET_COLOR(LogType::Assert));
+            std::clog << "[ASSERT]";
+            std::clog << l_System;
+            std::clog << l_Message << std::endl;
+            SET_COLOR(COLOR_RGB);
+        }
+
+        /// Crash
+        *((volatile int*)nullptr) = 0;
+        exit(1);
     }
 
     /// Output Server Banner

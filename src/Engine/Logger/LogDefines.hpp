@@ -24,11 +24,13 @@
 #define LOG_WARNING(p_System,   ...)        ::SteerStone::Core::Logger::Base::GetSingleton()->Report(SteerStone::Core::Logger::LogType::Warning, p_System, LOG_GET_FUNCTION(), LOG_GET_FUNCTION_LINE(), __VA_ARGS__)
 #define LOG_ERROR(p_System,     ...)        ::SteerStone::Core::Logger::Base::GetSingleton()->Report(SteerStone::Core::Logger::LogType::Error,   p_System, LOG_GET_FUNCTION(), LOG_GET_FUNCTION_LINE(), __VA_ARGS__)
 #define LOG_VERBOSE(p_System,   ...)        ::SteerStone::Core::Logger::Base::GetSingleton()->Report(SteerStone::Core::Logger::LogType::Verbose, p_System, LOG_GET_FUNCTION(), LOG_GET_FUNCTION_LINE(), __VA_ARGS__)
+#define LOG_ASSERT(p_Condition, p_System, ...) if (!(p_Condition)) ::SteerStone::Core::Logger::Base::GetSingleton()->Report(SteerStone::Core::Logger::LogType::Assert, p_System, LOG_GET_FUNCTION(), LOG_GET_FUNCTION_LINE(), __VA_ARGS__)
 #else
 #define LOG_INFO(p_System,      ...)        ::SteerStone::Core::Logger::Base::GetSingleton()->Report(SteerStone::Core::Logger::LogType::Info,    p_System, LOG_GET_FUNCTION(), LOG_GET_FUNCTION_LINE(), __VA_ARGS__)
 #define LOG_WARNING(p_System,   ...)        ::SteerStone::Core::Logger::Base::GetSingleton()->Report(SteerStone::Core::Logger::LogType::Warning, p_System, LOG_GET_FUNCTION(), LOG_GET_FUNCTION_LINE(), __VA_ARGS__)
 #define LOG_ERROR(p_System,     ...)        ::SteerStone::Core::Logger::Base::GetSingleton()->Report(SteerStone::Core::Logger::LogType::Error,   p_System, LOG_GET_FUNCTION(), LOG_GET_FUNCTION_LINE(), __VA_ARGS__)
 #define LOG_VERBOSE(p_System,   ...)
+#define LOG_ASSERT(p_Condition, p_System, ...) if (!(p_Condition)) ::SteerStone::Core::Logger::Base::GetSingleton()->Report(SteerStone::Core::Logger::LogType::Assert, p_System, LOG_GET_FUNCTION(), LOG_GET_FUNCTION_LINE(), __VA_ARGS__)
 #endif
 
 /// Logger Configuration
@@ -54,6 +56,7 @@ namespace SteerStone { namespace Core { namespace Logger {
         Info,
         Warning,
         Error,
+        Assert,
         Verbose
     };
 
