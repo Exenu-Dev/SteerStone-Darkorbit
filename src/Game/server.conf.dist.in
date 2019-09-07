@@ -1,0 +1,28 @@
+### SECTION INDEX ###
+#   SERVER SETTINGS
+#   MYSQL SETTINGS
+
+### SERVER SETTINGS ###
+
+## Server Port
+#   Description: TCP port to reach the server.
+#   Default: 37120
+ServerPort = 37120
+
+## BindIP
+#	Description: Bind server to Ip/Host Name
+#	Default: "127.0.0.1" - (Bind to all IPs on the system)
+BindIP = "127.0.0.1"
+
+## Listener ChildProcesses
+#	Description: Amount of listener child processes to spawn
+#	Default: 2
+ChildProcesses = 2
+
+### MYSQL SETTINGS ###
+
+## GameDatabase
+#	Description: Mysql account settings to connect to Game Database
+#	Example:     "hostname;port;username;password;database"
+#   Default:     "127.0.0.1;3306;SteerStone;SteerStone;SteerStone"
+GameDatabaseInfo = "127.0.0.1;3306;SteerStone;SteerStone;SteerStone"
