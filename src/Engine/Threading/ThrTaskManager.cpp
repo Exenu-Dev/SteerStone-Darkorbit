@@ -79,7 +79,7 @@ namespace SteerStone { namespace Core { namespace Threading {
         }
         else if (p_Task->GetTaskType() == TaskType::Moderate)
         {
-            for (std::size_t l_I = 1; l_I < m_ExclusiveTaskWorkers.size(); ++l_I)
+            for (std::size_t l_I = 0; l_I < m_ExclusiveTaskWorkers.size(); ++l_I)
             {
                 TaskWorker* l_CurrentWorker = m_ExclusiveTaskWorkers[l_I];
 
@@ -121,7 +121,7 @@ namespace SteerStone { namespace Core { namespace Threading {
     /// @p_Function : Task
     Task::Ptr TaskManager::PushTask(const std::string & p_Name, const TaskType p_TaskType, uint64 p_Period, const std::function<bool()> & p_Function)
     {
-        Task::Ptr l_Task = std::make_shared<LambdaTask>(p_Name, p_TaskType, p_Period, p_Function);
+        const Task::Ptr l_Task = std::make_shared<LambdaTask>(p_Name, p_TaskType, p_Period, p_Function);
 
         PushTask(l_Task);
 
@@ -133,7 +133,7 @@ namespace SteerStone { namespace Core { namespace Threading {
     /// @p_Function : Task
     Task::Ptr TaskManager::PushTask(const TaskType p_TaskType, const uint64 p_Period, const std::function<bool()> & p_Function)
     {
-        std::string l_TaskName = Utils::StringBuilder("ANONYMOUS_LAMBDA_%0", clock());
+        const std::string l_TaskName = Utils::StringBuilder("ANONYMOUS_LAMBDA_%0", clock());
         return PushTask(l_TaskName, p_TaskType, p_Period, p_Function);
     }
     /// Push a lambda task
@@ -142,7 +142,7 @@ namespace SteerStone { namespace Core { namespace Threading {
     /// @p_Function : Task
     Task::Ptr TaskManager::PushRunOnceTask(const std::string & p_Name, const TaskType p_TaskType, const std::function<void()> & p_Function)
     {
-        Task::Ptr l_Task = std::make_shared<LambdaTask>(p_Name, p_TaskType, 0, [p_Function]() -> bool {
+        const Task::Ptr l_Task = std::make_shared<LambdaTask>(p_Name, p_TaskType, 0, [p_Function]() -> bool {
             p_Function();
             return false;
         });
@@ -156,7 +156,7 @@ namespace SteerStone { namespace Core { namespace Threading {
     /// @p_Function : Task
     Task::Ptr TaskManager::PushRunOnceTask(const TaskType p_TaskType, const std::function<void()> & p_Function)
     {
-        std::string l_TaskName = Utils::StringBuilder("ANONYMOUS_RUN_ONCE_LAMBDA_%0", clock());
+        const std::string l_TaskName = Utils::StringBuilder("ANONYMOUS_RUN_ONCE_LAMBDA_%0", clock());
         return PushRunOnceTask(l_TaskName, p_TaskType, p_Function);
     }
     /// Pop task
@@ -209,6 +209,7 @@ namespace SteerStone { namespace Core { namespace Threading {
     std::vector<Task::Ptr> TaskManager::GetTasks()
     {
         std::lock_guard<std::recursive_mutex> l_Lock(m_Mutex);
+
         return m_Tasks;
     }
 

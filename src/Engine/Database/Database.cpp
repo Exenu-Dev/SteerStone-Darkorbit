@@ -71,7 +71,7 @@ namespace SteerStone { namespace Core { namespace Database {
 
         if (!Connect(l_Username, l_Password, std::stoi(l_Port), l_Host, l_Database, p_PoolSize, *this))
         {
-            Threading::TaskManager::GetSingleton()->PushTask("DATABASE_WORKER_THREAD", Threading::TaskType::Moderate, 0, std::bind(&Base::ProcessOperators, this));
+            sThreadManager->PushTask("DATABASE_WORKER_THREAD", Threading::TaskType::Moderate, 0, std::bind(&Base::ProcessOperators, this));
             return true;
         }
         else
