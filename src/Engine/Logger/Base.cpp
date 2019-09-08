@@ -18,7 +18,7 @@
 
 #include <Precompiled.hpp>
 
-#include "BaseLogger.hpp"
+#include "Base.hpp"
 
 #ifdef _WIN32
 #   include <windows.h>

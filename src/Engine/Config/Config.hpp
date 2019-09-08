@@ -28,15 +28,15 @@ namespace SteerStone { namespace Core { namespace Configuration {
     /// Configuration Map
     using ConfigMap = std::unordered_map<std::string, std::string>;
 
-    /// Config
-    class Config : private Utils::LockableReadWrite
+    /// Base
+    class Base : private Utils::LockableReadWrite
     {
         /// Allow access to lock / unlock methods
-        friend class Utils::ObjectGuard<Config>;
-        friend class Utils::ObjectReadGuard<Config>;
-        friend class Utils::ObjectWriteGuard<Config>;
+        friend class Utils::ObjectGuard<Base>;
+        friend class Utils::ObjectReadGuard<Base>;
+        friend class Utils::ObjectWriteGuard<Base>;
 
-        SINGLETON_P_D(Config);
+        SINGLETON_P_D(Base);
 
         //////////////////////////////////////////////////////////////////////////
         //////////////////////////////////////////////////////////////////////////
@@ -86,4 +86,4 @@ namespace SteerStone { namespace Core { namespace Configuration {
 }   ///< Core
 }   ///< SteerStone
 
-#define sConfig SteerStone::Core::Configuration::Config::GetSingleton()
+#define sConfig SteerStone::Core::Configuration::Base::GetSingleton()

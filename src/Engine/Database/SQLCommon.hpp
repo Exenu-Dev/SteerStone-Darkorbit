@@ -19,7 +19,7 @@
 #pragma once
 #include <PCH/Precompiled.hpp>
 
-#include "Logger/BaseLogger.hpp"
+#include "Logger/Base.hpp"
 
 static uint32 SizeForType(MYSQL_FIELD* p_Field)
 {

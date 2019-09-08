@@ -19,7 +19,7 @@
 #pragma once
 #include <PCH/Precompiled.hpp>
 #include "Core/Core.hpp"
-#include "Logger/BaseLogger.hpp"
+#include "Logger/Base.hpp"
 #include "Database/BindData.hpp"
 
 namespace SteerStone { namespace Core { namespace Database {

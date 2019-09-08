@@ -14,10 +14,10 @@ ServerPort = 37120
 #	Default: "127.0.0.1" - (Bind to all IPs on the system)
 BindIP = "127.0.0.1"
 
-## Listener ChildProcesses
-#	Description: Amount of listener child processes to spawn
-#	Default: 2
-ChildProcesses = 2
+## Child Listeners
+#	Description: Amount of Child Listeners to spawn
+#	Default: 1
+ChildListeners = 1
 
 ### MYSQL SETTINGS ###
 

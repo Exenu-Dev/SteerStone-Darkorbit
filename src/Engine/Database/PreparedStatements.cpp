@@ -17,7 +17,7 @@
 */
 
 #include "Database/Database.hpp"
-#include "Logger/BaseLogger.hpp"
+#include "Logger/Base.hpp"
 #include "SQLCommon.hpp"
 
 namespace SteerStone { namespace Core { namespace Database {

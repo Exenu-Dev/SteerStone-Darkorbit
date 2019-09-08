@@ -20,7 +20,7 @@
 #include <PCH/Precompiled.hpp>
 #include <boost/asio.hpp>
 
-#include "Logger/BaseLogger.hpp"
+#include "Logger/Base.hpp"
 #include "PacketBuffer.hpp"
 #include "Utility/UtiObjectGuard.hpp"
 #include "Utility/UtiLockable.hpp"

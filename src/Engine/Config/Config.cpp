@@ -20,22 +20,22 @@
 #include <boost/algorithm/string.hpp>
 
 #include "Config.hpp"
-#include "BaseLogger.hpp"
+#include "Base.hpp"
 
 namespace SteerStone { namespace Core { namespace Configuration {
 
-    SINGLETON_P_I(Config);
+    SINGLETON_P_I(Base);
 
     //////////////////////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////////////////////
 
-    Config::Config()
+    Base::Base()
     {
         #ifdef STEERSTONE_CORE_DEBUG
             LOG_INFO("Configuration", "Initialized");
         #endif
     }
-    Config::~Config()
+    Base::~Base()
     {
     }
 
@@ -44,21 +44,21 @@ namespace SteerStone { namespace Core { namespace Configuration {
 
     /// Load File
     /// @p_File : File Name
-    bool Config::SetFile(std::string const& p_File)
+    bool Base::SetFile(std::string const& p_File)
     {
         m_FileName = p_File;
         
         return Reload();
     }
     /// Returns file name
-    std::string Config::GetFilename() const
+    std::string Base::GetFilename() const
     {
         return m_FileName;
     }
     /// Reload File
-    bool Config::Reload()
+    bool Base::Reload()
     {
-        Utils::ObjectWriteGuard<Config> l_Guard(this);
+        Utils::ObjectWriteGuard<Base> l_Guard(this);
 
         /// Reset
         m_Entries.clear();
@@ -105,9 +105,9 @@ namespace SteerStone { namespace Core { namespace Configuration {
     }
     /// Check if entry exists
     /// @p_File : File name
-    bool Config::IsSet(std::string const& p_File)
+    bool Base::IsSet(std::string const& p_File)
     {
-        Utils::ObjectReadGuard<Config> l_Guard(this);
+        Utils::ObjectReadGuard<Base> l_Guard(this);
 
         auto const l_NameLower = boost::algorithm::to_lower_copy(p_File);
         return m_Entries.find(l_NameLower) != m_Entries.cend();
@@ -119,9 +119,9 @@ namespace SteerStone { namespace Core { namespace Configuration {
     /// Get String configuration
     /// @p_Name     :  Name of entry we are looking for
     /// @p_Default  :  Default value
-    std::string Config::GetString(std::string const& p_Name, std::string const& p_Default /*= std::string()*/)
+    std::string Base::GetString(std::string const& p_Name, std::string const& p_Default /*= std::string()*/)
     {
-        Utils::ObjectReadGuard<Config> l_Guard(this);
+        Utils::ObjectReadGuard<Base> l_Guard(this);
 
         auto const l_NameLower = boost::algorithm::to_lower_copy(p_Name);
 
@@ -132,7 +132,7 @@ namespace SteerStone { namespace Core { namespace Configuration {
     /// Get Bool configuration
     /// @p_Name     :  Name of entry we are looking for
     /// @p_Default  :  Default value
-    bool Config::GetBool(std::string const& p_Name, bool const& p_Default)
+    bool Base::GetBool(std::string const& p_Name, bool const& p_Default)
     {
         auto const l_Value = GetString(p_Name, p_Default ? "true" : "false");
 
@@ -144,7 +144,7 @@ namespace SteerStone { namespace Core { namespace Configuration {
     /// Get Int configuration
     /// @p_Name     :  Name of entry we are looking for
     /// @p_Default  :  Default value
-    int32 Config::GetInt(std::string const& p_Name, int32 const& p_Default)
+    int32 Base::GetInt(std::string const& p_Name, int32 const& p_Default)
     {
         auto const l_Value = GetString(p_Name, std::to_string(p_Default));
 
@@ -153,7 +153,7 @@ namespace SteerStone { namespace Core { namespace Configuration {
     /// Get Float configuration
     /// @p_Name     :  Name of entry we are looking for
     /// @p_Default  :  Default value
-    float Config::GetFloat(std::string const& p_Name, float const& p_Default)
+    float Base::GetFloat(std::string const& p_Name, float const& p_Default)
     {
         auto const l_Value = GetString(p_Name, std::to_string(p_Default));
 

@@ -19,7 +19,7 @@
 #include <Precompiled.hpp>
 
 #include "Singleton.hpp"
-#include "BaseLogger.hpp"
+#include "Base.hpp"
 
 namespace SteerStone { namespace Core {
 
