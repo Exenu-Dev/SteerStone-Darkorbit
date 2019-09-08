@@ -26,7 +26,6 @@ namespace SteerStone { namespace Core { namespace Database {
     {
         m_PromiseResultSet = new std::promise<std::unique_ptr<PreparedResultSet>>();
     }
-
     /// Deconstructor
     PrepareStatementOperator::~PrepareStatementOperator()
     {
@@ -35,14 +34,14 @@ namespace SteerStone { namespace Core { namespace Database {
             delete m_PromiseResultSet;
     }
 
-    /// GetFuture
-    /// GetFuture set
+    //////////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////////
+
+    /// Get Future set
     std::future<std::unique_ptr<PreparedResultSet>> PrepareStatementOperator::GetFuture()
     {
         return m_PromiseResultSet->get_future();
     }
-
-    /// Execute
     /// Execute Query
     bool PrepareStatementOperator::Execute()
     {

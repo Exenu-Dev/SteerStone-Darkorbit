@@ -144,30 +144,30 @@ namespace SteerStone { namespace Core { namespace Database {
         /// All data is buffered, let go of mysql c api structures
         mysql_stmt_free_result(m_PreparedStatement->GetStatement());
     }
-
     /// Deconstructor
     PreparedResultSet::~PreparedResultSet() 
     {
         CleanUp();
     }
 
-    /// FetchResult
+    //////////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////////
+
     /// Return result
     ResultSet* PreparedResultSet::FetchResult() const
     {
-        assert(m_RowPosition < m_RowCount);
+        LOG_ASSERT(m_RowPosition < m_RowCount, "Database", "Row Position is more than Row count!");
         return const_cast<ResultSet*>(&m_Results[m_RowPosition * m_FieldCount]);
     }
-
+    /// [] Operator
     ResultSet const& PreparedResultSet::operator[](std::size_t p_Index) const
     {
-        assert(m_RowPosition < m_RowCount);
-        assert(p_Index < m_FieldCount);
+        LOG_ASSERT(m_RowPosition < m_RowCount, "Database", "Row Position is higher than Row count!");
+        LOG_ASSERT(p_Index < m_FieldCount, "Database", "Index is higher than field count!");
         return m_Results[m_RowPosition * m_FieldCount + p_Index];
     }
 
-    /// GetNextRow
-    /// High Level
+    /// Get Next Row
     bool PreparedResultSet::GetNextRow()
     {
         if (++m_RowPosition >= m_RowCount)
@@ -176,30 +176,14 @@ namespace SteerStone { namespace Core { namespace Database {
         return true;
     }
 
-    /// NextRow
-    /// Get Next Row in result
-    /// Low Level
-    uint32 PreparedResultSet::NextRow()
-    {
-        if (m_RowPosition >= m_RowCount)
-            return false;
+    //////////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////////
 
-        int32 l_Code = mysql_stmt_fetch(m_PreparedStatement->GetStatement());
-        return l_Code == 0 || l_Code == MYSQL_DATA_TRUNCATED; ///< Success
-    }
-
-    /// CleanUp
     /// Free Bind Memory
     void PreparedResultSet::CleanUp()
     {
         if (m_Result)
             mysql_free_result(m_Result);
-
-        if (m_PreparedStatement->GetStatement()->bind_result_done)
-        {
-            delete[]m_PreparedStatement->GetStatement()->bind->length;
-            delete[]m_PreparedStatement->GetStatement()->bind->is_null;
-        }
 
         if (m_Bind)
         {
@@ -208,8 +192,16 @@ namespace SteerStone { namespace Core { namespace Database {
             m_Bind = nullptr;
         }
 
-        /// Let statement be used again
-        m_PreparedStatement->SetPrepared(false);
+        m_PreparedStatement->Clear();
+    }
+    /// Get Next Row
+    uint32 PreparedResultSet::NextRow()
+    {
+        if (m_RowPosition >= m_RowCount)
+            return false;
+
+        int32 l_Code = mysql_stmt_fetch(m_PreparedStatement->GetStatement());
+        return l_Code == 0 || l_Code == MYSQL_DATA_TRUNCATED; ///< Success
     }
 
 }   ///< namespace Database

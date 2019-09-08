@@ -38,7 +38,7 @@ namespace SteerStone { namespace Core { namespace Database {
 
     /// @p_InfoString : Database user details; username, password, host, database, l_Port
     /// @p_PoolSize : How many pool connections database will launch
-    uint32 Base::StartUp(char const* p_InfoString, uint32 p_PoolSize)
+    uint32 Base::Start(char const* p_InfoString, uint32 p_PoolSize)
     {
         /// Check if pool size is within our requirements
         if (p_PoolSize < MIN_CONNECTION_POOL_SIZE)
@@ -69,7 +69,7 @@ namespace SteerStone { namespace Core { namespace Database {
         if (l_Itr != l_Tokens.end())
             l_Database = *l_Itr++;
 
-        if (!SetUp(l_Username, l_Password, std::stoi(l_Port), l_Host, l_Database, p_PoolSize, *this))
+        if (!Connect(l_Username, l_Password, std::stoi(l_Port), l_Host, l_Database, p_PoolSize, *this))
         {
             Threading::TaskManager::GetSingleton()->PushRunOnceTask("DATABASE_WORKER_THREAD", std::bind(&Base::ProcessOperators, this));
             return true;
@@ -78,21 +78,15 @@ namespace SteerStone { namespace Core { namespace Database {
             return false;
     }
 
-    /// Shutdown all connections
-    void Base::ShutDown()
-    {
-        CloseConnections(); 
-    }
-
     /// Returns a Prepare Statement from Pool
     PreparedStatement* Base::GetPrepareStatement()
     {
-       return GetPrepareStatement();
+       return Prepare();
     }
     /// @p_PreparedStatement : Connection we are freeing
     void Base::FreePrepareStatement(PreparedStatement* p_PreparedStatement)
     {
-        FreePrepareStatement(p_PreparedStatement);
+        Free(p_PreparedStatement);
     }
 
     /// Execute query on worker thread
@@ -133,12 +127,6 @@ namespace SteerStone { namespace Core { namespace Database {
                 delete l_Operator;
             }
         }
-    }
-
-    /// Close all MySQL connections
-    void Base::CloseConnections()
-    {
-        ClosePrepareStatements();
     }
 
 }   ///< namespace Database

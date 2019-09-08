@@ -24,12 +24,6 @@ namespace SteerStone { namespace Core { namespace Database {
     CallBackOperator::CallBackOperator(std::future<std::unique_ptr<PreparedResultSet>> p_PreparedFuture) : m_PreparedFuture(std::move(p_PreparedFuture)), m_OperatorFunction(nullptr)
     {
     }
-
-    /// Deconstructor
-    CallBackOperator::~CallBackOperator()
-    {
-    }
-
     /// AddFunction
     /// p_CallBack : Function which we will be doing a call back on
     CallBackOperator&& CallBackOperator::AddFunction(std::function<void(std::unique_ptr<PreparedResultSet>)> p_CallBack)
@@ -37,8 +31,14 @@ namespace SteerStone { namespace Core { namespace Database {
         m_OperatorFunction = std::move(p_CallBack);
         return std::move(*this);
     }
+    /// Deconstructor
+    CallBackOperator::~CallBackOperator()
+    {
+    }
 
-    /// InvokeOperator
+    //////////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////////
+
     /// Check if operator is ready to be called
     bool CallBackOperator::InvokeOperator()
     {
@@ -51,15 +51,11 @@ namespace SteerStone { namespace Core { namespace Database {
             if (m_OperatorFunction)
                 m_OperatorFunction(std::move(l_PreparedResultSet));
             else ///< If there's no function, then free the prepared statement here
-            {
-                //;if (l_PreparedResultSet->GetPreparedStatement()->GetMYSQLStatement()->GetDatabase().GetName() == "users")
-                    ;// UserDatabase.FreePrepareStatement(std::move(l_PreparedResultSet->GetPreparedStatement()));
-                //else
-                    ;// RoomDatabase.FreePrepareStatement(std::move(l_PreparedResultSet->GetPreparedStatement()));
-            }
+                GameDatabase.FreePrepareStatement(std::move(l_PreparedResultSet->GetPreparedStatement()));
 
             return true;
         }
+
         return false;
     }
 

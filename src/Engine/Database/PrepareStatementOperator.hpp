@@ -33,22 +33,20 @@ namespace SteerStone { namespace Core { namespace Database {
         /// Constructor
         /// @p_PrepareStatementHolder : Keep reference of statement to be accessed later
         PrepareStatementOperator(PreparedStatement* p_PreparedStatementHolder);
-
         /// Deconstructor
         ~PrepareStatementOperator() override;
 
-    public:
-        /// GetFuture
-        /// GetFuture set
-        std::future<std::unique_ptr<PreparedResultSet>> GetFuture();
+        //////////////////////////////////////////////////////////////////////////
+        //////////////////////////////////////////////////////////////////////////
 
-        /// Execute
+        /// Get Future set
+        std::future<std::unique_ptr<PreparedResultSet>> GetFuture();
         /// Execute Query
         virtual bool Execute() override;
 
     private:
-        PreparedStatement* m_PreparedStatementHolder;         ///< Holds query and stores result set if any
-        std::promise<std::unique_ptr<PreparedResultSet>>* m_PromiseResultSet;       ///< Promise which the non database worker thread will hold, database worker thread holds the future
+        PreparedStatement* m_PreparedStatementHolder;                         ///< Holds query and stores result set if any
+        std::promise<std::unique_ptr<PreparedResultSet>>* m_PromiseResultSet; ///< Promise which the non database worker thread will hold, database worker thread holds the future
     };
 
 }   ///< namespace Database

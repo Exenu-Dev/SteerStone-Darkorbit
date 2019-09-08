@@ -21,20 +21,15 @@
 #include <condition_variable>
 
 #include "Core/Core.hpp"
-#include "Utility/UtiLockable.hpp"
-#include "Utility/UtiObjectGuard.hpp"
 
 namespace SteerStone { namespace Core { namespace Database {
 
-    template <typename T> class ProducerQueue : private Utils::LockableReadWrite
+    template <typename T> class ProducerQueue
     {
         DISALLOW_COPY_AND_ASSIGN(ProducerQueue);
 
         //////////////////////////////////////////////////////////////////////////
         //////////////////////////////////////////////////////////////////////////
-
-        /// Allow access to lock / unlock methods
-        friend class Utils::ObjectGuard<ProducerQueue>;
 
     public:
         /// Constructor

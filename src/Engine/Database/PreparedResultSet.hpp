@@ -18,6 +18,7 @@
 
 #pragma once
 #include <PCH/Precompiled.hpp>
+
 #include "Core/Core.hpp"
 #include "Database/ResultSet.hpp"
 
@@ -27,60 +28,57 @@ namespace SteerStone { namespace Core { namespace Database {
 
     class PreparedResultSet
     {
+        DISALLOW_COPY_AND_ASSIGN(PreparedResultSet);
+
+        //////////////////////////////////////////////////////////////////////////
+        //////////////////////////////////////////////////////////////////////////
+
     public:
         /// Constructor
         /// @p_Statement : Prepare Statement
         /// @p_Result : Result
         /// @p_FieldCount : Field count
         PreparedResultSet(PreparedStatement* p_Statement, MYSQL_RES* p_Result, uint32 p_FieldCount);
-
         /// Deconstructor
         ~PreparedResultSet();
 
-    public:
-        /// FetchResult
+        //////////////////////////////////////////////////////////////////////////
+        //////////////////////////////////////////////////////////////////////////
+
         /// Return result
         ResultSet* FetchResult() const;
-
-        ResultSet const& operator[](std::size_t p_Index) const;
-
-        /// GetNextRow
-        /// High Level
+        /// Get Next Row
         bool GetNextRow();
-
-        /// GetRowCount
-        /// Get total row count
+        /// Get Total Row Count
         uint64 GetRowCount() const { return m_RowCount; }
 
-        /// GetPreparedStatement
-        /// Returns PrepareStatement
+        /// Get Prepare Statement
         PreparedStatement* GetPreparedStatement() { return m_PreparedStatement; }
 
+        /// [] Operator
+        ResultSet const& operator[](std::size_t p_Index) const;
+
+    //////////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////////
+
     private:
-        /// CleanUp
         /// Free Bind Memory
         void CleanUp();
-
-        /// NextRow
-        /// Get Next Row in result
-        /// Low Level
+        /// Get Next Row
         uint32 NextRow();
 
-    private:
-        PreparedStatement* m_PreparedStatement;
-        MYSQL_RES* m_Result;
-        MYSQL_FIELD* m_Fields;
-        uint64 m_RowCount;
-        uint32 m_FieldCount;
+        PreparedStatement* m_PreparedStatement; ///< Prepare Statement
+        MYSQL_RES* m_Result;                    ///< Result
+        MYSQL_FIELD* m_Fields;                  ///< Field
+        uint64 m_RowCount;                      ///< Row count
+        uint32 m_FieldCount;                    ///< Field count
 
-    private:
-        my_bool* m_IsNull; 
-        unsigned long* m_Length;
-        MYSQL_BIND* m_Bind;
+        my_bool* m_IsNull;                      ///< Bind Null
+        unsigned long* m_Length;                ///< Bind Length
+        MYSQL_BIND* m_Bind;                     ///< Bind
 
-    private:
-        uint32 m_RowPosition;
-        std::vector<ResultSet> m_Results;
+        uint32 m_RowPosition;                   ///< Row Position
+        std::vector<ResultSet> m_Results;       ///< Result set
     };
 
 }   ///< namespace Database

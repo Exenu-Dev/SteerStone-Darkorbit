@@ -42,9 +42,7 @@ namespace SteerStone { namespace Core { namespace Database {
 
         /// @p_InfoString : Database user details; username, password, host, database, l_Port
         /// @p_PoolSize : How many pool connections database will launch
-        uint32 StartUp(char const* p_InfoString, uint32 p_PoolSize);
-        /// Shutdown all connections
-        void ShutDown();
+        uint32 Start(char const* p_InfoString, uint32 p_PoolSize);
 
         /// Returns a Prepare Statement from Pool
         PreparedStatement* GetPrepareStatement();
@@ -65,9 +63,6 @@ namespace SteerStone { namespace Core { namespace Database {
         void EnqueueOperator(Operator* p_Operator);
         /// Process future operations
         void ProcessOperators();
-
-        /// Close all MySQL connections
-        void CloseConnections();
 
     private:
         ProducerQueue<Operator*> m_Producer;

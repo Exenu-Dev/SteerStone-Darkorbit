@@ -26,3 +26,8 @@ ChildProcesses = 2
 #	Example:     "hostname;port;username;password;database"
 #   Default:     "127.0.0.1;3306;SteerStone;SteerStone;SteerStone"
 GameDatabaseInfo = "127.0.0.1;3306;SteerStone;SteerStone;SteerStone"
+
+## MySQL Instances
+#	Description: Amount of MySQL instances to spawn
+#   Default:     5 (max 5)
+MySQLInstances = 5

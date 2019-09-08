@@ -30,61 +30,37 @@ namespace SteerStone { namespace Core { namespace Database {
 
     class PreparedStatement
     {
-    public:
         friend class MYSQLPreparedStatement;
 
     public:
         /// Constructor
-        /// @p_MYSQLPreparedStatement : Keep reference of our connection
-        PreparedStatement(MYSQLPreparedStatement* p_MySQLPreparedStatement);
+        /// @p_MYSQLPreparedStatement : Reference
+        PreparedStatement(std::shared_ptr<MYSQLPreparedStatement> p_MySQLPreparedStatement);
 
         /// Deconstructor
         ~PreparedStatement();
 
-    public:
-        /// GetStatement
-        /// Returns MYSQL Statement
-        MYSQL_STMT* GetStatement() const { return m_Stmt; }
+        //////////////////////////////////////////////////////////////////////////
+        //////////////////////////////////////////////////////////////////////////
 
-        /// TryLock
-        /// Attempt to lock the object
-        bool TryLock();
+        /// Attempt to lock
+        bool TryLockMutex();
+        /// Allow to be accessed
+        void UnlockMutex();
 
-        /// Unlock
-        /// Allow the prepare statement to be accessed again
-        void Unlock();
-
-    public:
         /// Prepare the statement
         /// @p_Query : Query which will be executed to database
         void PrepareStatement(char const* p_Query);
-
-        /// ClearPrepared
-        /// Allow Prepare statement to be used again on same scope
-        void ClearPrepared();
-
         /// ExecuteStatement
         /// Execute the statement
         std::unique_ptr<PreparedResultSet> ExecuteStatement();
+        
+        /// Clear Prepared Statements
+        void Clear();
 
-        /// GetStatement
         /// Return statement
-        MYSQL_STMT* GetStatement() { return m_Stmt; }
+        MYSQL_STMT* GetStatement();
 
-        /// GetMYSQLStatement
-        /// Return MYSQL Statement
-        MYSQLPreparedStatement* GetMYSQLStatement() { return m_MySQLPreparedStatement; }
-
-        /// SetPrepared
-        /// Set whether the statement can be prepared or not
-        /// @p_Prepared : Value we are setting it to
-        void SetPrepared(bool const p_Prepared) { m_Prepared = p_Prepared; }
-
-        /// IsPrepared
-        /// Returns if query is currently being prepared
-        bool IsPrepared() const { return m_Prepared; }
-
-    public:
         /// Set our prepared values
         void SetBool(uint8 p_Index, uint8 p_Value)         { m_Binds.push_back(std::make_pair(p_Index, SQLBindData(p_Value))); }
         void SetUint8(uint8 p_Index, uint8 p_Value)        { m_Binds.push_back(std::make_pair(p_Index, SQLBindData(p_Value))); }
@@ -100,7 +76,6 @@ namespace SteerStone { namespace Core { namespace Database {
         void SetString(uint8 p_Index, std::string p_Value) { m_Binds.push_back(std::make_pair(p_Index, SQLBindData(p_Value))); }
 
     private:
-        /// Prepare
         /// Prepare the query
         /// @p_Query : Query which will be executed to database
         bool Prepare(char const * p_Query);
@@ -114,17 +89,15 @@ namespace SteerStone { namespace Core { namespace Database {
         void RemoveBinds();
 
     private:
-        MYSQLPreparedStatement* m_MySQLPreparedStatement;
-
-    private:
         MYSQL_STMT* m_Stmt;
         MYSQL_BIND* m_Bind;
+        std::shared_ptr<MYSQLPreparedStatement> m_MYSQLPreparedStatement;
         uint32 m_ParametersCount;
         std::string m_Query;
         bool m_PrepareError;
-        std::atomic<bool> m_Prepared;
+        bool m_Prepared;
         std::vector<std::pair<uint8, SQLBindData>> m_Binds;
-        std::mutex m_Mutex; ///< We use this to prevent other uses trying to access a already accessed object
+        std::mutex m_Mutex;
     };
 
 }   ///< namespace Database

@@ -18,10 +18,9 @@
 
 #pragma once
 #include <PCH/Precompiled.hpp>
+
 #include "Core/Core.hpp"
 #include "Database/MYSQLPreparedStatement.hpp"
-#include <atomic>
-#include <mutex>
 
 namespace SteerStone { namespace Core { namespace Database {
 
@@ -29,6 +28,11 @@ namespace SteerStone { namespace Core { namespace Database {
 
     class PreparedStatements
     {
+        DISALLOW_COPY_AND_ASSIGN(PreparedStatements);
+
+        //////////////////////////////////////////////////////////////////////////
+        //////////////////////////////////////////////////////////////////////////
+
     public:
         /// Constructor
         PreparedStatements();
@@ -36,8 +40,9 @@ namespace SteerStone { namespace Core { namespace Database {
         /// Constructor
         ~PreparedStatements();
 
-    public:
-        /// SetUp
+        //////////////////////////////////////////////////////////////////////////
+        //////////////////////////////////////////////////////////////////////////
+
         /// @p_Username : Name of user
         /// @p_Password : Password of user
         /// @p_Port     : Port we are connecting to
@@ -45,26 +50,21 @@ namespace SteerStone { namespace Core { namespace Database {
         /// @p_Database : Database we are querying to
         /// @p_PoolSize : Amount of MYSQL connections we are spawning
         /// @p_DatabaseHolder : Reference of database
-        uint32 SetUp(std::string const p_Username, std::string const p_Password,
+        uint32 Connect(std::string const p_Username, std::string const p_Password,
             uint32 const p_Port, std::string const p_Host, std::string const p_Database, uint32 const p_PoolSize, Base& p_DatabaseHolder);
 
-    public:
-        /// ClosePrepareStatements
-        /// Close all prepare statements
-        void ClosePrepareStatements();
-
-    public:
         /// Attempt to get a Prepared Statement
-        PreparedStatement* ObtainPrepareStatement();
-
+        PreparedStatement* Prepare();
         /// FreePrepareStatement
         /// Release Prepare statement to be used again
-        void FreePrepareStatement(PreparedStatement* p_PrepareStatement);
+        void Free(PreparedStatement* p_PrepareStatement);
+
+    //////////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////////
 
     private:
-        std::vector<MYSQLPreparedStatement*> m_Pool;
-        std::mutex m_Mutex;
-        std::atomic<bool> m_ShutDown;
+        std::vector<std::shared_ptr<MYSQLPreparedStatement>> m_ConnectionPool;    ///< Storage for Prepare Statements
+        std::mutex m_Mutex;                             ///< Mutex
     };
 
 }   ///< namespace Database

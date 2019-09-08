@@ -18,52 +18,38 @@
 
 #pragma once
 #include <PCH/Precompiled.hpp>
-#include "Core/Core.hpp"
 
+#include "Core/Core.hpp"
 #include "Database/PreparedStatement.hpp"
 #include "Database/SQLCommon.hpp"
-#include <mutex>
+#include "Utility/UtiLockable.hpp"
+#include "Utility/UtiObjectGuard.hpp"
 
 namespace SteerStone { namespace Core { namespace Database {
 
-    /// Used for bind index, easy readability
-    enum Index
+    class MYSQLPreparedStatement : public std::enable_shared_from_this<MYSQLPreparedStatement>, private Utils::LockableReadWrite
     {
-        INDEX_0,
-        INDEX_1,
-        INDEX_2,
-        INDEX_3,
-        INDEX_4,
-        INDEX_5,
-        INDEX_6,
-        INDEX_7,
-        INDEX_8,
-        INDEX_9,
-        INDEX_10,
-        INDEX_11,
-        INDEX_12,
-        INDEX_13,
-        INDEX_14,
-        INDEX_15,
-    };
+        /// Allow access to lock / unlock methods
+        friend class Utils::ObjectGuard<MYSQLPreparedStatement>;
+        friend class Utils::ObjectReadGuard<MYSQLPreparedStatement>;
+        friend class Utils::ObjectWriteGuard<MYSQLPreparedStatement>;
 
-    class Base;
-
-    class MYSQLPreparedStatement
-    {
-    public:
         friend class PreparedStatements;
+
+        //////////////////////////////////////////////////////////////////////////
+        //////////////////////////////////////////////////////////////////////////
 
     public:
         /// Constructor
-        /// @p_Database : Keep reference of database
-        MYSQLPreparedStatement(Base& p_Database);
+        MYSQLPreparedStatement();
 
         /// Constructor
         ~MYSQLPreparedStatement();
 
-    public:
-        /// SetupStatements
+        //////////////////////////////////////////////////////////////////////////
+        //////////////////////////////////////////////////////////////////////////
+
+        /// Connect to the database
         /// @p_Username : Name of user
         /// @p_Password : Password of user
         /// @p_Port     : Port we are connecting to
@@ -72,33 +58,21 @@ namespace SteerStone { namespace Core { namespace Database {
         uint32 Connect(std::string const p_Username, std::string const p_Password,
             uint32 const p_Port, std::string const p_Host, std::string const p_Database);
 
-    public:
-        /// PrepareStatement
         /// Prepare the statement
-        /// @p_Query : Query which will be executed to database
+        /// @p_StatementHolder : Statement being prepared
         bool Prepare(PreparedStatement* p_StatementHolder);
-
-        /// Execute
-        /// @p_Stmt : Statement we are executing
+        /// Execute the statement
+        /// @p_Stmt : Statement being executed
         /// @p_Result : Result set
-        /// @p_FieldCount : How many columns
+        /// @p_FieldCount : Field count
         bool Execute(MYSQL_STMT* p_Stmt, MYSQL_RES ** p_Result, uint32* p_FieldCount);
 
-        /// GetHandle
-        /// Return MySQL Connection Handle
-        MYSQL* GetHandle() { return m_Connection; }
-
-        /// GetDatabase
-        /// Return database
-        Base& GetDatabase() const { return m_Database; }
+    //////////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////////
 
     private:
-        MYSQL* m_Connection;
-
-    private:
-        PreparedStatement* m_Statements[MAX_PREPARED_STATEMENTS];
-        Base& m_Database;
-        std::mutex m_Mutex;
+        MYSQL* m_Connection;                                       ///< MYSQL Connection
+        PreparedStatement* m_Statements[MAX_PREPARED_STATEMENTS]; /// Prepared Statements storage
     };
 
 }   ///< namespace Database

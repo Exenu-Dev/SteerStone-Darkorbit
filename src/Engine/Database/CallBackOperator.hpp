@@ -33,26 +33,23 @@ namespace SteerStone { namespace Core { namespace Database {
     public:
         /// Constructor
         explicit CallBackOperator(std::future<std::unique_ptr<PreparedResultSet>> p_PreparedFuture);
-
         /// Move Constructor
         CallBackOperator(CallBackOperator&& p_Other) : m_PreparedFuture(std::move(p_Other.m_PreparedFuture)), m_OperatorFunction(std::move(p_Other.m_OperatorFunction)){}
         CallBackOperator& operator=(CallBackOperator&& p_Other) { this->m_PreparedFuture = std::move(p_Other.m_PreparedFuture); this->m_OperatorFunction = p_Other.m_OperatorFunction; return *this; }
-
         /// Deconstructor
         ~CallBackOperator();
 
-    public:
-        /// InvokeOperator
+        //////////////////////////////////////////////////////////////////////////
+        //////////////////////////////////////////////////////////////////////////
+
         /// Check if operator is ready to be called
         bool InvokeOperator();
-
-        /// AddFunction
         /// p_CallBack : Function which we will be doing a call back on
         CallBackOperator&& AddFunction(std::function<void(std::unique_ptr<PreparedResultSet>)> p_CallBack);
 
     private:
-        std::future<std::unique_ptr<PreparedResultSet>> m_PreparedFuture;
-        std::function<void(std::unique_ptr<PreparedResultSet>)> m_OperatorFunction;
+        std::future<std::unique_ptr<PreparedResultSet>> m_PreparedFuture;           ///< Future result
+        std::function<void(std::unique_ptr<PreparedResultSet>)> m_OperatorFunction; ///< Operator function
     };
 
 }   ///< namespace Database

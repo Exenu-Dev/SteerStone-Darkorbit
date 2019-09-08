@@ -17,13 +17,16 @@
 */
 
 #include "Database/Database.hpp"
+#include "Logger/LogDefines.hpp"
 
 namespace SteerStone { namespace Core { namespace Database {
 
     /// Constructor
-    /// @p_Database : Keep reference of database
-    MYSQLPreparedStatement::MYSQLPreparedStatement(Base& p_Database) : m_Database(p_Database)
+    MYSQLPreparedStatement::MYSQLPreparedStatement()
     {
+        #ifdef STEERSTONE_CORE_DEBUG
+            LOG_INFO("PreparedStatements", "MYSQLPreparedStatement Initialized");
+        #endif
     }
 
     /// Deconstructor
@@ -72,7 +75,7 @@ namespace SteerStone { namespace Core { namespace Database {
 
             /// Set up prepare statements
             for (uint32 l_I = 0; l_I < MAX_PREPARED_STATEMENTS; l_I++)
-                m_Statements[l_I] = new PreparedStatement(this);
+                m_Statements[l_I] = new PreparedStatement(shared_from_this());
 
             mysql_set_character_set(m_Connection, "utf8");
 
@@ -85,18 +88,17 @@ namespace SteerStone { namespace Core { namespace Database {
             return mysql_errno(l_Connection);
         }
     }
-
     /// Prepare the statement
-    /// @p_Query : Query which will be executed to database
+    /// @p_StatementHolder : Statement being prepared
     bool MYSQLPreparedStatement::Prepare(PreparedStatement* p_StatementHolder)
     {
-        std::unique_lock<std::mutex> l_Guard(m_Mutex);
+        Utils::ObjectGuard l_Guard(this);
 
         p_StatementHolder->m_Stmt = mysql_stmt_init(m_Connection);
 
         if (!p_StatementHolder->m_Stmt)
         {
-            LOG_INFO("Database", "mysql_stmt_init: %0", mysql_error(m_Connection));
+            LOG_INFO("Database", "Failed in initializing MYSQL. Error: %0", mysql_error(m_Connection));
             return true;
         }
 
@@ -106,8 +108,10 @@ namespace SteerStone { namespace Core { namespace Database {
 
         if (mysql_stmt_prepare(p_StatementHolder->m_Stmt, p_StatementHolder->m_Query.c_str(), p_StatementHolder->m_Query.length()))
         {
-            LOG_INFO("Database", "mysql_stmt_prepare: %0 ON %1",mysql_error(m_Connection), p_StatementHolder->m_Query);
+            LOG_INFO("Database", "Failed to prepare %0 on %1", mysql_error(m_Connection), p_StatementHolder->m_Query);
+
             mysql_stmt_close(p_StatementHolder->m_Stmt);
+
             return true;
         }
 
@@ -123,18 +127,17 @@ namespace SteerStone { namespace Core { namespace Database {
 
         return false;
     }
-
-    /// Execute
-    /// @p_Stmt : Statement we are executing
+    /// Execute the statement
+    /// @p_Stmt : Statement being executed
     /// @p_Result : Result set
-    /// @p_FieldCount : How many columns
+    /// @p_FieldCount : Field count
     bool MYSQLPreparedStatement::Execute(MYSQL_STMT* p_Stmt, MYSQL_RES ** p_Result, uint32 * p_FieldCount)
     {
-        std::unique_lock<std::mutex> l_Guard(m_Mutex);
+        Utils::ObjectGuard l_Guard(this);
 
         if (mysql_stmt_execute(p_Stmt))
         {
-            LOG_INFO("Database", "mysql_stmt_execute: %0",mysql_stmt_error(p_Stmt));
+            LOG_ASSERT(false, "Database", "Failed to execute statement. Error: %0",mysql_stmt_error(p_Stmt));
             return false;
         }
 

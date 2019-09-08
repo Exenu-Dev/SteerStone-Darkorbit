@@ -18,13 +18,18 @@
 
 #include "Database/MYSQLPreparedStatement.hpp"
 #include "Database/SQLCommon.hpp"
+#include "Logger/LogDefines.hpp"
 
 namespace SteerStone { namespace Core { namespace Database {
 
     /// Constructor
-    /// @p_MYSQLPreparedStatement : Keep reference of our connection
-    PreparedStatement::PreparedStatement(MYSQLPreparedStatement* p_MySQLPreparedStatement) : m_MySQLPreparedStatement(p_MySQLPreparedStatement), m_Stmt(nullptr), m_Bind(nullptr), m_PrepareError(false), m_Prepared(false)
+    /// @p_MYSQLPreparedStatement : Reference
+    PreparedStatement::PreparedStatement(std::shared_ptr<MYSQLPreparedStatement> p_MySQLPreparedStatement) 
+        : m_MYSQLPreparedStatement(p_MySQLPreparedStatement), m_Stmt(nullptr), m_Bind(nullptr), m_PrepareError(false), m_Prepared(false)
     {
+        #ifdef STEERSTONE_CORE_DEBUG
+            LOG_INFO("PreparedStatement", "PreparedStatement initialized!");
+        #endif
     }
 
     /// Deconstructor
@@ -33,16 +38,16 @@ namespace SteerStone { namespace Core { namespace Database {
         RemoveBinds();
     }
 
-    /// TryLock
-    /// Attempt to lock the object
-    bool PreparedStatement::TryLock()
+    //////////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////////
+
+    /// Attempt to lock
+    bool PreparedStatement::TryLockMutex()
     {
         return m_Mutex.try_lock();
     }
-
-    /// Unlock
-    /// Allow the prepare statement to be accessed again
-    void PreparedStatement::Unlock()
+    /// Allow to be accessed
+    void PreparedStatement::UnlockMutex()
     {
         m_Mutex.unlock();
     }
@@ -55,17 +60,9 @@ namespace SteerStone { namespace Core { namespace Database {
         {
             m_PrepareError = true;
 
-            LOG_ERROR("Database", "Failed in Preparing Statement!");
+            LOG_ASSERT(!m_PrepareError, "Database", "Failed in Preparing Statement!");
         }
     }
-
-    /// ClearPrepared
-    /// Allow Prepare statement to be used again on same scope
-    void PreparedStatement::ClearPrepared()
-    {
-        m_Prepared = false;
-    }
-
     /// ExecuteStatement
     /// Execute the statement
     std::unique_ptr<PreparedResultSet> PreparedStatement::ExecuteStatement()
@@ -77,35 +74,53 @@ namespace SteerStone { namespace Core { namespace Database {
         uint32 l_FieldCount = 0;
 
         BindParameters();
-        if (!m_MySQLPreparedStatement->Execute(m_Stmt, &l_Result, &l_FieldCount))
+
+        if (!m_MYSQLPreparedStatement->Execute(m_Stmt, &l_Result, &l_FieldCount))
             return nullptr;
 
         std::unique_ptr<PreparedResultSet> l_PreparedResultSet = std::make_unique<PreparedResultSet>(this, l_Result, l_FieldCount);
 
         if (!l_PreparedResultSet || !l_PreparedResultSet->GetRowCount())
-        {
-            m_Prepared = false;
             return nullptr;
-        }
         else
             return std::move(l_PreparedResultSet);
     }
 
-    /// Prepare
+    /// Clear Prepare Statement
+    void PreparedStatement::Clear()
+    {
+        if (m_Stmt->bind_result_done)
+        {
+            delete[]m_Stmt->bind->length;
+            delete[]m_Stmt->bind->is_null;
+        }
+
+        m_Prepared = false;
+    }
+
+    MYSQL_STMT* PreparedStatement::GetStatement()
+    {
+        return m_Stmt;
+    }
+
+    //////////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////////
+
     /// Prepare the query
     /// @p_Query : Query which will be executed to database
-    bool PreparedStatement::Prepare(char const * p_Query)
+    bool PreparedStatement::Prepare(char const* p_Query)
     {
-        if (IsPrepared())
+        if (m_Prepared)
         {
-            LOG_ERROR("Database", "Trying to prepare a statement but statement is already being used by another thread!");
+            LOG_ASSERT(m_Prepared, "Database", "Trying to prepare a statement but statement is already in use!");
             return true;
         }
 
         RemoveBinds();
+
         m_Query = p_Query;
 
-        return m_MySQLPreparedStatement->Prepare(this);
+        return m_MYSQLPreparedStatement->Prepare(this);
     }
 
     /// BindParameters
@@ -123,10 +138,9 @@ namespace SteerStone { namespace Core { namespace Database {
         }
 
         if (mysql_stmt_bind_param(m_Stmt, m_Bind))
-            LOG_ERROR("Database", "mysql_stmt_bind_param: Cannot bind parameters ON %0", m_Query);
+            LOG_ERROR("Database", "Cannot bind parameters on %0", m_Query);
     }
 
-    /// RemoveBinds
     /// Remove previous binds
     void PreparedStatement::RemoveBinds()
     {
@@ -142,7 +156,7 @@ namespace SteerStone { namespace Core { namespace Database {
 
         m_PrepareError = false;
         m_ParametersCount = 0;
-        m_Query = "";
+        m_Query.clear();
         mysql_stmt_close(m_Stmt);
         m_Stmt = nullptr;
     }
