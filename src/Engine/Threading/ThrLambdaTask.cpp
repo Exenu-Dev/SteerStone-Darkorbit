@@ -16,19 +16,19 @@
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <Precompiled.hpp>
+#include <PCH/Precompiled.hpp>
 
-#include "ThrLambdaTask.hpp"
+#include "Threading/ThrLambdaTask.hpp"
 
 namespace SteerStone { namespace Core { namespace Threading {
 
     /// Constructor
     /// @p_Name     : Task name
+    /// @p_TaskType : Task Type
     /// @p_Period   : Task period
-    /// @p_Type     : Task type
-    /// @p_ManualDeletion : Task to be deleted manually
-    LambdaTask::LambdaTask(const std::string & p_Name, uint64 p_Period, std::function<bool()> p_Function)
-        : Task(p_Name, TaskType::Normal), m_Period(p_Period), m_Function(p_Function)
+    /// @p_Function : Function
+    LambdaTask::LambdaTask(const std::string & p_Name, TaskType p_TaskType, uint64 p_Period, std::function<bool()> p_Function)
+        : Task(p_Name, p_TaskType), m_Period(p_Period), m_Function(p_Function)
     {
 
     }

@@ -1,18 +1,37 @@
-#include <Precompiled.hpp>
+/*
+* Liam Ashdown
+* Copyright (C) 2019
+*
+* This program is free software: you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation, either version 3 of the License, or
+* (at your option) any later version.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License
+* along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
 
-#include "ThrTaskManager.hpp"
-#include "ThrThread.hpp"
-#include "ThrThisThread.hpp"
+#include <PCH/Precompiled.hpp>
 
-#include "BaseLogger.hpp"
+#include "Threading/ThrTaskManager.hpp"
+#include "Threading/ThrThread.hpp"
+#include "Threading/ThrThisThread.hpp"
+
+#include "Logger/Base.hpp"
 
 #include <chrono>
 
 namespace SteerStone { namespace Core { namespace Threading {
 
     /// Constructor
-    TaskWorker::TaskWorker()
-        : m_Name("ThrTaskWorker"), m_CPUAffinity(0), m_IsRunning(true), m_TotalRunTime(0), m_TotalRunCount(0), m_AverageRunTime(0)
+    /// @p_WorkerType : Type of Worker
+    TaskWorker::TaskWorker(WorkerType p_WorkerType)
+        : m_Name("ThrTaskWorker"), m_CPUAffinity(0), m_IsRunning(true), m_TotalRunTime(0), m_TotalRunCount(0), m_AverageRunTime(0), m_WorkerType(p_WorkerType)
     {
         m_Thread = new std::thread([this]() { UpdateThread(); });
     }
@@ -90,6 +109,11 @@ namespace SteerStone { namespace Core { namespace Threading {
     uint64 TaskWorker::GetAverageUpdateTime() const
     {
         return m_AverageRunTime;
+    }
+    /// Get Task Size
+    std::size_t TaskWorker::GetTaskSize() const
+    {
+        return m_Tasks.size();
     }
     /// Reset avg update time
     void TaskWorker::ResetAverageUpdateTime()
@@ -218,7 +242,6 @@ namespace SteerStone { namespace Core { namespace Threading {
             ThisThread::SleepFor(std::chrono::milliseconds(1));
         }
     }
-
 
 //     /// Update thread
 //     void TaskWorker::UpdateThread()

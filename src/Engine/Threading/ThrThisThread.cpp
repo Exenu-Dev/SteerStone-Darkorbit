@@ -16,10 +16,10 @@
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <Precompiled.hpp>
+#include <PCH/Precompiled.hpp>
 
-#include "ThrThisThread.hpp"
-#include "ThrThread.hpp"
+#include "Threading/ThrThisThread.hpp"
+#include "Threading/ThrThread.hpp"
 
 #if defined(_WIN32)
 #   include <windows.h>

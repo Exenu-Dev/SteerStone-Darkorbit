@@ -29,8 +29,9 @@ namespace SteerStone { namespace Core { namespace Threading {
     /// Task types
     enum class TaskType : uint32_t
     {
-        Normal,
-        Critical
+        Normal,         ///< Support multiple tasks
+        Moderate,       ///< Execute one and only task
+        Critical        ///< Execute task regardless of hardware concurrency
     };
 
     //////////////////////////////////////////////////////////////////////////
@@ -41,16 +42,18 @@ namespace SteerStone { namespace Core { namespace Threading {
     {
         DISALLOW_COPY_AND_ASSIGN(Task);
 
+        //////////////////////////////////////////////////////////////////////////
+        //////////////////////////////////////////////////////////////////////////
+
         public:
             /// Shared ptr type for tasks
             using Ptr = std::shared_ptr<Task>;
 
         public:
             /// Constructor
-            /// @p_Name : Task name
-            /// @p_Type : Task type
-            /// @p_ManualDeletion : Task to be deleted manually
-            Task(const std::string & p_Name, TaskType p_Type = TaskType::Normal, bool p_ManualDeletion = false);
+            /// @p_Name     : Task name
+            /// @p_TaskType : Task type
+            Task(const std::string & p_Name, TaskType p_TaskType);
             /// Destructor
             virtual ~Task();
 
@@ -84,12 +87,12 @@ namespace SteerStone { namespace Core { namespace Threading {
             TaskType    m_TaskType;     ///< Type
             int64       m_TaskTimer;    ///< Time until next execution in MS
 
-            std::atomic_uint64_t m_TaskTotalRunTime;                         ///< Total run time
-            std::atomic_uint64_t m_TaskTotalRunCount;                        ///< Total run count
-            std::atomic_uint64_t m_TaskAverageRunTime;                       ///< Avg execution time
-            std::atomic_uint64_t m_TaskLastDiffTime;                         ///< Last diff time
+            std::atomic_uint64_t m_TaskTotalRunTime;    ///< Total run time
+            std::atomic_uint64_t m_TaskTotalRunCount;   ///< Total run count
+            std::atomic_uint64_t m_TaskAverageRunTime;  ///< Avg execution time
+            std::atomic_uint64_t m_TaskLastDiffTime;    ///< Last diff time
 
-            Diagnostic::StopWatch m_TaskStopWatch; ///< Stop watch
+            Diagnostic::StopWatch m_TaskStopWatch;      ///< Stop watch
 
     };
 

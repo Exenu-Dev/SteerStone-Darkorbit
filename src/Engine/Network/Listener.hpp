@@ -54,14 +54,16 @@ namespace SteerStone { namespace Core { namespace Network {
                     return true;
                 };
 
-                m_AcceptorTask = Threading::TaskManager::GetSingleton()->PushTask("LISTENER_THREAD", -1, l_Service);
+                BeginAccept();
+
+                m_AcceptorTask = sThreadManager->PushTask("LISTENER_THREAD", Threading::TaskType::Moderate, 0, l_Service);
             }
 
             ~Listener()
             {
                 m_Acceptor->close();
                 m_Service->stop();
-                Threading::TaskManager::GetSingleton()->PopTask(m_AcceptorTask);
+                sThreadManager->PopTask(m_AcceptorTask);
                 m_Acceptor.reset();
                 m_Service.reset();
             }
@@ -73,14 +75,14 @@ namespace SteerStone { namespace Core { namespace Network {
             /// Select the worker with lowest storage size (equal distrubition)
             NetworkThread<T>* SelectWorker() const
             {
-                const std:size_t l_MinimumSize = m_NetworkThreads.size();
+                std::size_t l_MinimumSize = m_NetworkThreads.size();
                 int32 l_Index = 0;
 
-                for (std::size_t l_I = 0; l_I < m_NetworkThreads.size())
+                for (std::size_t l_I = 0; l_I < m_NetworkThreads.size(); l_I++)
                 {
-                    const std::size_t l_Size = mWorkerThreads[i]->Size();
+                    const std::size_t l_Size = m_NetworkThreads[l_I]->GetSize();
 
-                    if (l_Size < minSize)
+                    if (l_Size < l_MinimumSize)
                     {
                         l_MinimumSize = l_Size;
                         l_Index = l_I;
@@ -95,19 +97,19 @@ namespace SteerStone { namespace Core { namespace Network {
                 auto l_Worker = SelectWorker();
                 auto l_Socket = l_Worker->CreateSocket();
 
-                m_Acceptor->async_accept(socket->GetAsioSocket(),
+                m_Acceptor->async_accept(l_Socket->GetAsioSocket(),
                     [this, l_Worker, l_Socket](const boost::system::error_code& p_ErrorCode)
                     {
-                        this->OnAccept(worker, socket, p_ErrorCode);
+                        this->OnAccept(l_Worker, l_Socket, p_ErrorCode);
                     });
             }
             /// Accept new connection and create socket
             void Listener<T>::OnAccept(NetworkThread<T>* p_Worker, std::shared_ptr<T> const& p_Socket, const boost::system::error_code& p_ErrorCode)
             {
                 if (p_ErrorCode)
-                    p_Worker->RemoveSocket(socket.get());
+                    p_Worker->RemoveSocket(p_Socket.get());
                 else
-                    p_Socket->Open(mPort);
+                    p_Socket->Open();
 
                 /// Return back and accept any more incoming connections
                 BeginAccept();
@@ -116,7 +118,6 @@ namespace SteerStone { namespace Core { namespace Network {
         private:
             std::unique_ptr<boost::asio::io_service> m_Service;                     ///< IO Service
             std::vector<std::unique_ptr<NetworkThread<T>>> m_NetworkThreads;        ///< Worker threads
-
             std::unique_ptr<boost::asio::ip::tcp::acceptor> m_Acceptor;             ///< IO Acceptor
             Threading::Task::Ptr m_AcceptorTask;                                    ///< Acceptor Task
     };

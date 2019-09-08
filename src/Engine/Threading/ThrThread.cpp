@@ -16,11 +16,11 @@
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <Precompiled.hpp>
+#include <PCH/Precompiled.hpp>
 
-#include "ThrThread.hpp"
+#include "Threading/ThrThread.hpp"
 
-#include "BaseLogger.hpp"
+#include "Logger/Base.hpp"
 
 #if defined(_WIN32)
 #   include <windows.h>

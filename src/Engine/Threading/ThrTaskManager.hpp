@@ -26,12 +26,17 @@
 #include <functional>
 #include <string>
 
+#define EXLUSIVE_CURRENCY_COUNT 0.30f
+
 namespace SteerStone { namespace Core { namespace Threading {
 
     /// TaskWorker
     class TaskManager
     {
         SINGLETON_P_D(TaskManager);
+
+        //////////////////////////////////////////////////////////////////////////
+        //////////////////////////////////////////////////////////////////////////
 
         public:
             /// Push task
@@ -40,20 +45,24 @@ namespace SteerStone { namespace Core { namespace Threading {
 
             /// Push a lambda task
             /// @p_Name     : Task name
+            /// @p_TaskType : Task Type
             /// @p_Period   : Task interval
             /// @p_Function : Task
-            Task::Ptr PushTask(const std::string & p_Name, uint64 p_Period, const std::function<bool()> & p_Function);
+            Task::Ptr PushTask(const std::string & p_Name, const TaskType p_TaskType, const uint64 p_Period, const std::function<bool()> & p_Function);
             /// Push a lambda task
+            /// @p_TaskType : Task Type
             /// @p_Period   : Task interval
             /// @p_Function : Task
-            Task::Ptr PushTask(uint64 p_Period, const std::function<bool()> & p_Function);
+            Task::Ptr PushTask(const TaskType p_TaskType, const uint64 p_Period, const std::function<bool()> & p_Function);
             /// Push a lambda task
             /// @p_Name     : Task name
+            /// @p_TaskType : Task Type
             /// @p_Function : Task
-            Task::Ptr PushRunOnceTask(const std::string & p_Name, const std::function<void()> & p_Function);
+            Task::Ptr PushRunOnceTask(const std::string & p_Name, const TaskType p_TaskType, const std::function<void()> & p_Function);
             /// Push a lambda task
+            /// @p_TaskType : Task Type
             /// @p_Function : Task
-            Task::Ptr PushRunOnceTask(const std::function<void()> & p_Function);
+            Task::Ptr PushRunOnceTask(const TaskType p_TaskType, const std::function<void()> & p_Function);
 
             /// Pop task
             /// @p_Task : Task to pop
@@ -70,7 +79,11 @@ namespace SteerStone { namespace Core { namespace Threading {
             void SetOptimizePeriod(uint64 p_Period);
 
             /// Optimize
+            /// Only for Inclusive Workers
             void Optimize();
+
+        //////////////////////////////////////////////////////////////////////////
+        //////////////////////////////////////////////////////////////////////////
 
         private:
             std::recursive_mutex    m_Mutex;        ///< Global mutex
@@ -78,7 +91,8 @@ namespace SteerStone { namespace Core { namespace Threading {
             OptimizeTaskPtr         m_OptimizeTask; ///< Optimize task instance
 
             std::vector<Task::Ptr>      m_Tasks;                ///< Tasks
-            std::vector<TaskWorker*>    m_TaskWorkers;          ///< Workers
+            std::vector<TaskWorker*>    m_InclusiveTaskWorkers; ///< Workers
+            std::vector<TaskWorker*>    m_ExclusiveTaskWorkers; ///< Workers
             std::vector<TaskWorker*>    m_CriticalTaskWorkers;  ///< Workers
 
     };
@@ -86,3 +100,5 @@ namespace SteerStone { namespace Core { namespace Threading {
 }   ///< namespace Threading
 }   ///< namespace Core
 }   ///< namespace SteerStone
+
+#define sThreadManager SteerStone::Core::Threading::TaskManager::GetSingleton()

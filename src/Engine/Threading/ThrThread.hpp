@@ -18,7 +18,7 @@
 
 #pragma once
 
-#include "Core.hpp"
+#include "Core/Core.hpp"
 
 #include <thread>
 #include <mutex>

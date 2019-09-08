@@ -55,7 +55,7 @@ namespace SteerStone { namespace Core { namespace Network {
                     return true;
                 };
 
-                 l_Task = Threading::TaskManager::GetSingleton()->PushTask(Utils::StringBuilder("NETWORK_WORKER_THREAD_%0", p_WorkerThread), -1, l_Service);
+                 l_Task = sThreadManager->PushTask(Utils::StringBuilder("NETWORK_WORKER_THREAD_%0", p_WorkerThread), Threading::TaskType::Moderate, -1, l_Service);
             }
             /// Deconstructor
             ~NetworkThread()
@@ -71,11 +71,18 @@ namespace SteerStone { namespace Core { namespace Network {
                         (*l_Itr)->CloseSocket();
                 }
 
-                Threading::TaskManager::GetSingleton()->PopTask(l_Task);
+                sThreadManager->PopTask(l_Task);
             }
 
             //////////////////////////////////////////////////////////////////////////
             //////////////////////////////////////////////////////////////////////////
+
+            /// Get size of Socket storage
+            std::size_t GetSize() const
+            {
+                return m_Sockets.size();
+            }
+
             /// Create socket
             std::shared_ptr<T> NetworkThread<T>::CreateSocket()
             {
@@ -83,7 +90,7 @@ namespace SteerStone { namespace Core { namespace Network {
 
                 m_Sockets.emplace(std::make_shared<T>(m_Service, [this](Socket* p_Socket) { this->RemoveSocket(p_Socket); }));
                 
-                return *m_Sockets.first;
+                return *m_Sockets.begin();
             }
             /// Remove socket from storage
             /// @p_Socket : Socket being removed
@@ -97,7 +104,6 @@ namespace SteerStone { namespace Core { namespace Network {
         private:
             boost::asio::io_service m_Service;                          ///< IO Service
             std::unique_ptr<boost::asio::io_service::work> m_Worker;    ///< Worker of IO Service
-            std::thread mServiceThread;
             std::unordered_set<std::shared_ptr<T>> m_Sockets;           ///< Storage of socket classes
             Threading::Task::Ptr l_Task;                                ///< Worker task
     };

@@ -62,7 +62,7 @@ namespace SteerStone { namespace Core { namespace Database {
         /// @p_Operator : Operator we are adding to be processed on database worker thread
         void EnqueueOperator(Operator* p_Operator);
         /// Process future operations
-        void ProcessOperators();
+        bool ProcessOperators();
 
     private:
         ProducerQueue<Operator*> m_Producer;

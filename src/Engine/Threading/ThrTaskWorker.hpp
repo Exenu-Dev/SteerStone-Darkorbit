@@ -18,21 +18,31 @@
 
 #pragma once
 
-#include "ThrTask.hpp"
+#include "Threading/ThrTask.hpp"
 
 #include <thread>
 #include <shared_mutex>
 
 namespace SteerStone { namespace Core { namespace Threading {
 
+    enum class WorkerType
+    {
+        Inclusive,      ///< Can be popped
+        Exclusive       ///< Cannot be popped          
+    };
+
     /// TaskWorker
     class TaskWorker
     {
         DISALLOW_COPY_AND_ASSIGN(TaskWorker);
 
+        //////////////////////////////////////////////////////////////////////////
+        //////////////////////////////////////////////////////////////////////////
+
         public:
             /// Constructor
-            TaskWorker();
+            /// @p_WorkerType : Type of Worker
+            TaskWorker(WorkerType p_WorkerType);
             /// Destructor
             ~TaskWorker();
 
@@ -52,7 +62,8 @@ namespace SteerStone { namespace Core { namespace Threading {
             uint64 GetTotalRunCount() const;
             /// Get average execution time
             uint64 GetAverageUpdateTime() const;
-
+            /// Get Task Size
+            std::size_t GetTaskSize() const;
             /// Reset avg update time
             void ResetAverageUpdateTime();
 
@@ -80,6 +91,7 @@ namespace SteerStone { namespace Core { namespace Threading {
             std::thread *           m_Thread;       ///< Thread
             int32                   m_CPUAffinity;  ///< CPU affinity
             bool                    m_IsRunning;    ///< Thread run condition
+            WorkerType              m_WorkerType;   ///< Type
 
             std::vector<Task::Ptr> m_Tasks; ///< Tasks
 

@@ -16,20 +16,19 @@
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <Precompiled.hpp>
+#include <PCH/Precompiled.hpp>
 
-#include "ThrTask.hpp"
+#include "Threading/ThrTask.hpp"
 
-#include "BaseLogger.hpp"
+#include "Logger/Base.hpp"
 
 namespace SteerStone { namespace Core { namespace Threading {
 
     /// Constructor
-    /// @p_Name : Task name
-    /// @p_Type : Task type
-    /// @p_ManualDeletion : Task to be deleted manually
-    Task::Task(const std::string & p_Name, TaskType p_Flags, bool p_ManualDeletion)
-        : m_TaskName(p_Name), m_TaskType(p_Flags), m_TaskTimer(-1), m_TaskTotalRunTime(0), m_TaskTotalRunCount(0), m_TaskAverageRunTime(0), m_TaskLastDiffTime(0)
+    /// @p_Name     : Task name
+    /// @p_TaskType : Task type
+    Task::Task(const std::string & p_Name, TaskType p_TaskType)
+        : m_TaskName(p_Name), m_TaskType(p_TaskType), m_TaskTimer(-1), m_TaskTotalRunTime(0), m_TaskTotalRunCount(0), m_TaskAverageRunTime(0), m_TaskLastDiffTime(0)
     {
         m_TaskStopWatch.Start();
     }
@@ -82,7 +81,7 @@ namespace SteerStone { namespace Core { namespace Threading {
     {
         int64 l_Elapsed = m_TaskStopWatch.GetElapsed();
 
-        //LOG_INFO("Task", "name %0, timer %1, interval %2, diff %3", GetTaskName(), m_TaskTimer, GetTaskPeriod(), l_Elapsed);
+        //LOG_INFO("task", "timer %0, internval %1, diff %2", m_TaskTimer, GetTaskPeriod(), l_Elapsed);
 
         m_TaskTimer       -= l_Elapsed;
         m_TaskLastDiffTime = l_Elapsed;

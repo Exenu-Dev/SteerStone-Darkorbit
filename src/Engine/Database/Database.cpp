@@ -71,7 +71,7 @@ namespace SteerStone { namespace Core { namespace Database {
 
         if (!Connect(l_Username, l_Password, std::stoi(l_Port), l_Host, l_Database, p_PoolSize, *this))
         {
-            Threading::TaskManager::GetSingleton()->PushRunOnceTask("DATABASE_WORKER_THREAD", std::bind(&Base::ProcessOperators, this));
+            Threading::TaskManager::GetSingleton()->PushTask("DATABASE_WORKER_THREAD", Threading::TaskType::Moderate, 0, std::bind(&Base::ProcessOperators, this));
             return true;
         }
         else
@@ -113,7 +113,7 @@ namespace SteerStone { namespace Core { namespace Database {
         m_Producer.Push(p_Operator);
     }
     /// Process future operations
-    void Base::ProcessOperators()
+    bool Base::ProcessOperators()
     {
         while (true)
         {
@@ -127,6 +127,8 @@ namespace SteerStone { namespace Core { namespace Database {
                 delete l_Operator;
             }
         }
+
+        return false;
     }
 
 }   ///< namespace Database

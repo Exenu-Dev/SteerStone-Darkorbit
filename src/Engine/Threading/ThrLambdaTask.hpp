@@ -1,3 +1,5 @@
+#pragma once
+
 /*
 * Liam Ashdown
 * Copyright (C) 2019
@@ -16,9 +18,7 @@
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#pragma once
-
-#include "ThrTask.hpp"
+#include "Threading/ThrTask.hpp"
 
 #include <functional>
 
@@ -32,9 +32,10 @@ namespace SteerStone { namespace Core { namespace Threading {
         public:
             /// Constructor
             /// @p_Name     : Task name
+            /// @p_TaskType : Task Type
             /// @p_Period   : Task period
-            /// @p_Type     : Task type
-            LambdaTask(const std::string & p_Name, uint64 p_Period, std::function<bool()> p_Function);
+            /// @p_Function : Function
+            LambdaTask(const std::string & p_Name, TaskType p_TaskType, uint64 p_Period, std::function<bool()> p_Function);
             /// Destructor
             ~LambdaTask();
 

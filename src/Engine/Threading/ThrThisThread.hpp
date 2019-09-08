@@ -18,7 +18,7 @@
 
 #pragma once
 
-#include "Core.hpp"
+#include "Core/Core.hpp"
 
 #include <thread>
 #include <chrono>
@@ -30,6 +30,9 @@ namespace SteerStone { namespace Core { namespace Threading {
     {
         DISALLOW_COPY_AND_ASSIGN(ThisThread);
         DEFAULT_CONSTRUCTOR(ThisThread);
+
+        //////////////////////////////////////////////////////////////////////////
+        //////////////////////////////////////////////////////////////////////////
 
         public:
             /// Get this thread native handle

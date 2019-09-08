@@ -18,7 +18,7 @@
 
 #pragma once
 
-#include "ThrTask.hpp"
+#include "Threading/ThrTask.hpp"
 
 namespace SteerStone { namespace Core { namespace Threading {
 
@@ -26,6 +26,9 @@ namespace SteerStone { namespace Core { namespace Threading {
     class OptimizeTask : public Task
     {
         DISALLOW_COPY_AND_ASSIGN(OptimizeTask);
+
+        //////////////////////////////////////////////////////////////////////////
+        //////////////////////////////////////////////////////////////////////////
 
         public:
             /// Constructor

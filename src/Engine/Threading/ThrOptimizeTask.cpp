@@ -16,10 +16,10 @@
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <Precompiled.hpp>
+#include <PCH/Precompiled.hpp>
 
-#include "ThrOptimizeTask.hpp"
-#include "ThrTaskManager.hpp"
+#include "Threading/ThrOptimizeTask.hpp"
+#include "Threading/ThrTaskManager.hpp"
 
 namespace SteerStone { namespace Core { namespace Threading {
 
