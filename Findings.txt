@@ -1,0 +1,2 @@
+# Darkorbit 2009 Emulator - Could be useful for checking packet structure
+https://github.com/MuffinMario/Old-Darkorbit-Project-2009-Cpp
