@@ -90,13 +90,13 @@ namespace SteerStone  { namespace Core { namespace Logger {
         {
             SET_COLOR(COLOR_BASE);
 
-            if (CanLogTime())
+            if (m_LogTime)
                 std::clog << l_Time + " | ";
 
-            if (CanLogThreadId())
+            if (m_LogThreadId)
                 std::clog << "Thread Id: " << Utils::GetThreadId() << " | ";
 
-            if (CanLogFunction())
+            if (m_LogFunction)
                 std::clog << p_Function << "::" << p_FunctionLine << " | ";
 
             SET_COLOR(GET_COLOR(p_LogType));
@@ -125,13 +125,13 @@ namespace SteerStone  { namespace Core { namespace Logger {
         {
             SET_COLOR(COLOR_BASE);
 
-            if (CanLogTime())
+            if (m_LogTime)
                 std::clog << l_Time + " | ";
 
-            if (CanLogThreadId())
+            if (m_LogThreadId)
                 std::clog << "Thread Id: " << Utils::GetThreadId() << " | ";
 
-            if (CanLogFunction())
+            if (m_LogFunction)
                 std::clog << p_Function << "::" << p_FunctionLine << " | ";
 
             SET_COLOR(GET_COLOR(LogType::Assert));
@@ -147,7 +147,8 @@ namespace SteerStone  { namespace Core { namespace Logger {
     }
 
     /// Output Server Banner
-    void Base::ShowBanner()
+    /// @p_ExtraInfo : Extra info to output
+    void Base::ShowBanner(void(*p_ExtraInfo)())
     {
         std::clog << " ______     ______   ______     ______     ______     ______     ______   ______     __   __     ______ " << std::endl;
         std::clog << "/\\  ___\\   /\\__  _\\ /\\  ___\\   /\\  ___\\   /\\  == \\   /\\  ___\\   /\\__  _\\ /\\  __ \\   /\\ ' - .\\ \ / \\  ___\\     " << std::endl;
@@ -155,6 +156,9 @@ namespace SteerStone  { namespace Core { namespace Logger {
         std::clog << " \\/\\_____\\    \\ \\_\\  \\ \\_____\\  \\ \\_____\\  \\ \\_\\ \\_\\  \\/\\_____\\    \\ \\_\\  \\ \\_____\\  \\ \\_\\\\'\\_\\  \\ \\_____\\   " << std::endl;
         std::clog << "  \\/_____/     \\/_/   \\/_____/   \\/_____/   \\/_/ /_/   \\/_____/     \\/_/   \\/_____/   \\/_/ \\/_/   \\/_____/    " << std::endl;
         std::clog << "                                                                                  Powered by Boost & MySQL" << std::endl;
+
+        if (p_ExtraInfo)
+            p_ExtraInfo();
     }
 
     //////////////////////////////////////////////////////////////////////////
@@ -166,32 +170,17 @@ namespace SteerStone  { namespace Core { namespace Logger {
     {
         m_LogTime = p_Enabler;
     }
-    /// Can log time to console
-    bool Base::CanLogTime() const
-    {
-        return m_LogTime;
-    }
     /// Enable/Disable Thread Id to console
     /// @p_Enabler  : Enable/Disable output to console
     void Base::LogThreadIdEnabler(bool const p_Enabler)
     {
         m_LogThreadId = p_Enabler;
     }
-    /// Can log Thread Id to console
-    bool Base::CanLogThreadId() const
-    {
-        return m_LogThreadId;
-    }
     /// Enable/Disable Function output to console
     /// @p_Enabler  : Enable/Disable output to console
     void Base::LogFunctionEnabler(bool const p_Enabler)
     {
         m_LogFunction = p_Enabler;
-    }
-    /// Can log Function name output to console
-    bool Base::CanLogFunction() const
-    {
-        return m_LogFunction;
     }
 
     //////////////////////////////////////////////////////////////////////////

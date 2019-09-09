@@ -60,7 +60,8 @@ namespace SteerStone { namespace Core { namespace Logger {
             void ReportAssert(std::string const& p_System, std::string_view const p_Function, int32 const p_FunctionLine, std::string const& p_Message);
 
             /// Output Server Banner
-            void ShowBanner();
+            /// @p_ExtraInfo : Extra info to output
+            void ShowBanner(void(*p_ExtraInfo)());
 
             //////////////////////////////////////////////////////////////////////////
             //////////////////////////////////////////////////////////////////////////
@@ -68,18 +69,12 @@ namespace SteerStone { namespace Core { namespace Logger {
             /// Enable/Disable Timer output to console
             /// @p_Enabler  : Enable/Disable output to console
             void LogTimeEnabler(bool const p_Enabler);
-            /// Can log time to console
-            bool CanLogTime() const;
             /// Enable/Disable Thread Id to console
             /// @p_Enabler  : Enable/Disable output to console
             void LogThreadIdEnabler(bool const p_Enabler);
-            /// Can log Thread Id to console
-            bool CanLogThreadId() const;
             /// Enable/Disable Function output to console
             /// @p_Enabler  : Enable/Disable output to console
             void LogFunctionEnabler(bool const p_Enabler);
-            /// Can log Function name output to console
-            bool CanLogFunction() const;
 
         //////////////////////////////////////////////////////////////////////////
         //////////////////////////////////////////////////////////////////////////

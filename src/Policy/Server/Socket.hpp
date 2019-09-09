@@ -18,12 +18,14 @@
 
 #pragma once
 #include "Network/Listener.hpp"
+#include "Opcodes/Opcodes.hpp"
+#include "PacketBuffer.hpp"
 
-namespace SteerStone { namespace Game { namespace Server { 
+namespace SteerStone { namespace Policy { namespace Server { 
 
-    class SessionSocket : public Core::Network::Socket
+    class PolicySocket : public Core::Network::Socket
     {
-        DISALLOW_COPY_AND_ASSIGN(SessionSocket);
+        DISALLOW_COPY_AND_ASSIGN(PolicySocket);
 
         //////////////////////////////////////////////////////////////////////////
         //////////////////////////////////////////////////////////////////////////
@@ -32,16 +34,25 @@ namespace SteerStone { namespace Game { namespace Server {
             /// Constructor 
             /// @p_Service : Boost Service
             /// @p_CloseHandler : Close Handler Custom function
-            SessionSocket(boost::asio::io_service& p_Service, std::function<void(Socket*)> p_CloseHandler);
+            PolicySocket(boost::asio::io_service& p_Service, std::function<void(Socket*)> p_CloseHandler);
             /// Deconstructor
-            ~SessionSocket() {}
+            ~PolicySocket() {}
 
             //////////////////////////////////////////////////////////////////////////
             //////////////////////////////////////////////////////////////////////////
 
             /// Send packet to client
-            /// @p_Buffer : Buffer which holds our data to be send to the client
-            void SendPacket(uint8* p_Packet) {}
+            /// @p_PacketBuffer : Packet Buffer
+            void SendPacket(const PacketBuffer* p_PacketBuffer);
+
+            /// For Non-Implemented packets
+            void HandleNULL(ClientPacket* p_Packet);
+            /// For Server packets (Do not require handlers)
+            void HandleServer(ClientPacket* p_Packet) {}
+            /// Policy Handler
+            /// @p_ClientPacket : Packet recieved from client
+            void HandlePolicy(ClientPacket* p_Packet);
+
 
         //////////////////////////////////////////////////////////////////////////
         //////////////////////////////////////////////////////////////////////////
@@ -49,8 +60,13 @@ namespace SteerStone { namespace Game { namespace Server {
         private:
             /// Handle incoming data
             virtual bool ProcessIncomingData() override;
+
+            /// Handle Client Packet Handler
+            /// @p_OpCodeHandler : Handler of Client Packet
+            /// @p_Packet        : Client Packet
+            void ExecutePacket(const OpcodeHandler* p_OpCodeHandler, ClientPacket* p_Packet);
     };
 
 }   ///< namespace Server
-}   ///< namespace Game
+}   ///< namespace Policy
 }   ///< namespace Steerstone

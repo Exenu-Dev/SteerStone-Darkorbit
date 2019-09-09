@@ -37,7 +37,6 @@
 #define LOG_ENABLE_TIME(p_Enable)           ::SteerStone::Core::Logger::Base::GetSingleton()->LogTimeEnabler(p_Enable)
 #define LOG_ENABLE_THREAD_ID(p_Enable)      ::SteerStone::Core::Logger::Base::GetSingleton()->LogThreadIdEnabler(p_Enable)
 #define LOG_ENABLE_FUNCTION(p_Enable)       ::SteerStone::Core::Logger::Base::GetSingleton()->LogFunctionEnabler(p_Enable)
-#define SHOW_BANNER()                       ::SteerStone::Core::Logger::Base::GetSingleton()->ShowBanner()
 
 /// Internal Logger Helpers
 #ifdef _MSC_VER

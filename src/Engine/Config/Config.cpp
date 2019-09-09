@@ -31,9 +31,6 @@ namespace SteerStone { namespace Core { namespace Configuration {
 
     Base::Base()
     {
-        #ifdef STEERSTONE_CORE_DEBUG
-            LOG_INFO("Configuration", "Initialized");
-        #endif
     }
     Base::~Base()
     {

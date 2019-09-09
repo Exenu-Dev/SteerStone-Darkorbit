@@ -16,14 +16,14 @@
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "SessionSocket.hpp"
+#include "Socket.hpp"
 
 namespace SteerStone { namespace Game { namespace Server {
 
     /// Constructor 
     /// @p_Service : Boost Service
     /// @p_CloseHandler : Close Handler Custom function
-    SessionSocket::SessionSocket(boost::asio::io_service& p_Service, std::function<void(Socket*)> p_CloseHandler) 
+    GameSocket::GameSocket(boost::asio::io_service& p_Service, std::function<void(Socket*)> p_CloseHandler)
         : Socket(p_Service, std::move(p_CloseHandler))
     {
     }
@@ -32,7 +32,7 @@ namespace SteerStone { namespace Game { namespace Server {
     //////////////////////////////////////////////////////////////////////////
 
     /// Handle incoming data
-    bool SessionSocket::ProcessIncomingData()
+    bool GameSocket::ProcessIncomingData()
     {
         return true;
     }

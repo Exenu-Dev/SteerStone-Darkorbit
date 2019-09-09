@@ -50,6 +50,8 @@ namespace SteerStone { namespace Core { namespace Network {
 
         m_OutBuffer.reset(new PacketBuffer);
         m_InBuffer.reset(new PacketBuffer);
+
+        StartAsyncRead();
     }
     /// Close our socket to stop recieving incoming packets
     void Socket::CloseSocket()

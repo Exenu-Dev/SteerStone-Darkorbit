@@ -1,13 +1,15 @@
+[Game Configuration]
+
 ### SECTION INDEX ###
 #   SERVER SETTINGS
 #   MYSQL SETTINGS
 
 ### SERVER SETTINGS ###
 
-## Server Port
+## Game Port
 #   Description: TCP port to reach the server.
 #   Default: 37120
-ServerPort = 37120
+GamePort = 37120
 
 ## BindIP
 #	Description: Bind server to Ip/Host Name

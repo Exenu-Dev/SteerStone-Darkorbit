@@ -1,0 +1,35 @@
+[Policy Configuration]
+
+### SECTION INDEX ###
+#   SERVER SETTINGS
+#   MYSQL SETTINGS
+
+### SERVER SETTINGS ###
+
+## Policy Port
+#   Description: TCP port to reach the server.
+#   Default: 843
+PolicyPort = 843
+
+## BindIP
+#	Description: Bind server to Ip/Host Name
+#	Default: "127.0.0.1" - (Bind to all IPs on the system)
+BindIP = "127.0.0.1"
+
+## Child Listeners
+#	Description: Amount of Child Listeners to spawn
+#	Default: 1
+ChildListeners = 1
+
+### MYSQL SETTINGS ###
+
+## GameDatabase
+#	Description: Mysql account settings to connect to Game Database
+#	Example:     "hostname;port;username;password;database"
+#   Default:     "127.0.0.1;3306;SteerStone;SteerStone;SteerStone"
+GameDatabaseInfo = "127.0.0.1;3306;SteerStone;SteerStone;SteerStone"
+
+## MySQL Instances
+#	Description: Amount of MySQL instances to spawn
+#   Default:     5 (max 5)
+MySQLInstances = 5
