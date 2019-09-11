@@ -20,6 +20,7 @@ set(EXECUTABLE_NAME Game)
 
 # Include Directories
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Common)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Entity)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Entity/Player)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Server)
