@@ -24,12 +24,7 @@ namespace SteerStone { namespace Policy { namespace Server {
     /// @p_ClientPacket : Packet recieved from client
     void PolicySocket::HandlePolicy(ClientPacket* p_Packet)
     {
-        static const std::string l_Policy = "<?xml version=\"1.0\"?><cross-domain-policy xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:noNamespaceSchemaLocation=\"http://www.adobe.com/xml/schemas/PolicyFileSocket.xsd\"><allow-access-from domain=\"*\" to-ports=\"*\" secure=\"false\" /><site-control permitted-cross-domain-policies=\"master-only\" /></cross-domain-policy>";
-
-        PacketBuffer l_PacketBuffer;
-        l_PacketBuffer.AppendString(l_Policy);
-
-        SendPacket(&l_PacketBuffer);
+        WritePolicy();
     }
 
 }   ///< namespace Server

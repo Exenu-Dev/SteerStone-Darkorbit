@@ -114,6 +114,24 @@ namespace SteerStone { namespace Core { namespace Network {
         if (m_WriteState == WriteState::Idle)
             StartWriteFlushTimer();
     }
+    /// Write Policy
+    void Socket::WritePolicy()
+    {
+        /// Using async_write doesn't work - I don't know why.
+        /// But since client only requires 1 packet from policy server, we can just send the packet
+        /// and force close the connection
+
+        std::string l_Policy = "<?xml version=\"1.0\"?><cross-domain-policy xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:noNamespaceSchemaLocation=\"http://www.adobe.com/xml/schemas/PolicyFileSocket.xsd\"><allow-access-from domain=\"*\" to-ports=\"*\" secure=\"false\" /><site-control permitted-cross-domain-policies=\"master-only\" /></cross-domain-policy>";
+
+        boost::asio::streambuf l_Buffer;
+        std::ostream l_Stream(&l_Buffer);
+        l_Stream << l_Policy;
+
+        boost::asio::write(m_Socket,
+            l_Buffer.data());
+
+        CloseSocket();
+    }
     /// Get the total read length of the packet
     std::size_t const Socket::ReadLength()
     {

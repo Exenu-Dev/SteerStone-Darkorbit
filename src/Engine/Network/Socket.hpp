@@ -80,6 +80,10 @@ namespace SteerStone { namespace Core { namespace Network {
             /// @p_Buffer : Buffer which holds the data
             /// @p_Length : The length of the data
             void Write(const char* p_Buffer, std::size_t const& p_Length);
+#pragma region CustomDeclaration
+            /// Write Policy
+            void WritePolicy();
+#pragma endregion
             /// Get the total read length of the packet
             std::size_t const ReadLength();
             /// Get the length remaining to read
