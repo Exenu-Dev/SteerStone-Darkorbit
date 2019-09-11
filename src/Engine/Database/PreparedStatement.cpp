@@ -25,7 +25,7 @@ namespace SteerStone { namespace Core { namespace Database {
     /// Constructor
     /// @p_MYSQLPreparedStatement : Reference
     PreparedStatement::PreparedStatement(std::shared_ptr<MYSQLPreparedStatement> p_MySQLPreparedStatement) 
-        : m_MYSQLPreparedStatement(p_MySQLPreparedStatement), m_Stmt(nullptr), m_Bind(nullptr), m_PrepareError(false), m_Prepared(false)
+        : m_MYSQLPreparedStatement(p_MySQLPreparedStatement), m_Stmt(nullptr), m_Bind(nullptr), m_PrepareError(false), m_Prepared(false), m_ParametersCount(0)
     {
         #ifdef STEERSTONE_CORE_DEBUG
             LOG_INFO("PreparedStatement", "PreparedStatement initialized!");

@@ -45,8 +45,7 @@ namespace SteerStone { namespace Core { namespace Database {
     uint32 MYSQLPreparedStatement::Connect(std::string const p_Username, std::string const p_Password, uint32 const p_Port, std::string const p_Host, std::string const p_Database)
     {
         /// Initialize connection
-        MYSQL* l_Connection;
-        l_Connection = mysql_init(NULL);
+        MYSQL* l_Connection = mysql_init(NULL);
 
         if (!l_Connection)
         {
@@ -108,7 +107,7 @@ namespace SteerStone { namespace Core { namespace Database {
 
         if (mysql_stmt_prepare(p_StatementHolder->m_Stmt, p_StatementHolder->m_Query.c_str(), p_StatementHolder->m_Query.length()))
         {
-            LOG_INFO("Database", "Failed to prepare %0 on %1", mysql_error(m_Connection), p_StatementHolder->m_Query);
+            LOG_ERROR("Database", "Failed to prepare %0 on %1", mysql_error(m_Connection), p_StatementHolder->m_Query);
 
             mysql_stmt_close(p_StatementHolder->m_Stmt);
 

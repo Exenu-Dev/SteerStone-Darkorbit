@@ -18,8 +18,21 @@
 
 #pragma once
 #include "Network/Listener.hpp"
+#include "Opcodes/Opcodes.hpp"
+#include "ServerPacket.hpp"
 
-namespace SteerStone { namespace Game { namespace Server { 
+/// Declarations
+namespace SteerStone { namespace Game { namespace Entity {
+    
+    class Player;
+
+}   ///< Entity
+}   ///< Game
+}   ///< SteerStone
+
+namespace SteerStone { namespace Game { namespace Server {
+
+    class Entity::Player;
 
     class GameSocket : public Core::Network::Socket
     {
@@ -40,8 +53,22 @@ namespace SteerStone { namespace Game { namespace Server {
             //////////////////////////////////////////////////////////////////////////
 
             /// Send packet to client
-            /// @p_Buffer : Buffer which holds our data to be send to the client
-            void SendPacket(uint8* p_Packet) {}
+            /// @p_PacketBuffer : Packet Buffer
+            void SendPacket(const PacketBuffer* p_PacketBuffer);
+
+            /// For Non-Implemented packets
+            void HandleNULL(ClientPacket* p_Packet);
+            /// For Server packets (Do not require handlers)
+            void HandleServer(ClientPacket* p_Packet) {}
+            /// Login Handler
+            /// @p_ClientPacket : Packet recieved from client
+            void HandleLogin(ClientPacket* p_Packet);
+
+            /// Pointer to Player
+            Entity::Player* ToPlayer();
+            /// Delete Player
+            void DestroyPlayer();
+
 
         //////////////////////////////////////////////////////////////////////////
         //////////////////////////////////////////////////////////////////////////
@@ -49,6 +76,14 @@ namespace SteerStone { namespace Game { namespace Server {
         private:
             /// Handle incoming data
             virtual bool ProcessIncomingData() override;
+
+            /// Handle Client Packet Handler
+            /// @p_OpCodeHandler : Handler of Client Packet
+            /// @p_Packet        : Client Packet
+            void ExecutePacket(const OpcodeHandler* p_OpCodeHandler, ClientPacket* p_Packet);
+
+        private:
+            Entity::Player* m_Player;       ///< Player of socket
     };
 
 }   ///< namespace Server

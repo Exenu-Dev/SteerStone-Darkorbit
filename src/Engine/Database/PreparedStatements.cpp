@@ -67,13 +67,9 @@ namespace SteerStone { namespace Core { namespace Database {
     /// Attempt to get a Prepared Statement
     PreparedStatement * PreparedStatements::Prepare()
     {
-        m_Mutex.lock();
-        std::vector<std::shared_ptr<MYSQLPreparedStatement>> l_Copy(m_ConnectionPool);
-        m_Mutex.unlock();
-
         for(;;)
         {
-            for (auto l_Itr : l_Copy)
+            for (auto l_Itr : m_ConnectionPool)
             {
                 std::shared_ptr<MYSQLPreparedStatement> l_PreparedStatement = l_Itr;
 
@@ -93,7 +89,7 @@ namespace SteerStone { namespace Core { namespace Database {
     void PreparedStatements::Free(PreparedStatement* p_PrepareStatement)
     {
         /// Statement must be locked - if not something went wrong and we must investigate
-        LOG_ASSERT(p_PrepareStatement->TryLockMutex(), "PreparedStatements", "Attempted to free a statement but it's already locked!");
+        LOG_ASSERT(!p_PrepareStatement->TryLockMutex(), "PreparedStatements", "Attempted to free a statement but it's already locked!");
 
         if (!p_PrepareStatement->TryLockMutex())
             p_PrepareStatement->UnlockMutex();

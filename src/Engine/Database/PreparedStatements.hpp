@@ -64,7 +64,6 @@ namespace SteerStone { namespace Core { namespace Database {
 
     private:
         std::vector<std::shared_ptr<MYSQLPreparedStatement>> m_ConnectionPool;    ///< Storage for Prepare Statements
-        std::mutex m_Mutex;                             ///< Mutex
     };
 
 }   ///< namespace Database

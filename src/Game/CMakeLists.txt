@@ -19,7 +19,12 @@
 set(EXECUTABLE_NAME Game)
 
 # Include Directories
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Entity)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Entity/Player)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Server)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Server/Opcodes)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Server/Opcodes/Packets)
 include_directories(${CMAKE_SOURCE_DIR}/src/Engine)
 
 file(GLOB_RECURSE SOURCE_LIST RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}" "*.cpp" "*.hpp")

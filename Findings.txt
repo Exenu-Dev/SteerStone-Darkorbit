@@ -1,2 +1,10 @@
+### GENERAL INFO
+
+### Sources
 # Darkorbit 2009 Emulator - Could be useful for checking packet structure
 https://github.com/MuffinMario/Old-Darkorbit-Project-2009-Cpp
+
+### DECOMPILATION INFO
+## Map Ports
+# Ports is located at DoAction(34)@385 for game server (It's an array, and all changed to port 37120)
+# And Policy server port is 843 which I cannot find in spacemap
