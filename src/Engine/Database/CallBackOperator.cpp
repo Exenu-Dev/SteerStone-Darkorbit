@@ -50,8 +50,6 @@ namespace SteerStone { namespace Core { namespace Database {
             /// If there's a function, then execute the function with our result set
             if (m_OperatorFunction)
                 m_OperatorFunction(std::move(l_PreparedResultSet));
-            else ///< If there's no function, then free the prepared statement here
-                GameDatabase.FreePrepareStatement(std::move(l_PreparedResultSet->GetPreparedStatement()));
 
             return true;
         }

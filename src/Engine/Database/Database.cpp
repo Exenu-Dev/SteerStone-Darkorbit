@@ -69,7 +69,7 @@ namespace SteerStone { namespace Core { namespace Database {
         if (l_Itr != l_Tokens.end())
             l_Database = *l_Itr++;
 
-        if (!Connect(l_Username, l_Password, std::stoi(l_Port), l_Host, l_Database, p_PoolSize, *this))
+        if (!Connect(l_Username, l_Password, std::stoi(l_Port), l_Host, l_Database, p_PoolSize, this))
         {
             sThreadManager->PushTask("DATABASE_WORKER_THREAD", Threading::TaskType::Moderate, 0, std::bind(&Base::ProcessOperators, this));
             return true;
@@ -86,6 +86,7 @@ namespace SteerStone { namespace Core { namespace Database {
     /// @p_PreparedStatement : Connection we are freeing
     void Base::FreePrepareStatement(PreparedStatement* p_PreparedStatement)
     {
+        /// This is handled automatically, but I'll leave this for now
         Free(p_PreparedStatement);
     }
 

@@ -22,13 +22,19 @@
 namespace SteerStone { namespace Core { namespace Database {
 
     /// Constructor
-    MYSQLPreparedStatement::MYSQLPreparedStatement()
+    /// @p_Base : Database
+    MYSQLPreparedStatement::MYSQLPreparedStatement(Base* p_Base) 
+        : m_Base(p_Base)
     {
         #ifdef STEERSTONE_CORE_DEBUG
             LOG_INFO("PreparedStatements", "MYSQLPreparedStatement Initialized");
         #endif
-    }
 
+        m_Connection = nullptr;
+
+        for (uint32 l_I = 0; l_I < MAX_PREPARED_STATEMENTS; l_I++)
+            m_Statements[l_I] = nullptr;
+    }
     /// Deconstructor
     MYSQLPreparedStatement::~MYSQLPreparedStatement()
     {
@@ -107,7 +113,7 @@ namespace SteerStone { namespace Core { namespace Database {
 
         if (mysql_stmt_prepare(p_StatementHolder->m_Stmt, p_StatementHolder->m_Query.c_str(), p_StatementHolder->m_Query.length()))
         {
-            LOG_ERROR("Database", "Failed to prepare %0 on %1", mysql_error(m_Connection), p_StatementHolder->m_Query);
+            LOG_ERROR("Database", "%0 on %1", mysql_error(m_Connection), p_StatementHolder->m_Query);
 
             mysql_stmt_close(p_StatementHolder->m_Stmt);
 
@@ -144,6 +150,12 @@ namespace SteerStone { namespace Core { namespace Database {
         *p_FieldCount = mysql_stmt_field_count(p_Stmt);
 
         return true;
+    }
+
+    /// Returns database
+    Base* MYSQLPreparedStatement::GetDatabase() const
+    {
+        return m_Base;
     }
 
 }   ///< namespace Database

@@ -27,6 +27,8 @@
 
 namespace SteerStone { namespace Core { namespace Database {
 
+    class Base;
+
     class MYSQLPreparedStatement : public std::enable_shared_from_this<MYSQLPreparedStatement>, private Utils::LockableReadWrite
     {
         /// Allow access to lock / unlock methods
@@ -41,9 +43,9 @@ namespace SteerStone { namespace Core { namespace Database {
 
     public:
         /// Constructor
-        MYSQLPreparedStatement();
-
-        /// Constructor
+        /// @p_Base : Database
+        MYSQLPreparedStatement(Base* p_Base);
+        /// Deconstructor
         ~MYSQLPreparedStatement();
 
         //////////////////////////////////////////////////////////////////////////
@@ -67,12 +69,16 @@ namespace SteerStone { namespace Core { namespace Database {
         /// @p_FieldCount : Field count
         bool Execute(MYSQL_STMT* p_Stmt, MYSQL_RES ** p_Result, uint32* p_FieldCount);
 
+        /// Returns database
+        Base* GetDatabase() const;
+
     //////////////////////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////////////////////
 
     private:
         MYSQL* m_Connection;                                       ///< MYSQL Connection
-        PreparedStatement* m_Statements[MAX_PREPARED_STATEMENTS]; /// Prepared Statements storage
+        PreparedStatement* m_Statements[MAX_PREPARED_STATEMENTS];  ///< Prepared Statements storage
+        Base* m_Base;                                              ///< Database
     };
 
 }   ///< namespace Database

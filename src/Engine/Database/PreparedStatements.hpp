@@ -49,9 +49,9 @@ namespace SteerStone { namespace Core { namespace Database {
         /// @p_Host     : Address we are connecting to
         /// @p_Database : Database we are querying to
         /// @p_PoolSize : Amount of MYSQL connections we are spawning
-        /// @p_DatabaseHolder : Reference of database
+        /// @p_Base     : Database
         uint32 Connect(std::string const p_Username, std::string const p_Password,
-            uint32 const p_Port, std::string const p_Host, std::string const p_Database, uint32 const p_PoolSize, Base& p_DatabaseHolder);
+            uint32 const p_Port, std::string const p_Host, std::string const p_Database, uint32 const p_PoolSize, Base* p_Base);
 
         /// Attempt to get a Prepared Statement
         PreparedStatement* Prepare();
@@ -64,6 +64,7 @@ namespace SteerStone { namespace Core { namespace Database {
 
     private:
         std::vector<std::shared_ptr<MYSQLPreparedStatement>> m_ConnectionPool;    ///< Storage for Prepare Statements
+
     };
 
 }   ///< namespace Database

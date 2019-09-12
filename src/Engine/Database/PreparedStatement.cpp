@@ -17,6 +17,7 @@
 */
 
 #include "Database/MYSQLPreparedStatement.hpp"
+#include "Database.hpp"
 #include "Database/SQLCommon.hpp"
 #include "Logger/LogDefines.hpp"
 
@@ -75,15 +76,16 @@ namespace SteerStone { namespace Core { namespace Database {
 
         BindParameters();
 
-        if (!m_MYSQLPreparedStatement->Execute(m_Stmt, &l_Result, &l_FieldCount))
-            return nullptr;
+        if (m_MYSQLPreparedStatement->Execute(m_Stmt, &l_Result, &l_FieldCount))
+        {
+            std::unique_ptr<PreparedResultSet> l_PreparedResultSet = std::make_unique<PreparedResultSet>(this, l_Result, l_FieldCount);
 
-        std::unique_ptr<PreparedResultSet> l_PreparedResultSet = std::make_unique<PreparedResultSet>(this, l_Result, l_FieldCount);
+            if (l_PreparedResultSet && l_PreparedResultSet->GetRowCount())
+                return std::move(l_PreparedResultSet);
+        }
 
-        if (!l_PreparedResultSet || !l_PreparedResultSet->GetRowCount())
-            return nullptr;
-        else
-            return std::move(l_PreparedResultSet);
+        m_MYSQLPreparedStatement->GetDatabase()->FreePrepareStatement(this);
+        return nullptr;
     }
 
     /// Clear Prepare Statement
@@ -96,6 +98,9 @@ namespace SteerStone { namespace Core { namespace Database {
         }
 
         m_Prepared = false;
+
+        /// Free the statement
+        m_MYSQLPreparedStatement->GetDatabase()->FreePrepareStatement(this);
     }
 
     MYSQL_STMT* PreparedStatement::GetStatement()

@@ -26,7 +26,6 @@ namespace SteerStone { namespace Core { namespace Database {
     PreparedStatements::PreparedStatements()
     {
     }
-
     /// Deconstructor
     PreparedStatements::~PreparedStatements()
     {
@@ -41,13 +40,13 @@ namespace SteerStone { namespace Core { namespace Database {
     /// @p_Host     : Address we are connecting to
     /// @p_Database : Database we are querying to
     /// @p_PoolSize : Amount of MYSQL connections we are spawning
-    /// @p_DatabaseHolder : Reference of database
+    /// @p_Base     : Database
     uint32 PreparedStatements::Connect(std::string const p_Username, std::string const p_Password, uint32 const p_Port, std::string const p_Host, 
-        std::string const p_Database, uint32 const p_PoolSize, Base& p_DatabaseHolder)
+        std::string const p_Database, uint32 const p_PoolSize, Base* p_Base)
     {
         for (uint32 l_I = 0; l_I < p_PoolSize; l_I++)
         {
-            std::shared_ptr<MYSQLPreparedStatement> l_PreparedStatement = std::make_shared<MYSQLPreparedStatement>();
+            std::shared_ptr<MYSQLPreparedStatement> l_PreparedStatement = std::make_shared<MYSQLPreparedStatement>(p_Base);
 
             uint32 l_Success = l_PreparedStatement->Connect(p_Username, p_Password, p_Port, p_Host, p_Database);
             
@@ -81,6 +80,8 @@ namespace SteerStone { namespace Core { namespace Database {
                         return l_PrepareStatement;
                 }
             }
+
+            LOG_WARNING("PreparedStatements", "Could not get a prepare statement... trying again!");
         }
 
         return nullptr;
