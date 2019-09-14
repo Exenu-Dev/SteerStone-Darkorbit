@@ -28,21 +28,27 @@ namespace SteerStone { namespace Game { namespace Entity {
     Ship::Ship(Player* p_Player) 
         : m_Player(p_Player)
     {
-        m_ShipId        = PlayerShips::Phoenix;
-        m_Speed         = 0;
-        m_Shield        = 0;
-        m_MaxShield     = 0;
-        m_HitPoints     = 0;
-        m_MaxHitPoints  = 0;
-        m_CargoSpace    = 0;
-        m_MaxCargoSpace = 0;
-        m_PositionX     = 0.0f;
-        m_PositionY     = 0.0f;
-        m_MapId         = 0;
-        m_MaxAmmo    = 0;
-        m_MaxRockets    = 0;
-        m_WeaponState   = 0;
-        m_UseSystemFont = 0;
+        m_ShipId         = PlayerShips::Phoenix;
+        m_Speed          = 0;
+        m_Shield         = 0;
+        m_MaxShield      = 0;
+        m_HitPoints      = 0;
+        m_MaxHitPoints   = 0;
+        m_CargoSpace     = 0;
+        m_MaxCargoSpace  = 0;
+        m_PositionX      = 0.0f;
+        m_PositionY      = 0.0f;
+        m_MapId          = 0;
+        m_MaxAmmo        = 0;
+        m_MaxRockets     = 0;
+        m_WeaponState    = 0;
+        m_UseSystemFont  = 0;
+        m_RocketR310     = 0;
+        m_RocketPLT2026  = 0;
+        m_RocketPLT2021  = 0;
+        m_Mines          = 0;
+        m_SmartBombs     = 0;
+        m_InstantShields = 0;
     }
     /// Deconstructor
     Ship::~Ship()

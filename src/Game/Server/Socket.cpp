@@ -99,12 +99,6 @@ namespace SteerStone { namespace Game { namespace Server {
 
         Write((const char*)p_PacketBuffer->GetContents(), p_PacketBuffer->GetSize());
     }
-
-    void GameSocket::SendPacketTest(std::string test)
-    {
-        Write(test.c_str(), 1);
-    }
-
     /// For Non-Implemented packets
     void GameSocket::HandleNULL(ClientPacket* p_Packet)
     {
