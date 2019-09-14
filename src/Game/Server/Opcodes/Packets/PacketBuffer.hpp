@@ -45,10 +45,10 @@ namespace SteerStone { namespace Game { namespace Server {
      
         /// Append Bool
         /// @p_Header : Header of packet
-        void AppendHeader(char p_Header)
+        void AppendHeader(const char p_Header)
         {
             AppendChar("0");
-            AppendChar(&p_Header);
+            AppendChar((std::string(1, p_Header)).c_str());
         }
         /// Append String
         /// @p_Value : Append a string to our storage
@@ -66,9 +66,23 @@ namespace SteerStone { namespace Game { namespace Server {
         {
             AppendChar(p_Bool ? "1" : "0");
         }
+        /// Append UInt16
+        /// @p_Value : Value being appended
+        void AppendUInt16(uint16 p_Value)
+        {
+            std::string l_Value = std::to_string(p_Value);
+            AppendChar(l_Value.c_str());
+        }
         /// Append UInt32
         /// @p_Value : Value being appended
         void AppendUInt32(uint32 p_Value)
+        {
+            std::string l_Value = std::to_string(p_Value);
+            AppendChar(l_Value.c_str());
+        }
+        /// Append Int32
+        /// @p_Value : Value being appended
+        void AppendInt32(int32 p_Value)
         {
             std::string l_Value = std::to_string(p_Value);
             AppendChar(l_Value.c_str());
@@ -80,12 +94,38 @@ namespace SteerStone { namespace Game { namespace Server {
             std::string l_Value = std::to_string(p_Value);
             AppendChar(l_Value.c_str());
         }
+        /// Append Int64
+        /// @p_Value : Value being appended
+        void AppendUInt64(int64 p_Value)
+        {
+            std::string l_Value = std::to_string(p_Value);
+            AppendChar(l_Value.c_str());
+        }
+        /// Append Float
+        /// @p_Value : Value being appended
+        void AppendFloat(float p_Value)
+        {
+            std::string l_Value = std::to_string(p_Value);
+            AppendChar(l_Value.c_str());
+        }
         /// Apennd Splitter
         void AppendSplit()
         {
             std::string l_Split = "|";
             if (std::size_t l_Length = l_Split.length())
                 Append(l_Split.c_str(), l_Length);
+        }
+        /// Knock off last byte
+        void AppendEndSplitter()
+        {
+            m_Storage.pop_back();
+        }
+        /// Append end of packet
+        void AppendCarriage()
+        {
+            std::string l_Carriage = "\r";
+            if (std::size_t l_Length = l_Carriage.length())
+                Append(l_Carriage.c_str(), l_Length);
         }
         /// Append
         /// @p_Buffer : Append another PacketBuffer into our storage

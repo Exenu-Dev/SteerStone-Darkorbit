@@ -50,7 +50,46 @@ namespace SteerStone { namespace Game { namespace Server { namespace Packets {
         m_Buffer.AppendBool(AutoChangeAmmo);
         m_Buffer.AppendBool(EnableBuyFast);
 
-        char* ptr = (char*)&m_Buffer.GetContents()[0];
+        m_Buffer.AppendEndSplitter();
+        m_Buffer.AppendCarriage();
+
+        return &m_Buffer;
+    }
+
+    PacketBuffer const* InitializeShip::Write()
+    {
+        m_Buffer.AppendUInt32(Id);
+        m_Buffer.AppendChar(Username.c_str());
+        m_Buffer.AppendUInt16(ShipId);
+        m_Buffer.AppendUInt32(Speed);
+        m_Buffer.AppendInt32(Shield);
+        m_Buffer.AppendUInt32(MaxShield);
+        m_Buffer.AppendInt32(HitPoints);
+        m_Buffer.AppendUInt32(m_MaxHitPoints);
+        m_Buffer.AppendUInt32(CargoSpace);
+        m_Buffer.AppendUInt32(MaxCargoSpace);
+        m_Buffer.AppendFloat(PositionX);
+        m_Buffer.AppendFloat(PositionY);
+        m_Buffer.AppendUInt32(MapId);
+        m_Buffer.AppendUInt16(CompanyId);
+        m_Buffer.AppendUInt32(ClanId);
+        m_Buffer.AppendUInt32(MaxBattery);
+        m_Buffer.AppendUInt32(MaxRockets);
+        m_Buffer.AppendUInt16(WeaponState);
+        m_Buffer.AppendBool(IsPremium);
+        m_Buffer.AppendUInt32(Experience);
+        m_Buffer.AppendUInt32(Honour);
+        m_Buffer.AppendUInt32(Level);
+        m_Buffer.AppendUInt32(Credits);
+        m_Buffer.AppendUInt32(Uridium);
+        m_Buffer.AppendUInt32(JackPot);
+        m_Buffer.AppendUInt16(Rank);
+        m_Buffer.AppendChar(ClanTag.c_str());
+        m_Buffer.AppendUInt16(GatesAchieved);
+        m_Buffer.AppendBool(UseSystemFont);
+
+        m_Buffer.AppendEndSplitter();
+        m_Buffer.AppendCarriage();
 
         return &m_Buffer;
     }

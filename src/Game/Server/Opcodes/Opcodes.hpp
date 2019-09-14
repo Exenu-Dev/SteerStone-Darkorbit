@@ -43,7 +43,11 @@ enum ClientOpCodes
 
 enum ServerOpCodes
 {
-    SERVER_PACKET_LOGIN = 0x41
+    SERVER_PACKET_LOGIN             = 0x41,
+    SERVER_PACKET_INITIALIZE_SHIP   = 0x49,
+    SERVER_PACKET_MAP_UPDATE        = 0x69,
+    SERVER_PACKET_MINI_MAP_UPDATE   = 0x6D,
+    SERVER_PACKET_UPDATE_ROCKET_MINE  = 0x33,
 };
 
 namespace SteerStone { namespace Game { namespace Server {

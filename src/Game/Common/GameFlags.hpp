@@ -17,6 +17,8 @@
 */
 
 #pragma once
+#include <PCH/Precompiled.hpp>
+#include "Core/Core.hpp"
 
 enum PlayerShips
 {
@@ -62,7 +64,7 @@ enum NpcShips
     BossStreuneR        = 24,
     UFO                 = 25,
     UFONIT              = 26,
-    Aggro-Streuner      = 27,
+    AggroStreuner       = 27,
     UberStreuner        = 28,
     UberLordakia        = 29,
     UberMordon          = 30,
@@ -155,4 +157,26 @@ enum ConditionType
     cCARGO               = 48,
     SELL_ORE             = 49,
     LEVEL                = 50,
+};
+
+enum class Company : uint16
+{
+    NOMAD       = 0,
+    MMO         = 1,
+    EARTH       = 2,
+    VRU         = 3,
+    MAXCOMPANY  = 4
+};
+
+enum RocketType
+{
+    ROCKET_TYPE_R310     = 0,
+    ROCKET_TYPE_PLT_2026 = 1,
+    ROCKET_TYPE_PLT_2021 = 2
+};
+
+enum MinesType
+{
+    SMART_BOMB      = 0,
+    INSTANT_SHIELD  = 1
 };

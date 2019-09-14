@@ -21,6 +21,7 @@
 
 #include "Core/Core.hpp"
 #include "Socket.hpp"
+#include "Ship/Ship.hpp"
 
 namespace SteerStone { namespace Game { namespace Entity {
 
@@ -49,23 +50,29 @@ namespace SteerStone { namespace Game { namespace Entity {
 
             /// Send Client In-game settings
             void SendClientSettings();
+            /// Send ship details
+            void SendInitializeShip();
+
+            /// Get Ship
+            Ship* GetShip();
 
             /// Send Packet
             /// @p_PacketBuffer : Packet Buffer
             void SendPacket(Server::PacketBuffer const* p_PacketBuffer);
 
             /// Stored Player Info Getters
-            uint32 GetId()             const     { return m_Id; }
-            std::string GetSessionId() const     { return m_SessionId; }
-            std::string GetUsername()  const     { return m_Username; }
-            uint32 GetUridium()        const     { return m_Uridium; }
-            uint32 GetCredits()        const     { return m_Credits; }
-            uint32 GetJackPot()        const     { return m_Jackpot; }
-            uint32 GetLevel()          const     { return m_Level; }
-            uint32 GetExperience()     const     { return m_Experience; }
-            uint32 GetHonor()          const     { return m_Honor; }
-            uint32 GetClanId()         const     { return m_ClanId; }
-            bool IsPremium()           const     { return m_Premium; }
+            uint32 GetId()             const     { return m_Id;             }
+            std::string GetSessionId() const     { return m_SessionId;      }
+            std::string GetUsername()  const     { return m_Username;       }
+            uint32 GetUridium()        const     { return m_Uridium;        }
+            uint32 GetCredits()        const     { return m_Credits;        }
+            uint32 GetJackPot()        const     { return m_Jackpot;        }
+            uint32 GetLevel()          const     { return m_Level;          }
+            uint32 GetExperience()     const     { return m_Experience;     }
+            uint32 GetHonor()          const     { return m_Honor;          }
+            uint32 GetClanId()         const     { return m_ClanId;         }
+            Company GetCompany()        const    { return m_CompanyId;      }
+            bool IsPremium()           const     { return m_Premium;        }
 
         //////////////////////////////////////////////////////////////////////////
         //////////////////////////////////////////////////////////////////////////
@@ -81,7 +88,10 @@ namespace SteerStone { namespace Game { namespace Entity {
             uint32 m_Level;
             uint32 m_Experience;
             uint32 m_Honor;
+            uint16 m_GatesAchieved;
             uint32 m_ClanId;
+            Company m_CompanyId;
+            uint16 m_Rank;
             bool m_Premium;
 
             /// Player Settings
@@ -111,7 +121,7 @@ namespace SteerStone { namespace Game { namespace Entity {
             bool m_AutoChangeAmmo;
             bool m_EnableBuyFast;
 
-
+            Ship m_Ship;    ///< Ship
             std::shared_ptr<Server::GameSocket> m_Socket;   ///< Socket
     };
 

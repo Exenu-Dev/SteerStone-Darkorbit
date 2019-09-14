@@ -55,6 +55,7 @@ namespace SteerStone { namespace Game { namespace Server {
             /// Send packet to client
             /// @p_PacketBuffer : Packet Buffer
             void SendPacket(const PacketBuffer* p_PacketBuffer);
+            void SendPacketTest(std::string test);
 
             /// For Non-Implemented packets
             void HandleNULL(ClientPacket* p_Packet);
