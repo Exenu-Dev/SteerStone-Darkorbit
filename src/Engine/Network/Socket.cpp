@@ -255,8 +255,8 @@ namespace SteerStone { namespace Core { namespace Network {
 
         Utils::ObjectGuard l_Guard(this);
 
-        assert(m_WriteState == WriteState::Sending);
-        assert(p_Length <= m_OutBuffer->m_WritePosition);
+        LOG_ASSERT(m_WriteState == WriteState::Sending, "Socket", "Flushed out packet, but write state is not set to sending!");
+        LOG_ASSERT(p_Length <= m_OutBuffer->m_WritePosition, "Socket", "Sent length is more than OutBuffer length!");
 
         /// If there is data left to write, move it to the start of the buffer
         if (p_Length < m_OutBuffer->m_WritePosition)
@@ -292,7 +292,7 @@ namespace SteerStone { namespace Core { namespace Network {
 
         Utils::ObjectGuard l_Guard(this);
 
-        assert(m_WriteState == WriteState::Buffering);
+        LOG_ASSERT(m_WriteState == WriteState::Buffering, "Socket", "Flushing out packet but write state is not set to buffering!");
 
         /// At this point we are guarunteed that there is data to send in the primary buffer.  send it.
         m_WriteState = WriteState::Sending;
