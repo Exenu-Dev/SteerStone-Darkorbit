@@ -58,6 +58,12 @@ namespace SteerStone { namespace Core { namespace Network {
 
         m_WritePosition += p_Length;
     }
+    /// Terminate Buffer
+    void PacketBuffer::TerminateBuffer()
+    {
+        m_WritePosition++;
+        m_Buffer[0] + '\0';
+    }
 
     /// Get the total read length of the packet
     std::size_t const PacketBuffer::ReadLength()

@@ -18,7 +18,7 @@
 
 #pragma once
 #include <PCH/Precompiled.hpp>
-
+#include <boost/asio.hpp>
 #include "Core/Core.hpp"
 
 #define STORAGE_INITIAL_SIZE 4096
@@ -52,6 +52,8 @@ namespace SteerStone { namespace Core { namespace Network {
             /// @p_Buffer : Buffer which holds the data
             /// @p_Length : The length of the data
             void Write(char const* p_Buffer, std::size_t const& p_Length);
+            /// Terminate Buffer
+            void TerminateBuffer();
 
             /// Get the total read length of the packet
             std::size_t const ReadLength();

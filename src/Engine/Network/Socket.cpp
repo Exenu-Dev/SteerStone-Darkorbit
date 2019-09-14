@@ -114,24 +114,6 @@ namespace SteerStone { namespace Core { namespace Network {
         if (m_WriteState == WriteState::Idle)
             StartWriteFlushTimer();
     }
-    /// Write Policy
-    void Socket::WritePolicy()
-    {
-        /// Using async_write doesn't work - I don't know why.
-        /// But since client only requires 1 packet from policy server, we can just send the packet
-        /// and force close the connection
-
-        std::string l_Policy = "<?xml version=\"1.0\"?><cross-domain-policy xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:noNamespaceSchemaLocation=\"http://www.adobe.com/xml/schemas/PolicyFileSocket.xsd\"><allow-access-from domain=\"*\" to-ports=\"*\" secure=\"false\" /><site-control permitted-cross-domain-policies=\"master-only\" /></cross-domain-policy>";
-
-        boost::asio::streambuf l_Buffer;
-        std::ostream l_Stream(&l_Buffer);
-        l_Stream << l_Policy;
-
-        boost::asio::write(m_Socket,
-            l_Buffer.data());
-
-        CloseSocket();
-    }
     /// Get the total read length of the packet
     std::size_t const Socket::ReadLength()
     {
@@ -289,9 +271,12 @@ namespace SteerStone { namespace Core { namespace Network {
         std::shared_ptr<Socket> l_Ptr = Shared<Socket>();
         /// If there is any data to write, do so immediately
         if (m_OutBuffer->m_WritePosition > 0)
+        {
+            std::shared_ptr<Socket> l_Ptr = Shared<Socket>();
             m_Socket.async_write_some(boost::asio::buffer(m_OutBuffer->m_Buffer, m_OutBuffer->m_WritePosition),
                 make_custom_alloc_handler(m_allocator,
                     [l_Ptr](boost::system::error_code const& p_ErrorCode, std::size_t const& p_Length) { l_Ptr->OnWriteComplete(p_ErrorCode, p_Length); }));
+        }
         else
             m_WriteState = WriteState::Idle;
     }
@@ -311,6 +296,9 @@ namespace SteerStone { namespace Core { namespace Network {
 
         /// At this point we are guarunteed that there is data to send in the primary buffer.  send it.
         m_WriteState = WriteState::Sending;
+
+        /// Terminate end of string buffer
+        m_OutBuffer->TerminateBuffer();
 
         std::shared_ptr<Socket> l_Ptr = Shared<Socket>();
         m_Socket.async_write_some(boost::asio::buffer(m_OutBuffer->m_Buffer, m_OutBuffer->m_WritePosition),
