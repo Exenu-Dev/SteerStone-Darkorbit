@@ -43,7 +43,7 @@ enum ClientOpCodes
 
 enum ServerOpCodes
 {
-    SERVER_PACKET_POLICY        = 0x3C
+    SERVER_PACKET_POLICY        = 0x00
 };
 
 namespace SteerStone { namespace Policy { namespace Server {

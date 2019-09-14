@@ -58,7 +58,6 @@ namespace SteerStone { namespace Policy { namespace Server {
 
         StoreServerPacket(ServerOpCodes::SERVER_PACKET_POLICY, "SERVER_PACKET_POLICY", &PolicySocket::HandleServer);
 
-
         LOG_INFO("OpCodes", "Loaded %0 Client Packets", m_ClientOpCodes.size());
         LOG_INFO("OpCodes", "Loaded %0 Server Packets", m_ServerOpCodes.size());
     } 

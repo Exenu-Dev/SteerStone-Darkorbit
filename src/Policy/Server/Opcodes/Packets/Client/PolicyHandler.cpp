@@ -16,6 +16,7 @@
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include "Packets/Server/PolicyPacket.hpp"
 #include "Socket.hpp"
 
 namespace SteerStone { namespace Policy { namespace Server {
@@ -24,7 +25,9 @@ namespace SteerStone { namespace Policy { namespace Server {
     /// @p_ClientPacket : Packet recieved from client
     void PolicySocket::HandlePolicy(ClientPacket* p_Packet)
     {
-        WritePolicy();
+        Packets::PolicyPacket l_Packet;
+        l_Packet.PolicyDetails = "<?xml version=\"1.0\"?><cross-domain-policy xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:noNamespaceSchemaLocation=\"http://www.adobe.com/xml/schemas/PolicyFileSocket.xsd\"><allow-access-from domain=\"*\" to-ports=\"*\" secure=\"false\" /><site-control permitted-cross-domain-policies=\"master-only\" /></cross-domain-policy>";
+        SendPacket(l_Packet.Write());
     }
 
 }   ///< namespace Server

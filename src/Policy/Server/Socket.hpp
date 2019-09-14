@@ -18,8 +18,8 @@
 
 #pragma once
 #include "Network/Listener.hpp"
+#include "ServerPacket.hpp"
 #include "Opcodes/Opcodes.hpp"
-#include "PacketBuffer.hpp"
 
 namespace SteerStone { namespace Policy { namespace Server { 
 
