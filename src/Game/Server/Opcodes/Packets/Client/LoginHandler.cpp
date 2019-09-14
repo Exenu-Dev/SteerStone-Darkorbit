@@ -38,7 +38,7 @@ namespace SteerStone { namespace Game { namespace Server {
             m_Player->SendClientSettings();
             m_Player->SendInitializeShip();
             m_Player->GetShip()->SendMapUpdate();
-            m_Player->GetShip()->SendRocketMineUpdate();
+            m_Player->GetShip()->SendAmmoUpdate();
         }
 
     }

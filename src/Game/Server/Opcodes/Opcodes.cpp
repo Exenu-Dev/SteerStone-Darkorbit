@@ -56,11 +56,12 @@ namespace SteerStone { namespace Game { namespace Server {
         //////////////////////////////////////////////////////////////////////////
         //////////////////////////////////////////////////////////////////////////
 
-        StoreServerPacket(ServerOpCodes::SERVER_PACKET_LOGIN,            "SERVER_PACKET_LOGIN",            &GameSocket::HandleServer);
-        StoreServerPacket(ServerOpCodes::SERVER_PACKET_INITIALIZE_SHIP,  "SERVER_PACKET_INITIALIZE_SHIP",  &GameSocket::HandleServer);
-        StoreServerPacket(ServerOpCodes::SERVER_PACKET_MAP_UPDATE,       "SERVER_PACKET_MAP_UPDATE",       &GameSocket::HandleServer);
-        StoreServerPacket(ServerOpCodes::SERVER_PACKET_MINI_MAP_UPDATE,  "SERVER_PACKET_MINI_MAP_UPDATE",  &GameSocket::HandleServer);
-        StoreServerPacket(ServerOpCodes::SERVER_PACKET_UPDATE_ROCKET_MINE, "SERVER_PACKET_MISC_AMMO_UPDATE", &GameSocket::HandleServer);
+        StoreServerPacket(ServerOpCodes::SERVER_PACKET_LOGIN,               "SERVER_PACKET_LOGIN",              &GameSocket::HandleServer);
+        StoreServerPacket(ServerOpCodes::SERVER_PACKET_INITIALIZE_SHIP,     "SERVER_PACKET_INITIALIZE_SHIP",    &GameSocket::HandleServer);
+        StoreServerPacket(ServerOpCodes::SERVER_PACKET_MAP_UPDATE,          "SERVER_PACKET_MAP_UPDATE",         &GameSocket::HandleServer);
+        StoreServerPacket(ServerOpCodes::SERVER_PACKET_MINI_MAP_UPDATE,     "SERVER_PACKET_MINI_MAP_UPDATE",    &GameSocket::HandleServer);
+        StoreServerPacket(ServerOpCodes::SERVER_PACKET_UPDATE_ROCKET_MINE,  "SERVER_PACKET_MISC_AMMO_UPDATE",   &GameSocket::HandleServer);
+        StoreServerPacket(ServerOpCodes::SERVER_PACKET_UPDATE_BATTERY,      "SERVER_PACKET_UPDATE_BATTERY",     &GameSocket::HandleServer);
 
         LOG_INFO("OpCodes", "Loaded %0 Client Packets", m_ClientOpCodes.size());
         LOG_INFO("OpCodes", "Loaded %0 Server Packets", m_ServerOpCodes.size());

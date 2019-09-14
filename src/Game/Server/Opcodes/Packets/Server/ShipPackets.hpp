@@ -81,6 +81,28 @@ namespace SteerStone { namespace Game { namespace Server { namespace Packets {
         uint32 InstantShields;
     };
 
+    /// SERVER_PACKET_UPDATE_BATTERY packet builder
+    class UpdateBatteryAmmo final : public ServerPacket
+    {
+    public:
+        /// Constructor 
+        UpdateBatteryAmmo() : ServerPacket(ServerOpCodes::SERVER_PACKET_UPDATE_BATTERY)
+        {
+        }
+
+        //////////////////////////////////////////////////////////////////////////
+        //////////////////////////////////////////////////////////////////////////
+
+        /// Write the packet
+        PacketBuffer const* Write();
+
+        int32 BatteryLCB10;
+        int32 BatteryMCB25;
+        int32 BatteryMCB50;
+        int32 BatteryUCB100;
+        int32 BatterySAB50;
+    };
+
 }   ///< Packets
 }   ///< Server
 }   ///< Game

@@ -38,6 +38,46 @@ namespace SteerStone { namespace Game { namespace Entity {
     class Player;
     class Server::Packets::InitializeShip;
 
+    /// Holds Ammo data
+    struct Ammo
+    {
+    public:
+        /// Constructor
+        Ammo()
+        {
+            m_BatteryLCB10      = 0;
+            m_BatteryMCB25      = 0;
+            m_BatteryMCB50      = 0;
+            m_BatteryUCB100     = 0;
+
+            m_RocketR310        = 0;
+            m_RocketPLT2026     = 0;
+            m_RocketPLT2021     = 0;
+
+            m_Mines             = 0;
+            m_SmartBombs        = 0;
+            m_InstantShields    = 0;
+        }
+        /// Deconstructor
+        ~Ammo() 
+        {
+        }
+
+        int32 m_BatteryLCB10;
+        int32 m_BatteryMCB25;
+        int32 m_BatteryMCB50;
+        int32 m_BatteryUCB100;
+        int32 m_BatterySAB50;
+
+        int32 m_RocketR310;
+        int32 m_RocketPLT2026;
+        int32 m_RocketPLT2021;
+
+        int32 m_Mines;
+        int32 m_SmartBombs;
+        int32 m_InstantShields;
+    };
+
     /// Ship Data for player class
     class Ship
     {
@@ -61,8 +101,8 @@ namespace SteerStone { namespace Game { namespace Entity {
             void FormulateInitializeShip(Server::Packets::InitializeShip& p_Packet);
             /// Send Map update
             void SendMapUpdate();
-            /// Send Rocket and Mine Update
-            void SendRocketMineUpdate();
+            /// Send Battery, Rocket and mine update
+            void SendAmmoUpdate();
 
         //////////////////////////////////////////////////////////////////////////
         //////////////////////////////////////////////////////////////////////////
@@ -79,19 +119,13 @@ namespace SteerStone { namespace Game { namespace Entity {
             float m_PositionX;
             float m_PositionY;
             uint32 m_MapId;
-            uint32 m_MaxAmmo;
+            uint32 m_MaxBattery;
             uint32 m_MaxRockets;
             uint16 m_WeaponState;
             bool m_UseSystemFont;
+            Ammo m_Ammo;
 
-            uint32 m_RocketR310;
-            uint32 m_RocketPLT2026;
-            uint32 m_RocketPLT2021;
-            uint32 m_Mines;
-            uint32 m_SmartBombs;
-            uint32 m_InstantShields;
             Player* m_Player;   ///< Player
-
     };
 
 }   ///< namespace Entity

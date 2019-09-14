@@ -161,22 +161,35 @@ enum ConditionType
 
 enum class Company : uint16
 {
-    NOMAD       = 0,
-    MMO         = 1,
-    EARTH       = 2,
-    VRU         = 3,
-    MAXCOMPANY  = 4
+    NOMAD        = 0,
+    MMO          = 1,
+    EARTH        = 2,
+    VRU          = 3,
+    MAX_COMPANY  = 4
 };
 
 enum RocketType
 {
     ROCKET_TYPE_R310     = 0,
     ROCKET_TYPE_PLT_2026 = 1,
-    ROCKET_TYPE_PLT_2021 = 2
+    ROCKET_TYPE_PLT_2021 = 2,
+    MAX_ROCKET           = 3
+};
+
+enum BatteryType
+{
+    BATTERY_TYPE_LCB10  = 0,
+    BATTERY_TYPE_MCB25  = 1,
+    BATTERY_TYPE_MCB50  = 2,
+    BATTERY_TYPE_UCB100 = 3,
+    BATTERY_TYPE_SAB50  = 4,
+    MAX_BATTERY         = 5
 };
 
 enum MinesType
 {
-    SMART_BOMB      = 0,
-    INSTANT_SHIELD  = 1
+    MINE            = 0,
+    SMART_BOMB      = 1,
+    INSTANT_SHIELD  = 2,
+    MAX_MINES       = 3
 };

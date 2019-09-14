@@ -45,12 +45,27 @@ namespace SteerStone { namespace Game { namespace Server { namespace Packets {
     /// SERVER_PACKET_UPDATE_ROCKET_MINE
     PacketBuffer const* UpdateRocketMineAmmo::Write()
     {
-        m_Buffer.AppendUInt32(RocketR310);
-        m_Buffer.AppendUInt32(RocketPLT2026);
-        m_Buffer.AppendUInt32(RocketPLT2021);
-        m_Buffer.AppendUInt32(Mines);
-        m_Buffer.AppendUInt32(SmartBombs);
-        m_Buffer.AppendUInt32(InstantShields);
+        m_Buffer.AppendInt32(RocketR310);
+        m_Buffer.AppendInt32(RocketPLT2026);
+        m_Buffer.AppendInt32(RocketPLT2021);
+        m_Buffer.AppendInt32(Mines);
+        m_Buffer.AppendInt32(SmartBombs);
+        m_Buffer.AppendInt32(InstantShields);
+
+        m_Buffer.AppendEndSplitter();
+        m_Buffer.AppendCarriage();
+
+        return &m_Buffer;
+    }
+
+    /// SERVER_PACKET_UPDATE_BATTERY
+    PacketBuffer const* UpdateBatteryAmmo::Write()
+    {
+        m_Buffer.AppendInt32(BatteryLCB10);
+        m_Buffer.AppendInt32(BatteryMCB25);
+        m_Buffer.AppendInt32(BatteryMCB50);
+        m_Buffer.AppendInt32(BatteryUCB100);
+        m_Buffer.AppendInt32(BatterySAB50);
 
         m_Buffer.AppendEndSplitter();
         m_Buffer.AppendCarriage();
