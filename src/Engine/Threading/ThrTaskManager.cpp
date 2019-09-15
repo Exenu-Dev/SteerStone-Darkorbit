@@ -79,7 +79,7 @@ namespace SteerStone { namespace Core { namespace Threading {
         }
         else if (p_Task->GetTaskType() == TaskType::Moderate)
         {
-            for (std::size_t l_I = 0; l_I < m_ExclusiveTaskWorkers.size(); ++l_I)
+            for (std::size_t l_I = 0; l_I < m_ExclusiveTaskWorkers.size(); l_I++)
             {
                 TaskWorker* l_CurrentWorker = m_ExclusiveTaskWorkers[l_I];
 
@@ -90,7 +90,10 @@ namespace SteerStone { namespace Core { namespace Threading {
                 }
             }
 
-            LOG_ERROR("ThrTaskManager", "Task %0 added with no exclusive worker", p_Task->GetTaskName());
+            p_Task->SetTaskType(TaskType::Critical);
+            PushTask(p_Task);
+
+            LOG_WARNING("ThrTaskManager", "Could not add exclusive task %0. Re-adding task as Critical", p_Task->GetTaskName());
         }
         else
         {

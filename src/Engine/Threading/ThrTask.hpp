@@ -57,6 +57,10 @@ namespace SteerStone { namespace Core { namespace Threading {
             /// Destructor
             virtual ~Task();
 
+            /// Set Task
+            /// @p_TaskType : Task type
+            void SetTaskType(TaskType p_TaskType);
+
             /// Get name
             const std::string & GetTaskName();
             /// Get flags

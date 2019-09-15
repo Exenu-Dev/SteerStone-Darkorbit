@@ -41,6 +41,13 @@ namespace SteerStone { namespace Core { namespace Threading {
     //////////////////////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////////////////////
 
+    /// Set Task
+    /// @p_TaskType : Task type
+    void Task::SetTaskType(TaskType p_TaskType)
+    {
+        m_TaskType = p_TaskType;
+    }
+
     /// Get name
     const std::string& Task::GetTaskName()
     {
