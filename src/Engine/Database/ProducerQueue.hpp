@@ -19,6 +19,7 @@
 #pragma once
 #include <PCH/Precompiled.hpp>
 #include <condition_variable>
+#include <atomic>
 
 #include "Core/Core.hpp"
 
@@ -70,6 +71,14 @@ namespace SteerStone { namespace Core { namespace Database {
             p_Object = m_Queue.front();
 
             m_Queue.pop();
+        }
+        
+        /// Get Size
+        const std::size_t GetSize()
+        {
+            std::lock_guard<std::mutex> l_Guard(m_Lock);
+
+            return m_Queue.size();
         }
 
         /// Clear storage and delete objects

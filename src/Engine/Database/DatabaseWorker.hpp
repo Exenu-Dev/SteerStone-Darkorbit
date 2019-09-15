@@ -17,58 +17,51 @@
 */
 
 #pragma once
-#include "DatabaseWorker.hpp"
-#include "Database/PreparedStatements.hpp"
+#include <PCH/Precompiled.hpp>
+#include "Core/Core.hpp"
+#include "Database/ProducerQueue.hpp"
+#include "Threading/ThrTaskManager.hpp"
 
 namespace SteerStone { namespace Core { namespace Database {
 
-    class Base : private PreparedStatements
+    class Operator;
+
+    class DatabaseWorker
     {
-        DISALLOW_COPY_AND_ASSIGN(Base);
+    DISALLOW_COPY_AND_ASSIGN(DatabaseWorker);
 
     //////////////////////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////////////////////
 
     public:
         /// Constructor
-        Base();
+        /// @p_WorkerThread : Worker thread number spawned
+        DatabaseWorker(uint8 const& p_WorkerThread);
         /// Deconstructor
-        ~Base();
+        ~DatabaseWorker();
 
     //////////////////////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////////////////////
 
-        /// Start Database
-        /// @p_InfoString : Database user details; username, password, host, database, l_Port
-        /// @p_PoolSize : How many pool connections database will launch
-        /// @p_WorkerThreads : Amount of workers to spawn
-        uint32 Start(char const* p_InfoString, uint32 p_PoolSize, uint32 p_WorkerThreads);
+        /// Add Operator
+        /// @p_Operator : Operater being added
+        void AddOperator(Operator* p_Operator);
 
-        /// Returns a Prepare Statement from Pool
-        PreparedStatement* GetPrepareStatement();
-        /// Free Prepare Statement
-        /// @p_PreparedStatement : Connection we are freeing
-        void FreePrepareStatement(PreparedStatement* p_PreparedStatement);
-
-        /// Execute query on worker thread
-        /// @p_PrepareStatementHolder : PrepareStatement which will be executed on database worker thread
-        CallBackOperator PrepareOperator(PreparedStatement* p_PrepareStatementHolder);
+        /// Get size of producer
+        const std::size_t GetSize();
 
     //////////////////////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////////////////////
 
     private:
-        /// Pass operator to worker thread
-        /// @p_Operator : Operator we are adding to be processed on database worker thread
-        void EnqueueOperator(Operator* p_Operator);
-
-        /// Select the worker with lowest storage size (equal distrubition)
-        DatabaseWorker* SelectWorker() const;
+        bool Update();
 
     private:
-        std::vector<std::unique_ptr<DatabaseWorker>> m_Workers;
+        ProducerQueue<Operator*> m_Producer;
+        Threading::Task::Ptr l_Task;
     };
 
 }   ///< namespace Database
 }   ///< namespace Core
 }   ///< namespace SteerStone
+

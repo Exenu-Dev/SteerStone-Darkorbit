@@ -36,9 +36,11 @@ namespace SteerStone { namespace Core { namespace Database {
     //////////////////////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////////////////////
 
+    /// Start Database
     /// @p_InfoString : Database user details; username, password, host, database, l_Port
     /// @p_PoolSize : How many pool connections database will launch
-    uint32 Base::Start(char const* p_InfoString, uint32 p_PoolSize)
+    /// @p_WorkerThreads : Amount of workers to spawn
+    uint32 Base::Start(char const* p_InfoString, uint32 p_PoolSize, uint32 p_WorkerThreads)
     {
         /// Check if pool size is within our requirements
         if (p_PoolSize < MIN_CONNECTION_POOL_SIZE)
@@ -71,7 +73,9 @@ namespace SteerStone { namespace Core { namespace Database {
 
         if (!Connect(l_Username, l_Password, std::stoi(l_Port), l_Host, l_Database, p_PoolSize, this))
         {
-            sThreadManager->PushTask("DATABASE_WORKER_THREAD", Threading::TaskType::Moderate, 0, std::bind(&Base::ProcessOperators, this));
+            for (uint8 l_I = 0; l_I < p_WorkerThreads; l_I++)
+                m_Workers.push_back(std::make_unique<DatabaseWorker>(l_I));
+
             return true;
         }
         else
@@ -111,25 +115,29 @@ namespace SteerStone { namespace Core { namespace Database {
     /// @p_Operator : Operator we are adding to be processed on database worker thread
     void Base::EnqueueOperator(Operator* p_Operator)
     {
-        m_Producer.Push(p_Operator);
+        auto l_Worker = SelectWorker();
+
+        l_Worker->AddOperator(p_Operator);
     }
-    /// Process future operations
-    bool Base::ProcessOperators()
+
+    /// Select the worker with lowest storage size (equal distrubition)
+    DatabaseWorker* Base::SelectWorker() const
     {
-        while (true)
+        std::size_t l_MinimumSize = m_Workers.size();
+        int32 l_Index = 0;
+
+        for (std::size_t l_I = 0; l_I < m_Workers.size(); l_I++)
         {
-            Operator* l_Operator = nullptr;
-            m_Producer.WaitAndPop(l_Operator);
+            const std::size_t l_Size = m_Workers[l_I]->GetSize();
 
-            if (l_Operator)
+            if (l_Size < l_MinimumSize)
             {
-                l_Operator->Execute();
-
-                delete l_Operator;
+                l_MinimumSize = l_Size;
+                l_Index = l_I;
             }
         }
 
-        return false;
+        return m_Workers[l_Index].get();
     }
 
 }   ///< namespace Database
