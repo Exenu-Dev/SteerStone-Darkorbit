@@ -100,7 +100,7 @@ namespace SteerStone { namespace Core { namespace Database {
                 if (!*m_Bind[l_I].is_null)
                 {
                     /// Retrieve our buffer
-                    void* l_Buffer = m_PreparedStatement->GetStatement()->bind[l_I].buffer;
+                    void* l_Buffer = m_Bind[l_I].buffer;
 
                     switch (m_Bind[l_I].buffer_type)
                     {

@@ -109,6 +109,22 @@ namespace SteerStone { namespace Game { namespace Server { namespace Packets {
         bool UseSystemFont;
     };
 
+    /// SERVER_PACKET_LOGGED_IN packet builder
+    class LoggedIn final : public ServerPacket
+    {
+    public:
+        /// Constructor 
+        LoggedIn() : ServerPacket(ServerOpCodes::SERVER_PACKET_LOGGED_IN)
+        {
+        }
+
+        //////////////////////////////////////////////////////////////////////////
+        //////////////////////////////////////////////////////////////////////////
+
+        /// Write the packet
+        PacketBuffer const* Write();
+    };
+
 }   ///< Packets
 }   ///< Server
 }   ///< Game

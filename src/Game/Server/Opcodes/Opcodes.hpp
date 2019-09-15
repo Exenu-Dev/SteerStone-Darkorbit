@@ -21,34 +21,41 @@
 #include <PCH/Precompiled.hpp>
 #include "Core/Core.hpp"
 #include "Singleton/Singleton.hpp"
-#include "Packets/ClientPacket.hpp"
+#include "PacketFilter.hpp"
 #endif /* _OPCODES_OPCODES_HPP_ */
-
 
 enum class PacketStatus
 {
-    STATUS_UNHANDLED,
-    STATUS_AUTHENTICATION
+    STATUS_UNHANDLED,           ///< Packet not handled
+    STATUS_AUTHENTICATION,      ///< Player has not been created yet
+    STATUS_LOGGED_IN            ///< Player is created and in world        
 };
 
 enum class PacketProcess
-{
-    PROCESS_NOW
+{  
+    PROCESS_WORLD_THREAD,       ///< Process Packet in Player::Update           (Thread Unsafe)
+    PROCESS_MAP_THREAD,         ///< Process Packet in Map::Update              (Thread Safe)
+    PROCESS_PLAYER_THREAD       ///< Process Packet in Socket::ReadIncomingData (For non implemented packets)
 };
 
-enum ClientOpCodes
+enum ClientOpCodes : uint8
 {
-    CLIENT_PACKET_LOGIN = 0x4C
+    CLIENT_PACKET_LOGIN                 = 0x4C,
+    CLIENT_PACKET_CHANGE_LASER          = 0x75,
+    CLIENT_PACKET_CHANGE_ROCKET         = 0x64,
+    CLIENT_MAX_OPCODE                   = 0x7A
 };
 
-enum ServerOpCodes
+enum ServerOpCodes : uint8
 {
     SERVER_PACKET_LOGIN                 = 0x41,
     SERVER_PACKET_INITIALIZE_SHIP       = 0x49,
     SERVER_PACKET_MAP_UPDATE            = 0x69,
     SERVER_PACKET_MINI_MAP_UPDATE       = 0x6D,
     SERVER_PACKET_UPDATE_ROCKET_MINE    = 0x33,
-    SERVER_PACKET_UPDATE_BATTERY        = 0x42
+    SERVER_PACKET_UPDATE_BATTERY        = 0x42,
+    SERVER_PACKET_LOGGED_IN             = 0x38,
+    SERVER_MAX_OPCODE                   = 0x7A,
 };
 
 namespace SteerStone { namespace Game { namespace Server {
@@ -75,16 +82,20 @@ namespace SteerStone { namespace Game { namespace Server {
         //////////////////////////////////////////////////////////////////////////
 
         public:
-
             /// Initialize Client and Server Handlers
             void InitializePackets();
 
             /// Get Client Packet
             /// @p_Id : Id of client packet we are searching for
-            OpcodeHandler const& GetClientPacket(const uint64& Id);
+            OpcodeHandler const* GetClientPacket(ClientOpCodes p_Id);
             /// Get Server Packet
             /// @p_Id : Id of server packet we are searching for
-            OpcodeHandler const& GetServerPacket(const uint64& Id);
+            OpcodeHandler const* GetServerPacket(ServerOpCodes p_Id);
+
+            /// Get Client Opcode Name
+            std::string GetClientOpCodeName(ClientOpCodes p_Opcode);
+            /// Get Server Opcode Name
+            std::string GetServerOpCodeName(ServerOpCodes p_Opcode);
 
         //////////////////////////////////////////////////////////////////////////
         //////////////////////////////////////////////////////////////////////////
@@ -96,12 +107,12 @@ namespace SteerStone { namespace Game { namespace Server {
             /// @p_Status : Status of Opcode
             /// @p_Process : When to process the packet
             /// @p_Handler : Handler Function which we will be accessing too
-            void StoreClientPacket(uint64 const p_OpCode, char const* p_Name, PacketStatus const p_Status, PacketProcess p_Process, void (GameSocket::*handler)(ClientPacket* p_Packet));
+            void StoreClientPacket(uint8 const p_OpCode, char const* p_Name, PacketStatus const p_Status, PacketProcess p_Process, void (GameSocket::*handler)(ClientPacket* p_Packet));
             /// Store Server packet into storage
             /// @p_Opcode : Opcode Id
             /// @p_Name : Name of Opcode
             /// @p_Handler : Handler Function which we will be accessing too
-            void StoreServerPacket(uint64 const p_OpCode, char const* p_Name, void (GameSocket::* p_Handler)(ClientPacket* p_Packet));
+            void StoreServerPacket(uint8 const p_OpCode, char const* p_Name, void (GameSocket::* p_Handler)(ClientPacket* p_Packet));
 
         private:
             static OpcodeHandler const m_EmptyHandler;      ///< Empty handler if client packet has not been given a handler yet

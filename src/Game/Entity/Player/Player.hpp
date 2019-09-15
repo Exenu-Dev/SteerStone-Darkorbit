@@ -23,7 +23,11 @@
 #include "Socket.hpp"
 #include "Ship/Ship.hpp"
 
+#include "Utility/UtiLockedQueue.hpp"
+
 namespace SteerStone { namespace Game { namespace Entity {
+
+    class Server::ClientPacket;
 
     /// Main entry for session in world
     class Player
@@ -52,10 +56,20 @@ namespace SteerStone { namespace Game { namespace Entity {
             void SendClientSettings();
             /// Send ship details
             void SendInitializeShip();
+            /// Send Logged In
+            void SendLoggedIn();
 
             /// Get Ship
             Ship* GetShip();
 
+            /// Update Player
+            /// @p_Diff         : Execution Time
+            /// @p_PacketFilter : Type of packet
+            bool Update(uint32 p_Diff, Server::PacketFilter& p_PacketFilter);
+
+            /// Queue Packet
+            /// @_ClientPacket : Packet being queued
+            void QueuePacket(Server::ClientPacket* p_ClientPacket);
             /// Send Packet
             /// @p_PacketBuffer : Packet Buffer
             void SendPacket(Server::PacketBuffer const* p_PacketBuffer);
@@ -71,9 +85,9 @@ namespace SteerStone { namespace Game { namespace Entity {
             uint32 GetExperience()     const     { return m_Experience;     }
             uint32 GetHonor()          const     { return m_Honor;          }
             uint32 GetClanId()         const     { return m_ClanId;         }
-            Company GetCompany()        const    { return m_CompanyId;      }
+            Company GetCompany()       const     { return m_CompanyId;      }
             bool IsPremium()           const     { return m_Premium;        }
-
+            bool IsLoggedIn()          const     { return m_LoggedIn;       }
         //////////////////////////////////////////////////////////////////////////
         //////////////////////////////////////////////////////////////////////////
 
@@ -121,8 +135,11 @@ namespace SteerStone { namespace Game { namespace Entity {
             bool m_AutoChangeAmmo;
             bool m_EnableBuyFast;
 
-            Ship m_Ship;    ///< Ship
-            std::shared_ptr<Server::GameSocket> m_Socket;   ///< Socket
+            bool m_LoggedIn;
+
+            Core::Utils::LockedQueue<Server::ClientPacket*> m_RecievedQueue; ///< Packets
+            Ship m_Ship;                                        ///< Ship
+            std::shared_ptr<Server::GameSocket> m_Socket;       ///< Socket
     };
 
 }   ///< namespace Entity

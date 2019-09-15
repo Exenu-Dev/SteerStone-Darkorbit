@@ -20,6 +20,7 @@
 #include "Packets/Server/ShipPackets.hpp"
 #include "Player.hpp"
 #include "Database/DatabaseTypes.hpp"
+#include "Diagnostic/DiaStopWatch.hpp"
 
 namespace SteerStone { namespace Game { namespace Entity {
 
@@ -70,10 +71,24 @@ namespace SteerStone { namespace Game { namespace Entity {
         m_IgnoreHostileCargo    = false;
         m_AutoChangeAmmo        = false;
         m_EnableBuyFast         = false;
+
+        m_LoggedIn              = false;
     }
     /// Deconstructor
     Player::~Player()
     {
+        /// Delete socket
+        if (m_Socket)
+        {
+            m_Socket->CloseSocket();
+            m_Socket = nullptr;
+        }
+
+        /// Empty Queue
+        Server::ClientPacket* l_Packet = nullptr;
+        while (m_RecievedQueue.Next(l_Packet))
+            delete l_Packet;
+
     }
 
     /// Load player details from database
@@ -192,6 +207,14 @@ namespace SteerStone { namespace Game { namespace Entity {
 
         SendPacket(l_Packet.Write());
     }
+    /// Send Logged In
+    void Player::SendLoggedIn()
+    {
+        m_LoggedIn = true;
+
+        Server::Packets::LoggedIn l_Packet;
+        SendPacket(l_Packet.Write());
+    }
 
     /// Get Ship
     Ship* Player::GetShip()
@@ -199,6 +222,38 @@ namespace SteerStone { namespace Game { namespace Entity {
         return &m_Ship;
     }
 
+    /// Update Player
+    /// @p_Diff         : Execution Time
+    /// @p_PacketFilter : Type of packet
+    bool Player::Update(uint32 p_Diff, Server::PacketFilter& p_PacketFilter)
+    {
+        Core::Diagnostic::StopWatch l_StopWatch;
+        l_StopWatch.Start();
+
+        Server::ClientPacket* l_ClientPacket = nullptr;
+        while (m_Socket && m_RecievedQueue.Next(l_ClientPacket, p_PacketFilter))
+        {
+            Server::OpcodeHandler const* l_OpCodeHandler = sOpCode->GetClientPacket(static_cast<ClientOpCodes>(l_ClientPacket->GetHeader()));
+            m_Socket->ExecutePacket(l_OpCodeHandler, l_ClientPacket);
+            delete l_ClientPacket;
+        }
+
+        if (!m_Socket || m_Socket->IsClosed())
+            return false;
+
+        l_StopWatch.Stop();
+        if (l_StopWatch.GetElapsed() > 20)
+            LOG_WARNING("Player", "Took more than 20ms to update Player!");
+
+        return true;
+    }
+
+    /// Queue Packet
+    /// @_ClientPacket : Packet being queued
+    void Player::QueuePacket(Server::ClientPacket* p_ClientPacket)
+    {
+        m_RecievedQueue.Add(p_ClientPacket);
+    }
     /// Send Packet
     /// @p_PacketBuffer : Packet Buffer
     void Player::SendPacket(Server::PacketBuffer const* p_PacketBuffer)

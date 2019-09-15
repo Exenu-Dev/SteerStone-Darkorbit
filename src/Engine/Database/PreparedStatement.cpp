@@ -93,8 +93,10 @@ namespace SteerStone { namespace Core { namespace Database {
     {
         if (m_Stmt->bind_result_done)
         {
-            delete[]m_Stmt->bind->length;
-            delete[]m_Stmt->bind->is_null;
+            if (m_Stmt->bind->length)
+                delete m_Stmt->bind->length;
+            if( m_Stmt->bind->is_null)
+                delete m_Stmt->bind->is_null;
         }
 
         m_Prepared = false;

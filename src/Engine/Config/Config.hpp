@@ -86,4 +86,4 @@ namespace SteerStone { namespace Core { namespace Configuration {
 }   ///< Core
 }   ///< SteerStone
 
-#define sConfig SteerStone::Core::Configuration::Base::GetSingleton()
+#define sConfigManager SteerStone::Core::Configuration::Base::GetSingleton()

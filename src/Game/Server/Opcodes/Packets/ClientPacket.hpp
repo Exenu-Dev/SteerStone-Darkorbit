@@ -55,6 +55,16 @@ namespace SteerStone { namespace Game { namespace Server {
             //////////////////////////////////////////////////////////////////////////
             //////////////////////////////////////////////////////////////////////////
 
+            /// String to UInt16
+            const uint16 ReadUInt16()
+            {
+                return static_cast<uint16>(std::stoul(m_Payload[m_ReadPosition++]));
+            }
+            /// String to Int16
+            const int16 ReadInt16()
+            {
+                return static_cast<int16>(std::stoi(m_Payload[m_ReadPosition++]));
+            }
             /// String to UInt32
             const uint32 ReadUInt32()
             {

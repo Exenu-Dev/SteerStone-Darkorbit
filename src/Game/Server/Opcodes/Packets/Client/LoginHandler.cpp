@@ -18,6 +18,7 @@
 
 #include "Socket.hpp"
 #include "Player.hpp"
+#include "World.hpp"
 
 namespace SteerStone { namespace Game { namespace Server {
 
@@ -39,6 +40,8 @@ namespace SteerStone { namespace Game { namespace Server {
             m_Player->SendInitializeShip();
             m_Player->GetShip()->SendMapUpdate();
             m_Player->GetShip()->SendAmmoUpdate();
+            m_Player->SendLoggedIn();
+            sWorldManager->AddPlayer(m_Player);
         }
 
     }

@@ -41,41 +41,62 @@ namespace SteerStone { namespace Game { namespace Entity {
     /// Holds Ammo data
     struct Ammo
     {
-    public:
-        /// Constructor
-        Ammo()
-        {
-            m_BatteryLCB10      = 0;
-            m_BatteryMCB25      = 0;
-            m_BatteryMCB50      = 0;
-            m_BatteryUCB100     = 0;
+        friend class Ship;
 
-            m_RocketR310        = 0;
-            m_RocketPLT2026     = 0;
-            m_RocketPLT2021     = 0;
+        public:
+            /// Constructor
+            Ammo()
+            {
+                m_LaserType         = 1;
+                m_BatteryLCB10      = 0;
+                m_BatteryMCB25      = 0;
+                m_BatteryMCB50      = 0;
+                m_BatteryUCB100     = 0;
+                m_BatterySAB50      = 0;
 
-            m_Mines             = 0;
-            m_SmartBombs        = 0;
-            m_InstantShields    = 0;
-        }
-        /// Deconstructor
-        ~Ammo() 
-        {
-        }
+                m_RocketType        = 0;
+                m_RocketR310        = 0;
+                m_RocketPLT2026     = 0;
+                m_RocketPLT2021     = 0;
 
-        int32 m_BatteryLCB10;
-        int32 m_BatteryMCB25;
-        int32 m_BatteryMCB50;
-        int32 m_BatteryUCB100;
-        int32 m_BatterySAB50;
+                m_Mines             = 0;
+                m_SmartBombs        = 0;
+                m_InstantShields    = 0;
+            }
+            /// Deconstructor
+            ~Ammo() 
+            {
+            }
 
-        int32 m_RocketR310;
-        int32 m_RocketPLT2026;
-        int32 m_RocketPLT2021;
+        //////////////////////////////////////////////////////////////////////////
+        //////////////////////////////////////////////////////////////////////////
 
-        int32 m_Mines;
-        int32 m_SmartBombs;
-        int32 m_InstantShields;
+            /// Set Laser Type
+            /// @p_LaserType : Laser Type
+            void SetLaserType(uint16 const p_LaserType) { m_LaserType = p_LaserType; }
+            /// Set Rocket Type
+            /// @p_RocketType : Rocket Type
+            void SetRocketType(uint16 const p_RocketType) { m_RocketType = p_RocketType; }
+
+        //////////////////////////////////////////////////////////////////////////
+        //////////////////////////////////////////////////////////////////////////
+
+        private:
+            uint16 m_LaserType;
+            int32 m_BatteryLCB10;
+            int32 m_BatteryMCB25;
+            int32 m_BatteryMCB50;
+            int32 m_BatteryUCB100;
+            int32 m_BatterySAB50;
+
+            uint16 m_RocketType;
+            int32 m_RocketR310;
+            int32 m_RocketPLT2026;
+            int32 m_RocketPLT2021;
+
+            int32 m_Mines;
+            int32 m_SmartBombs;
+            int32 m_InstantShields;
     };
 
     /// Ship Data for player class
@@ -103,6 +124,9 @@ namespace SteerStone { namespace Game { namespace Entity {
             void SendMapUpdate();
             /// Send Battery, Rocket and mine update
             void SendAmmoUpdate();
+
+            /// Get Ammo
+            Ammo* GetAmmo();
 
         //////////////////////////////////////////////////////////////////////////
         //////////////////////////////////////////////////////////////////////////

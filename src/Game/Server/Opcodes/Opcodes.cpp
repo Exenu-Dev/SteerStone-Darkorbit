@@ -17,6 +17,7 @@
 */
 
 #include "Socket.hpp"
+#include <iomanip>
 
 namespace SteerStone { namespace Game { namespace Server {
 
@@ -43,7 +44,7 @@ namespace SteerStone { namespace Game { namespace Server {
     {
         "NULL",
         PacketStatus::STATUS_UNHANDLED,
-        PacketProcess::PROCESS_NOW,
+        PacketProcess::PROCESS_PLAYER_THREAD,
         &GameSocket::HandleNULL
     };
     
@@ -51,7 +52,9 @@ namespace SteerStone { namespace Game { namespace Server {
     /// Load our packets into storages to be accessed later
     void OpCodes::InitializePackets()
     {
-        StoreClientPacket(ClientOpCodes::CLIENT_PACKET_LOGIN, "CLIENT_PACKET_LOGIN", PacketStatus::STATUS_AUTHENTICATION, PacketProcess::PROCESS_NOW, &GameSocket::HandleLogin);
+        StoreClientPacket(ClientOpCodes::CLIENT_PACKET_LOGIN,           "CLIENT_PACKET_LOGIN",              PacketStatus::STATUS_AUTHENTICATION, PacketProcess::PROCESS_PLAYER_THREAD, &GameSocket::HandleLogin        );
+        StoreClientPacket(ClientOpCodes::CLIENT_PACKET_CHANGE_LASER,    "CLIENT_PACKET_CHANGE_LASER",       PacketStatus::STATUS_LOGGED_IN,      PacketProcess::PROCESS_WORLD_THREAD,  &GameSocket::HandleChangeLaser  );
+        StoreClientPacket(ClientOpCodes::CLIENT_PACKET_CHANGE_ROCKET,   "CLIENT_PACKET_CHANGE_ROCKET",      PacketStatus::STATUS_LOGGED_IN,      PacketProcess::PROCESS_WORLD_THREAD,  &GameSocket::HandleChangeRocket );
 
         //////////////////////////////////////////////////////////////////////////
         //////////////////////////////////////////////////////////////////////////
@@ -62,6 +65,7 @@ namespace SteerStone { namespace Game { namespace Server {
         StoreServerPacket(ServerOpCodes::SERVER_PACKET_MINI_MAP_UPDATE,     "SERVER_PACKET_MINI_MAP_UPDATE",    &GameSocket::HandleServer);
         StoreServerPacket(ServerOpCodes::SERVER_PACKET_UPDATE_ROCKET_MINE,  "SERVER_PACKET_MISC_AMMO_UPDATE",   &GameSocket::HandleServer);
         StoreServerPacket(ServerOpCodes::SERVER_PACKET_UPDATE_BATTERY,      "SERVER_PACKET_UPDATE_BATTERY",     &GameSocket::HandleServer);
+        StoreServerPacket(ServerOpCodes::SERVER_PACKET_LOGGED_IN,           "SERVER_PACKET_LOGGED_IN",          &GameSocket::HandleServer);
 
         LOG_INFO("OpCodes", "Loaded %0 Client Packets", m_ClientOpCodes.size());
         LOG_INFO("OpCodes", "Loaded %0 Server Packets", m_ServerOpCodes.size());
@@ -73,7 +77,7 @@ namespace SteerStone { namespace Game { namespace Server {
     /// @p_Status : Status of Opcode
     /// @p_Process : When to process the packet
     /// @p_Handler : Handler Function which we will be accessing too
-    void OpCodes::StoreClientPacket(uint64 const p_OpCode, char const* p_Name, PacketStatus const p_Status, PacketProcess p_Process, void(GameSocket::* p_Handler)(ClientPacket* p_Packet))
+    void OpCodes::StoreClientPacket(uint8 const p_OpCode, char const* p_Name, PacketStatus const p_Status, PacketProcess p_Process, void(GameSocket::* p_Handler)(ClientPacket* p_Packet))
     {
         OpcodeHandler& l_Ref = m_ClientOpCodes[p_OpCode];
         l_Ref.Name = p_Name;
@@ -84,7 +88,7 @@ namespace SteerStone { namespace Game { namespace Server {
     /// @p_Opcode : Opcode Id
     /// @p_Name : Name of Opcode
     /// @p_Handler : Handler Function which we will be accessing too
-    void OpCodes::StoreServerPacket(uint64 const p_OpCode, char const* p_Name, void(GameSocket::* p_Handler)(ClientPacket* p_Packet))
+    void OpCodes::StoreServerPacket(uint8 const p_OpCode, char const* p_Name, void(GameSocket::* p_Handler)(ClientPacket* p_Packet))
     {
         OpcodeHandler& l_Ref = m_ServerOpCodes[p_OpCode];
         l_Ref.Name = p_Name;
@@ -93,21 +97,54 @@ namespace SteerStone { namespace Game { namespace Server {
 
     /// Get Client Packet
     /// @p_Id : Id of client packet we are searching for
-    OpcodeHandler const& OpCodes::GetClientPacket(const uint64& Id)
+    OpcodeHandler const* OpCodes::GetClientPacket(ClientOpCodes p_Id)
     {
-        auto const l_Itr = m_ClientOpCodes.find(Id);
-        if (l_Itr != m_ClientOpCodes.end())
-            return l_Itr->second;
-        return m_EmptyHandler;
+        return &m_ClientOpCodes[p_Id];
     }
     /// Get Server Packet
     /// @p_Id : Id of server packet we are searching for
-    OpcodeHandler const& OpCodes::GetServerPacket(const uint64& Id)
+    OpcodeHandler const* OpCodes::GetServerPacket(ServerOpCodes p_Id)
     {
-        auto const l_Itr = m_ServerOpCodes.find(Id);
-        if (l_Itr != m_ServerOpCodes.end())
-            return l_Itr->second;
-        return m_EmptyHandler;
+        return &m_ServerOpCodes[p_Id];
+    }
+
+    /// Get Client Opcode Name
+    std::string OpCodes::GetClientOpCodeName(ClientOpCodes p_Opcode)
+    {
+        std::ostringstream l_StringStream;
+        l_StringStream << '[';
+
+        if (static_cast<uint32>(p_Opcode) < ClientOpCodes::CLIENT_MAX_OPCODE)
+        {
+            if (OpcodeHandler const* l_Handler = GetClientPacket(p_Opcode))
+                l_StringStream << l_Handler->Name;
+            else
+                l_StringStream << "UNKNOWN OPCODE";
+        }
+        else
+            l_StringStream << "INVALID OPCODE";
+
+        l_StringStream << " (" << p_Opcode << ")]";
+        return l_StringStream.str();
+    }
+    /// Get Server Opcode Name
+    std::string OpCodes::GetServerOpCodeName(ServerOpCodes p_Opcode)
+    {
+        std::ostringstream l_StringStream;
+        l_StringStream << '[';
+
+        if (static_cast<uint32>(p_Opcode) < ClientOpCodes::CLIENT_MAX_OPCODE)
+        {
+            if (OpcodeHandler const* l_Handler = GetServerPacket(p_Opcode))
+                l_StringStream << l_Handler->Name;
+            else
+                l_StringStream << "UNKNOWN OPCODE";
+        }
+        else
+            l_StringStream << "INVALID OPCODE";
+
+        l_StringStream << " (" << p_Opcode << ")]";
+        return l_StringStream.str();
     }
 
 }   ///< namespace Packet

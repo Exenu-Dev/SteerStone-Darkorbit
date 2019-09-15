@@ -52,6 +52,13 @@ namespace SteerStone { namespace Game { namespace Server {
             //////////////////////////////////////////////////////////////////////////
             //////////////////////////////////////////////////////////////////////////
 
+            /// Handle Initial part of logging into game server
+            /// @p_Packet        : Client Packet
+            void HandleLoginPacket(ClientPacket* p_Packet);
+            /// Handle Client Packet Handler
+            /// @p_OpCodeHandler : Handler of Client Packet
+            /// @p_Packet        : Client Packet
+            void ExecutePacket(OpcodeHandler const* p_OpCodeHandler, ClientPacket* p_Packet);
             /// Send packet to client
             /// @p_PacketBuffer : Packet Buffer
             void SendPacket(const PacketBuffer* p_PacketBuffer);
@@ -59,9 +66,17 @@ namespace SteerStone { namespace Game { namespace Server {
             void HandleNULL(ClientPacket* p_Packet);
             /// For Server packets (Do not require handlers)
             void HandleServer(ClientPacket* p_Packet) {}
+
             /// Login Handler
             /// @p_ClientPacket : Packet recieved from client
             void HandleLogin(ClientPacket* p_Packet);
+
+            /// Ship Handler
+            /// @p_ClientPacket : Packet recieved from client
+            void HandleChangeLaser(ClientPacket* p_Packet);
+            /// Ship Handler
+            /// @p_ClientPacket : Packet recieved from client
+            void HandleChangeRocket(ClientPacket* p_Packet);
 
             /// Pointer to Player
             Entity::Player* ToPlayer();
@@ -75,11 +90,6 @@ namespace SteerStone { namespace Game { namespace Server {
         private:
             /// Handle incoming data
             virtual bool ProcessIncomingData() override;
-
-            /// Handle Client Packet Handler
-            /// @p_OpCodeHandler : Handler of Client Packet
-            /// @p_Packet        : Client Packet
-            void ExecutePacket(const OpcodeHandler* p_OpCodeHandler, ClientPacket* p_Packet);
 
         private:
             Entity::Player* m_Player;       ///< Player of socket

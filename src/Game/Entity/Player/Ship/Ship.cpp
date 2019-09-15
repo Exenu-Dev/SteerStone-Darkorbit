@@ -39,7 +39,7 @@ namespace SteerStone { namespace Game { namespace Entity {
         m_PositionX      = 0.0f;
         m_PositionY      = 0.0f;
         m_MapId          = 0;
-        m_MaxBattery        = 0;
+        m_MaxBattery     = 0;
         m_MaxRockets     = 0;
         m_WeaponState    = 0;
         m_UseSystemFont  = 0;
@@ -157,6 +157,12 @@ namespace SteerStone { namespace Game { namespace Entity {
         l_BatteryAmmoPacket.BatterySAB50      = m_Ammo.m_BatterySAB50;
 
         m_Player->SendPacket(l_BatteryAmmoPacket.Write());
+    }
+
+    /// Get Ammo
+    Ammo* Ship::GetAmmo()
+    {
+        return &m_Ammo;
     }
 }   ///< namespace Entity
 }   ///< namespace Game

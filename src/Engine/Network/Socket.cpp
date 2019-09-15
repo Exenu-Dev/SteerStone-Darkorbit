@@ -29,7 +29,9 @@ namespace SteerStone { namespace Core { namespace Network {
     /// @p_CloseHandler : Custom Handler to handle our function
     Socket::Socket(boost::asio::io_service& p_Service, std::function<void(Socket*)> p_CloseHandler)
         : m_WriteState(WriteState::Idle), m_ReadState(ReadState::Idle), m_Socket(p_Service),
-        m_CloseHandler(std::move(p_CloseHandler)), m_OutBufferFlushTimer(p_Service), m_Address("0.0.0.0") {}
+        m_CloseHandler(std::move(p_CloseHandler)), m_OutBufferFlushTimer(p_Service), m_Address("0.0.0.0") 
+    {
+    }
 
     //////////////////////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////////////////////
