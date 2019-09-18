@@ -140,9 +140,6 @@ namespace SteerStone { namespace Game { namespace Entity {
             uint32 m_MaxHitPoints;
             uint32 m_CargoSpace;
             uint32 m_MaxCargoSpace;
-            float m_PositionX;
-            float m_PositionY;
-            uint32 m_MapId;
             uint32 m_MaxBattery;
             uint32 m_MaxRockets;
             uint16 m_WeaponState;

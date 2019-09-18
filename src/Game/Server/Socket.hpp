@@ -18,6 +18,7 @@
 
 #pragma once
 #include "Network/Listener.hpp"
+#include "Diagnostic/DiaStopWatch.hpp"
 #include "Opcodes/Opcodes.hpp"
 #include "ServerPacket.hpp"
 
@@ -66,10 +67,15 @@ namespace SteerStone { namespace Game { namespace Server {
             void HandleNULL(ClientPacket* p_Packet);
             /// For Server packets (Do not require handlers)
             void HandleServer(ClientPacket* p_Packet) {}
+            /// For Client Packets which gets handled in ProcessIncomingData
+            void HandleClient(ClientPacket* p_Packet) {}
 
             /// Login Handler
             /// @p_ClientPacket : Packet recieved from client
             void HandleLogin(ClientPacket* p_Packet);
+            /// Ping Handler
+            /// @p_ClientPacket : Packet recieved from client
+            void HandlePing(ClientPacket* p_Packet);
 
             /// Ship Handler
             /// @p_ClientPacket : Packet recieved from client
@@ -92,7 +98,8 @@ namespace SteerStone { namespace Game { namespace Server {
             virtual bool ProcessIncomingData() override;
 
         private:
-            Entity::Player* m_Player;       ///< Player of socket
+            Entity::Player* m_Player;                       ///< Player of socket
+            Core::Diagnostic::StopWatch m_PingStopWatch;    ///< Stop Watch for Ping
     };
 
 }   ///< namespace Server

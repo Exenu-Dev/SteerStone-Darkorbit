@@ -65,7 +65,7 @@ namespace SteerStone { namespace Core { namespace Database {
         /// Free Bind Memory
         void CleanUp();
         /// Get Next Row
-        uint32 NextRow();
+        bool NextRow();
 
         PreparedStatement* m_PreparedStatement; ///< Prepare Statement
         MYSQL_RES* m_Result;                    ///< Result

@@ -112,8 +112,7 @@ namespace SteerStone { namespace Game { namespace Server {
         void AppendSplit()
         {
             std::string l_Split = "|";
-            if (std::size_t l_Length = l_Split.length())
-                Append(l_Split.c_str(), l_Length);
+            Append(l_Split.c_str(), l_Split.length());
         }
         /// Knock off last byte
         void AppendEndSplitter()
@@ -124,8 +123,7 @@ namespace SteerStone { namespace Game { namespace Server {
         void AppendCarriage()
         {
             std::string l_Carriage = "\r";
-            if (std::size_t l_Length = l_Carriage.length())
-                Append(l_Carriage.c_str(), l_Length);
+            Append(l_Carriage.c_str(), l_Carriage.length());
         }
         /// Append
         /// @p_Buffer : Append another PacketBuffer into our storage

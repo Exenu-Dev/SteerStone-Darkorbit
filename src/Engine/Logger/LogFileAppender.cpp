@@ -91,9 +91,10 @@ namespace SteerStone { namespace Core { namespace Logger {
 
         switch (p_Type)
         {
-            case LogType::Error:    l_TypeStr = "Error";    l_HTMLColor = "red";    break;
-            case LogType::Warning:  l_TypeStr = "Warning";  l_HTMLColor = "blue";   break;
             case LogType::Info:     l_TypeStr = "Info";     l_HTMLColor = "green";  break;
+            case LogType::Warning:  l_TypeStr = "Warning";  l_HTMLColor = "blue";   break;
+            case LogType::Error:    l_TypeStr = "Error";    l_HTMLColor = "red";    break;
+            case LogType::Assert:   l_TypeStr = "Assert";   l_HTMLColor = "red";  break;
             case LogType::Verbose:  l_TypeStr = "Verbose";  l_HTMLColor = "black";  break;
         }
 

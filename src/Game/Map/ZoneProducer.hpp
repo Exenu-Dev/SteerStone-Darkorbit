@@ -18,27 +18,27 @@
 
 #pragma once
 #include <PCH/Precompiled.hpp>
-#include <deque>
-#include <mutex>
+#include <condition_variable>
 #include <atomic>
+
 #include "Core/Core.hpp"
 
-namespace SteerStone { namespace Core { namespace Utils {
+namespace SteerStone { namespace Game { namespace Map {
 
-    template <typename T> class LockedQueue
+    template <typename T> class ZoneProducer
     {
-        DISALLOW_COPY_AND_ASSIGN(LockedQueue);
+        DISALLOW_COPY_AND_ASSIGN(ZoneProducer);
 
         //////////////////////////////////////////////////////////////////////////
         //////////////////////////////////////////////////////////////////////////
 
     public:
         /// Constructor
-        LockedQueue<T>() : m_ShutDown(false)
+        ZoneProducer<T>() : m_ShutDown(false)
         {}
 
         /// Deconstructor
-        ~LockedQueue<T>()
+        ~ZoneProducer<T>()
         {}
 
         //////////////////////////////////////////////////////////////////////////
@@ -47,63 +47,52 @@ namespace SteerStone { namespace Core { namespace Utils {
     public:
         /// Push object to storage
         /// @p_Value : Object we are pushing to queue
-        void Add(const T& p_Object)
+        void Push(const T& p_Object)
         {
             std::lock_guard<std::mutex> l_Guard(m_Lock);
 
-            m_Queue.push_back(std::move(p_Object));
+            m_Queue.push(std::move(p_Object));
+
+            m_Condition.notify_one();
         }
-        /// Get next result in queue
-        /// @p_Object : Object being passed to
-        bool Next(T& p_Object)
+        /// Pop
+        /// @p_Object : Object being popped to
+        bool Pop(T& p_Object)
         {
             std::lock_guard<std::mutex> l_Guard(m_Lock);
 
-            if (m_Queue.empty())
+            if (m_Queue.empty() || m_ShutDown)
                 return false;
 
             p_Object = m_Queue.front();
-            m_Queue.pop_front();
+
+            m_Queue.pop();
 
             return true;
         }
-        /// Get next result in queue
-        /// @p_Object : Object being passed to
-        /// @p_Filter : Check whether we can pass the object
-        template<typename Filter> bool Next(T& p_Object, Filter& p_Filter)
+        /// Pass access to object before removing from storage
+        /// @p_Object : Object we are accessing from storage
+        void WaitAndPop(T& p_Object)
         {
-            std::lock_guard<std::mutex> l_Guard(m_Lock);
+            std::unique_lock<std::mutex> l_Guard(m_Lock);
 
-            if (m_Queue.empty())
-                return false;
+            if (m_Queue.empty() || !m_ShutDown)
+                m_Condition.wait(l_Guard);
+
+            if (m_Queue.empty() || m_ShutDown)
+                return;
 
             p_Object = m_Queue.front();
-            if (!p_Filter.Process(p_Object))
-                return false;
 
-            m_Queue.pop_front();
-
-            return true;
+            m_Queue.pop();
         }
-
-        /// Pop Front of queue
-        void PopFront()
+        
+        /// Get Size
+        const std::size_t GetSize()
         {
             std::lock_guard<std::mutex> l_Guard(m_Lock);
-            m_Queue.pop_front();
-        }
-        /// Pop Back of queue
-        void PopBack()
-        {
-            std::lock_guard<std::mutex> l_Guard(m_Lock);
-            m_Queue.pop_back();
-        }
 
-        /// Check if queue is empty
-        bool Empty()
-        {
-            std::lock_guard<std::mutex> l_Guard(m_Lock);
-            return m_Queue.empty();
+            return m_Queue.size();
         }
 
         /// Clear storage and delete objects
@@ -121,6 +110,8 @@ namespace SteerStone { namespace Core { namespace Utils {
             }
 
             m_ShutDown = true;
+
+            m_Condition.notify_all();
         }
 
     private:
@@ -128,11 +119,12 @@ namespace SteerStone { namespace Core { namespace Utils {
         template<typename T> typename std::enable_if<std::is_pointer<T>::value>::type DeleteQueuedObject(T& p_Object) { delete p_Object; p_Object = nullptr; }
 
     private:
-        std::deque<T> m_Queue;                ///< Storage for objects
+        std::queue<T> m_Queue;                ///< Storage for objects
         std::atomic_bool m_ShutDown;          ///< Shutdown
+        std::condition_variable m_Condition;  ///< Condition
         std::mutex m_Lock;                    ///< Mutex
     };
 
-}   ///< namespace Utility
+}   ///< namespace Database
 }   ///< namespace Core
 }   ///< namespace SteerStone

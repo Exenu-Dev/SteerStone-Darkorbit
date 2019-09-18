@@ -28,11 +28,11 @@ namespace SteerStone { namespace Game { namespace Entity {
     /// @p_GameSocket : Socket
     Player::Player(Server::GameSocket* p_GameSocket) :
         m_Socket(p_GameSocket ? p_GameSocket->Shared<Server::GameSocket>() : nullptr),
+        m_GUID(GUIDType::Player),
         m_Ship(this)
     {
         m_Id                    = 0;
         m_SessionId.clear();
-        m_Username.clear();
         m_Uridium                = 0;
         m_Credits                = 0;
         m_Jackpot                = 0;
@@ -44,7 +44,6 @@ namespace SteerStone { namespace Game { namespace Entity {
         m_CompanyId              = Company::NOMAD;
         m_Rank                   = 0;
         m_Premium                = 0;
-
 
         m_DisplayBoost          = false;
         m_DisplayDamage         = false;
@@ -73,6 +72,9 @@ namespace SteerStone { namespace Game { namespace Entity {
         m_EnableBuyFast         = false;
 
         m_LoggedIn              = false;
+
+        SetObjectType(ObjectType::OBJECT_TYPE_PLAYER);
+        SetObjectGUID(ObjectGUID(GUIDType::Player));
     }
     /// Deconstructor
     Player::~Player()
@@ -88,7 +90,6 @@ namespace SteerStone { namespace Game { namespace Entity {
         Server::ClientPacket* l_Packet = nullptr;
         while (m_RecievedQueue.Next(l_Packet))
             delete l_Packet;
-
     }
 
     /// Load player details from database
@@ -107,7 +108,7 @@ namespace SteerStone { namespace Game { namespace Entity {
         {
             Core::Database::ResultSet* l_Result = l_PreparedResultSet->FetchResult();
             
-            m_Username                  = l_Result[0].GetString();
+            SetName(l_Result[0].GetString());
             m_Uridium                   = l_Result[1].GetUInt32();
             m_Credits                   = l_Result[2].GetUInt32();
             m_Jackpot                   = l_Result[3].GetUInt32();
@@ -191,7 +192,7 @@ namespace SteerStone { namespace Game { namespace Entity {
     {
         Server::Packets::InitializeShip l_Packet;
         l_Packet.Id             = m_Id;
-        l_Packet.Username       = m_Username;
+        l_Packet.Username       = GetName();
         l_Packet.CompanyId      = static_cast<uint16>(m_CompanyId);
         l_Packet.ClanId         = m_ClanId;
         l_Packet.IsPremium      = m_Premium;
@@ -241,6 +242,8 @@ namespace SteerStone { namespace Game { namespace Entity {
         if (!m_Socket || m_Socket->IsClosed())
             return false;
 
+        m_OperatorProcessor.ProcessOperators();
+
         l_StopWatch.Stop();
         if (l_StopWatch.GetElapsed() > 20)
             LOG_WARNING("Player", "Took more than 20ms to update Player!");
@@ -262,6 +265,12 @@ namespace SteerStone { namespace Game { namespace Entity {
             return;
 
         m_Socket->SendPacket(p_PacketBuffer);
+    }
+    /// Kick Player from world
+    void Player::KickPlayer()
+    {
+        if (m_Socket)
+            m_Socket->CloseSocket();
     }
 
 }   ///< namespace Entity

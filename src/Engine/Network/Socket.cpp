@@ -54,6 +54,8 @@ namespace SteerStone { namespace Core { namespace Network {
         m_InBuffer.reset(new PacketBuffer);
 
         StartAsyncRead();
+
+        return true;
     }
     /// Close our socket to stop recieving incoming packets
     void Socket::CloseSocket()
@@ -270,7 +272,6 @@ namespace SteerStone { namespace Core { namespace Network {
         else
             m_OutBuffer->m_WritePosition = 0;
 
-        std::shared_ptr<Socket> l_Ptr = Shared<Socket>();
         /// If there is any data to write, do so immediately
         if (m_OutBuffer->m_WritePosition > 0)
         {

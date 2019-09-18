@@ -28,6 +28,8 @@ namespace SteerStone { namespace Game { namespace Server {
         : Socket(p_Service, std::move(p_CloseHandler))
     {
         m_Player = nullptr;
+
+        m_PingStopWatch.Start();
     }
 
     //////////////////////////////////////////////////////////////////////////
@@ -61,6 +63,12 @@ namespace SteerStone { namespace Game { namespace Server {
                     HandleLoginPacket(new ClientPacket((char*)& l_BufferVec[0]));
                 }
                 break;
+                case ClientOpCodes::CLIENT_PACKET_PING:
+                {
+
+                    HandleLoginPacket(new ClientPacket((char*)& l_BufferVec[0]));
+                }
+                break;
                 default:
                 {
                     if (l_Opcode > ClientOpCodes::CLIENT_MAX_OPCODE)
@@ -72,7 +80,7 @@ namespace SteerStone { namespace Game { namespace Server {
                     OpcodeHandler const* l_OpCodeHandler = sOpCode->GetClientPacket(l_Opcode);
                     if (!l_OpCodeHandler)
                     {
-                        LOG_ERROR("GameSocket", "No defined handler for opcode %0 sent by %1", sOpCode->GetClientOpCodeName(l_Opcode), m_Player->GetUsername());
+                        LOG_ERROR("GameSocket", "No defined handler for opcode %0 sent by %1", sOpCode->GetClientOpCodeName(l_Opcode), GetRemoteAddress());
                         return false;
                     }
 
@@ -87,7 +95,7 @@ namespace SteerStone { namespace Game { namespace Server {
                         {
                             if (m_Player || m_Player->IsLoggedIn())
                             {
-                                LOG_WARNING("GameSocket", "Recieved opcode %0 from player %1 but player is already in world!", sOpCode->GetClientOpCodeName(l_Opcode), m_Player->GetUsername());
+                                LOG_WARNING("GameSocket", "Recieved opcode %0 from player %1 but player is already in world!", sOpCode->GetClientOpCodeName(l_Opcode), m_Player->GetName());
                                 return true;
                             }
                         }
@@ -96,9 +104,14 @@ namespace SteerStone { namespace Game { namespace Server {
                         {
                             if (!m_Player || !m_Player->IsLoggedIn())
                             {
-                                LOG_WARNING("GameSocket", "Recieved opcode %0 from player %1 but player is not in world!", sOpCode->GetClientOpCodeName(l_Opcode), m_Player->GetUsername());
+                                LOG_WARNING("GameSocket", "Recieved opcode %0 from player %1 but player is not in world!", sOpCode->GetClientOpCodeName(l_Opcode), m_Player->GetName());
                                 return true;
                             }
+                        }
+                        break;
+                        case PacketStatus::STATUS_UNHANDLED:
+                        {
+                            ;///< TODO; What should we put here
                         }
                         break;
                     }
@@ -130,6 +143,13 @@ namespace SteerStone { namespace Game { namespace Server {
         (this->*sOpCode->GetClientPacket(ClientOpCodes::CLIENT_PACKET_LOGIN)->Handler)(p_Packet);
 
         delete p_Packet;
+    }
+    /// Ping Handler
+    /// @p_ClientPacket : Packet recieved from client
+    void GameSocket::HandlePing(ClientPacket* p_Packet)
+    {
+        /// TODO; Code Ping
+        m_PingStopWatch.Reset();
     }
     /// Handle Client Packet Handler
     /// @p_OpCodeHandler : Handler of Client Packet

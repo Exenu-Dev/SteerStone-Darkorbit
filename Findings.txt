@@ -8,3 +8,31 @@ https://github.com/MuffinMario/Old-Darkorbit-Project-2009-Cpp
 ## Map Ports
 # Ports is located at DoAction(34)@385 for game server (It's an array, and all changed to port 37120)
 # And Policy server port is 843 which I cannot find in spacemap
+
+## OnStreamData(src) DoAction_32@27
+# At every begining of packet, we must add char(0) - the client knocks this off and then proceeds to read the packet
+# The client splits the string with delimter '|'
+
+## createPlayer.prototype.attachship
+# This creates the ship. Located at DoAction_30
+
+## Company
+function getPlanetIntitial(company_id)
+{
+   if(company_id == 3)
+   {
+      return "v";
+   }
+   if(company_id == 1)
+   {
+      return "m";
+   }
+   if(company_id == 2)
+   {
+      return "e";
+   }
+   if(company_id == 0)
+   {
+      return "n";
+   }
+}

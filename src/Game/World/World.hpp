@@ -36,23 +36,53 @@ namespace SteerStone { namespace Game { namespace World {
 
     class Entity::Player;
 
-    /// World
-    class World
+    enum BoolConfigs
     {
-        SINGLETON_P_D(World);
+        BOOL_CONFIG_MAX = 1
+    };
+
+    enum IntConfigs
+    {
+        INT_CONFIG_MAP_INTERVAL,
+        INT_CONFIG_CHECK_FOR_PLAYER,
+        INT_CONFIG_MAX,
+    };
+
+    enum FloatConfigs
+    {
+        FLOAT_CONFIG_MAX = 1
+    };
+
+    /// World
+    class Base
+    {
+        SINGLETON_P_D(Base);
 
         //////////////////////////////////////////////////////////////////////////
         //////////////////////////////////////////////////////////////////////////
 
         public:
+            /// Load the World
+            void Load();
+
             /// Update World
             /// @p_Diff : Execution Diff
-            void Update(uint32 p_Diff);
+            void Update(uint32 const p_Diff);
             /// Update Players
             /// @p_Diff : Execution Diff
             void UpdatePlayers(uint32 p_Diff);
             /// Stop World Updating
             bool StopWorld() const;
+
+            /// Load Configs
+            void LoadConfigs();
+
+            /// Returns bool value
+            bool GetBoolConfig(BoolConfigs p_Index);
+            /// Returns integer value
+            uint32 GetIntConfig(IntConfigs p_Index);
+            /// Returns float value
+            float GetFloatConfig(FloatConfigs p_Index);
 
             /// Add Player to queue
             /// @p_Player : Player being added
@@ -67,11 +97,15 @@ namespace SteerStone { namespace Game { namespace World {
         private:
             std::map<uint32, Entity::Player*> m_Players;                ///< Player in world
             Core::Utils::LockedQueue<Entity::Player*> m_PlayerQueue;    ///< Player in queue storage
-            static volatile bool s_StopWorld;                   ///< Stop World Updating
+            uint32 m_IntConfigs[INT_CONFIG_MAX];                        ///< Holds config settings for int
+            bool m_BoolConfigs[BOOL_CONFIG_MAX];                        ///< Holds config settings for bool
+            float m_FloatConfigs[FLOAT_CONFIG_MAX];                     ///< Holds config settings for float
+
+            static volatile bool s_StopWorld;                           ///< Stop World Updating
     };
 
 }   ///< namespace World
 }   ///< namespace Game
 }   ///< namespace Steerstone
 
-#define sWorldManager SteerStone::Game::World::World::GetSingleton()
+#define sWorldManager SteerStone::Game::World::Base::GetSingleton()

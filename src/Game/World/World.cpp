@@ -16,25 +16,24 @@
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "Packets/Server/LoginPackets.hpp"
-#include "Packets/Server/ShipPackets.hpp"
 #include "World.hpp"
 #include "Player.hpp"
-#include "Database/DatabaseTypes.hpp"
+#include "ZoneManager.hpp"
+#include "Config/Config.hpp"
 
 namespace SteerStone { namespace Game { namespace World {
 
-    SINGLETON_P_I(World);
+    SINGLETON_P_I(Base);
 
     //////////////////////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////////////////////
 
     /// Constructor
-    World::World()
+    Base::Base()
     {
     }
     /// Deconstructor
-    World::~World()
+    Base::~Base()
     {
     }
 
@@ -42,21 +41,31 @@ namespace SteerStone { namespace Game { namespace World {
     //////////////////////////////////////////////////////////////////////////
 
     /// Static StopWorld
-    volatile bool World::s_StopWorld = false;
+    volatile bool Base::s_StopWorld = false;
+
+    /// Load the World
+    void Base::Load()
+    {
+        LoadConfigs();
+
+        sZoneManager->LoadMaps();
+    }
 
     /// Update World
     /// @p_Diff : Execution Diff
-    void World::Update(uint32 p_Diff)
+    void Base::Update(uint32 const p_Diff)
     {
         Entity::Player* l_Player = nullptr;
         while (m_PlayerQueue.Next(l_Player))
             ProcessPlayer(l_Player);
 
         UpdatePlayers(p_Diff);
+
+        sZoneManager->Update(p_Diff);
     }
     /// Update Players
     /// @p_Diff : Execution Diff
-    void World::UpdatePlayers(uint32 p_Diff)
+    void Base::UpdatePlayers(uint32 p_Diff)
     {
         for (auto& l_Itr = m_Players.begin(); l_Itr != m_Players.end();)
         {
@@ -76,20 +85,42 @@ namespace SteerStone { namespace Game { namespace World {
         }
     }
     /// Stop World Updating
-    bool World::StopWorld() const
+    bool Base::StopWorld() const
     {
         return s_StopWorld;
     }
 
+    void Base::LoadConfigs()
+    {
+        m_IntConfigs[IntConfigs::INT_CONFIG_MAP_INTERVAL]       = sConfigManager->GetInt("MapUpdateInterval", 0);
+        m_IntConfigs[IntConfigs::INT_CONFIG_CHECK_FOR_PLAYER]   = sConfigManager->GetInt("CheckForPlayer", 60000);
+    }
+
+    /// Returns bool value
+    bool Base::GetBoolConfig(BoolConfigs p_Index)
+    {
+        return p_Index < BOOL_CONFIG_MAX ? m_BoolConfigs[p_Index] : 0;
+    }
+    /// Returns integer value
+    uint32 Base::GetIntConfig(IntConfigs p_Index)
+    {
+        return p_Index < INT_CONFIG_MAX ? m_IntConfigs[p_Index] : 0;
+    }
+    /// Returns float value
+    float Base::GetFloatConfig(FloatConfigs p_Index)
+    {
+        return p_Index < FLOAT_CONFIG_MAX ? m_FloatConfigs[p_Index] : 0;
+    }
+
     /// Add Player to queue
     /// @p_Player : Player being added
-    void World::AddPlayer(Entity::Player* p_Player)
+    void Base::AddPlayer(Entity::Player* p_Player)
     {
         m_PlayerQueue.Add(p_Player);
     }
     /// Remove Player from world
     /// @p_Player : Player being removed
-    void World::RemovePlayer(Entity::Player* p_Player)
+    void Base::RemovePlayer(Entity::Player* p_Player)
     {
         LOG_ASSERT(p_Player, "World", "Attempted to delete player but player already is null!");
 
@@ -102,7 +133,7 @@ namespace SteerStone { namespace Game { namespace World {
     }
     /// Process Player in queue
     /// @p_Player : being processed
-    void World::ProcessPlayer(Entity::Player* p_Player)
+    void Base::ProcessPlayer(Entity::Player* p_Player)
     {
         LOG_ASSERT(p_Player, "World", "Attempted to add a nullptr player!");
 

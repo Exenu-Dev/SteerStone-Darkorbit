@@ -62,7 +62,7 @@ namespace SteerStone { namespace Core { namespace Database {
             if (p_UnSigned)
                 return FieldType::FIELD_UI64;
             else
-                return FieldType::FIELD_UI64;
+                return FieldType::FIELD_I64;
         }
         case enum_field_types::MYSQL_TYPE_FLOAT:
             return FieldType::FIELD_FLOAT;
@@ -138,10 +138,11 @@ namespace SteerStone { namespace Core { namespace Database {
         /// Constructor
         ResultSet()
         {
-            Data.Buffer = NULL;
-            Data.Type = FieldType::FIELD_NONE;
+            Data.Buffer = nullptr;
+            Data.Type   = FieldType::FIELD_NONE;
             Data.Length = 0;
-            Data.Raw = false;
+            Data.Raw    = false;
+            m_Value     = nullptr;
         }
 
         /// Deconstructor

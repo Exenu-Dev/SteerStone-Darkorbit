@@ -111,7 +111,7 @@ namespace SteerStone { namespace Core { namespace Database {
         bool l_Temp = true;
         mysql_stmt_attr_set(p_StatementHolder->m_Stmt, STMT_ATTR_UPDATE_MAX_LENGTH, &l_Temp);
 
-        if (mysql_stmt_prepare(p_StatementHolder->m_Stmt, p_StatementHolder->m_Query.c_str(), p_StatementHolder->m_Query.length()))
+        if (mysql_stmt_prepare(p_StatementHolder->m_Stmt, p_StatementHolder->m_Query.c_str(), static_cast<unsigned long>(p_StatementHolder->m_Query.length())))
         {
             LOG_ERROR("Database", "%0 on %1", mysql_error(m_Connection), p_StatementHolder->m_Query);
 

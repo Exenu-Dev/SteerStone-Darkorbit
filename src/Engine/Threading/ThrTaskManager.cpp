@@ -225,7 +225,7 @@ namespace SteerStone { namespace Core { namespace Threading {
     {
         std::lock_guard<std::recursive_mutex> l_Lock(m_Mutex);
 
-        const int32 l_TaskWorkerCount = m_InclusiveTaskWorkers.size() + m_ExclusiveTaskWorkers.size();
+        const uint32 l_TaskWorkerCount = m_InclusiveTaskWorkers.size() + m_ExclusiveTaskWorkers.size();
 
         if (p_Count == l_TaskWorkerCount)
             return;
@@ -268,8 +268,8 @@ namespace SteerStone { namespace Core { namespace Threading {
         }
         else if (p_Count > l_TaskWorkerCount)
         {
-            const std::size_t l_HardwareConcurency = std::thread::hardware_concurrency() - 1;
-            const std::size_t l_ExclusiveCount     = std::floor(p_Count * EXLUSIVE_CURRENCY_COUNT);
+            const uint32 l_HardwareConcurency = std::thread::hardware_concurrency() - 1;
+            const uint32 l_ExclusiveCount     = std::floor(p_Count * EXLUSIVE_CURRENCY_COUNT);
 
             LOG_ASSERT(l_ExclusiveCount, "ThrTaskManager", "ERROR: MONGOOSE. Please refer to SteerStone Documentation.");
 

@@ -111,8 +111,7 @@ namespace SteerStone { namespace Policy { namespace Server {
         void AppendSplit()
         {
             std::string l_Split = "|";
-            if (std::size_t l_Length = l_Split.length())
-                Append(l_Split.c_str(), l_Length);
+            Append(l_Split.c_str(), l_Split.length());
         }
         /// Knock off last byte
         void AppendEndSplitter()

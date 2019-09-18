@@ -19,6 +19,7 @@
 #include "Packets/Server/LoginPackets.hpp"
 #include "Packets/Server/ShipPackets.hpp"
 #include "Player.hpp"
+#include "ZoneManager.hpp"
 #include "Database/DatabaseTypes.hpp"
 
 namespace SteerStone { namespace Game { namespace Entity {
@@ -36,9 +37,6 @@ namespace SteerStone { namespace Game { namespace Entity {
         m_MaxHitPoints   = 0;
         m_CargoSpace     = 0;
         m_MaxCargoSpace  = 0;
-        m_PositionX      = 0.0f;
-        m_PositionY      = 0.0f;
-        m_MapId          = 0;
         m_MaxBattery     = 0;
         m_MaxRockets     = 0;
         m_WeaponState    = 0;
@@ -73,9 +71,10 @@ namespace SteerStone { namespace Game { namespace Entity {
             m_MaxHitPoints  = l_Result[5].GetUInt32();
             m_CargoSpace    = l_Result[6].GetUInt32();
             m_MaxCargoSpace = l_Result[7].GetUInt32();
-            m_PositionX     = l_Result[8].GetFloat();
-            m_PositionY     = l_Result[9].GetFloat();
-            m_MapId         = l_Result[10].GetUInt32();
+
+            m_Player->SetPosition(l_Result[8].GetFloat(), l_Result[9].GetFloat());
+            m_Player->SetMap(sZoneManager->GetMap(l_Result[10].GetUInt32()));
+
             m_MaxBattery    = l_Result[11].GetUInt32();
             m_MaxRockets    = l_Result[12].GetUInt32();
             m_WeaponState   = l_Result[13].GetUInt16();
@@ -113,9 +112,9 @@ namespace SteerStone { namespace Game { namespace Entity {
         p_Packet.m_MaxHitPoints = m_MaxHitPoints;
         p_Packet.CargoSpace     = m_CargoSpace;
         p_Packet.MaxCargoSpace  = m_MaxCargoSpace;
-        p_Packet.PositionX      = m_PositionX;
-        p_Packet.PositionY      = m_PositionY;
-        p_Packet.MapId          = m_MapId;
+        p_Packet.PositionX      = m_Player->GetPositionX();
+        p_Packet.PositionY      = m_Player->GetPositionY();
+        p_Packet.MapId          = m_Player->GetMap()->GetId();
         p_Packet.MaxBattery     = m_MaxBattery;
         p_Packet.MaxRockets     = m_MaxRockets;
         p_Packet.WeaponState    = m_WeaponState;
@@ -124,14 +123,14 @@ namespace SteerStone { namespace Game { namespace Entity {
     void Ship::SendMapUpdate()
     {
         Server::Packets::MapUpdate l_MapUpdatePacket;
-        l_MapUpdatePacket.MapId = m_MapId;
+        l_MapUpdatePacket.MapId = m_Player->GetMap()->GetId();
 
         /// TODO; Mini map seems to also update the background
         /// maybe this packet has a purpose, not sure yet
         //m_Player->SendPacket(l_MapUpdatePacket.Write());
 
         Server::Packets::MiniMapUpdate l_MiniMapUpdatePacket;
-        l_MiniMapUpdatePacket.MapId = m_MapId;
+        l_MiniMapUpdatePacket.MapId = m_Player->GetMap()->GetId();
         m_Player->SendPacket(l_MiniMapUpdatePacket.Write());
 
     }
@@ -152,7 +151,6 @@ namespace SteerStone { namespace Game { namespace Entity {
         l_BatteryAmmoPacket.BatteryLCB10      = m_Ammo.m_BatteryLCB10;
         l_BatteryAmmoPacket.BatteryMCB25      = m_Ammo.m_BatteryMCB25;
         l_BatteryAmmoPacket.BatteryMCB50      = m_Ammo.m_BatteryMCB50;
-        l_BatteryAmmoPacket.BatteryUCB100     = m_Ammo.m_BatteryUCB100;
         l_BatteryAmmoPacket.BatteryUCB100     = m_Ammo.m_BatteryUCB100;
         l_BatteryAmmoPacket.BatterySAB50      = m_Ammo.m_BatterySAB50;
 

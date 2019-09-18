@@ -55,6 +55,7 @@ namespace SteerStone { namespace Game { namespace Server {
         StoreClientPacket(ClientOpCodes::CLIENT_PACKET_LOGIN,           "CLIENT_PACKET_LOGIN",              PacketStatus::STATUS_AUTHENTICATION, PacketProcess::PROCESS_PLAYER_THREAD, &GameSocket::HandleLogin        );
         StoreClientPacket(ClientOpCodes::CLIENT_PACKET_CHANGE_LASER,    "CLIENT_PACKET_CHANGE_LASER",       PacketStatus::STATUS_LOGGED_IN,      PacketProcess::PROCESS_WORLD_THREAD,  &GameSocket::HandleChangeLaser  );
         StoreClientPacket(ClientOpCodes::CLIENT_PACKET_CHANGE_ROCKET,   "CLIENT_PACKET_CHANGE_ROCKET",      PacketStatus::STATUS_LOGGED_IN,      PacketProcess::PROCESS_WORLD_THREAD,  &GameSocket::HandleChangeRocket );
+        StoreClientPacket(ClientOpCodes::CLIENT_PACKET_PING,            "CLIENT_PACKET_PING",               PacketStatus::STATUS_LOGGED_IN,      PacketProcess::PROCESS_PLAYER_THREAD, &GameSocket::HandleClient       );
 
         //////////////////////////////////////////////////////////////////////////
         //////////////////////////////////////////////////////////////////////////

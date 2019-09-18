@@ -36,7 +36,7 @@
 #   define COLOR_RGB    39
 #   define SET_COLOR(p_Color) std::cout << "\033[" << p_Color << "m" << std::flush;
 #endif
-#define GET_COLOR(Mode) (Mode == LogType::Assert ? COLOR_RED : Mode == LogType::Error ? COLOR_RED : (Mode == LogType::Warning ? COLOR_BLUE : (Mode == LogType::Info ? COLOR_GREEN : COLOR_BASE)))
+#define GET_COLOR(Mode) ((Mode) == LogType::Assert ? COLOR_RED : (Mode) == LogType::Error ? COLOR_RED : ((Mode) == LogType::Warning ? COLOR_BLUE : ((Mode) == LogType::Info ? COLOR_GREEN : COLOR_BASE)))
 
 namespace SteerStone  { namespace Core { namespace Logger {
 

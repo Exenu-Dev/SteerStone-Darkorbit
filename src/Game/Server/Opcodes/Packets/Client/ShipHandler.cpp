@@ -30,7 +30,7 @@ namespace SteerStone { namespace Game { namespace Server {
 
         if (l_LaserType >= BatteryType::MAX_BATTERY || l_LaserType < BatteryType::BATTERY_TYPE_LCB10)
         {
-            LOG_WARNING("Ship", "Player %0 attempted to change laser type %1 but laser type is out of bounds!", m_Player->GetUsername(), l_LaserType);
+            LOG_WARNING("Ship", "Player %0 attempted to change laser type %1 but laser type is out of bounds!", m_Player->GetName(), l_LaserType);
             return;
         }
 
@@ -45,7 +45,7 @@ namespace SteerStone { namespace Game { namespace Server {
 
         if (l_RocketType >= RocketType::MAX_ROCKET || l_RocketType < RocketType::ROCKET_TYPE_R310)
         {
-            LOG_WARNING("Ship", "Player %0 attempted to change rocket type %1 but rocket type is out of bounds!", m_Player->GetUsername(), l_RocketType);
+            LOG_WARNING("Ship", "Player %0 attempted to change rocket type %1 but rocket type is out of bounds!", m_Player->GetName(), l_RocketType);
             return;
         }
 

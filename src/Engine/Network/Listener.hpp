@@ -76,7 +76,7 @@ namespace SteerStone { namespace Core { namespace Network {
             NetworkThread<T>* SelectWorker() const
             {
                 std::size_t l_MinimumSize = m_NetworkThreads.size();
-                int32 l_Index = 0;
+                std::size_t l_Index = 0;
 
                 for (std::size_t l_I = 0; l_I < m_NetworkThreads.size(); l_I++)
                 {

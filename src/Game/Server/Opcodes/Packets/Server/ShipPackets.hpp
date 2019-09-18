@@ -28,6 +28,7 @@ namespace SteerStone { namespace Game { namespace Server { namespace Packets {
         /// Constructor 
         MapUpdate() : ServerPacket(ServerOpCodes::SERVER_PACKET_MAP_UPDATE)
         {
+            MapId = 0;
         }
 
         //////////////////////////////////////////////////////////////////////////

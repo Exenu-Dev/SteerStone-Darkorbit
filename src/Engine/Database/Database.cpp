@@ -31,6 +31,7 @@ namespace SteerStone { namespace Core { namespace Database {
     /// Deconstructor
     Base::~Base()
     {
+        m_Workers.clear();
     }
 
     //////////////////////////////////////////////////////////////////////////
@@ -40,7 +41,7 @@ namespace SteerStone { namespace Core { namespace Database {
     /// @p_InfoString : Database user details; username, password, host, database, l_Port
     /// @p_PoolSize : How many pool connections database will launch
     /// @p_WorkerThreads : Amount of workers to spawn
-    uint32 Base::Start(char const* p_InfoString, uint32 p_PoolSize, uint32 p_WorkerThreads)
+    bool Base::Start(char const* p_InfoString, uint32 p_PoolSize, uint32 p_WorkerThreads)
     {
         /// Check if pool size is within our requirements
         if (p_PoolSize < MIN_CONNECTION_POOL_SIZE)

@@ -43,6 +43,7 @@ enum ClientOpCodes : uint8
     CLIENT_PACKET_LOGIN                 = 0x4C,
     CLIENT_PACKET_CHANGE_LASER          = 0x75,
     CLIENT_PACKET_CHANGE_ROCKET         = 0x64,
+    CLIENT_PACKET_PING                  = 0x50,
     CLIENT_MAX_OPCODE                   = 0x7A
 };
 

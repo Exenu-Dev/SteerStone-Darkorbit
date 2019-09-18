@@ -24,8 +24,10 @@ namespace SteerStone { namespace Core { namespace Diagnostic {
 
     /// Constructor
     StopWatch::StopWatch()
-        : m_Start(std::chrono::steady_clock::now()), m_Elapsed(0)
+        : m_Start(std::chrono::steady_clock::now())
     {
+        m_Elapsed = 0;
+        m_Running = true;
         Reset();
     }
 

@@ -61,7 +61,7 @@ namespace SteerStone { namespace Core { namespace Database {
         {
             m_PrepareError = true;
 
-            LOG_ASSERT(!m_PrepareError, "Database", "Failed in Preparing Statement!");
+            LOG_ASSERT(false, "Database", "Failed in Preparing Statement!");
         }
     }
     /// ExecuteStatement
@@ -119,7 +119,7 @@ namespace SteerStone { namespace Core { namespace Database {
     {
         if (m_Prepared)
         {
-            LOG_ASSERT(m_Prepared, "Database", "Trying to prepare a statement but statement is already in use!");
+            LOG_ASSERT(false, "Database", "Trying to prepare a statement but statement is already in use!");
             return true;
         }
 

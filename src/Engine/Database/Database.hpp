@@ -42,7 +42,7 @@ namespace SteerStone { namespace Core { namespace Database {
         /// @p_InfoString : Database user details; username, password, host, database, l_Port
         /// @p_PoolSize : How many pool connections database will launch
         /// @p_WorkerThreads : Amount of workers to spawn
-        uint32 Start(char const* p_InfoString, uint32 p_PoolSize, uint32 p_WorkerThreads);
+        bool Start(char const* p_InfoString, uint32 p_PoolSize, uint32 p_WorkerThreads);
 
         /// Returns a Prepare Statement from Pool
         PreparedStatement* GetPrepareStatement();

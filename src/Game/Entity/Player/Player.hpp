@@ -22,7 +22,8 @@
 #include "Core/Core.hpp"
 #include "Socket.hpp"
 #include "Ship/Ship.hpp"
-
+#include "Unit/Unit.hpp"
+#include "Database/OperatorProcessor.hpp"
 #include "Utility/UtiLockedQueue.hpp"
 
 namespace SteerStone { namespace Game { namespace Entity {
@@ -30,7 +31,7 @@ namespace SteerStone { namespace Game { namespace Entity {
     class Server::ClientPacket;
 
     /// Main entry for session in world
-    class Player
+    class Player : public Unit
     {
         DISALLOW_COPY_AND_ASSIGN(Player);
 
@@ -44,7 +45,7 @@ namespace SteerStone { namespace Game { namespace Entity {
             /// @p_GameSocket : Socket
             Player(Server::GameSocket* p_GameSocket);
             /// Deconstructor
-            ~Player();
+            virtual ~Player();
 
         //////////////////////////////////////////////////////////////////////////
         //////////////////////////////////////////////////////////////////////////
@@ -73,11 +74,12 @@ namespace SteerStone { namespace Game { namespace Entity {
             /// Send Packet
             /// @p_PacketBuffer : Packet Buffer
             void SendPacket(Server::PacketBuffer const* p_PacketBuffer);
+            /// Kick Player from world
+            void KickPlayer();
 
             /// Stored Player Info Getters
             uint32 GetId()             const     { return m_Id;             }
             std::string GetSessionId() const     { return m_SessionId;      }
-            std::string GetUsername()  const     { return m_Username;       }
             uint32 GetUridium()        const     { return m_Uridium;        }
             uint32 GetCredits()        const     { return m_Credits;        }
             uint32 GetJackPot()        const     { return m_Jackpot;        }
@@ -88,14 +90,15 @@ namespace SteerStone { namespace Game { namespace Entity {
             Company GetCompany()       const     { return m_CompanyId;      }
             bool IsPremium()           const     { return m_Premium;        }
             bool IsLoggedIn()          const     { return m_LoggedIn;       }
+
         //////////////////////////////////////////////////////////////////////////
         //////////////////////////////////////////////////////////////////////////
 
         private:
             /// Stored Player Info
             uint32 m_Id;
+            ObjectGUID m_GUID;
             std::string m_SessionId;
-            std::string m_Username;
             uint32 m_Uridium;
             uint32 m_Credits;
             uint32 m_Jackpot;
@@ -138,8 +141,9 @@ namespace SteerStone { namespace Game { namespace Entity {
             bool m_LoggedIn;
 
             Core::Utils::LockedQueue<Server::ClientPacket*> m_RecievedQueue; ///< Packets
-            Ship m_Ship;                                        ///< Ship
-            std::shared_ptr<Server::GameSocket> m_Socket;       ///< Socket
+            Ship m_Ship;                                                     ///< Ship
+            std::shared_ptr<Server::GameSocket> m_Socket;                    ///< Socket
+            Core::Database::OperatorProcessor m_OperatorProcessor;           ///< Process Asynchronous Queries
     };
 
 }   ///< namespace Entity

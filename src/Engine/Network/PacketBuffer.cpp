@@ -62,7 +62,8 @@ namespace SteerStone { namespace Core { namespace Network {
     void PacketBuffer::TerminateBuffer()
     {
         m_WritePosition++;
-        m_Buffer[0] + '\0';
+        m_Buffer.resize(m_Buffer.size() + 1);
+        m_Buffer[m_Buffer.size() - 1] = 0;
     }
 
     /// Get the total read length of the packet

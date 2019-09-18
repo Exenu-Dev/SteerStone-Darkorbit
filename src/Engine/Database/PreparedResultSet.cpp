@@ -57,9 +57,9 @@ namespace SteerStone { namespace Core { namespace Database {
         m_RowCount = mysql_stmt_num_rows(m_PreparedStatement->GetStatement());
 
         std::size_t l_SizeType = 0;
-        for (uint32 l_I = 0; l_I < m_FieldCount; l_I++)
+        for (std::size_t l_I = 0; l_I < m_FieldCount; l_I++)
         {
-            uint32 l_Size = SizeForType(&m_Fields[l_I]);
+            std::size_t l_Size = SizeForType(&m_Fields[l_I]);
             l_SizeType += l_Size;
 
             m_Bind[l_I].buffer_type = m_Fields[l_I].type;
@@ -72,7 +72,7 @@ namespace SteerStone { namespace Core { namespace Database {
 
         /// m_Bind handles the deletion of the buffer
         char* l_DataBuffer = new char[l_SizeType * m_RowCount];
-        for (uint32 l_I = 0, l_Offset = 0; l_I < m_FieldCount; l_I++)
+        for (std::size_t l_I = 0, l_Offset = 0; l_I < m_FieldCount; l_I++)
         {
             m_Bind[l_I].buffer = l_DataBuffer + l_Offset;
             l_Offset += m_Bind[l_I].buffer_length;
@@ -92,7 +92,7 @@ namespace SteerStone { namespace Core { namespace Database {
         m_Results.resize(uint32(m_RowCount) * m_FieldCount);
         while (NextRow())
         {
-            for (uint32 l_I = 0; l_I < m_FieldCount; ++l_I)
+            for (std::size_t l_I = 0; l_I < m_FieldCount; ++l_I)
             {
                 unsigned long l_BufferLength = m_Bind[l_I].buffer_length;
                 unsigned long l_FetchedLength = *m_Bind[l_I].length;
@@ -195,7 +195,7 @@ namespace SteerStone { namespace Core { namespace Database {
         m_PreparedStatement->Clear();
     }
     /// Get Next Row
-    uint32 PreparedResultSet::NextRow()
+    bool PreparedResultSet::NextRow()
     {
         if (m_RowPosition >= m_RowCount)
             return false;
