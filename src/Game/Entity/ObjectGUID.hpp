@@ -103,6 +103,11 @@ namespace SteerStone { namespace Game { namespace Entity {
         {
             return uint32(m_GUID & uint64(0x00000000FFFFFFFF));
         }
+        /// Get GUID
+        uint64 GetGUID() const
+        {
+            return m_GUID;
+        }
 
         /// Is Player
         bool IsPlayer() const { return !IsEmpty() && GetType() == GUIDType::Player; }

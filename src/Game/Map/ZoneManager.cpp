@@ -111,6 +111,8 @@ namespace SteerStone { namespace Game { namespace Map {
                 return l_Map;
         }
 
+        LOG_ASSERT(false, "MapManager", "Map Id: %0 does not exist", p_Id);
+
         return nullptr;
     }
 
@@ -123,9 +125,7 @@ namespace SteerStone { namespace Game { namespace Map {
             return;
 
         for (auto l_Itr : m_Zones)
-        {
             l_Itr.second->ScheduleUpdate(p_Diff);
-        }
     }
 
 }   ///< namespace Map

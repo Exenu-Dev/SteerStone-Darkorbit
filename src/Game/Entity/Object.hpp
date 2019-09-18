@@ -67,6 +67,8 @@ namespace SteerStone { namespace Game { namespace Entity {
         void SetObjectGUID(ObjectGUID& p_ObjectGUID);
         /// Return Object GUID
         const ObjectGUID* GetObjectGUID();
+        /// Returns Object GUID
+        uint64 GetGUID() const;
 
         /// Set Map for Object
         void SetMap(Map::Base* p_Map);

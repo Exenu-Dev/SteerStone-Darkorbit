@@ -72,11 +72,16 @@ namespace SteerStone { namespace Game { namespace Entity {
     {
         return &m_ObjectGUID;
     }
+    /// Returns Object GUID
+    uint64 Object::GetGUID() const
+    {
+        return m_ObjectGUID.GetGUID();
+    }
 
     /// Set Map for Object
     void Object::SetMap(Map::Base* p_Map)
     {
-        LOG_ASSERT(p_Map, "Object", "Attempted to assign Object Map to nullptr! for Object %0", GetObjectGUID()->GetCounter());
+        LOG_ASSERT(p_Map, "Object", "Attempted to assign Object Map to nullptr! for Object %0", GetGUID());
 
         m_Map = p_Map;
     }

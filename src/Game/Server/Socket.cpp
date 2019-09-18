@@ -65,8 +65,7 @@ namespace SteerStone { namespace Game { namespace Server {
                 break;
                 case ClientOpCodes::CLIENT_PACKET_PING:
                 {
-
-                    HandleLoginPacket(new ClientPacket((char*)& l_BufferVec[0]));
+                    HandlePingPacket(new ClientPacket((char*)& l_BufferVec[0]));
                 }
                 break;
                 default:
@@ -146,7 +145,7 @@ namespace SteerStone { namespace Game { namespace Server {
     }
     /// Ping Handler
     /// @p_ClientPacket : Packet recieved from client
-    void GameSocket::HandlePing(ClientPacket* p_Packet)
+    void GameSocket::HandlePingPacket(ClientPacket* p_Packet)
     {
         /// TODO; Code Ping
         m_PingStopWatch.Reset();

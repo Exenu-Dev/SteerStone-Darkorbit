@@ -75,7 +75,7 @@ namespace SteerStone { namespace Game { namespace Server {
             void HandleLogin(ClientPacket* p_Packet);
             /// Ping Handler
             /// @p_ClientPacket : Packet recieved from client
-            void HandlePing(ClientPacket* p_Packet);
+            void HandlePingPacket(ClientPacket* p_Packet);
 
             /// Ship Handler
             /// @p_ClientPacket : Packet recieved from client

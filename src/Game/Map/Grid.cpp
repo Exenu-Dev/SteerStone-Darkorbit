@@ -48,14 +48,14 @@ namespace SteerStone { namespace Game { namespace Map {
     {
         std::lock_guard<std::mutex> l_Guard(m_Mutex);
 
-        m_Objects[p_Object->GetObjectGUID()->GetCounter()] = p_Object;
+        m_Objects[p_Object->GetGUID()] = p_Object;
 
         /// If a player is joining then set grid to active
         if (p_Object->GetObjectType() == Entity::ObjectType::OBJECT_TYPE_PLAYER)
             if (m_State == State::Idle)
                 m_State = State::Active;
 
-        LOG_INFO("Grid", "Added GUID: %0 to Grid: X %1 Y %2", p_Object->GetObjectGUID()->GetCounter(), m_GridX, m_GridY);
+        LOG_INFO("Grid", "Added GUID: %0 to Grid: X %1 Y %2", p_Object->GetGUID(), m_GridX, m_GridY);
     }
     /// Remove Object from Grid
     /// @p_Object : Object being removed
@@ -63,14 +63,7 @@ namespace SteerStone { namespace Game { namespace Map {
     {
         std::lock_guard<std::mutex> l_Guard(m_Mutex);
 
-        auto l_Itr = m_Objects.find(p_Object->GetObjectGUID()->GetCounter());
-        if (l_Itr != m_Objects.end())
-        {
-            LOG_INFO("Grid", "Removed GUID: %0 from Grid: X %1 Y %2", p_Object->GetObjectGUID()->GetCounter(), m_GridX, m_GridY);
-            m_Objects.erase(l_Itr);
-        }
-        else
-            LOG_WARNING("Grid", "Attempted to remove Object %0 from grid, but object does not exist!", p_Object->GetName());
+        m_Objects.erase(p_Object->GetGUID());
     }
 
     /// Get State of Grid
