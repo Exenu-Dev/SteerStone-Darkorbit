@@ -84,7 +84,6 @@ namespace SteerStone { namespace Core { namespace Database {
                 return std::move(l_PreparedResultSet);
         }
 
-        m_MYSQLPreparedStatement->GetDatabase()->FreePrepareStatement(this);
         return nullptr;
     }
 
