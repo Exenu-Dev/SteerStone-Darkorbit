@@ -40,15 +40,19 @@ namespace SteerStone { namespace Core { namespace Diagnostic {
         /// @p_Diff : Execution Time
         void Update(uint32 const p_Diff)
         {
-            m_Current -= p_Diff;
-            if (m_Current < 0)
-                m_Current = 0;
+            m_Current += p_Diff;
         }
 
         /// Has Time passed
         bool Passed()
         {
-            return m_Current >= m_Interval;
+            if (m_Current >= m_Interval)
+            {
+                m_Current = 0;
+                return true;
+            }
+
+            return false;
         }
 
         /// Set Inverval
