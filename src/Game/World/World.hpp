@@ -90,6 +90,9 @@ namespace SteerStone { namespace Game { namespace World {
             /// Remove Player from world
             /// @p_Player : Player being removed
             void RemovePlayer(Entity::Player* p_Player);
+            /// Return Player in world
+            /// @p_Id : Id of player
+            Entity::Player* FindPlayer(uint32 const p_Id);
             /// Process Player in queue
             /// @p_Player : being processed
             void ProcessPlayer(Entity::Player* p_Player);

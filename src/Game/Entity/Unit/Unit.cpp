@@ -24,10 +24,8 @@ namespace SteerStone { namespace Game { namespace Entity {
     /// Constructor
     Unit::Unit()
     {
-        SetObjectType(ObjectType::OBJECT_TYPE_NPC);
-        SetObjectGUID(ObjectGUID(GUIDType::NPC));
-
-        m_MapId = 0;
+        SetType(Type::OBJECT_TYPE_NPC);
+        SetGUID(ObjectGUID(GUIDType::NPC));
     }
     /// Deconstructor
     Unit::~Unit()

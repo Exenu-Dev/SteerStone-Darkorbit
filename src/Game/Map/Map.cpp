@@ -48,8 +48,8 @@ namespace SteerStone { namespace Game { namespace Map {
     std::tuple<uint32, uint32> Base::CalculateGridByPosition(Entity::Object* p_Object)
     {
         /// We need to calculate which grid the player will be in
-        float l_PositionX = p_Object->GetPositionX();
-        float l_PositionY = p_Object->GetPositionY();
+        float l_PositionX = p_Object->GetSpline()->GetPositionX();
+        float l_PositionY = p_Object->GetSpline()->GetPositionY();
         uint32 l_PositionOffset = (l_PositionX + l_PositionY) / GRID_SEARCH_RADIUS;
 
         /// This is a quicker way of determining we are inside the 64 grid range
@@ -82,21 +82,88 @@ namespace SteerStone { namespace Game { namespace Map {
         return std::make_tuple(static_cast<uint32>(l_GridX), static_cast<uint32>(l_GridY));
     }
 
+    /// Calculate Grid By Object Position
+    /// @p_Object : Object
+    /// @p_PositionX : X Axis
+    /// @p_PositionY : Y Axis
+    std::tuple<uint32, uint32> Base::CalculateGridByNewPosition(Entity::Object* p_Object, float const p_PositionX, float const p_PositionY)
+    {
+        /// We need to calculate which grid the player will be in
+        float l_PositionX = p_PositionX;
+        float l_PositionY = p_PositionY;
+        int32 l_PositionOffset = (l_PositionX + l_PositionY) / GRID_SEARCH_RADIUS;
+
+        /// This is a quicker way of determining we are inside the 64 grid range
+        if (l_PositionOffset > MAX_GRIDS)
+        {
+            LOG_WARNING("Map", "Attempted to add Player %0 to grid but grid is larger than max grid! kicking player!", p_Object->ToPlayer()->GetName());
+            p_Object->ToPlayer()->KickPlayer();
+            return std::make_tuple(0, 0); ///< To make compiler happy
+        }
+
+        /// Now grab the Grid X and Grid Y index
+        float l_GridX = l_PositionX / GRID_SEARCH_RADIUS;
+        l_GridX = std::ceil(((l_GridX / MAX_GRIDS) * 10)) - 1;
+
+        /// The width is bigger than the height
+        /// Map Size is 21000x14100, so we need to cut the search radius in half to get the index we are looking for
+        float l_GridY = l_PositionY / GRID_SEARCH_RADIUS_HALFED;
+        l_GridY = std::floor((l_GridY / MAX_GRIDS * 10)) - 1;
+
+        if (l_GridX < 1)
+            l_GridX = 0;
+
+        if (l_GridY < 1)
+            l_GridY = 0;
+
+        /// Is our grid out of bounds?
+        if (l_GridX > GRID_CELLS - 1 || l_GridY > GRID_CELLS - 1) ///< Grid starts from 0
+            LOG_ASSERT(false, "Map", "Grid X or Y is larger than Grid Cells! Grid X: %0, Grid Y: %1", l_GridX, l_GridY);
+
+        return std::make_tuple(static_cast<uint32>(l_GridX), static_cast<uint32>(l_GridY));
+    }
+
     /// Add Object to map
     /// @p_Object : Object being added to map
     void Base::Add(Entity::Object* p_Object)
     {
-        std::tuple<uint32, uint32> l_GridIndex = CalculateGridByPosition(p_Object);
+        p_Object->SetGridIndex(CalculateGridByPosition(p_Object));
 
-        m_Grids[std::get<0>(l_GridIndex)][std::get<1>(l_GridIndex)]->Add(p_Object);
+        m_Grids[std::get<0>(p_Object->GetGridIndex())][std::get<1>(p_Object->GetGridIndex())]->Add(p_Object);
     }
     /// Remove Object from map
     /// @p_Object : Object being removed from map
     void Base::Remove(Entity::Object* p_Object)
     {
-        std::tuple<uint32, uint32> l_GridIndex = CalculateGridByPosition(p_Object);
+        m_Grids[std::get<0>(p_Object->GetGridIndex())][std::get<1>(p_Object->GetGridIndex())]->Remove(p_Object);
+    }
 
-        m_Grids[std::get<0>(l_GridIndex)][std::get<1>(l_GridIndex)]->Remove(p_Object);
+    /// Move Object
+    /// @p_Object : Object being moved
+    void Base::Move(Entity::Object* p_Object)
+    {
+        std::tuple<uint32, uint32> l_GridIndex = CalculateGridByNewPosition(p_Object, p_Object->GetSpline()->GetPositionX(), p_Object->GetSpline()->GetPositionY());
+
+        /// If both indexes don't match, we've moved to a new grid
+        if (std::get<0>(l_GridIndex) != std::get<0>(p_Object->GetGridIndex()) ||
+            std::get<1>(l_GridIndex) != std::get<1>(p_Object->GetGridIndex()))
+        {
+            /// Remove old grid
+            m_Grids[std::get<0>(p_Object->GetGridIndex())][std::get<1>(p_Object->GetGridIndex())]->Remove(p_Object);
+
+            /// Add new grid
+            p_Object->SetGridIndex(l_GridIndex);
+            m_Grids[std::get<0>(p_Object->GetGridIndex())][std::get<1>(p_Object->GetGridIndex())]->Add(p_Object);
+        }
+
+        m_Grids[std::get<0>(p_Object->GetGridIndex())][std::get<1>(p_Object->GetGridIndex())]->Move(p_Object);
+    }
+
+    /// Return Grid
+    /// @p_Object : Object we are getting grid from
+    Grid* Base::GetGrid(Entity::Object const* p_Object)
+    {
+        return m_Grids[std::get<0>(p_Object->GetGridIndex())][std::get<1>(p_Object->GetGridIndex())];
     }
 
     /// Update Maps

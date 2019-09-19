@@ -80,7 +80,7 @@ namespace SteerStone  { namespace Core { namespace Logger {
         }
 
         /// Constant always true variables
-        const std::string l_Time      = GetTime();
+        const std::string l_Time      = GetServerTime();
         const std::string l_System    = "[" + p_System + "]";
         const std::string l_Message   = " << " + p_Message;
         const std::string l_LogLevel  = (p_LogType == LogType::Verbose ? "[VERBOSE]" : (p_LogType == LogType::Error) ? "[ERROR]"
@@ -117,7 +117,7 @@ namespace SteerStone  { namespace Core { namespace Logger {
     void Base::ReportAssert(std::string const& p_System, std::string_view const p_Function, int32 const p_FunctionLine, std::string const& p_Message)
     {
         /// Constant always true variables
-        const std::string l_Time = GetTime();
+        const std::string l_Time = GetServerTime();
         const std::string l_System = "[" + p_System + "]";
         const std::string l_Message = " << " + p_Message;
 
@@ -203,7 +203,7 @@ namespace SteerStone  { namespace Core { namespace Logger {
         return m_LogLevel;
     }
     /// Return current time
-    std::string Base::GetTime()
+    std::string Base::GetServerTime()
     {
         time_t l_RawTime;
         struct tm* l_TimeInfo;

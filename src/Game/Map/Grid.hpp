@@ -31,6 +31,14 @@ namespace SteerStone { namespace Game { namespace Entity {
 }   ///< namespace Game
 }   ///< namespace SteerStone
 
+namespace SteerStone { namespace Game { namespace Server {
+
+    class PacketBuffer;
+
+}   ///< namespace Server
+}   ///< namespace Game
+}   ///< namespace SteerStone
+
 namespace SteerStone { namespace Game { namespace Map {
 
     enum class State
@@ -42,6 +50,7 @@ namespace SteerStone { namespace Game { namespace Map {
 
 
     class Entity::Object;
+    class Server::PacketBuffer;
 
     /// Grid
     class Grid
@@ -69,6 +78,30 @@ namespace SteerStone { namespace Game { namespace Map {
         /// @p_Object : Object being removed
         void Remove(Entity::Object* p_Object);
 
+        /// Build Player Spawn Packet
+        /// @p_Object : Object being built
+        void BuildPlayerSpawnAndSend(Entity::Object* p_Object);
+        /// Build Player Spawn Packet
+        /// @p_ObjectBuilt : Object being built
+        /// @p_Object      : Object
+        Server::PacketBuffer const BuildPlayerSpawn(Entity::Object* p_ObjectBuilt, Entity::Object* p_Object);
+        /// Build Player Despawn Packet
+        /// @p_Object : Object being built
+        void BuildPlayerDespawnAndSend(Entity::Object* p_Object);
+
+        /// Move Object
+        /// @p_Object : Object being moved
+        void Move(Entity::Object* p_Object);
+
+        /// Find Player
+        /// @p_Id : Id of Player
+        Entity::Object* FindPlayer(uint32 const p_Id);
+
+        /// Send Packet to everyone
+        /// @p_Packet : Packing being sent
+        /// @p_Object : Send packet to self
+        void SendPacketEveryone(Server::PacketBuffer const* p_Packet, Entity::Object* p_Object = nullptr);
+
         /// Get State of Grid
         State GetState() const;
 
@@ -86,6 +119,7 @@ namespace SteerStone { namespace Game { namespace Map {
 
     private:
         std::unordered_map<uint32, Entity::Object*> m_Objects;  ///< Objects in Grid
+        std::unordered_set<Entity::Object*> m_Players;          ///< Players in Grid
         State m_State;                                          ///< Grid State
         uint32 m_GridX;                                         ///< Grid Index X
         uint32 m_GridY;                                         ///< Grid Index Y

@@ -16,6 +16,7 @@
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include "Packets/Server/MapPackets.hpp"
 #include "Grid.hpp"
 #include "Player.hpp"
 #include "World.hpp"
@@ -51,9 +52,15 @@ namespace SteerStone { namespace Game { namespace Map {
         m_Objects[p_Object->GetGUID()] = p_Object;
 
         /// If a player is joining then set grid to active
-        if (p_Object->GetObjectType() == Entity::ObjectType::OBJECT_TYPE_PLAYER)
+        if (p_Object->GetType() == Entity::Type::OBJECT_TYPE_PLAYER)
+        {
+            m_Players.insert(p_Object);
+
             if (m_State == State::Idle)
                 m_State = State::Active;
+
+            BuildPlayerSpawnAndSend(p_Object);
+        }
 
         LOG_INFO("Grid", "Added GUID: %0 to Grid: X %1 Y %2", p_Object->GetGUID(), m_GridX, m_GridY);
     }
@@ -61,9 +68,70 @@ namespace SteerStone { namespace Game { namespace Map {
     /// @p_Object : Object being removed
     void Grid::Remove(Entity::Object* p_Object)
     {
-        std::lock_guard<std::mutex> l_Guard(m_Mutex);
-
+        m_Mutex.lock();
         m_Objects.erase(p_Object->GetGUID());
+        m_Mutex.unlock();
+
+        if (p_Object->GetType() == Entity::Type::OBJECT_TYPE_PLAYER)
+        {
+            m_Mutex.lock();
+            m_Players.erase(p_Object);
+            m_Mutex.unlock();
+
+            BuildPlayerDespawnAndSend(p_Object);
+        }
+
+        LOG_INFO("Grid", "Removed GUID: %0 from Grid: X %1 Y %2", p_Object->GetGUID(), m_GridX, m_GridY);
+    }
+
+    /// Move Object
+    /// @p_Object : Object being moved
+    /// @p_PositionX : New X Axis
+    /// @p_PositionY : New Y Axis
+    void Grid::Move(Entity::Object* p_Object)
+    {
+        Server::Packets::ObjectMove l_Packet;
+        l_Packet.Id        = p_Object->ToPlayer()->GetId();
+        l_Packet.PositionX = p_Object->GetSpline()->GetPlannedPositionX();
+        l_Packet.PositionY = p_Object->GetSpline()->GetPlannedPositionY();
+        l_Packet.Time      = p_Object->GetSpline()->GetDestinationTime();
+        SendPacketEveryone(l_Packet.Write());
+    }
+
+    /// Find Player
+    /// @p_Id : Id of Player
+    Entity::Object* Grid::FindPlayer(uint32 const p_Id)
+    {
+        m_Mutex.lock();
+        std::unordered_set<Entity::Object*> l_Copy(m_Players);
+        m_Mutex.unlock();
+
+        for (auto l_Itr : l_Copy)
+        {
+            if (l_Itr->ToPlayer()->GetId() == p_Id)
+                return l_Itr;
+        }
+
+        return nullptr;
+    }
+
+    /// Send Packet to everyone
+    /// @p_Packet : Packing being sent
+    /// @p_Object : Send packet to self
+    void Grid::SendPacketEveryone(Server::PacketBuffer const* p_Packet, Entity::Object* p_Object)
+    {
+        m_Mutex.lock();
+        std::unordered_set<Entity::Object*> l_Copy(m_Players);
+        m_Mutex.unlock();
+
+        for (auto l_Itr : l_Copy)
+        {
+            if (p_Object)
+                if (p_Object->GetGUID() == l_Itr->GetGUID())
+                    continue;
+
+            l_Itr->ToPlayer()->SendPacket(p_Packet);
+        }
     }
 
     /// Get State of Grid
@@ -80,25 +148,21 @@ namespace SteerStone { namespace Game { namespace Map {
         if (!m_IntervalCheckPlayer.Passed())
             return;
 
-        for (auto l_Itr : m_Objects)
+        if (!m_Players.empty())
         {
-            /// We a player, keep the grid active
-            if (l_Itr.second->GetObjectType() == Entity::ObjectType::OBJECT_TYPE_PLAYER)
-            {
-                #ifdef STEERSTONE_CORE_DEBUG
-                    LOG_INFO("Grid", "Player found in Grid %0 %1 - Keeping grid active!", m_GridX, m_GridY);
-                #endif
-
-                return;
-            }
+            #ifdef STEERSTONE_CORE_DEBUG
+                LOG_INFO("Grid", "Player found in Grid %0 %1 - Keeping grid active!", m_GridX, m_GridY);
+            #endif
         }
+        else
+        {
+            /// We have not found a player, turn the grid to idle
+            m_State = State::Idle;
 
-        /// We have not found a player, turn the grid to idle
-        m_State = State::Idle;
-
-        #ifdef STEERSTONE_CORE_DEBUG
-            LOG_INFO("Grid", "Player not found in Grid %0 %1 - Grid is now idle!", m_GridX, m_GridY);
-        #endif
+            #ifdef STEERSTONE_CORE_DEBUG
+                LOG_INFO("Grid", "Player not found in Grid %0 %1 - Grid is now idle!", m_GridX, m_GridY);
+            #endif
+        }
     }
 
     /// Update Grid

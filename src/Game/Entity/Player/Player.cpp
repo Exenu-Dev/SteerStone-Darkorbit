@@ -41,6 +41,7 @@ namespace SteerStone { namespace Game { namespace Entity {
         m_Honor                  = 0;
         m_GatesAchieved          = 0;
         m_ClanId                 = 0;
+        m_ClanName.clear();
         m_CompanyId              = Company::NOMAD;
         m_Rank                   = 0;
         m_Premium                = 0;
@@ -73,8 +74,8 @@ namespace SteerStone { namespace Game { namespace Entity {
 
         m_LoggedIn              = false;
 
-        SetObjectType(ObjectType::OBJECT_TYPE_PLAYER);
-        SetObjectGUID(ObjectGUID(GUIDType::Player));
+        SetType(Type::OBJECT_TYPE_PLAYER);
+        SetGUID(ObjectGUID(GUIDType::Player));
     }
     /// Deconstructor
     Player::~Player()
@@ -96,7 +97,7 @@ namespace SteerStone { namespace Game { namespace Entity {
     bool Player::LoadFromDB()
     {
         Core::Database::PreparedStatement* l_PreparedStatement = GameDatabase.GetPrepareStatement();
-        l_PreparedStatement->PrepareStatement("SELECT accounts.username, accounts.uridium, accounts.credits, accounts.jackpot, accounts.level, accounts.experience, accounts.honor, accounts.gates_achieved, accounts.clan_id, accounts.company, accounts.rank, accounts.premium, "
+        l_PreparedStatement->PrepareStatement("SELECT accounts.username, accounts.uridium, accounts.credits, accounts.jackpot, accounts.level, accounts.experience, accounts.honor, accounts.gates_achieved, accounts.clan_id, accounts.clan_name, accounts.company, accounts.rank, accounts.premium, "
             "account_settings.display_boost, account_settings.display_damage, account_settings.display_all_las, account_settings.display_exploration, account_settings.display_name, account_settings.display_firm_icon, account_settings.display_alpha_bg, account_settings.ignore_res, "
             "account_settings.ignore_box, account_settings.convert_gates, account_settings.convert_oppo, account_settings.sound_off, account_settings.bg_music_off, account_settings.display_status, account_settings.display_bubble, account_settings.selected_laser, account_settings.selected_rocket, account_settings.display_digits, "
             "account_settings.display_chat, account_settings.display_drones, account_settings.show_star_system, account_settings.ignore_cargo, account_settings.ignore_hostile_cargo, account_settings.auto_change_ammo, account_settings.enable_buy_fast"
@@ -117,35 +118,36 @@ namespace SteerStone { namespace Game { namespace Entity {
             m_Honor                     = l_Result[6].GetUInt32();
             m_GatesAchieved             = l_Result[7].GetUInt16();
             m_ClanId                    = l_Result[8].GetUInt32();
-            m_CompanyId                 = static_cast<Company>(l_Result[9].GetUInt16());
-            m_Rank                      = l_Result[10].GetUInt16();
-            m_Premium                   = l_Result[11].GetBool();
+            m_ClanName                  = l_Result[9].GetString();
+            m_CompanyId                 = static_cast<Company>(l_Result[10].GetUInt16());
+            m_Rank                      = l_Result[11].GetUInt16();
+            m_Premium                   = l_Result[12].GetBool();
 
-            m_DisplayBoost              = l_Result[12].GetBool();
-            m_DisplayDamage             = l_Result[13].GetBool();
-            m_DisplayAllLas             = l_Result[14].GetBool();
-            m_DisplayExploration        = l_Result[15].GetBool();
-            m_DisplayName               = l_Result[16].GetBool();
-            m_DisplayFirmIcon           = l_Result[17].GetBool();
-            m_DisplayAlphaBG            = l_Result[18].GetBool();
-            m_IgnoreRes                 = l_Result[19].GetBool();
-            m_IgnoreBox                 = l_Result[20].GetBool();
-            m_ConvertGates              = l_Result[21].GetBool();
-            m_ConvertOppo               = l_Result[22].GetBool();
-            m_SoundOff                  = l_Result[23].GetBool();
-            m_BackgroundMusicOff        = l_Result[24].GetBool();
-            m_DisplayStatus             = l_Result[25].GetBool();
-            m_DisplayBubble             = l_Result[26].GetBool();
-            m_SelectedLaser             = l_Result[27].GetUInt32();
-            m_SelectedRocket            = l_Result[28].GetUInt32();
-            m_DisplayDigits             = l_Result[29].GetBool();
-            m_DisplayChat               = l_Result[30].GetBool();
-            m_DisplayDrones             = l_Result[31].GetBool();
-            m_ShowStarSystem            = l_Result[32].GetBool();
-            m_IgnoreCargo               = l_Result[33].GetBool();
-            m_IgnoreHostileCargo        = l_Result[34].GetBool();
-            m_AutoChangeAmmo            = l_Result[35].GetBool();
-            m_EnableBuyFast             = l_Result[36].GetBool();
+            m_DisplayBoost              = l_Result[13].GetBool();
+            m_DisplayDamage             = l_Result[14].GetBool();
+            m_DisplayAllLas             = l_Result[15].GetBool();
+            m_DisplayExploration        = l_Result[16].GetBool();
+            m_DisplayName               = l_Result[17].GetBool();
+            m_DisplayFirmIcon           = l_Result[18].GetBool();
+            m_DisplayAlphaBG            = l_Result[19].GetBool();
+            m_IgnoreRes                 = l_Result[20].GetBool();
+            m_IgnoreBox                 = l_Result[21].GetBool();
+            m_ConvertGates              = l_Result[22].GetBool();
+            m_ConvertOppo               = l_Result[23].GetBool();
+            m_SoundOff                  = l_Result[24].GetBool();
+            m_BackgroundMusicOff        = l_Result[25].GetBool();
+            m_DisplayStatus             = l_Result[26].GetBool();
+            m_DisplayBubble             = l_Result[27].GetBool();
+            m_SelectedLaser             = l_Result[28].GetUInt32();
+            m_SelectedRocket            = l_Result[29].GetUInt32();
+            m_DisplayDigits             = l_Result[30].GetBool();
+            m_DisplayChat               = l_Result[31].GetBool();
+            m_DisplayDrones             = l_Result[32].GetBool();
+            m_ShowStarSystem            = l_Result[33].GetBool();
+            m_IgnoreCargo               = l_Result[34].GetBool();
+            m_IgnoreHostileCargo        = l_Result[35].GetBool();
+            m_AutoChangeAmmo            = l_Result[36].GetBool();
+            m_EnableBuyFast             = l_Result[37].GetBool();
 
             /// Now load ship details
             m_Ship.LoadFromDB();
@@ -263,6 +265,8 @@ namespace SteerStone { namespace Game { namespace Entity {
     {
         if (!m_Socket || !p_PacketBuffer)
             return;
+
+        //LOG_INFO("Packet", "%0", (char*)& p_PacketBuffer->GetContents()[0]);
 
         m_Socket->SendPacket(p_PacketBuffer);
     }

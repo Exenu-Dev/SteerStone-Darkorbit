@@ -86,8 +86,11 @@ namespace SteerStone { namespace Game { namespace Entity {
             uint32 GetLevel()          const     { return m_Level;          }
             uint32 GetExperience()     const     { return m_Experience;     }
             uint32 GetHonor()          const     { return m_Honor;          }
+            uint16 GetGatesAchieved()  const     { return m_GatesAchieved;  }
             uint32 GetClanId()         const     { return m_ClanId;         }
+            std::string GetClanName()  const     { return m_ClanName;       }
             Company GetCompany()       const     { return m_CompanyId;      }
+            uint16 GetRank()           const     { return m_Rank;           }  
             bool IsPremium()           const     { return m_Premium;        }
             bool IsLoggedIn()          const     { return m_LoggedIn;       }
 
@@ -107,6 +110,7 @@ namespace SteerStone { namespace Game { namespace Entity {
             uint32 m_Honor;
             uint16 m_GatesAchieved;
             uint32 m_ClanId;
+            std::string m_ClanName;
             Company m_CompanyId;
             uint16 m_Rank;
             bool m_Premium;

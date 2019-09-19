@@ -30,7 +30,6 @@ namespace SteerStone { namespace Game { namespace Entity {
         : m_Player(p_Player)
     {
         m_ShipId         = PlayerShips::Phoenix;
-        m_Speed          = 0;
         m_Shield         = 0;
         m_MaxShield      = 0;
         m_HitPoints      = 0;
@@ -64,7 +63,7 @@ namespace SteerStone { namespace Game { namespace Entity {
             Core::Database::ResultSet* l_Result = l_PreparedResultSet->FetchResult();
 
             m_ShipId        = static_cast<PlayerShips>(l_Result[0].GetUInt16());
-            m_Speed         = l_Result[1].GetUInt32();
+            m_Player->GetSpline()->SetSpeed(l_Result[1].GetUInt32());
             m_Shield        = l_Result[2].GetInt32();
             m_MaxShield     = l_Result[3].GetUInt32();
             m_HitPoints     = l_Result[4].GetInt32();
@@ -72,7 +71,7 @@ namespace SteerStone { namespace Game { namespace Entity {
             m_CargoSpace    = l_Result[6].GetUInt32();
             m_MaxCargoSpace = l_Result[7].GetUInt32();
 
-            m_Player->SetPosition(l_Result[8].GetFloat(), l_Result[9].GetFloat());
+            m_Player->GetSpline()->SetPosition(l_Result[8].GetFloat(), l_Result[9].GetFloat(), l_Result[8].GetFloat(), l_Result[9].GetFloat());
             m_Player->SetMap(sZoneManager->GetMap(l_Result[10].GetUInt32()));
 
             m_MaxBattery    = l_Result[11].GetUInt32();
@@ -105,15 +104,15 @@ namespace SteerStone { namespace Game { namespace Entity {
     void Ship::FormulateInitializeShip(Server::Packets::InitializeShip& p_Packet)
     {
         p_Packet.ShipId         = static_cast<uint16>(m_ShipId);
-        p_Packet.Speed          = m_Speed;
+        p_Packet.Speed          = m_Player->GetSpline()->GetSpeed();
         p_Packet.Shield         = m_Shield;
         p_Packet.MaxShield      = m_MaxShield;
         p_Packet.HitPoints      = m_HitPoints;
         p_Packet.m_MaxHitPoints = m_MaxHitPoints;
         p_Packet.CargoSpace     = m_CargoSpace;
         p_Packet.MaxCargoSpace  = m_MaxCargoSpace;
-        p_Packet.PositionX      = m_Player->GetPositionX();
-        p_Packet.PositionY      = m_Player->GetPositionY();
+        p_Packet.PositionX      = m_Player->GetSpline()->GetPositionX();
+        p_Packet.PositionY      = m_Player->GetSpline()->GetPositionY();
         p_Packet.MapId          = m_Player->GetMap()->GetId();
         p_Packet.MaxBattery     = m_MaxBattery;
         p_Packet.MaxRockets     = m_MaxRockets;

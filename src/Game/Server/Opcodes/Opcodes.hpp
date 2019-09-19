@@ -44,6 +44,8 @@ enum ClientOpCodes : uint8
     CLIENT_PACKET_CHANGE_LASER          = 0x75,
     CLIENT_PACKET_CHANGE_ROCKET         = 0x64,
     CLIENT_PACKET_PING                  = 0x50,
+    CLIENT_PACKET_OBJECT_MOVE           = 0x31,
+    CLIENT_PACKET_INITIALIZE_PLAYER     = 0x69,
     CLIENT_MAX_OPCODE                   = 0x7A
 };
 
@@ -56,6 +58,9 @@ enum ServerOpCodes : uint8
     SERVER_PACKET_UPDATE_ROCKET_MINE    = 0x33,
     SERVER_PACKET_UPDATE_BATTERY        = 0x42,
     SERVER_PACKET_LOGGED_IN             = 0x38,
+    SERVER_PACKET_SPAWN_SHIP            = 0x43,
+    SERVER_PACKET_DESPAWN_SHIP          = 0x52,
+    SERVER_PACKET_OBJECT_MOVE           = 0x31,
     SERVER_MAX_OPCODE                   = 0x7A,
 };
 

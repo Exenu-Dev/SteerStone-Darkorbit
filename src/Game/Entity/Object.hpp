@@ -18,12 +18,13 @@
 
 #pragma once
 #include <PCH/Precompiled.hpp>
+#include "ObjectSpline.hpp"
 #include "ObjectGUID.hpp"
 #include "Map.hpp"
 
 namespace SteerStone { namespace Game { namespace Entity {
 
-    enum class ObjectType
+    enum class Type
     {
         OBJECT_TYPE_NON,
         OBJECT_TYPE_PLAYER,
@@ -51,10 +52,10 @@ namespace SteerStone { namespace Game { namespace Entity {
 
     public:
         /// Set Object Type
-        /// @p_ObjectType : Type of Object
-        void SetObjectType(ObjectType const p_ObjectType);
+        /// @p_Type : Type of Object
+        void SetType(Type const p_Type);
         /// Return Object Type
-        ObjectType GetObjectType() const;
+        Type GetType() const;
 
         /// Set Object Name
         /// @p_Name : Name of Object
@@ -64,25 +65,25 @@ namespace SteerStone { namespace Game { namespace Entity {
 
         /// Set Object GUID
         /// @p_ObjectGUID : Object GUID
-        void SetObjectGUID(ObjectGUID& p_ObjectGUID);
+        void SetGUID(ObjectGUID& p_ObjectGUID);
         /// Return Object GUID
         const ObjectGUID* GetObjectGUID();
         /// Returns Object GUID
         uint64 GetGUID() const;
+
+        /// Set Grid Index
+        /// @p_GridIndex : Grid Index
+        void SetGridIndex(std::tuple<uint32, uint32> const p_GridIndex);
+        /// Return Grid Index
+        std::tuple<uint32, uint32> GetGridIndex() const;
 
         /// Set Map for Object
         void SetMap(Map::Base* p_Map);
         /// Get Map
         Map::Base* GetMap() const;
 
-        /// Set Object Position
-        /// @p_PositionX : X
-        /// @p_PositionY : Y
-        void SetPosition(float const p_PositionX, float const p_PositionY);
-        /// Return Position X
-        float GetPositionX() const;
-        /// Return Position Y
-        float GetPositionY() const;
+        /// Returns Spline
+        Spline* GetSpline();
 
         /// To Player Class
         Player* ToPlayer();
@@ -91,13 +92,13 @@ namespace SteerStone { namespace Game { namespace Entity {
     //////////////////////////////////////////////////////////////////////////
 
     private:
-        ObjectType m_ObjectType;    ///< Object Type
-        ObjectGUID m_ObjectGUID;    ///< Object GUID
-        Map::Base* m_Map;           ///< Map
-
+        Type m_Type;
+        ObjectGUID m_ObjectGUID;
         std::string m_Name;
-        float m_PositionX;
-        float m_PositionY;
+
+        Spline m_Spline;
+        Map::Base* m_Map;
+        std::tuple<uint32, uint32> m_GridIndex;
     };
 
 }   ///< namespace Entity

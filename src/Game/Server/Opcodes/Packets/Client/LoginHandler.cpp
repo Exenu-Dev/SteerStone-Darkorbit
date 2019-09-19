@@ -45,7 +45,6 @@ namespace SteerStone { namespace Game { namespace Server {
             sWorldManager->AddPlayer(m_Player);
             sZoneManager->AddToMap(m_Player);
         }
-
     }
 
 }   ///< namespace Server

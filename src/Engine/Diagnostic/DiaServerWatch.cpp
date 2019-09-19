@@ -41,7 +41,7 @@ namespace SteerStone { namespace Core { namespace Diagnostic {
     //////////////////////////////////////////////////////////////////////////
 
     /// Get Start time when engine booted up
-    uint32 ServerTime::GetStartTime()
+    uint32 ServerTime::GetServerTime()
     {
         static const std::chrono::system_clock::time_point l_StartTime = std::chrono::system_clock::now();
         return static_cast<uint32>((std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()) - std::chrono::duration_cast<std::chrono::milliseconds>(l_StartTime.time_since_epoch())).count());
@@ -78,7 +78,7 @@ namespace SteerStone { namespace Core { namespace Diagnostic {
         m_PrevTime = m_Time;
 
         /// Get the new one and don't forget to persist current system time in m_SystemTickTime
-        m_Time = GetStartTime();
+        m_Time = GetServerTime();
 
         /// Return tick diff
         return GetTimeDifference(m_PrevTime, m_Time);

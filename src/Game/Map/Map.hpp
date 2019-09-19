@@ -56,6 +56,11 @@ namespace SteerStone { namespace Game { namespace Map {
         /// Calculate Grid By Object Position
         /// @p_Object : Object
         std::tuple<uint32, uint32> CalculateGridByPosition(Entity::Object* p_Object);
+        /// Calculate Grid By Object Position
+        /// @p_Object : Object
+        /// @p_PositionX : X Axis
+        /// @p_PositionY : Y Axis
+        std::tuple<uint32, uint32> CalculateGridByNewPosition(Entity::Object* p_Object, float const p_PositionX, float const p_PositionY);
 
         /// Add Object to map
         /// @p_Object : Object being added to map
@@ -63,6 +68,14 @@ namespace SteerStone { namespace Game { namespace Map {
         /// Remove Object from map
         /// @p_Object : Object being removed from map
         void Remove(Entity::Object* p_Object);
+
+        /// Move Object
+        /// @p_Object : Object being moved
+        void Move(Entity::Object* p_Object);
+
+        /// Return Grid
+        /// @p_Object : Object we are getting grid from
+        Grid* GetGrid(Entity::Object const* p_Object);
 
         /// Update Maps
         /// @p_Diff : Execution Time

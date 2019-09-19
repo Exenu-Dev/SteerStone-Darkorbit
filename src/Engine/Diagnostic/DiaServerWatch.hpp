@@ -36,7 +36,7 @@ namespace SteerStone { namespace Core { namespace Diagnostic {
 
         public:
             /// Get Start time when engine booted up
-            uint32 GetStartTime();
+            uint32 GetServerTime();
             /// Time Difference
             /// @p_OldMSTime : Old Time
             /// @p_NewMSTime : New Time

@@ -128,12 +128,22 @@ namespace SteerStone { namespace Game { namespace Entity {
             /// Get Ammo
             Ammo* GetAmmo();
 
+            PlayerShips GetShipId()     const { return m_ShipId;            }
+            int32 GetShield()           const { return m_Shield;            }
+            uint32 GetMaxShield()       const { return m_MaxShield;         }
+            int32 GetHitPoints()        const { return m_HitPoints;         }
+            uint32 GetHitMaxPoints()    const { return m_MaxHitPoints;      }
+            uint32 GetCargoSpace()      const { return m_CargoSpace;        }
+            uint32 GetMaxCargoSpace()   const { return m_MaxCargoSpace;     }
+            uint32 GetMaxBattery()      const { return m_MaxBattery;        }
+            uint16 GetWeaponState()     const { return m_WeaponState;       }
+            bool UseSystemFont()        const { return m_UseSystemFont;     }
+
         //////////////////////////////////////////////////////////////////////////
         //////////////////////////////////////////////////////////////////////////
 
         private:
             PlayerShips m_ShipId;
-            uint32 m_Speed;
             int32 m_Shield;
             uint32 m_MaxShield;
             int32 m_HitPoints;

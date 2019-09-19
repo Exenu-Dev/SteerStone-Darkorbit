@@ -90,7 +90,7 @@ namespace SteerStone { namespace Core { namespace Logger {
             /// Get log mode
             LogType GetLogLevel();
             /// Return current time
-            std::string GetTime();
+            std::string GetServerTime();
 
             //////////////////////////////////////////////////////////////////////////
             //////////////////////////////////////////////////////////////////////////

@@ -22,12 +22,10 @@ namespace SteerStone { namespace Game { namespace Entity {
 
     /// Constructor
     Object::Object()
+        : m_Spline(this)
     {
-        m_ObjectType    = ObjectType::OBJECT_TYPE_NON;
-
-        m_PositionX     = 0.0f;
-        m_PositionY     = 0.0f;
-        m_Map           = nullptr;
+        m_Type    = Type::OBJECT_TYPE_NON;
+        m_Map     = nullptr;
     }
     /// Deconstructor
     Object::~Object()
@@ -37,16 +35,16 @@ namespace SteerStone { namespace Game { namespace Entity {
     //////////////////////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////////////////////
 
-    /// Set Object Type
-    /// @p_ObjectType : Type of Object
-    void Object::SetObjectType(ObjectType const p_ObjectType)
+    /// Set Type
+    /// @p_Type : Type of Object
+    void Object::SetType(Type const p_Type)
     {
-        m_ObjectType = p_ObjectType;
+        m_Type = p_Type;
     }
-    /// Return Object Type
-    ObjectType Object::GetObjectType() const
+    /// Return Type
+    Type Object::GetType() const
     {
-        return m_ObjectType;
+        return m_Type;
     }
 
     /// Set Object Name
@@ -63,7 +61,7 @@ namespace SteerStone { namespace Game { namespace Entity {
 
     /// Set Object GUID
     /// @p_ObjectGUID : Object GUID
-    void Object::SetObjectGUID(ObjectGUID& p_ObjectGUID)
+    void Object::SetGUID(ObjectGUID& p_ObjectGUID)
     {
         m_ObjectGUID = p_ObjectGUID;
     }
@@ -76,6 +74,18 @@ namespace SteerStone { namespace Game { namespace Entity {
     uint64 Object::GetGUID() const
     {
         return m_ObjectGUID.GetGUID();
+    }
+
+    /// Set Grid Index
+    /// @p_GridIndex : Grid Index
+    void Object::SetGridIndex(std::tuple<uint32, uint32> const p_GridIndex)
+    {
+        m_GridIndex = p_GridIndex;
+    }
+    /// Return Grid Index
+    std::tuple<uint32, uint32> Object::GetGridIndex() const
+    {
+        return m_GridIndex;
     }
 
     /// Set Map for Object
@@ -91,29 +101,16 @@ namespace SteerStone { namespace Game { namespace Entity {
         return m_Map;
     }
 
-    /// Set Object Position
-    /// @p_PositionX : X
-    /// @p_PositionY : Y
-    void Object::SetPosition(float const p_PositionX, float const p_PositionY)
+    /// Returns Spline
+    Spline* Object::GetSpline()
     {
-        m_PositionX = p_PositionX;
-        m_PositionY = p_PositionY;
-    }
-    /// Return Position X
-    float Object::GetPositionX() const
-    {
-        return m_PositionX;
-    }
-    /// Return Position Y
-    float Object::GetPositionY() const
-    {
-        return m_PositionY;
+        return &m_Spline;
     }
 
     /// To Player Class
     Player* Object::ToPlayer()
     {
-         if (GetObjectType() == ObjectType::OBJECT_TYPE_PLAYER) 
+         if (GetType() == Type::OBJECT_TYPE_PLAYER) 
              return reinterpret_cast<Player*>(this);
 
          return nullptr;

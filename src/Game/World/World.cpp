@@ -131,6 +131,16 @@ namespace SteerStone { namespace Game { namespace World {
         delete p_Player;
         p_Player = nullptr;
     }
+    /// Return Player in world
+    /// @p_Id : Id of player
+    Entity::Player* Base::FindPlayer(uint32 const p_Id)
+    {
+        auto l_Itr = m_Players.find(p_Id);
+        if (l_Itr != m_Players.end())
+            return l_Itr->second;
+
+        return nullptr;
+    }
     /// Process Player in queue
     /// @p_Player : being processed
     void Base::ProcessPlayer(Entity::Player* p_Player)
