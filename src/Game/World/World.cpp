@@ -90,10 +90,12 @@ namespace SteerStone { namespace Game { namespace World {
         return s_StopWorld;
     }
 
+    /// Load Configs
     void Base::LoadConfigs()
     {
-        m_IntConfigs[IntConfigs::INT_CONFIG_MAP_INTERVAL]       = sConfigManager->GetInt("MapUpdateInterval", 0);
-        m_IntConfigs[IntConfigs::INT_CONFIG_CHECK_FOR_PLAYER]   = sConfigManager->GetInt("CheckForPlayer", 60000);
+        m_IntConfigs[IntConfigs::INT_CONFIG_MAP_INTERVAL]                 = sConfigManager->GetInt("MapUpdateInterval", 0);
+        m_IntConfigs[IntConfigs::INT_CONFIG_CHECK_FOR_PLAYER]             = sConfigManager->GetInt("CheckForPlayer", 60000);
+        m_IntConfigs[IntConfigs::INT_CONFIG_CHECK_FOR_INTERACTIVE_EVENTS] = sConfigManager->GetInt("CheckForInteractiveEvents", 5000);
     }
 
     /// Returns bool value

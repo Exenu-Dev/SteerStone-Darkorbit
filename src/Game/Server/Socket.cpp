@@ -70,11 +70,13 @@ namespace SteerStone { namespace Game { namespace Server {
                 break;
                 default:
                 {
-                    if (l_Opcode > ClientOpCodes::CLIENT_MAX_OPCODE)
-                    {
-                        LOG_WARNING("GameSocket", "Recieved opcode %0 which is larger than max opcode! closing socket!", l_Opcode);
-                        return false;
-                    }
+                    #ifndef HEADLESS_DEBUG
+                        if (l_Opcode > ClientOpCodes::CLIENT_MAX_OPCODE)
+                        {
+                            LOG_WARNING("GameSocket", "Recieved opcode %0 which is larger than max opcode! closing socket!", l_Opcode);
+                            return false;
+                        }
+                    #endif
 
                     OpcodeHandler const* l_OpCodeHandler = sOpCode->GetClientPacket(l_Opcode);
                     if (!l_OpCodeHandler)

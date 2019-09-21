@@ -16,8 +16,11 @@
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include "Packets/Server/DebugPackets.hpp"
 #include "Packets/Server/MapPackets.hpp"
 #include "Grid.hpp"
+#include "Portal.hpp"
+#include "Station.hpp"
 #include "Player.hpp"
 #include "World.hpp"
 #include "Database/DatabaseTypes.hpp"
@@ -34,6 +37,7 @@ namespace SteerStone { namespace Game { namespace Map {
         m_State = State::Active;
 
         m_IntervalCheckPlayer.SetInterval(sWorldManager->GetIntConfig(World::IntConfigs::INT_CONFIG_CHECK_FOR_PLAYER));
+        m_IntervalInteractiveEvents.SetInterval(sWorldManager->GetIntConfig(World::IntConfigs::INT_CONFIG_CHECK_FOR_INTERACTIVE_EVENTS));
     }
     /// Deconstructor
     Grid::~Grid()
@@ -82,6 +86,25 @@ namespace SteerStone { namespace Game { namespace Map {
         }
 
         LOG_INFO("Grid", "Removed GUID: %0 from Grid: X %1 Y %2", p_Object->GetGUID(), m_GridX, m_GridY);
+    }
+
+    /// Check if near portal
+    /// @p_Object : Object being checked
+    Entity::Portal* Grid::CanJumpPortal(Entity::Object* p_Object)
+    {
+        m_Mutex.lock();
+        std::unordered_map<uint32, Entity::Object*> l_Copy(m_Objects);
+        m_Mutex.unlock();
+
+        for (auto l_Itr : l_Copy)
+        {
+            if (l_Itr.second->GetType() == Entity::Type::OBJECT_TYPE_PORTAL)
+            {
+                if (l_Itr.second->ToPortal()->IsInPortalRadius(p_Object))
+                    return l_Itr.second->ToPortal();
+            }
+        }
+        return nullptr;
     }
 
     /// Move Object
@@ -140,7 +163,7 @@ namespace SteerStone { namespace Game { namespace Map {
         return m_State;
     }
 
-    /// Check if a player is inside the grid
+    /// Check if a Player is inside the grid
     /// @p_Diff : Execution Time
     void Grid::CheckForPlayer(uint32 const p_Diff)
     {
@@ -165,6 +188,85 @@ namespace SteerStone { namespace Game { namespace Map {
         }
     }
 
+    /// Check if Player is near any interactive events
+    /// @p_Diff : Execution Time
+    void Grid::UpdateInteractiveEvents(uint32 const p_Diff)
+    {
+        m_IntervalInteractiveEvents.Update(p_Diff);
+        if (!m_IntervalInteractiveEvents.Passed())
+            return;
+
+        /// TODO; Optimize this code
+        for (auto l_Itr : m_Players)
+        {
+            for (auto l_SecondItr : m_Objects)
+            {
+                if (l_SecondItr.second->GetType() == Entity::Type::OBJECT_TYPE_PORTAL)
+                {
+                    if (l_Itr->ToPlayer()->GetEvent() == EventType::EVENT_TYPE_PORTAL)
+                        continue;
+
+                    if (l_SecondItr.second->ToPortal()->IsInPortalRadius(l_Itr))
+                    {
+                        Server::Packets::Event l_Packet;
+                        l_Packet.PositionX           = l_Itr->GetSpline()->GetPositionX();
+                        l_Packet.PositionY           = l_Itr->GetSpline()->GetPositionY();
+                        l_Packet.InDemolitionZone    = false;
+                        l_Packet.InRadiationZone     = false;
+                        l_Packet.PlayRepairAnimation = false;
+                        l_Packet.InTradeZone         = false;
+                        l_Packet.InJumpZone          = true;
+                        l_Packet.Repair              = false;
+                        l_Itr->ToPlayer()->SendPacket(l_Packet.Write());
+
+                        l_Itr->ToPlayer()->SetEventType(EventType::EVENT_TYPE_PORTAL);
+                        break;
+                    }
+                }
+                else if (l_SecondItr.second->GetType() == Entity::Type::OBJECT_TYPE_STATION)
+                {
+                    if (l_Itr->ToPlayer()->GetEvent() == EventType::EVENT_TYPE_STATION)
+                        continue;
+
+                    if (l_SecondItr.second->ToStation()->IsInStationRadius(l_Itr))
+                    {
+                        Server::Packets::Event l_Packet;
+                        l_Packet.PositionX           = l_Itr->GetSpline()->GetPositionX();
+                        l_Packet.PositionY           = l_Itr->GetSpline()->GetPositionY();
+                        l_Packet.InDemolitionZone    = false;
+                        l_Packet.InRadiationZone     = false;
+                        l_Packet.PlayRepairAnimation = false;
+                        l_Packet.InTradeZone         = true;
+                        l_Packet.InJumpZone          = false;
+                        l_Packet.Repair              = false;
+                        l_Itr->ToPlayer()->SendPacket(l_Packet.Write());
+
+                        l_Itr->ToPlayer()->SetEventType(EventType::EVENT_TYPE_STATION);
+                        break;
+                    }
+                }
+                else
+                {
+                    if (l_Itr->ToPlayer()->GetEvent() == EventType::EVENT_TYPE_NONE)
+                        return;
+
+                    Server::Packets::Event l_Packet;
+                    l_Packet.PositionX           = l_Itr->GetSpline()->GetPositionX();
+                    l_Packet.PositionY           = l_Itr->GetSpline()->GetPositionY();
+                    l_Packet.InDemolitionZone    = false;
+                    l_Packet.InRadiationZone     = false;
+                    l_Packet.PlayRepairAnimation = false;
+                    l_Packet.InTradeZone         = false;
+                    l_Packet.InJumpZone          = false;
+                    l_Packet.Repair              = false;
+                    l_Itr->ToPlayer()->SendPacket(l_Packet.Write());
+
+                    l_Itr->ToPlayer()->SetEventType(EventType::EVENT_TYPE_NONE);
+                }
+            }
+        }
+    }
+
     /// Update Grid
     /// @p_Diff : Execution Time
     bool Grid::Update(uint32 const p_Diff)
@@ -172,6 +274,7 @@ namespace SteerStone { namespace Game { namespace Map {
         std::lock_guard<std::mutex> l_Guard(m_Mutex);
 
         CheckForPlayer(p_Diff);
+        UpdateInteractiveEvents(p_Diff);
 
         for (auto l_Itr : m_Objects)
         {

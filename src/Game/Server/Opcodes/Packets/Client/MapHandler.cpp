@@ -16,7 +16,9 @@
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include "Server/MiscPackets.hpp"
 #include "Socket.hpp"
+#include "Portal.hpp"
 #include "Player.hpp"
 #include "World.hpp"
 #include "GameFlags.hpp"
@@ -36,6 +38,8 @@ namespace SteerStone { namespace Game { namespace Server {
         float l_PrevPositionY = static_cast<float>(p_Packet->ReadUInt32());
 
         m_Player->GetSpline()->Move(l_NewPositionX, l_NewPositionY, 0, 0);
+
+
     }
     /// Map Handler
     /// @p_ClientPacket : Packet recieved from client
@@ -53,6 +57,25 @@ namespace SteerStone { namespace Game { namespace Server {
         LOG_ASSERT(l_Player, "World", "Cannot find player Id: %0", l_Id);
 
         m_Player->SendPacket(&m_Player->GetMap()->GetGrid(m_Player)->BuildPlayerSpawn(l_Player, m_Player));
+    }
+
+    /// Map Handler
+    /// @p_ClientPacket : Packet recieved from client
+    void GameSocket::HandlePortalJump(ClientPacket* p_Packet)
+    {
+        Entity::Portal* l_Portal = m_Player->GetGrid()->CanJumpPortal(m_Player);
+
+        if (l_Portal)
+        {
+            ;
+        }
+        else
+        {
+            Packets::Message l_Packet;
+            l_Packet.Type = "STD";
+            l_Packet.Text = "You are not near a portal!";
+            SendPacket(l_Packet.Write());
+        }
     }
 }   ///< namespace Server
 }   ///< namespace Game

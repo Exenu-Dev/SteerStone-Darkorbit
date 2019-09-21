@@ -46,12 +46,14 @@ enum ClientOpCodes : uint8
     CLIENT_PACKET_PING                  = 0x50,
     CLIENT_PACKET_OBJECT_MOVE           = 0x31,
     CLIENT_PACKET_INITIALIZE_PLAYER     = 0x69,
+    CLIENT_PACKET_PORTAL_JUMP           = 0x6A,
+    CLIENT_PACKET_TRADE_ORE             = 0x62,
     CLIENT_MAX_OPCODE                   = 0x7A
 };
 
 enum ServerOpCodes : uint8
 {
-    SERVER_PACKET_LOGIN                 = 0x41,
+    SERVER_PACKET_PLAYER_INFO           = 0x41,
     SERVER_PACKET_INITIALIZE_SHIP       = 0x49,
     SERVER_PACKET_MAP_UPDATE            = 0x69,
     SERVER_PACKET_MINI_MAP_UPDATE       = 0x6D,
@@ -61,6 +63,11 @@ enum ServerOpCodes : uint8
     SERVER_PACKET_SPAWN_SHIP            = 0x43,
     SERVER_PACKET_DESPAWN_SHIP          = 0x52,
     SERVER_PACKET_OBJECT_MOVE           = 0x31,
+    SERVER_PACKET_DISPLAY_SUCC_DEBUG    = 0x53,
+    SERVER_PACKET_CREATE_PORTAL         = 0x70,
+    SERVER_PACKET_CREATE_STATION        = 0x73,
+    SERVER_PACKET_SEND_MESSAGE          = 0x41,
+    SERVER_PACKET_EVENT                 = 0x44,
     SERVER_MAX_OPCODE                   = 0x7A,
 };
 

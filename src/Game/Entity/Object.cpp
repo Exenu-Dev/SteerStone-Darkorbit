@@ -17,6 +17,8 @@
 */
 
 #include "Player.hpp"
+#include "Station.hpp"
+#include "Portal.hpp"
 
 namespace SteerStone { namespace Game { namespace Entity {
 
@@ -100,8 +102,12 @@ namespace SteerStone { namespace Game { namespace Entity {
     {
         return m_Map;
     }
-
-    /// Returns Spline
+    /// Get Grid
+    Map::Grid* Object::GetGrid() const
+    {
+        return m_Map->GetGrid(this);
+    }
+    /// Get Spline
     Spline* Object::GetSpline()
     {
         return &m_Spline;
@@ -114,6 +120,22 @@ namespace SteerStone { namespace Game { namespace Entity {
              return reinterpret_cast<Player*>(this);
 
          return nullptr;
+    }
+    /// To Portal Class
+    Portal* Object::ToPortal()
+    {
+        if (GetType() == Type::OBJECT_TYPE_PORTAL)
+            return reinterpret_cast<Portal*>(this);
+
+        return nullptr;
+    }
+    /// To Station Class
+    Station* Object::ToStation()
+    {
+        if (GetType() == Type::OBJECT_TYPE_STATION)
+            return reinterpret_cast<Station*>(this);
+
+        return nullptr;
     }
 
 }   ///< namespace Entity

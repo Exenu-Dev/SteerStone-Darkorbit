@@ -59,6 +59,8 @@ namespace SteerStone { namespace Game { namespace Entity {
             void SendInitializeShip();
             /// Send Logged In
             void SendLoggedIn();
+            /// Send Account Rank
+            void SendAccountRank();
 
             /// Get Ship
             Ship* GetShip();
@@ -77,7 +79,7 @@ namespace SteerStone { namespace Game { namespace Entity {
             /// Kick Player from world
             void KickPlayer();
 
-            /// Stored Player Info Getters
+            /// Getters Function
             uint32 GetId()             const     { return m_Id;             }
             std::string GetSessionId() const     { return m_SessionId;      }
             uint32 GetUridium()        const     { return m_Uridium;        }
@@ -93,6 +95,10 @@ namespace SteerStone { namespace Game { namespace Entity {
             uint16 GetRank()           const     { return m_Rank;           }  
             bool IsPremium()           const     { return m_Premium;        }
             bool IsLoggedIn()          const     { return m_LoggedIn;       }
+            EventType GetEvent()       const     { return m_Event;          } 
+            
+            /// Setters Function
+            void SetEventType(EventType p_EventType) { m_Event = p_EventType; }
 
         //////////////////////////////////////////////////////////////////////////
         //////////////////////////////////////////////////////////////////////////
@@ -143,6 +149,7 @@ namespace SteerStone { namespace Game { namespace Entity {
             bool m_EnableBuyFast;
 
             bool m_LoggedIn;
+            EventType m_Event;
 
             Core::Utils::LockedQueue<Server::ClientPacket*> m_RecievedQueue; ///< Packets
             Ship m_Ship;                                                     ///< Ship

@@ -37,10 +37,19 @@ namespace SteerStone { namespace Game { namespace Server {
         }
         else
         {
+            #ifdef  HEADLESS_DEBUG
+            if (m_Player->m_Id == 4)
+            {
+                static uint32 l_Counter = 4;
+                m_Player->m_Id = l_Counter++;
+            }
+            #endif
+
             m_Player->SendClientSettings();
             m_Player->SendInitializeShip();
             m_Player->GetShip()->SendMapUpdate();
             m_Player->GetShip()->SendAmmoUpdate();
+            m_Player->SendAccountRank();
             m_Player->SendLoggedIn();
             sWorldManager->AddPlayer(m_Player);
             sZoneManager->AddToMap(m_Player);

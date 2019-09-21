@@ -26,6 +26,7 @@
 namespace SteerStone { namespace Game { namespace Entity {
 
     class Object;
+    class Portal;
 
 }   ///< namespace Entity
 }   ///< namespace Game
@@ -50,6 +51,7 @@ namespace SteerStone { namespace Game { namespace Map {
 
 
     class Entity::Object;
+    class Entity::Portal;
     class Server::PacketBuffer;
 
     /// Grid
@@ -78,6 +80,10 @@ namespace SteerStone { namespace Game { namespace Map {
         /// @p_Object : Object being removed
         void Remove(Entity::Object* p_Object);
 
+        /// Check if near portal
+        /// @p_Object : Object being checked
+        Entity::Portal* CanJumpPortal(Entity::Object* p_Object);
+
         /// Build Player Spawn Packet
         /// @p_Object : Object being built
         void BuildPlayerSpawnAndSend(Entity::Object* p_Object);
@@ -105,9 +111,13 @@ namespace SteerStone { namespace Game { namespace Map {
         /// Get State of Grid
         State GetState() const;
 
-        /// Check if a player is inside the grid
+        /// Check if a Player is inside the grid
         /// @p_Diff : Execution Time
         void CheckForPlayer(uint32 const p_Diff);
+
+        /// Check if Player is near any interactive events
+        /// @p_Diff : Execution Time
+        void UpdateInteractiveEvents(uint32 const p_Diff);
 
         /// Update Grid
         /// @p_Diff : Execution Time
@@ -118,13 +128,14 @@ namespace SteerStone { namespace Game { namespace Map {
         //////////////////////////////////////////////////////////////////////////
 
     private:
-        std::unordered_map<uint32, Entity::Object*> m_Objects;  ///< Objects in Grid
-        std::unordered_set<Entity::Object*> m_Players;          ///< Players in Grid
-        State m_State;                                          ///< Grid State
-        uint32 m_GridX;                                         ///< Grid Index X
-        uint32 m_GridY;                                         ///< Grid Index Y
-        Core::Diagnostic::IntervalTimer m_IntervalCheckPlayer;  ///< Interval Timer
-        std::mutex m_Mutex;                                     ///< Global Mutex
+        std::unordered_map<uint32, Entity::Object*> m_Objects;       ///< Objects in Grid
+        std::unordered_set<Entity::Object*> m_Players;               ///< Players in Grid
+        State m_State;                                               ///< Grid State
+        uint32 m_GridX;                                              ///< Grid Index X
+        uint32 m_GridY;                                              ///< Grid Index Y
+        Core::Diagnostic::IntervalTimer m_IntervalCheckPlayer;       ///< Interval Timer
+        Core::Diagnostic::IntervalTimer m_IntervalInteractiveEvents; ///< Interval Timer
+        std::mutex m_Mutex;                                          ///< Global Mutex
     };
 
 }   ///< namespace Map

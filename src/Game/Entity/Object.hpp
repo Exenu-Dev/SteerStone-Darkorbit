@@ -26,13 +26,16 @@ namespace SteerStone { namespace Game { namespace Entity {
 
     enum class Type
     {
-        OBJECT_TYPE_NON,
-        OBJECT_TYPE_PLAYER,
-        OBJECT_TYPE_NPC,
-        OBJECT_TYPE_PORTAL,
+        OBJECT_TYPE_NON     = 0,
+        OBJECT_TYPE_PLAYER  = 1,
+        OBJECT_TYPE_NPC     = 2,
+        OBJECT_TYPE_PORTAL  = 3,
+        OBJECT_TYPE_STATION = 4
     };
 
     class Player;
+    class Portal;
+    class Station;
 
     class Object
     {
@@ -81,12 +84,17 @@ namespace SteerStone { namespace Game { namespace Entity {
         void SetMap(Map::Base* p_Map);
         /// Get Map
         Map::Base* GetMap() const;
-
-        /// Returns Spline
+        /// Get Grid
+        Map::Grid* GetGrid() const;
+        /// Get Spline
         Spline* GetSpline();
 
         /// To Player Class
         Player* ToPlayer();
+        /// To Portal Class
+        Portal* ToPortal();
+        /// To Station Class
+        Station* ToStation();
 
     //////////////////////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////////////////////

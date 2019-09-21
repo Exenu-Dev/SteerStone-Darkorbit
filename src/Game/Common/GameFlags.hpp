@@ -193,3 +193,47 @@ enum MinesType
     INSTANT_SHIELD  = 2,
     MAX_MINES       = 3
 };
+
+enum class PortalType : uint16
+{
+    PORTAL_TYPE_NORMAL      = 0,
+    PORTAL_TYPE_GALAXY_GATE = 1,
+};
+
+enum class StationType : uint16
+{
+    STATION_TYPE_NORMAL     = 0,
+    STATION_TYPE_UNKNOWN    = 1
+};
+
+enum Rank
+{
+    BASIC_SPACE_PILOT = 1,
+    SPACE_PILOT       = 2,
+    CHIEF_SPACE_PILOT = 3,
+    BASIC_SERGEANT    = 4,
+    SERGEANT          = 5,
+    CHIEF_SERGEANT    = 6,
+    BASIC_LIEUTENANT  = 7,
+    LIEUTENANT        = 8,
+    CHIEF_LIEUTENANT  = 9,
+    BASIC_CAPTAIN     = 10,
+    CAPTAIN           = 11,
+    CHIEF_CAPTAIN     = 12,
+    BASIC_MAJOR       = 13,
+    MAJOR             = 14,
+    CHIEF_MAJOR       = 15,
+    BASIC_COLONEL     = 16,
+    COLONEL           = 17,
+    CHIEF_COLONEL     = 18,
+    BASIC_GENERAL     = 19,
+    GENERAL           = 20,
+    ADMIN             = 21,
+};
+
+enum class EventType
+{
+    EVENT_TYPE_NONE    = 0,
+    EVENT_TYPE_PORTAL  = 1,
+    EVENT_TYPE_STATION = 2
+};

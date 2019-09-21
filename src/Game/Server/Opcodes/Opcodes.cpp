@@ -58,11 +58,13 @@ namespace SteerStone { namespace Game { namespace Server {
         StoreClientPacket(ClientOpCodes::CLIENT_PACKET_PING,              "CLIENT_PACKET_PING",               PacketStatus::STATUS_LOGGED_IN,      PacketProcess::PROCESS_PLAYER_THREAD, &GameSocket::HandleClient              );
         StoreClientPacket(ClientOpCodes::CLIENT_PACKET_OBJECT_MOVE,       "CLIENT_PACKET_OBJECT_MOVE",        PacketStatus::STATUS_LOGGED_IN,      PacketProcess::PROCESS_MAP_THREAD,    &GameSocket::HandleObjectMove          );
         StoreClientPacket(ClientOpCodes::CLIENT_PACKET_INITIALIZE_PLAYER, "CLIENT_PACKET_INITIALIZE_PLAYER",  PacketStatus::STATUS_LOGGED_IN,      PacketProcess::PROCESS_MAP_THREAD,    &GameSocket::HandleInitializePlayer    );
+        StoreClientPacket(ClientOpCodes::CLIENT_PACKET_PORTAL_JUMP,       "CLIENT_PACKET_PORTAL_JUMP",        PacketStatus::STATUS_LOGGED_IN,      PacketProcess::PROCESS_MAP_THREAD,    &GameSocket::HandlePortalJump          );
+        StoreClientPacket(ClientOpCodes::CLIENT_PACKET_TRADE_ORE,         "CLIENT_PACKET_TRADE_ORE",          PacketStatus::STATUS_LOGGED_IN,      PacketProcess::PROCESS_PLAYER_THREAD, &GameSocket::HandleNULL                );
 
         //////////////////////////////////////////////////////////////////////////
         //////////////////////////////////////////////////////////////////////////
 
-        StoreServerPacket(ServerOpCodes::SERVER_PACKET_LOGIN,               "SERVER_PACKET_LOGIN",              &GameSocket::HandleServer);
+        StoreServerPacket(ServerOpCodes::SERVER_PACKET_PLAYER_INFO,         "SERVER_PACKET_PLAYER_INFO",        &GameSocket::HandleServer);
         StoreServerPacket(ServerOpCodes::SERVER_PACKET_INITIALIZE_SHIP,     "SERVER_PACKET_INITIALIZE_SHIP",    &GameSocket::HandleServer);
         StoreServerPacket(ServerOpCodes::SERVER_PACKET_MAP_UPDATE,          "SERVER_PACKET_MAP_UPDATE",         &GameSocket::HandleServer);
         StoreServerPacket(ServerOpCodes::SERVER_PACKET_MINI_MAP_UPDATE,     "SERVER_PACKET_MINI_MAP_UPDATE",    &GameSocket::HandleServer);
@@ -72,6 +74,9 @@ namespace SteerStone { namespace Game { namespace Server {
         StoreServerPacket(ServerOpCodes::SERVER_PACKET_SPAWN_SHIP,          "SERVER_PACKET_SPAWN_SHIP",         &GameSocket::HandleServer);
         StoreServerPacket(ServerOpCodes::SERVER_PACKET_DESPAWN_SHIP,        "SERVER_PACKET_DESPAWN_SHIP",       &GameSocket::HandleServer);
         StoreServerPacket(ServerOpCodes::SERVER_PACKET_OBJECT_MOVE,         "SERVER_PACKET_OBJECT_MOVE",        &GameSocket::HandleServer);
+        StoreServerPacket(ServerOpCodes::SERVER_PACKET_CREATE_PORTAL,       "SERVER_PACKET_CREATE_PORTAL",      &GameSocket::HandleServer);
+        StoreServerPacket(ServerOpCodes::SERVER_PACKET_CREATE_STATION,      "SERVER_PACKET_CREATE_STATION",     &GameSocket::HandleServer);
+        StoreServerPacket(ServerOpCodes::SERVER_PACKET_SEND_MESSAGE,        "SERVER_PACKET_SEND_MESSAGE",       &GameSocket::HandleServer);
 
         LOG_INFO("OpCodes", "Loaded %0 Client Packets", m_ClientOpCodes.size());
         LOG_INFO("OpCodes", "Loaded %0 Server Packets", m_ServerOpCodes.size());

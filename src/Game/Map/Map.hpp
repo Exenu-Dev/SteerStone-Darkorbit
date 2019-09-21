@@ -53,6 +53,18 @@ namespace SteerStone { namespace Game { namespace Map {
         /// Get Map Id
         uint32 GetId() const;
 
+        /// Load Map
+        void Load();
+
+        /// Load Portals to map
+        void LoadPortals();
+        /// Load Stations to map
+        void LoadStations();
+
+        /// Send Objects which always appear on map regardless of what grid user is in
+        /// @p_Object : Packet being sent to
+        void SendConstantObjects(Entity::Object* p_Object);
+
         /// Calculate Grid By Object Position
         /// @p_Object : Object
         std::tuple<uint32, uint32> CalculateGridByPosition(Entity::Object* p_Object);
@@ -61,7 +73,8 @@ namespace SteerStone { namespace Game { namespace Map {
         /// @p_PositionX : X Axis
         /// @p_PositionY : Y Axis
         std::tuple<uint32, uint32> CalculateGridByNewPosition(Entity::Object* p_Object, float const p_PositionX, float const p_PositionY);
-
+        
+        /// This function is only called when object is added to map
         /// Add Object to map
         /// @p_Object : Object being added to map
         void Add(Entity::Object* p_Object);
@@ -86,9 +99,10 @@ namespace SteerStone { namespace Game { namespace Map {
         //////////////////////////////////////////////////////////////////////////
 
     private:
-        uint32 m_Id;                            ///< Map Id
-        Grid* m_Grids[GRID_CELLS][GRID_CELLS];  ///< Grids
-        std::mutex m_Mutex;                     ///< Mutex
+        uint32 m_Id;                                    ///< Map Id
+        Grid* m_Grids[GRID_CELLS][GRID_CELLS];          ///< Grids
+        std::vector<Entity::Object*> m_ConstantObjects; ///< Constant Objects
+        std::mutex m_Mutex;                             ///< Mutex
 
     };
 

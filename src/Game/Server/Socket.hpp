@@ -90,6 +90,13 @@ namespace SteerStone { namespace Game { namespace Server {
             /// Map Handler
             /// @p_ClientPacket : Packet recieved from client
             void HandleInitializePlayer(ClientPacket* p_Packet);
+            /// Map Handler
+            /// @p_ClientPacket : Packet recieved from client
+            void HandlePortalJump(ClientPacket* p_Packet);
+
+            /// Debug Handler
+            /// @p_ClientPacket : Packet recieved from client
+            void HandleDebugInitializePlayer(ClientPacket* p_Packet);
 
             /// Pointer to Player
             Entity::Player* ToPlayer();

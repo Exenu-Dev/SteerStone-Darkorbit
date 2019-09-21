@@ -69,6 +69,56 @@ namespace SteerStone { namespace Game { namespace Server { namespace Packets {
         return &m_Buffer;
     }
 
+    /// SERVER_PACKET_CREATE_PORTAL
+    PacketBuffer const* CreatePortal::Write()
+    {
+        m_Buffer.AppendUInt32(Id);
+        m_Buffer.AppendUInt16(Type);
+        m_Buffer.AppendChar("1"); ///< Unknown, not used by client
+        m_Buffer.AppendUInt32(PositionX);
+        m_Buffer.AppendUInt32(PositionY);
+
+        m_Buffer.AppendEndSplitter();
+        m_Buffer.AppendCarriage();
+
+        return &m_Buffer;
+    }
+
+    /// SERVER_PACKET_CREATE_STATION
+    PacketBuffer const* CreateStation::Write()
+    {
+        m_Buffer.AppendUInt32(Id);
+        m_Buffer.AppendUInt32(Type);
+        m_Buffer.AppendChar(Name.c_str());
+        m_Buffer.AppendUInt16(CompanyId);
+        m_Buffer.AppendBool(Peace);
+        m_Buffer.AppendUInt32(PositionX);
+        m_Buffer.AppendUInt32(PositionY);
+
+        m_Buffer.AppendEndSplitter();
+        m_Buffer.AppendCarriage();
+
+        return &m_Buffer;
+    }
+
+    /// SERVER_PACKET_EVENT
+    PacketBuffer const* Event::Write()
+    {
+        m_Buffer.AppendUInt32(PositionX);
+        m_Buffer.AppendUInt32(PositionY);
+        m_Buffer.AppendBool(InDemolitionZone);
+        m_Buffer.AppendBool(PlayRepairAnimation);
+        m_Buffer.AppendBool(InTradeZone);
+        m_Buffer.AppendBool(InRadiationZone);
+        m_Buffer.AppendBool(InJumpZone);
+        m_Buffer.AppendBool(Repair);
+
+        m_Buffer.AppendEndSplitter();
+        m_Buffer.AppendCarriage();
+
+        return &m_Buffer;
+    }
+
 }   ///< Packets
 }   ///< Server
 }   ///< Game

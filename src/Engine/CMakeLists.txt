@@ -30,6 +30,7 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Threading)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Utility)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Network)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Database)
+include_directories(${CMAKE_SOURCE_DIR}/dep/SFMT)
 
 file(GLOB_RECURSE source_list RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}" "*.cpp" "*.hpp")
 

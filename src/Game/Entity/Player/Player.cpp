@@ -18,6 +18,7 @@
 
 #include "Packets/Server/LoginPackets.hpp"
 #include "Packets/Server/ShipPackets.hpp"
+#include "Packets/Server/MiscPackets.hpp"
 #include "Player.hpp"
 #include "Database/DatabaseTypes.hpp"
 #include "Diagnostic/DiaStopWatch.hpp"
@@ -73,6 +74,7 @@ namespace SteerStone { namespace Game { namespace Entity {
         m_EnableBuyFast         = false;
 
         m_LoggedIn              = false;
+        m_Event           = EventType::EVENT_TYPE_NONE;
 
         SetType(Type::OBJECT_TYPE_PLAYER);
         SetGUID(ObjectGUID(GUIDType::Player));
@@ -161,7 +163,8 @@ namespace SteerStone { namespace Game { namespace Entity {
     /// Send Client In-game settings
     void Player::SendClientSettings()
     {
-        Server::Packets::Login l_Packet;
+        Server::Packets::PlayerInfo l_Packet;
+        l_Packet.Type                    = "SET";
         l_Packet.DisplayBoost            = m_DisplayBoost;
         l_Packet.DisplayDamage           = m_DisplayDamage;
         l_Packet.DisplayAllLas           = m_DisplayAllLas;
@@ -189,7 +192,7 @@ namespace SteerStone { namespace Game { namespace Entity {
         l_Packet.EnableBuyFast           = m_EnableBuyFast;
         SendPacket(l_Packet.Write());
     }
-
+    /// Send ship details
     void Player::SendInitializeShip()
     {
         Server::Packets::InitializeShip l_Packet;
@@ -217,6 +220,20 @@ namespace SteerStone { namespace Game { namespace Entity {
 
         Server::Packets::LoggedIn l_Packet;
         SendPacket(l_Packet.Write());
+    }
+    /// Send Account Rank
+    void Player::SendAccountRank()
+    {
+        if (GetRank() == Rank::ADMIN)
+        {
+            Server::Packets::PlayerInfo l_Packet;
+            l_Packet.Type = "ADM";
+            l_Packet.EnableDebugWindow = 1;
+            SendPacket(l_Packet.Write());
+
+            Server::Packets::DisplaySuccDebug l_DisplaySuccDebugPacket;
+            SendPacket(l_DisplaySuccDebugPacket.Write());
+        }
     }
 
     /// Get Ship

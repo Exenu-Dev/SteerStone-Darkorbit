@@ -52,6 +52,9 @@ namespace SteerStone { namespace Game { namespace Map {
     void Zone::AddMap(Map::Base* p_Base)
     {
         m_Maps[p_Base->GetId()] = p_Base;
+
+        /// Load Map
+        p_Base->Load();
     }
 
     /// Get Map

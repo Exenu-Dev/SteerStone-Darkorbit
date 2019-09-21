@@ -15,5 +15,6 @@
 #* along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #*
 
-option(WITH_WARNINGS     "Show all warnings during compile"                           0)
-option(WITH_CORE_DEBUG   "Include additional debug-code in core"                      1)
+option(WITH_WARNINGS         "Show all warnings during compile"                           0)
+option(WITH_CORE_DEBUG       "Include additional debug-code in core"                      1)
+option(WITH_HEADLESS_DEBUG   "Include Headless Players"                     		      1)

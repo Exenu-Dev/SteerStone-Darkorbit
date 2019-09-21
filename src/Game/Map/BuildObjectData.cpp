@@ -47,6 +47,7 @@ namespace SteerStone { namespace Game { namespace Map {
                 l_Packet.UseBigFont             = false; ///< TODO; For big ships only?
                 l_Itr->ToPlayer()->SendPacket(l_Packet.Write());
 
+                /// Also send movement packet as client has problems without it
                 Server::Packets::ObjectMove l_ObjectMovePacket;
                 l_ObjectMovePacket.Id        = p_Object->ToPlayer()->GetId();
                 l_ObjectMovePacket.PositionX = p_Object->GetSpline()->GetPositionX();
@@ -72,6 +73,7 @@ namespace SteerStone { namespace Game { namespace Map {
             l_Packet.UseBigFont             = false; ///< TODO; For big ships only?
             p_Object->ToPlayer()->SendPacket(l_Packet.Write());
       
+            /// Also send movement packet as client has problems without it
             Server::Packets::ObjectMove l_ObjectMovePacket;
             l_ObjectMovePacket.Id        = l_Itr->ToPlayer()->GetId();
             l_ObjectMovePacket.PositionX = l_Itr->GetSpline()->GetPositionX();

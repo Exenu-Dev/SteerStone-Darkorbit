@@ -91,6 +91,76 @@ namespace SteerStone { namespace Game { namespace Server { namespace Packets {
         uint32 Time;
     };
 
+    /// SERVER_PACKET_CREATE_PORTAL packet builder
+    class CreatePortal final : public ServerPacket
+    {
+    public:
+        /// Constructor 
+        CreatePortal() : ServerPacket(ServerOpCodes::SERVER_PACKET_CREATE_PORTAL)
+        {
+        }
+
+        //////////////////////////////////////////////////////////////////////////
+        //////////////////////////////////////////////////////////////////////////
+
+        /// Write the packet
+        PacketBuffer const* Write();
+
+        uint32 Id;
+        uint16 Type;
+        float PositionX;
+        float PositionY;
+    };
+
+    /// SERVER_PACKET_CREATE_STATION packet builder
+    class CreateStation final : public ServerPacket
+    {
+    public:
+        /// Constructor 
+        CreateStation() : ServerPacket(ServerOpCodes::SERVER_PACKET_CREATE_STATION)
+        {
+        }
+
+        //////////////////////////////////////////////////////////////////////////
+        //////////////////////////////////////////////////////////////////////////
+
+        /// Write the packet
+        PacketBuffer const* Write();
+
+        uint32 Id;
+        uint16 CompanyId;
+        uint16 Type;
+        std::string Name;
+        bool Peace;
+        float PositionX;
+        float PositionY;
+    };
+
+    /// SERVER_PACKET_EVENT packet builder
+    class Event final : public ServerPacket
+    {
+    public:
+        /// Constructor 
+        Event() : ServerPacket(ServerOpCodes::SERVER_PACKET_EVENT)
+        {
+        }
+
+        //////////////////////////////////////////////////////////////////////////
+        //////////////////////////////////////////////////////////////////////////
+
+        /// Write the packet
+        PacketBuffer const* Write();
+
+        bool InDemolitionZone;
+        bool PlayRepairAnimation;
+        bool InTradeZone;
+        bool InRadiationZone;
+        bool InJumpZone;
+        bool Repair;
+        float PositionX;
+        float PositionY;
+    };
+
 }   ///< Packets
 }   ///< Server
 }   ///< Game

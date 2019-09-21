@@ -21,34 +21,43 @@
 namespace SteerStone { namespace Game { namespace Server { namespace Packets {
 
     /// SERVER_PACKET_LOGIN
-    PacketBuffer const* Login::Write()
+    PacketBuffer const* PlayerInfo::Write()
     {
-        m_Buffer.AppendChar("SET");
-        m_Buffer.AppendBool(DisplayBoost);
-        m_Buffer.AppendBool(DisplayDamage);
-        m_Buffer.AppendBool(DisplayAllLas);
-        m_Buffer.AppendBool(DisplayExploration);
-        m_Buffer.AppendBool(DisplayName);
-        m_Buffer.AppendBool(DisplayFirmIcon);
-        m_Buffer.AppendBool(DisplayAlphaBG);
-        m_Buffer.AppendBool(IgnoreRes);
-        m_Buffer.AppendBool(IgnoreBox);
-        m_Buffer.AppendBool(ConvertGates);
-        m_Buffer.AppendBool(ConvertOppo);
-        m_Buffer.AppendBool(SoundOff);
-        m_Buffer.AppendBool(BackgroundMusicOff);
-        m_Buffer.AppendBool(DisplayStatus);
-        m_Buffer.AppendBool(DisplayBubble);
-        m_Buffer.AppendUInt32(SelectedLaser);
-        m_Buffer.AppendUInt32(SelectedRocket);
-        m_Buffer.AppendBool(DisplayDigits);
-        m_Buffer.AppendBool(DisplayChat);
-        m_Buffer.AppendBool(DisplayDrones);
-        m_Buffer.AppendBool(ShowStarSystem);
-        m_Buffer.AppendBool(IgnoreCargo);
-        m_Buffer.AppendBool(IgnoreHostileCargo);
-        m_Buffer.AppendBool(AutoChangeAmmo);
-        m_Buffer.AppendBool(EnableBuyFast);
+        if (Type == "SET")
+        {
+            m_Buffer.AppendChar(Type.c_str());
+            m_Buffer.AppendBool(DisplayBoost);
+            m_Buffer.AppendBool(DisplayDamage);
+            m_Buffer.AppendBool(DisplayAllLas);
+            m_Buffer.AppendBool(DisplayExploration);
+            m_Buffer.AppendBool(DisplayName);
+            m_Buffer.AppendBool(DisplayFirmIcon);
+            m_Buffer.AppendBool(DisplayAlphaBG);
+            m_Buffer.AppendBool(IgnoreRes);
+            m_Buffer.AppendBool(IgnoreBox);
+            m_Buffer.AppendBool(ConvertGates);
+            m_Buffer.AppendBool(ConvertOppo);
+            m_Buffer.AppendBool(SoundOff);
+            m_Buffer.AppendBool(BackgroundMusicOff);
+            m_Buffer.AppendBool(DisplayStatus);
+            m_Buffer.AppendBool(DisplayBubble);
+            m_Buffer.AppendUInt32(SelectedLaser);
+            m_Buffer.AppendUInt32(SelectedRocket);
+            m_Buffer.AppendBool(DisplayDigits);
+            m_Buffer.AppendBool(DisplayChat);
+            m_Buffer.AppendBool(DisplayDrones);
+            m_Buffer.AppendBool(ShowStarSystem);
+            m_Buffer.AppendBool(IgnoreCargo);
+            m_Buffer.AppendBool(IgnoreHostileCargo);
+            m_Buffer.AppendBool(AutoChangeAmmo);
+            m_Buffer.AppendBool(EnableBuyFast);
+        }
+        else if (Type == "ADM")
+        {
+            m_Buffer.AppendChar(Type.c_str());
+            m_Buffer.AppendChar("CLI");
+            m_Buffer.AppendBool(EnableDebugWindow);
+        }
 
         m_Buffer.AppendEndSplitter();
         m_Buffer.AppendCarriage();
@@ -56,6 +65,7 @@ namespace SteerStone { namespace Game { namespace Server { namespace Packets {
         return &m_Buffer;
     }
 
+    /// SERVER_PACKET_INITIALIZE_SHIP
     PacketBuffer const* InitializeShip::Write()
     {
         m_Buffer.AppendUInt32(Id);

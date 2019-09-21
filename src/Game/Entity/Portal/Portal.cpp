@@ -16,41 +16,40 @@
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#pragma once
-#include <PCH/Precompiled.hpp>
-#include "Core/Core.hpp"
-#include "Object.hpp"
+#include "Portal.hpp"
+#include "Utility/UtilMaths.hpp"
 
 namespace SteerStone { namespace Game { namespace Entity {
 
-    class Unit : public Object
+    /// Constructor
+    Portal::Portal()
     {
-        DISALLOW_COPY_AND_ASSIGN(Unit);
+        m_Id            = 0;
+        m_CompanyId     = Company::NOMAD;
+        m_Type          = PortalType::PORTAL_TYPE_NORMAL;
+        m_ToMapId       = 0;
+        m_ToPositionX   = 0.0f;
+        m_ToPositionY   = 0.0f;
+
+        SetType(Type::OBJECT_TYPE_PORTAL);
+    }
+    /// Deconstructor
+    Portal::~Portal()
+    {
+    }
 
     //////////////////////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////////////////////
 
-    public:
-        /// Constructor
-        Unit();
-        /// Deconstructor
-        virtual ~Unit();
+    /// Is Object near Portal
+    /// @p_Object : Object being checked
+    bool Portal::IsInPortalRadius(Entity::Object* p_Object)
+    {
+        return Core::Utils::IsInCircleRadius(GetSpline()->GetPositionX(), GetSpline()->GetPositionY(), p_Object->GetSpline()->GetPositionX(), p_Object->GetSpline()->GetPositionY(), PORTAL_RADIUS);
+    }
 
     //////////////////////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////////////////////
-
-    public:
-
-    //////////////////////////////////////////////////////////////////////////
-    //////////////////////////////////////////////////////////////////////////
-
-    private:
-
-    //////////////////////////////////////////////////////////////////////////
-    //////////////////////////////////////////////////////////////////////////
-
-    protected:
-    };
 
 }   ///< namespace Entity
 }   ///< namespace Game

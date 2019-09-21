@@ -21,12 +21,12 @@
 
 namespace SteerStone { namespace Game { namespace Server { namespace Packets {
 
-    /// SERVER_PACKET_LOGIN packet builder
-    class Login final : public ServerPacket
+    /// SERVER_PACKET_PLAYER_INFO packet builder
+    class PlayerInfo final : public ServerPacket
     {
         public:
             /// Constructor 
-            Login() : ServerPacket(ServerOpCodes::SERVER_PACKET_LOGIN)
+            PlayerInfo() : ServerPacket(ServerOpCodes::SERVER_PACKET_PLAYER_INFO)
             {
             }
 
@@ -35,7 +35,8 @@ namespace SteerStone { namespace Game { namespace Server { namespace Packets {
 
             /// Write the packet
             PacketBuffer const* Write();
-
+            
+            std::string Type;
             bool DisplayBoost;
             bool DisplayDamage;
             bool DisplayAllLas;
@@ -61,9 +62,10 @@ namespace SteerStone { namespace Game { namespace Server { namespace Packets {
             bool IgnoreHostileCargo;
             bool AutoChangeAmmo;
             bool EnableBuyFast;
+            bool EnableDebugWindow;
     };
 
-    /// SERVER_PACKET_LOGIN packet builder
+    /// SERVER_PACKET_INITIALIZE_SHIP packet builder
     class InitializeShip final : public ServerPacket
     {
     public:
@@ -77,7 +79,7 @@ namespace SteerStone { namespace Game { namespace Server { namespace Packets {
 
         /// Write the packet
         PacketBuffer const* Write();
-
+        
         uint32 Id;
         std::string Username;
         uint16 ShipId;
