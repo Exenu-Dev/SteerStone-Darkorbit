@@ -301,6 +301,15 @@ namespace SteerStone { namespace Game { namespace Map {
         return m_Grids[std::get<0>(p_Object->GetGridIndex())][std::get<1>(p_Object->GetGridIndex())];
     }
 
+    /// Send Packet to everyone in map
+    /// @p_PacketBuffer : Packet being sent to
+    void Base::SendPacketEveryone(Server::PacketBuffer const* p_PacketBuffer)
+    {
+        for (uint32 l_X = 0; l_X < GRID_CELLS; l_X++)
+            for (uint32 l_Y = 0; l_Y < GRID_CELLS; l_Y++)
+                m_Grids[l_X][l_Y]->SendPacketEveryone(p_PacketBuffer);
+    }
+
     /// Update Maps
     /// @p_Diff : Execution Time
     bool Base::Update(uint32 const p_Diff)

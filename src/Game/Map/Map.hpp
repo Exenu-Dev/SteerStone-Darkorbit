@@ -90,6 +90,10 @@ namespace SteerStone { namespace Game { namespace Map {
         /// @p_Object : Object we are getting grid from
         Grid* GetGrid(Entity::Object const* p_Object);
 
+        /// Send Packet to everyone in map
+        /// @p_PacketBuffer : Packet being sent to
+        void SendPacketEveryone(Server::PacketBuffer const* p_PacketBuffer);
+
         /// Update Maps
         /// @p_Diff : Execution Time
         bool Update(uint32 const p_Diff);
