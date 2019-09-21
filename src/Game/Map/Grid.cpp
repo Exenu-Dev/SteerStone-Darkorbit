@@ -92,11 +92,7 @@ namespace SteerStone { namespace Game { namespace Map {
     /// @p_Object : Object being checked
     Entity::Portal* Grid::CanJumpPortal(Entity::Object* p_Object)
     {
-        m_Mutex.lock();
-        std::unordered_map<uint32, Entity::Object*> l_Copy(m_Objects);
-        m_Mutex.unlock();
-
-        for (auto l_Itr : l_Copy)
+        for (auto l_Itr : m_Objects)
         {
             if (l_Itr.second->GetType() == Entity::Type::OBJECT_TYPE_PORTAL)
             {
@@ -104,6 +100,7 @@ namespace SteerStone { namespace Game { namespace Map {
                     return l_Itr.second->ToPortal();
             }
         }
+
         return nullptr;
     }
 
@@ -125,11 +122,7 @@ namespace SteerStone { namespace Game { namespace Map {
     /// @p_Id : Id of Player
     Entity::Object* Grid::FindPlayer(uint32 const p_Id)
     {
-        m_Mutex.lock();
-        std::unordered_set<Entity::Object*> l_Copy(m_Players);
-        m_Mutex.unlock();
-
-        for (auto l_Itr : l_Copy)
+        for (auto l_Itr : m_Players)
         {
             if (l_Itr->ToPlayer()->GetId() == p_Id)
                 return l_Itr;
@@ -143,11 +136,7 @@ namespace SteerStone { namespace Game { namespace Map {
     /// @p_Object : Send packet to self
     void Grid::SendPacketEveryone(Server::PacketBuffer const* p_Packet, Entity::Object* p_Object)
     {
-        m_Mutex.lock();
-        std::unordered_set<Entity::Object*> l_Copy(m_Players);
-        m_Mutex.unlock();
-
-        for (auto l_Itr : l_Copy)
+        for (auto l_Itr : m_Players)
         {
             if (p_Object)
                 if (p_Object->GetGUID() == l_Itr->GetGUID())
