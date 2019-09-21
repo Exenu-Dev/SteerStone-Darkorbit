@@ -51,6 +51,7 @@ namespace SteerStone { namespace Core { namespace Network {
         }
 
         m_OutBuffer.reset(new PacketBuffer);
+        m_SecondaryOutBuffer.reset(new PacketBuffer);
         m_InBuffer.reset(new PacketBuffer);
 
         StartAsyncRead();
@@ -110,6 +111,12 @@ namespace SteerStone { namespace Core { namespace Network {
     void Socket::Write(const char* p_Buffer, std::size_t const& p_Length)
     {
         Utils::ObjectGuard l_Guard(this);
+
+        /// Get the correct buffer depending on the current writing state
+        /// We do this because we don't want to be writing in our buffer while we are sending it out
+        /// it will cause corrupt data
+        /// BOOST_ASIO_ENABLE_BUFFER_DEBUGGING tells us about it
+        PacketBuffer* l_OutBuffer = m_WriteState == WriteState::Sending ? m_SecondaryOutBuffer.get() : m_OutBuffer.get();
 
         /// Write the header
         m_OutBuffer->Write(p_Buffer, p_Length);
@@ -272,6 +279,19 @@ namespace SteerStone { namespace Core { namespace Network {
         else
             m_OutBuffer->m_WritePosition = 0;
 
+        /// If there is data in the secondary buffer, append it to the primary buffer
+        if (m_SecondaryOutBuffer->m_WritePosition > 0)
+        {
+            /// Do we have enough space? if not, resize
+            if (m_OutBuffer->m_Buffer.size() < (m_OutBuffer->m_WritePosition + m_SecondaryOutBuffer->m_WritePosition))
+                m_OutBuffer->m_Buffer.resize(m_OutBuffer->m_WritePosition + m_SecondaryOutBuffer->m_WritePosition);
+
+            memcpy(&(m_OutBuffer->m_Buffer[m_OutBuffer->m_WritePosition]), &(m_SecondaryOutBuffer->m_Buffer[0]), (m_SecondaryOutBuffer->m_WritePosition) * sizeof(m_SecondaryOutBuffer->m_Buffer[0]));
+
+            m_OutBuffer->m_WritePosition += m_SecondaryOutBuffer->m_WritePosition;
+            m_SecondaryOutBuffer->m_WritePosition = 0;
+        }
+
         /// If there is any data to write, do so immediately
         if (m_OutBuffer->m_WritePosition > 0)
         {
@@ -300,9 +320,6 @@ namespace SteerStone { namespace Core { namespace Network {
         /// At this point we are guarunteed that there is data to send in the primary buffer.  send it.
         m_WriteState = WriteState::Sending;
 
-        /// Terminate end of string buffer
-        m_OutBuffer->TerminateBuffer();
-
         std::shared_ptr<Socket> l_Ptr = Shared<Socket>();
         m_Socket.async_write_some(boost::asio::buffer(m_OutBuffer->m_Buffer, m_OutBuffer->m_WritePosition),
             make_custom_alloc_handler(m_allocator,
@@ -311,8 +328,7 @@ namespace SteerStone { namespace Core { namespace Network {
     /// Start the time to send out our data in interval
     void Socket::StartWriteFlushTimer()
     {
-        if (m_WriteState == WriteState::Buffering)
-            return;
+        LOG_ASSERT(m_WriteState != WriteState::Buffering, "Socket", "Attempted to start the flush timer but we are already buffering!");
 
         /// If the socket is closed, silently fail
         if (IsClosed())
@@ -325,7 +341,7 @@ namespace SteerStone { namespace Core { namespace Network {
 
         std::shared_ptr<Socket> l_Ptr = Shared<Socket>();
         m_OutBufferFlushTimer.expires_from_now(boost::posix_time::milliseconds(int32(m_BufferTimeout)));
-        m_OutBufferFlushTimer.async_wait([l_Ptr](const boost::system::error_code& error) { l_Ptr->FlushOut(); });
+        m_OutBufferFlushTimer.async_wait([l_Ptr](const boost::system::error_code& p_Error) { l_Ptr->FlushOut(); });
     }
     /// Catch an error if packet is corrupted
     /// @p_Error : Error code

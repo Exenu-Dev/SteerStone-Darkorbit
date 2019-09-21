@@ -140,8 +140,9 @@ namespace SteerStone { namespace Core { namespace Network {
             /// Buffer
             std::unique_ptr<PacketBuffer> m_InBuffer;                                 ///< In Buffer - recieving incoming packets
             std::unique_ptr<PacketBuffer> m_OutBuffer;                                ///< Out Buffer - sending our packets
+            std::unique_ptr<PacketBuffer> m_SecondaryOutBuffer;                       ///< Secondary Out Buffer - sending our packets
             boost::asio::deadline_timer m_OutBufferFlushTimer;                        ///< Time to send out packets
-            static int32 const m_BufferTimeout = 50;                                  ///< Interval of our flush out timer
+            static int32 const m_BufferTimeout = 60;                                  ///< Interval of our flush out timer
             /// States
             WriteState m_WriteState;                                                  ///< State of where are at; idle, reading
             ReadState m_ReadState;                                                    ///< State of where are at; idle, reading, buffering
