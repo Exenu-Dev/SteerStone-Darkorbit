@@ -22,7 +22,7 @@
 #include "Utility/UtiLockedQueue.hpp"
 #include "GameFlags.hpp"
 
-#define WORLD_SLEEP_TIMER 50
+#define WORLD_SLEEP_TIMER 60
 
 namespace SteerStone { namespace Game { namespace Entity {
 
