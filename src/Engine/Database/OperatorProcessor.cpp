@@ -41,6 +41,9 @@ namespace SteerStone { namespace Core { namespace Database {
     /// Process any operators which are not pending
     void OperatorProcessor::ProcessOperators()
     {
+        if (m_Operators.empty())
+            return;
+
         std::vector<CallBackOperator> l_UpdateOperators{ std::move(m_Operators) };
 
         l_UpdateOperators.erase(std::remove_if(l_UpdateOperators.begin(), l_UpdateOperators.end(), [](CallBackOperator& p_Operator)
