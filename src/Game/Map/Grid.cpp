@@ -192,11 +192,11 @@ namespace SteerStone { namespace Game { namespace Map {
             {
                 if (l_SecondItr.second->GetType() == Entity::Type::OBJECT_TYPE_PORTAL)
                 {
-                    if (l_Itr->ToPlayer()->GetEvent() == EventType::EVENT_TYPE_PORTAL)
-                        continue;
-
                     if (l_SecondItr.second->ToPortal()->IsInPortalRadius(l_Itr))
                     {
+                        if (l_Itr->ToPlayer()->GetEvent() == EventType::EVENT_TYPE_PORTAL)
+                            break;
+
                         Server::Packets::Event l_Packet;
                         l_Packet.PositionX           = l_Itr->GetSpline()->GetPositionX();
                         l_Packet.PositionY           = l_Itr->GetSpline()->GetPositionY();
@@ -214,11 +214,11 @@ namespace SteerStone { namespace Game { namespace Map {
                 }
                 else if (l_SecondItr.second->GetType() == Entity::Type::OBJECT_TYPE_STATION)
                 {
-                    if (l_Itr->ToPlayer()->GetEvent() == EventType::EVENT_TYPE_STATION)
-                        continue;
-
                     if (l_SecondItr.second->ToStation()->IsInStationRadius(l_Itr))
                     {
+                        if (l_Itr->ToPlayer()->GetEvent() == EventType::EVENT_TYPE_STATION)
+                            break;
+
                         Server::Packets::Event l_Packet;
                         l_Packet.PositionX           = l_Itr->GetSpline()->GetPositionX();
                         l_Packet.PositionY           = l_Itr->GetSpline()->GetPositionY();
@@ -237,7 +237,7 @@ namespace SteerStone { namespace Game { namespace Map {
                 else
                 {
                     if (l_Itr->ToPlayer()->GetEvent() == EventType::EVENT_TYPE_NONE)
-                        return;
+                        continue;
 
                     Server::Packets::Event l_Packet;
                     l_Packet.PositionX           = l_Itr->GetSpline()->GetPositionX();
