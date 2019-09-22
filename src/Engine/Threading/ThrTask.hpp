@@ -97,7 +97,6 @@ namespace SteerStone { namespace Core { namespace Threading {
             std::atomic_uint64_t m_TaskLastDiffTime;    ///< Last diff time
 
             Diagnostic::StopWatch m_TaskStopWatch;      ///< Stop watch
-
     };
 
 }   ///< namespace Threading

@@ -21,6 +21,18 @@
 
 namespace SteerStone { namespace Game { namespace Server { namespace Packets {
     
+    /// SERVER_PACKET_HEADLESS_MOVE
+    PacketBuffer const* DebugHeadlessMove::Write()
+    {
+        m_Buffer.AppendUInt32(PositionX);
+        m_Buffer.AppendUInt32(PositionY);
+
+        m_Buffer.AppendEndSplitter();
+        m_Buffer.AppendCarriage();
+
+        return &m_Buffer;
+    }
+
 }   ///< Packets
 }   ///< Server
 }   ///< Game

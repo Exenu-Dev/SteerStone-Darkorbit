@@ -21,6 +21,25 @@
 
 namespace SteerStone { namespace Game { namespace Server { namespace Packets {
 
+    /// SERVER_PACKET_HEADLESS_MOVE packet builder
+    class DebugHeadlessMove final : public ServerPacket
+    {
+    public:
+        /// Constructor 
+        DebugHeadlessMove() : ServerPacket(ServerOpCodes::SERVER_PACKET_HEADLESS_MOVE)
+        {
+        }
+
+        //////////////////////////////////////////////////////////////////////////
+        //////////////////////////////////////////////////////////////////////////
+
+        /// Write the packet
+        PacketBuffer const* Write();
+
+        float PositionX;
+        float PositionY;
+    };
+
 }   ///< Packets
 }   ///< Server
 }   ///< Game

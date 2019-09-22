@@ -17,9 +17,11 @@
 */
 
 #include "Server/MiscPackets.hpp"
+#include "Server/MapPackets.hpp"
 #include "Socket.hpp"
 #include "Portal.hpp"
 #include "Player.hpp"
+#include "ZoneManager.hpp"
 #include "World.hpp"
 #include "GameFlags.hpp"
 
@@ -65,9 +67,17 @@ namespace SteerStone { namespace Game { namespace Server {
     {
         Entity::Portal* l_Portal = m_Player->GetGrid()->CanJumpPortal(m_Player);
 
+        /// Okay we can jump
         if (l_Portal)
         {
-            ;
+            /// Send Packet
+            Server::Packets::JumpPortal l_Packet;
+            l_Packet.MapId      = l_Portal->GetToMapId();
+            l_Packet.PortalId   = l_Portal->GetId();
+            m_Player->SendPacket(l_Packet.Write());
+
+            m_Player->GetMap()->AddToJumpQueue(m_Player, l_Portal);
+            m_Player->m_Jumping = true;
         }
         else
         {

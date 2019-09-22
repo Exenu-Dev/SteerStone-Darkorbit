@@ -19,19 +19,30 @@
 #pragma once
 #include <PCH/Precompiled.hpp>
 #include "Core/Core.hpp"
+#include "ZoneProducer.hpp"
 #include <mutex>
+#include <atomic>
+
+namespace SteerStone { namespace Core { namespace Threading {
+
+    class Task;
+
+}   ///< namespace Threading
+}   ///< namespace Core
+}   ///< namespace SteerStone
 
 namespace SteerStone { namespace Game { namespace Map {
 
     class Zone;
+    class ZoneUpdater;
 
     /// Zone Updater Task
     class ZoneUpdaterTask
     {
     public:
         /// Constructor
-        /// @p_Zone : Zone
-        ZoneUpdaterTask(Zone* p_Zone);
+        /// @p_ZoneUpdater : Zone Updater
+        ZoneUpdaterTask(ZoneUpdater* p_ZoneUpdater);
         /// Deconstructor
         virtual ~ZoneUpdaterTask();
 
@@ -40,11 +51,14 @@ namespace SteerStone { namespace Game { namespace Map {
 
         virtual void Call() = 0;
 
+        /// Notify that the task is done
+        void UpdateFinished();
+
         //////////////////////////////////////////////////////////////////////////
         //////////////////////////////////////////////////////////////////////////
 
     private:
-        Zone* m_Zone;   ///< Zone
+        ZoneUpdater* m_ZoneUpdater;
     };
 
     /// Zone Update Request
@@ -57,9 +71,10 @@ namespace SteerStone { namespace Game { namespace Map {
 
     public:
         /// Constructor
-        /// @p_Zone : Zone
-        /// @p_Diff : Execution Time
-        ZoneUpdateRequest(Zone* p_Zone, uint32 const p_Diff);
+        /// @p_Zone        : Zone
+        /// @p_ZoneUpdater : Zone Updater
+        /// @p_Diff        : Execution Time
+        ZoneUpdateRequest(Zone* p_Zone, ZoneUpdater& p_ZoneUpdater, uint32 const p_Diff);
         /// Deconstructor
         ~ZoneUpdateRequest();
 
@@ -75,6 +90,57 @@ namespace SteerStone { namespace Game { namespace Map {
     private:
         Zone* m_Zone;   ///< Zone
         uint32 m_Diff;  ///< Execution Time
+    };
+
+    /// Zone Updater
+    class ZoneUpdater
+    {
+    public:
+        /// Constructor
+        ZoneUpdater();
+        /// Deconstructor
+        ~ZoneUpdater();
+
+        //////////////////////////////////////////////////////////////////////////
+        //////////////////////////////////////////////////////////////////////////
+    public:
+
+        /// Activate Threads
+        /// @p_WorkerCount : Number of threads to spawn
+        void Activate(uint32 p_WorkerCount);
+
+        /// Is MultiThreading Active
+        bool Activated() const;
+
+        /// Shut down worker threads
+        void Deactivate();
+
+        /// Schedule Update
+        /// @p_Zone : Zone
+        /// @p_Diff : Execution Time
+        void ScheduleUpdate(Zone* p_Zone, uint32 const p_Diff);
+
+        /// Update Finished
+        void Finished();
+
+        /// Wait till we have finished all requests
+        void Wait();
+
+        //////////////////////////////////////////////////////////////////////////
+        //////////////////////////////////////////////////////////////////////////
+    private:
+        /// Worker Thread
+        bool WorkerThread();
+
+    private:
+        ZoneProducer<ZoneUpdaterTask*> m_UpdaterTask;   ///< Updater Task
+
+        bool m_Activated;
+        std::atomic<bool> m_CancelationToken;
+        std::vector<std::shared_ptr<Core::Threading::Task>> m_Tasks;
+        std::mutex m_Lock;
+        std::condition_variable m_Condition;
+        uint32 m_PendingRequests;
     };
 
 }   ///< namespace Map

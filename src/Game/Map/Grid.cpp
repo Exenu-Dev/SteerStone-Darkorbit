@@ -88,6 +88,21 @@ namespace SteerStone { namespace Game { namespace Map {
         LOG_INFO("Grid", "Removed GUID: %0 from Grid: X %1 Y %2", p_Object->GetGUID(), m_GridX, m_GridY);
     }
 
+    /// Unload objects from map
+    void Grid::Unload()
+    {
+        for (auto l_Itr : m_Objects)
+        {
+            if (l_Itr.second->GetType() == Entity::Type::OBJECT_TYPE_PLAYER)
+            {
+                l_Itr.second->ToPlayer()->ToSocket()->CloseSocket();
+            }
+        }
+
+        m_Objects.clear();
+        m_Players.clear();
+    }
+
     /// Check if near portal
     /// @p_Object : Object being checked
     Entity::Portal* Grid::CanJumpPortal(Entity::Object* p_Object)

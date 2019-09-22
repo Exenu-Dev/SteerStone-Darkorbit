@@ -27,25 +27,16 @@
 namespace SteerStone { namespace Game { namespace Map {
 
     /// Constructor
-    /// @p_WorkerCount : Worker Count
-    Zone::Zone(uint32 const p_Worker)
-        : m_WorkerId(p_Worker)
+    Zone::Zone()
     {
     }
     /// Deconstructor
     Zone::~Zone()
     {
-        sThreadManager->PopTask(m_Task);
     }
 
     //////////////////////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////////////////////
-
-    /// Start Updating Maps
-    void Zone::Start()
-    {
-        m_Task = sThreadManager->PushTask(Core::Utils::StringBuilder("ZONE_WORKER_THREAD_%0", m_WorkerId), Core::Threading::TaskType::Normal, 0, std::bind(&Zone::Update, this));
-    }
 
     /// Add a new map
     /// @p_Base : Map being added
@@ -56,12 +47,15 @@ namespace SteerStone { namespace Game { namespace Map {
         /// Load Map
         p_Base->Load();
     }
-
     /// Get Map
     /// @p_Id : Map Id
-    Map::Base* Zone::GetMap(uint32 const p_Id)
+    Map::Base* Zone::GetMap(uint32 const p_Id) const
     {
-        return m_Maps[p_Id];
+        auto const l_Itr = m_Maps.find(p_Id);
+        if (l_Itr != m_Maps.end())
+            return l_Itr->second;
+
+        return nullptr;
     }
 
     /// Add to Map
@@ -77,34 +71,20 @@ namespace SteerStone { namespace Game { namespace Map {
         p_Object->GetMap()->Remove(p_Object);
     }
 
-    /// Schedule to update the zone
-    /// @p_Diff : Execution Time
-    void Zone::ScheduleUpdate(uint32 const p_Diff)
+    /// Unload Maps
+    void Zone::UnloadAll()
     {
-        std::lock_guard<std::mutex> l_Guard(m_Mutex);
-
-        m_UpdaterTask.Push((ZoneUpdaterTask*)new ZoneUpdateRequest(this, p_Diff));
-    }
-
-    /// Update Tasks
-    bool Zone::Update()
-    {
-        while (true)
+        for (auto l_Itr : m_Maps)
         {
-            ZoneUpdaterTask* l_ZoneUpdaterTask = nullptr;
-            m_UpdaterTask.WaitAndPop(l_ZoneUpdaterTask);
-
-            l_ZoneUpdaterTask->Call();
-
-            delete l_ZoneUpdaterTask;
+            l_Itr.second->UnloadAll();
+            delete l_Itr.second;
         }
 
-        return true;
+        m_Maps.clear();
     }
 
-    /// Update Maps
     /// @p_Diff : Execution Time
-    void Zone::UpdateMaps(const uint32 p_Diff)
+    void Zone::Update(const uint32 p_Diff)
     {
         /// Update all of our maps
         for (auto l_Itr : m_Maps)

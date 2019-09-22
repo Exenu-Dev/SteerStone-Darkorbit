@@ -48,7 +48,7 @@ enum ClientOpCodes : uint8
     CLIENT_PACKET_INITIALIZE_PLAYER     = 0x69,
     CLIENT_PACKET_PORTAL_JUMP           = 0x6A,
     CLIENT_PACKET_TRADE_ORE             = 0x62,
-    CLIENT_MAX_OPCODE                   = 0x7A
+    CLIENT_MAX_OPCODE                   = 0x7B
 };
 
 enum ServerOpCodes : uint8
@@ -68,7 +68,13 @@ enum ServerOpCodes : uint8
     SERVER_PACKET_CREATE_STATION        = 0x73,
     SERVER_PACKET_SEND_MESSAGE          = 0x41,
     SERVER_PACKET_EVENT                 = 0x44,
-    SERVER_MAX_OPCODE                   = 0x7A,
+    SERVER_PACKET_JUMP_PORTAL           = 0x55,
+    SERVER_PACKET_DISPLAY_STAR_SYSTEM   = 0x7A,
+
+    /// Debug Headless Packets
+    SERVER_PACKET_HEADLESS_MOVE         = 0x21,
+
+    SERVER_MAX_OPCODE                   = 0x7B,
 };
 
 namespace SteerStone { namespace Game { namespace Server {

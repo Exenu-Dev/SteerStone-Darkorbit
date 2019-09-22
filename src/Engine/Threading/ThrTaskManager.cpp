@@ -171,9 +171,6 @@ namespace SteerStone { namespace Core { namespace Threading {
 
         std::lock_guard<std::recursive_mutex> l_Lock(m_Mutex);
 
-        if (m_InclusiveTaskWorkers.empty())
-            return;
-
         if (p_Task->GetTaskType() == TaskType::Critical)
         {
             auto l_It = std::find_if(m_CriticalTaskWorkers.begin(), m_CriticalTaskWorkers.end(), [&p_Task](TaskWorker * p_Worker) -> bool {
@@ -190,6 +187,11 @@ namespace SteerStone { namespace Core { namespace Threading {
             delete l_Worker;
 
             m_CriticalTaskWorkers.erase(l_It);
+        }
+        else if (p_Task->GetTaskType() == TaskType::Moderate)
+        {
+            for (auto l_Worker : m_ExclusiveTaskWorkers)
+                l_Worker->PopTask(p_Task);
         }
         else
         {

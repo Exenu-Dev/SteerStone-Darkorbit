@@ -161,6 +161,41 @@ namespace SteerStone { namespace Game { namespace Server { namespace Packets {
         float PositionY;
     };
 
+    /// SERVER_PACKET_JUMP_PORTAL packet builder
+    class JumpPortal final : public ServerPacket
+    {
+    public:
+        /// Constructor 
+        JumpPortal() : ServerPacket(ServerOpCodes::SERVER_PACKET_JUMP_PORTAL)
+        {
+        }
+
+        //////////////////////////////////////////////////////////////////////////
+        //////////////////////////////////////////////////////////////////////////
+
+        /// Write the packet
+        PacketBuffer const* Write();
+
+        uint32 MapId;
+        uint32 PortalId;
+    };
+
+    /// SERVER_PACKET_DISPLAY_STAR_SYSTEM packet builder
+    class DisplayStarSystem final : public ServerPacket
+    {
+    public:
+        /// Constructor 
+        DisplayStarSystem() : ServerPacket(ServerOpCodes::SERVER_PACKET_DISPLAY_STAR_SYSTEM)
+        {
+        }
+
+        //////////////////////////////////////////////////////////////////////////
+        //////////////////////////////////////////////////////////////////////////
+
+        /// Write the packet
+        PacketBuffer const* Write();
+    };
+
 }   ///< Packets
 }   ///< Server
 }   ///< Game

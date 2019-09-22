@@ -100,7 +100,7 @@ namespace SteerStone { namespace Core { namespace Database {
                 if (!*m_Bind[l_I].is_null)
                 {
                     /// Retrieve our buffer
-                    void* l_Buffer = m_Bind[l_I].buffer;
+                    void* l_Buffer = m_PreparedStatement->GetStatement()->bind[l_I].buffer;
 
                     switch (m_Bind[l_I].buffer_type)
                     {
@@ -125,7 +125,7 @@ namespace SteerStone { namespace Core { namespace Database {
                     m_Results[uint32(m_RowPosition) * m_FieldCount + l_I].SetValue(l_Buffer, MySQLTypeToFieldType(m_Bind[l_I].buffer_type, m_Fields[l_I].flags & UNSIGNED_FLAG ? false : true),
                         l_FetchedLength);
 
-                    /// move buffer pointer to next part
+                    /// Move buffer pointer to next part
                     m_PreparedStatement->GetStatement()->bind[l_I].buffer = (char*)l_Buffer + l_SizeType;
                 }
                 else

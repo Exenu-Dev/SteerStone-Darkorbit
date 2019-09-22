@@ -21,6 +21,8 @@
 #include "Station.hpp"
 #include "Player.hpp"
 #include "Portal.hpp"
+#include "World.hpp"
+#include "ZoneManager.hpp"
 #include "Diagnostic/DiaServerWatch.hpp"
 #include "Database/DatabaseTypes.hpp"
 #include "Database/Database.hpp"
@@ -36,10 +38,13 @@ namespace SteerStone { namespace Game { namespace Map {
         for (uint32 l_X = 0; l_X < GRID_CELLS; l_X++)
             for (uint32 l_Y = 0; l_Y < GRID_CELLS; l_Y++)
                 m_Grids[l_X][l_Y] = new Grid(l_X, l_Y);
+
+        m_IntervalJumpPlayer.SetInterval(sWorldManager->GetIntConfig(World::IntConfigs::INT_CONFIG_JUMP_DELAY));
     }
     /// Deconstructor
     Base::~Base()
     {
+        int i = 0;
     }
 
     /// Get Map Id
@@ -77,6 +82,7 @@ namespace SteerStone { namespace Game { namespace Map {
                 l_Portal->m_Id           = l_Result[0].GetUInt32();
                 l_Portal->m_CompanyId    = static_cast<Company>(l_Result[2].GetUInt16());
                 l_Portal->m_Type         = static_cast<PortalType>(l_Result[3].GetUInt16());
+                l_Portal->m_ToMapId      = l_Result[7].GetUInt32();
                 l_Portal->m_ToPositionX  = l_Result[8].GetFloat();
                 l_Portal->m_ToPositionY  = l_Result[9].GetFloat();
                 l_Portal->SetName(l_Result[1].GetString());
@@ -273,6 +279,20 @@ namespace SteerStone { namespace Game { namespace Map {
         m_Grids[std::get<0>(p_Object->GetGridIndex())][std::get<1>(p_Object->GetGridIndex())]->Remove(p_Object);
     }
 
+    /// Unload Maps
+    void Base::UnloadAll()
+    {
+        for (uint32 l_X = 0; l_X < GRID_CELLS; l_X++)
+        {
+            for (uint32 l_Y = 0; l_Y < GRID_CELLS; l_Y++)
+            {
+                Grid* l_Grid = m_Grids[l_X][l_Y];
+                l_Grid->Unload();
+                delete l_Grid;
+            }
+        }
+    }
+
     /// Move Object
     /// @p_Object : Object being moved
     void Base::Move(Entity::Object* p_Object)
@@ -292,6 +312,55 @@ namespace SteerStone { namespace Game { namespace Map {
         }
 
         m_Grids[std::get<0>(p_Object->GetGridIndex())][std::get<1>(p_Object->GetGridIndex())]->Move(p_Object);
+    }
+
+    /// Add Player to Jump Queue
+    /// @p_ObjectPlayer : Player being added
+    /// @p_ObjectPortal : Portal
+    void Base::AddToJumpQueue(Entity::Object* p_ObjectPlayer, Entity::Object* p_ObjectPortal)
+    {
+        if (p_ObjectPlayer->ToPlayer()->IsJumping())
+            return;
+
+        m_JumpPlayerMutex.lock();
+        m_PlayersToJump[p_ObjectPlayer] = p_ObjectPortal;
+        m_JumpPlayerMutex.unlock();
+    }
+
+    /// Process Jump Queue
+    /// @p_Diff : Execution Time
+    void Base::ProcessJumpQueue(uint32 const p_Diff)
+    {
+        m_IntervalJumpPlayer.Update(p_Diff);
+        if (!m_IntervalJumpPlayer.Passed())
+            return;
+
+        m_JumpPlayerMutex.lock();
+        std::unordered_map<Entity::Object*, Entity::Object*> l_Copy(m_PlayersToJump);
+        m_JumpPlayerMutex.unlock();
+
+        for (auto l_Itr : l_Copy)
+        {
+            /// Remove player from map
+            sZoneManager->RemoveFromMap(l_Itr.first);
+
+            /// Add to map
+            l_Itr.first->SetMap(sZoneManager->GetMap(l_Itr.second->ToPortal()->GetToMapId()));
+
+            l_Itr.first->ToPlayer()->SendDisplayStarSystem();
+            l_Itr.first->GetSpline()->SetPosition(l_Itr.second->ToPortal()->GetToPositionX(), l_Itr.second->ToPortal()->GetToPositionY(),
+                l_Itr.second->ToPortal()->GetToPositionX(), l_Itr.second->ToPortal()->GetToPositionY());
+            l_Itr.first->ToPlayer()->SendInitializeShip();
+            l_Itr.first->ToPlayer()->GetShip()->SendMapUpdate();
+            l_Itr.first->ToPlayer()->GetShip()->SendAmmoUpdate();
+            l_Itr.first->ToPlayer()->SendAccountRank();
+
+            /// Must be called after we send initial login packets
+            sZoneManager->AddToMap(l_Itr.first);
+            l_Itr.first->ToPlayer()->SetIsJumping(false);
+        }
+
+        m_PlayersToJump.clear();
     }
 
     /// Return Grid
@@ -314,6 +383,8 @@ namespace SteerStone { namespace Game { namespace Map {
     /// @p_Diff : Execution Time
     bool Base::Update(uint32 const p_Diff)
     {
+        ProcessJumpQueue(p_Diff);
+
         for (uint32 l_X = 0; l_X < GRID_CELLS; l_X++)
         {
             for (uint32 l_Y = 0; l_Y < GRID_CELLS; l_Y++)

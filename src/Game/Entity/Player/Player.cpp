@@ -17,6 +17,7 @@
 */
 
 #include "Packets/Server/LoginPackets.hpp"
+#include "Packets/Server/MapPackets.hpp"
 #include "Packets/Server/ShipPackets.hpp"
 #include "Packets/Server/MiscPackets.hpp"
 #include "Player.hpp"
@@ -74,6 +75,7 @@ namespace SteerStone { namespace Game { namespace Entity {
         m_EnableBuyFast         = false;
 
         m_LoggedIn              = false;
+        m_Jumping               = false;
         m_Event           = EventType::EVENT_TYPE_NONE;
 
         SetType(Type::OBJECT_TYPE_PLAYER);
@@ -235,6 +237,12 @@ namespace SteerStone { namespace Game { namespace Entity {
             SendPacket(l_DisplaySuccDebugPacket.Write());
         }
     }
+    /// Send Display Star System
+    void Player::SendDisplayStarSystem()
+    {
+        Server::Packets::DisplayStarSystem l_Packet;
+        SendPacket(l_Packet.Write());
+    }
 
     /// Get Ship
     Ship* Player::GetShip()
@@ -283,7 +291,7 @@ namespace SteerStone { namespace Game { namespace Entity {
         if (!m_Socket || !p_PacketBuffer)
             return;
 
-        //LOG_INFO("Packet", "%0", (char*)& p_PacketBuffer->GetContents()[0]);
+        LOG_INFO("Packet", "%0", (char*)& p_PacketBuffer->GetContents()[0]);
 
         m_Socket->SendPacket(p_PacketBuffer);
     }

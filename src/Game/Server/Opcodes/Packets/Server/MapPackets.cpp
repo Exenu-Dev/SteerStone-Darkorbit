@@ -119,6 +119,26 @@ namespace SteerStone { namespace Game { namespace Server { namespace Packets {
         return &m_Buffer;
     }
 
+    /// SERVER_PACKET_JUMP_PORTAL
+    PacketBuffer const* JumpPortal::Write()
+    {
+        m_Buffer.AppendBool(MapId);
+        m_Buffer.AppendBool(PortalId);
+
+        m_Buffer.AppendEndSplitter();
+        m_Buffer.AppendCarriage();
+
+        return &m_Buffer;
+    }
+
+    /// SERVER_PACKET_JUMP_PORTAL
+    PacketBuffer const* DisplayStarSystem::Write()
+    {
+        m_Buffer.AppendCarriage();
+
+        return &m_Buffer;
+    }
+
 }   ///< Packets
 }   ///< Server
 }   ///< Game

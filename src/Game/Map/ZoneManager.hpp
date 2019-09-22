@@ -19,7 +19,7 @@
 #pragma once
 #include <PCH/Precompiled.hpp>
 #include "Singleton/Singleton.hpp"
-#include "Utility/UtiLockedQueue.hpp"
+#include "ZoneUpdater.hpp"
 #include "GameFlags.hpp"
 #include "Zone.hpp"
 
@@ -52,6 +52,9 @@ namespace SteerStone { namespace Game { namespace Map {
         /// @p_Object : Object being removed from map
         void RemoveFromMap(Entity::Object* p_Object);
 
+        /// Unload Maps
+        void UnloadAll();
+
         /// Get Map
         /// @p_Id : Map Id
         Map::Base* GetMap(uint32 const p_Id);
@@ -62,6 +65,7 @@ namespace SteerStone { namespace Game { namespace Map {
 
     private:
         std::unordered_map<uint32, Zone*> m_Zones;
+        ZoneUpdater m_ZoneUpdater;
         Core::Diagnostic::IntervalTimer m_IntervalTimer;
     };
 

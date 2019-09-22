@@ -76,7 +76,7 @@ namespace SteerStone { namespace Game { namespace Map {
         {
             std::unique_lock<std::mutex> l_Guard(m_Lock);
 
-            if (m_Queue.empty() || !m_ShutDown)
+            if (m_Queue.empty() && !m_ShutDown)
                 m_Condition.wait(l_Guard);
 
             if (m_Queue.empty() || m_ShutDown)

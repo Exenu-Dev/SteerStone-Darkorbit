@@ -80,6 +80,9 @@ namespace SteerStone { namespace Game { namespace Map {
         /// @p_Object : Object being removed
         void Remove(Entity::Object* p_Object);
 
+        /// Unload objects from map
+        void Unload();
+
         /// Check if near portal
         /// @p_Object : Object being checked
         Entity::Portal* CanJumpPortal(Entity::Object* p_Object);

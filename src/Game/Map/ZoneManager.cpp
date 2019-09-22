@@ -47,7 +47,7 @@ namespace SteerStone { namespace Game { namespace Map {
     {
         /// There are 29 total maps
         static const int32 l_Maps  = 29;
-        static int32 l_WorkerCount = sConfigManager->GetInt("MapThreads", 1);
+        static int32 l_WorkerCount = sConfigManager->GetInt("MapThreads", 0);
 
         if (l_WorkerCount > l_Maps)
         {
@@ -55,10 +55,8 @@ namespace SteerStone { namespace Game { namespace Map {
             l_WorkerCount = l_Maps;
         }
 
-        LOG_ASSERT(l_WorkerCount, "MapManager", "There must be 1 thread active!");
-
         for (uint32 l_I = 0; l_I < l_WorkerCount; l_I++)
-            m_Zones[l_I] = new Zone(l_I);
+            m_Zones[l_I] = new Zone();
 
         static int16 l_Remainder        = l_Maps % l_WorkerCount;
         static const int16 l_MapCount   = l_Remainder == 0 ? l_Maps : ((l_Maps - l_Remainder) / l_WorkerCount);
@@ -85,9 +83,7 @@ namespace SteerStone { namespace Game { namespace Map {
             }
         }
 
-        /// Now Start the map updates
-        for (auto& l_Itr : m_Zones)
-            l_Itr.second->Start();
+        m_ZoneUpdater.Activate(l_WorkerCount);
     }
 
     void Manager::AddToMap(Entity::Object* p_Object)
@@ -101,13 +97,20 @@ namespace SteerStone { namespace Game { namespace Map {
         p_Object->GetMap()->Remove(p_Object);
     }
 
+    /// Unload Maps
+    void Manager::UnloadAll()
+    {
+        /// Close all operations
+        m_ZoneUpdater.Deactivate();
+    }
+
     /// Get Map
     /// @p_Id : Map Id
     Map::Base* Manager::GetMap(uint32 const p_Id)
     {
-        for (auto l_Itr : m_Zones)
+        for (auto& l_Itr : m_Zones)
         {
-            if (Map::Base * l_Map = l_Itr.second->GetMap(p_Id))
+            if (Map::Base* l_Map = l_Itr.second->GetMap(p_Id))
                 return l_Map;
         }
 
@@ -124,8 +127,16 @@ namespace SteerStone { namespace Game { namespace Map {
         if (!m_IntervalTimer.Passed())
             return;
 
-        for (auto l_Itr : m_Zones)
-            l_Itr.second->ScheduleUpdate(p_Diff);
+        for (auto& l_Itr : m_Zones)
+        {
+            if (m_ZoneUpdater.Activated())
+                m_ZoneUpdater.ScheduleUpdate(l_Itr.second, p_Diff);
+            else
+                l_Itr.second->Update(p_Diff);
+        }
+
+        if (m_ZoneUpdater.Activated())
+            m_ZoneUpdater.Wait();
     }
 
 }   ///< namespace Map

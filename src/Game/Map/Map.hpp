@@ -82,9 +82,21 @@ namespace SteerStone { namespace Game { namespace Map {
         /// @p_Object : Object being removed from map
         void Remove(Entity::Object* p_Object);
 
+        /// Unload Maps
+        void UnloadAll();
+
         /// Move Object
         /// @p_Object : Object being moved
         void Move(Entity::Object* p_Object);
+
+        /// Add Player to Jump Queue
+        /// @p_ObjectPlayer : Player being added
+        /// @p_ObjectPortal : Portal
+        void AddToJumpQueue(Entity::Object* p_ObjectPlayer, Entity::Object* p_ObjectPortal);
+
+        /// Process Jump Queue
+        /// @p_Diff : Execution Time
+        void ProcessJumpQueue(uint32 const p_Diff);
 
         /// Return Grid
         /// @p_Object : Object we are getting grid from
@@ -103,11 +115,13 @@ namespace SteerStone { namespace Game { namespace Map {
         //////////////////////////////////////////////////////////////////////////
 
     private:
-        uint32 m_Id;                                    ///< Map Id
-        Grid* m_Grids[GRID_CELLS][GRID_CELLS];          ///< Grids
-        std::vector<Entity::Object*> m_ConstantObjects; ///< Constant Objects
-        std::mutex m_Mutex;                             ///< Mutex
-
+        uint32 m_Id;                                          ///< Map Id
+        Grid* m_Grids[GRID_CELLS][GRID_CELLS];                ///< Grids
+        std::vector<Entity::Object*> m_ConstantObjects;       ///< Constant Objects
+        std::unordered_map<Entity::Object*, Entity::Object*> m_PlayersToJump;///< Process players to jump
+        Core::Diagnostic::IntervalTimer m_IntervalJumpPlayer; ///< Interval Timer
+        std::mutex m_Mutex;                                   ///< Mutex
+        std::mutex m_JumpPlayerMutex;                         ///< For Jump
     };
 
 }   ///< namespace Map

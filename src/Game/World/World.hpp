@@ -46,6 +46,7 @@ namespace SteerStone { namespace Game { namespace World {
         INT_CONFIG_MAP_INTERVAL,
         INT_CONFIG_CHECK_FOR_PLAYER,
         INT_CONFIG_CHECK_FOR_INTERACTIVE_EVENTS,
+        INT_CONFIG_JUMP_DELAY,
         INT_CONFIG_MAX,
     };
 

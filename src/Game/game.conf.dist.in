@@ -44,8 +44,8 @@ MySQLInstances = 5
 
 ## Map Threads
 ##	Description: Amount of map threads to spawn
-#	Default: 1 (Max 29)
-MapThreads = 1
+#	Default: 3 (Max 29)
+MapThreads = 3
 
 ## Map Update Interval
 ##	Description: How often to update map (in milliseconds)
@@ -55,11 +55,15 @@ MapUpdateInterval = 0
 ## Check For Player
 ##	Description: Check if player exists in a grid (in milliseconds)
 #	Default: 60000
-
 CheckForPlayer = 60000
 
 ## Check For Interactive Events
 ##	Description: Check if player is near interactive event (in milliseconds)
 #	Default: 5000
 CheckForInteractiveEvents = 5000
+
+## Jump Delay
+##	Description: Jump delay when changing maps
+#	Default: 2000 (same as official servers)
+JumpDelay = 2000
 

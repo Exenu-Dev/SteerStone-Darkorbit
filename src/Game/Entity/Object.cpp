@@ -93,7 +93,7 @@ namespace SteerStone { namespace Game { namespace Entity {
     /// Set Map for Object
     void Object::SetMap(Map::Base* p_Map)
     {
-        LOG_ASSERT(p_Map, "Object", "Attempted to assign Object Map to nullptr! for Object %0", GetGUID());
+        //LOG_ASSERT(p_Map, "Object", "Attempted to assign Object Map to nullptr! for Object %0", GetGUID());
 
         m_Map = p_Map;
     }

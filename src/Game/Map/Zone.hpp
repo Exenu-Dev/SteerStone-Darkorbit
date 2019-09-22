@@ -43,29 +43,26 @@ namespace SteerStone { namespace Game { namespace Map {
     {
         DISALLOW_COPY_AND_ASSIGN(Zone);
 
+        friend class ZoneUpdateRequest;
+
         //////////////////////////////////////////////////////////////////////////
         //////////////////////////////////////////////////////////////////////////
 
     public:
         /// Constructor
-        /// @p_WorkerCount : Worker Count
-        Zone(uint32 const p_WorkerCount);
+        Zone();
         /// Deconstructor
         ~Zone();
 
         //////////////////////////////////////////////////////////////////////////
         //////////////////////////////////////////////////////////////////////////
 
-        /// Start Updating Maps
-        void Start();
-
         /// Add a new map
         /// @p_Base : Map being added
         void AddMap(Map::Base* p_Base);
-
         /// Get Map
         /// @p_Id : Map Id
-        Map::Base* GetMap(uint32 const p_Id);
+        Map::Base* GetMap(uint32 const p_Id) const;
 
         /// Add to Map
         /// @p_Object : Object being added to map
@@ -74,28 +71,18 @@ namespace SteerStone { namespace Game { namespace Map {
         /// @p_Object : Object being remvoed from map
         void RemoveObject(Entity::Object* p_Object);
 
-        /// Schedule to update the zone
-        /// @p_Diff : Execution Time
-        void ScheduleUpdate(uint32 const p_Diff);
-
-        /// Update Tasks
-        /// @p_Diff : Execution Time
-        bool Update();
+        /// Unload Maps
+        void UnloadAll();
 
         /// Update Masps
         /// @p_Diff : Execution Time
-        void UpdateMaps(uint32 const p_Diff);
+        void Update(uint32 const p_Diff);
 
         //////////////////////////////////////////////////////////////////////////
         //////////////////////////////////////////////////////////////////////////
 
     private:
         std::unordered_map<uint32, Base*> m_Maps;       ///< Maps
-        Core::Threading::Task::Ptr m_Task;              ///< Update Thread Task
-        ZoneProducer<ZoneUpdaterTask*> m_UpdaterTask;   ///< Updater Task
-
-        uint32 m_WorkerId;                              ///< Worker Id
-        std::mutex m_Mutex;                             ///< Global Mutex
     };
 
 }   ///< namespace Map
