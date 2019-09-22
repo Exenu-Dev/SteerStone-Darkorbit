@@ -19,6 +19,7 @@
 #pragma once
 #include <PCH/Precompiled.hpp>
 #include "Grid.hpp"
+#include "GameFlags.hpp"
 #include <mutex>
 
 namespace SteerStone { namespace Game { namespace Entity {
@@ -52,6 +53,8 @@ namespace SteerStone { namespace Game { namespace Map {
 
         /// Get Map Id
         uint32 GetId() const;
+        /// Get Map Type
+        MapType GetMapType() const;
 
         /// Load Map
         void Load();
@@ -116,6 +119,9 @@ namespace SteerStone { namespace Game { namespace Map {
 
     private:
         uint32 m_Id;                                          ///< Map Id
+        MapType m_MapType;                                    ///< Map Type
+        uint32 m_GridRadiusX;                                 ///< Grid Radius X
+        uint32 m_GridRadiusY;                                 ///< Grid Radius Y
         Grid* m_Grids[GRID_CELLS][GRID_CELLS];                ///< Grids
         std::vector<Entity::Object*> m_ConstantObjects;       ///< Constant Objects
         std::unordered_map<Entity::Object*, Entity::Object*> m_PlayersToJump;///< Process players to jump

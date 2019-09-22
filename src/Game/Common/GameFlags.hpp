@@ -237,3 +237,9 @@ enum class EventType
     EVENT_TYPE_PORTAL  = 1,
     EVENT_TYPE_STATION = 2
 };
+
+enum class MapType
+{
+    MAP_TYPE_NORMAL,
+    MAP_TYPE_BIG
+};

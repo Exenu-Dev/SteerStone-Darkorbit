@@ -34,6 +34,22 @@ namespace SteerStone { namespace Game { namespace Map {
     Base::Base(uint32 const p_Id)
         : m_Id(p_Id)
     { 
+        /// Define size of map
+        switch (p_Id)
+        {
+        case 29: ///< 4-5
+        case 16: ///< 4-4
+            m_MapType = MapType::MAP_TYPE_BIG;
+            m_GridRadiusX = BIG_GRID_SEARCH_RADIUS;
+            m_GridRadiusY = BIG_GRID_SEARCH_RADIUS_HALFED;
+            break;
+        default:
+            m_MapType = MapType::MAP_TYPE_NORMAL;
+            m_GridRadiusX = NORMAL_GRID_SEARCH_RADIUS;
+            m_GridRadiusY = NORMAL_GRID_SEARCH_RADIUS_HALFED;
+            break;
+        }
+
         /// Load Grids
         for (uint32 l_X = 0; l_X < GRID_CELLS; l_X++)
             for (uint32 l_Y = 0; l_Y < GRID_CELLS; l_Y++)
@@ -52,6 +68,11 @@ namespace SteerStone { namespace Game { namespace Map {
     {
         return m_Id;
     }
+    /// Get Map Type
+    MapType Base::GetMapType() const
+    {
+        return m_MapType;
+    }
 
     /// Load Map
     void Base::Load()
@@ -66,7 +87,7 @@ namespace SteerStone { namespace Game { namespace Map {
         uint32 l_StartTime = sServerTimeManager->GetServerTime();
 
         Core::Database::PreparedStatement* l_PreparedStatement = GameDatabase.GetPrepareStatement();
-        l_PreparedStatement->PrepareStatement("SELECT id, name, company, type, map_id, position_x, position_y, to_map_id, to_position_x, to_position_y "
+        l_PreparedStatement->PrepareStatement("SELECT portal_id, name, company, type, map_id, position_x, position_y, to_map_id, to_position_x, to_position_y "
             "FROM portals WHERE map_id = ?");
         l_PreparedStatement->SetUint32(0, m_Id);
         std::unique_ptr<Core::Database::PreparedResultSet> l_PreparedResultSet = l_PreparedStatement->ExecuteStatement();
@@ -182,7 +203,7 @@ namespace SteerStone { namespace Game { namespace Map {
         /// We need to calculate which grid the player will be in
         float l_PositionX = p_Object->GetSpline()->GetPositionX();
         float l_PositionY = p_Object->GetSpline()->GetPositionY();
-        uint32 l_PositionOffset = (l_PositionX + l_PositionY) / GRID_SEARCH_RADIUS;
+        uint32 l_PositionOffset = (l_PositionX + l_PositionY) / m_GridRadiusX;
 
         /// This is a quicker way of determining we are inside the 64 grid range
         if (l_PositionOffset > MAX_GRIDS)
@@ -193,7 +214,7 @@ namespace SteerStone { namespace Game { namespace Map {
         }
 
         /// Now grab the Grid X and Grid Y index
-        float l_GridX = l_PositionX / GRID_SEARCH_RADIUS;
+        float l_GridX = l_PositionX / m_GridRadiusX;
         if (l_GridX < 1)
             l_GridX = 0;
         else
@@ -201,7 +222,7 @@ namespace SteerStone { namespace Game { namespace Map {
 
         /// The width is bigger than the height
         /// Map Size is 21000x14100, so we need to cut the search radius in half to get the index we are looking for
-        float l_GridY = l_PositionY / GRID_SEARCH_RADIUS_HALFED;
+        float l_GridY = l_PositionY / m_GridRadiusY;
         if (l_GridY < 1)
             l_GridY = 0;
         else
@@ -229,7 +250,7 @@ namespace SteerStone { namespace Game { namespace Map {
         /// We need to calculate which grid the player will be in
         float l_PositionX = p_PositionX;
         float l_PositionY = p_PositionY;
-        int32 l_PositionOffset = (l_PositionX + l_PositionY) / GRID_SEARCH_RADIUS;
+        int32 l_PositionOffset = (l_PositionX + l_PositionY) / m_GridRadiusX;
 
         /// This is a quicker way of determining we are inside the 64 grid range
         if (l_PositionOffset > MAX_GRIDS)
@@ -240,12 +261,12 @@ namespace SteerStone { namespace Game { namespace Map {
         }
 
         /// Now grab the Grid X and Grid Y index
-        float l_GridX = l_PositionX / GRID_SEARCH_RADIUS;
+        float l_GridX = l_PositionX / m_GridRadiusX;
         l_GridX = std::ceil(((l_GridX / MAX_GRIDS) * 10)) - 1;
 
         /// The width is bigger than the height
         /// Map Size is 21000x14100, so we need to cut the search radius in half to get the index we are looking for
-        float l_GridY = l_PositionY / GRID_SEARCH_RADIUS_HALFED;
+        float l_GridY = l_PositionY / m_GridRadiusY;
         l_GridY = std::floor((l_GridY / MAX_GRIDS * 10)) - 1;
 
         if (l_GridX < 1)
