@@ -122,8 +122,8 @@ namespace SteerStone { namespace Game { namespace Server { namespace Packets {
     /// SERVER_PACKET_JUMP_PORTAL
     PacketBuffer const* JumpPortal::Write()
     {
-        m_Buffer.AppendBool(MapId);
-        m_Buffer.AppendBool(PortalId);
+        m_Buffer.AppendUInt32(MapId);
+        m_Buffer.AppendUInt32(PortalId);
 
         m_Buffer.AppendEndSplitter();
         m_Buffer.AppendCarriage();
