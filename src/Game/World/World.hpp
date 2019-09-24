@@ -72,7 +72,7 @@ namespace SteerStone { namespace Game { namespace World {
             void Update(uint32 const p_Diff);
             /// Update Players
             /// @p_Diff : Execution Diff
-            void UpdatePlayers(uint32 p_Diff);
+            void ProcessPlayerPackets(uint32 p_Diff);
             /// Stop World Updating
             bool StopWorld() const;
 

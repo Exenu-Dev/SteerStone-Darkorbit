@@ -19,6 +19,7 @@
 #include "Packets/Server/DebugPackets.hpp"
 #include "Packets/Server/MapPackets.hpp"
 #include "Grid.hpp"
+#include "Mob.hpp"
 #include "Portal.hpp"
 #include "Station.hpp"
 #include "Player.hpp"
@@ -51,9 +52,7 @@ namespace SteerStone { namespace Game { namespace Map {
     /// @p_Object : Object being added
     void Grid::Add(Entity::Object* p_Object)
     {
-        std::lock_guard<std::mutex> l_Guard(m_Mutex);
-
-        m_Objects[p_Object->GetGUID()] = p_Object;
+        m_Objects[p_Object->GetObjectGUID().GetCounter()] = p_Object;
 
         /// If a player is joining then set grid to active
         if (p_Object->GetType() == Entity::Type::OBJECT_TYPE_PLAYER)
@@ -63,7 +62,7 @@ namespace SteerStone { namespace Game { namespace Map {
             if (m_State == State::Idle)
                 m_State = State::Active;
 
-            BuildPlayerSpawnAndSend(p_Object);
+            BuildObjectSpawnAndSend(p_Object);
         }
 
         LOG_INFO("Grid", "Added GUID: %0 to Grid: X %1 Y %2", p_Object->GetGUID(), m_GridX, m_GridY);
@@ -72,17 +71,12 @@ namespace SteerStone { namespace Game { namespace Map {
     /// @p_Object : Object being removed
     void Grid::Remove(Entity::Object* p_Object)
     {
-        m_Mutex.lock();
         m_Objects.erase(p_Object->GetGUID());
-        m_Mutex.unlock();
 
         if (p_Object->GetType() == Entity::Type::OBJECT_TYPE_PLAYER)
         {
-            m_Mutex.lock();
             m_Players.erase(p_Object);
-            m_Mutex.unlock();
-
-            BuildPlayerDespawnAndSend(p_Object);
+            BuildObjectDespawnAndSend(p_Object);
         }
 
         LOG_INFO("Grid", "Removed GUID: %0 from Grid: X %1 Y %2", p_Object->GetGUID(), m_GridX, m_GridY);
@@ -126,7 +120,7 @@ namespace SteerStone { namespace Game { namespace Map {
     void Grid::Move(Entity::Object* p_Object)
     {
         Server::Packets::ObjectMove l_Packet;
-        l_Packet.Id        = p_Object->ToPlayer()->GetId();
+        l_Packet.Id        = p_Object->GetObjectGUID().GetCounter();
         l_Packet.PositionX = p_Object->GetSpline()->GetPlannedPositionX();
         l_Packet.PositionY = p_Object->GetSpline()->GetPlannedPositionY();
         l_Packet.Time      = p_Object->GetSpline()->GetDestinationTime();
@@ -134,13 +128,25 @@ namespace SteerStone { namespace Game { namespace Map {
     }
 
     /// Find Player
-    /// @p_Id : Id of Player
+    /// @p_Id : Account Id of Player
     Entity::Object* Grid::FindPlayer(uint32 const p_Id)
     {
         for (auto l_Itr : m_Players)
         {
             if (l_Itr->ToPlayer()->GetId() == p_Id)
                 return l_Itr;
+        }
+
+        return nullptr;
+    }
+    /// Find Object
+    /// @p_Counter : Counter of Object
+    Entity::Object* Grid::FindObject(uint32 const p_Counter)
+    {
+        for (auto l_Itr : m_Objects)
+        {
+            if (l_Itr.second->GetObjectGUID().GetCounter() == p_Counter)
+                return l_Itr.second;
         }
 
         return nullptr;
@@ -275,18 +281,25 @@ namespace SteerStone { namespace Game { namespace Map {
     /// @p_Diff : Execution Time
     bool Grid::Update(uint32 const p_Diff)
     {
-        std::lock_guard<std::mutex> l_Guard(m_Mutex);
-
         CheckForPlayer(p_Diff);
         UpdateInteractiveEvents(p_Diff);
 
-        for (auto l_Itr : m_Objects)
+        /// TODO; This isn't really ideal, because the mobs can move to different grids
+        /// find a better way instead of copying, but this is okay for now
+        std::unordered_map<uint32, Entity::Object*> l_Copy(m_Objects);
+
+        for (auto l_Itr = l_Copy.begin(); l_Itr != l_Copy.end();)
         {
-            if (Entity::Player * l_Player = l_Itr.second->ToPlayer())
+            if (l_Itr->second->GetType() == Entity::Type::OBJECT_TYPE_PLAYER)
             {
-                Server::PlayerMapFilter l_Filter(l_Player);
-                l_Player->Update(p_Diff, l_Filter);
+                Server::PlayerMapFilter l_Filter(l_Itr->second->ToPlayer());
+                l_Itr->second->ToPlayer()->ProcessPacket(l_Filter);
+                l_Itr->second->ToPlayer()->Update(p_Diff);
             }
+            else if (l_Itr->second->GetType() == Entity::Type::OBJECT_TYPE_NPC)
+                l_Itr->second->ToMob()->Update(p_Diff);
+
+            l_Itr = l_Copy.erase(l_Itr);
         }
 
         return false;

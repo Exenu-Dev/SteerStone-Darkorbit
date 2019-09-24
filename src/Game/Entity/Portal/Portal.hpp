@@ -27,7 +27,7 @@
 namespace SteerStone { namespace Game { namespace Entity {
 
     /// Portal
-    class Portal : public Unit
+    class Portal : public Object
     {
         DISALLOW_COPY_AND_ASSIGN(Portal);
 

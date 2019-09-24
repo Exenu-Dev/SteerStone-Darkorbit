@@ -17,6 +17,7 @@
 */
 
 #include "Socket.hpp"
+#include "World.hpp"
 #include "Player.hpp"
 
 namespace SteerStone { namespace Game { namespace Server {
@@ -52,6 +53,11 @@ namespace SteerStone { namespace Game { namespace Server {
 
             switch (l_Opcode)
             {
+                case ClientOpCodes::CLIENT_PACKET_PING:
+                {
+                    HandlePingPacket(new ClientPacket((char*)& l_BufferVec[0]));
+                }
+                break;
                 case ClientOpCodes::CLIENT_PACKET_LOGIN:
                 {
                     if (m_Player)
@@ -61,13 +67,7 @@ namespace SteerStone { namespace Game { namespace Server {
                     }
 
                     HandleLoginPacket(new ClientPacket((char*)& l_BufferVec[0]));
-                }
-                break;
-                case ClientOpCodes::CLIENT_PACKET_PING:
-                {
-                    HandlePingPacket(new ClientPacket((char*)& l_BufferVec[0]));
-                }
-                break;
+                }///< Intended no break
                 default:
                 {
                     #ifndef HEADLESS_DEBUG
@@ -86,15 +86,15 @@ namespace SteerStone { namespace Game { namespace Server {
                     }
 
                     #ifdef STEERSTONE_CORE_DEBUG
-                        else
-                            LOG_INFO("GameSocket", "Received packet %0 from %1", sOpCode->GetClientOpCodeName(l_Opcode), GetRemoteAddress());
+                    ;// else
+                            //LOG_INFO("GameSocket", "Received packet %0 from %1", sOpCode->GetClientOpCodeName(l_Opcode), GetRemoteAddress());
                     #endif
 
                     switch (l_OpCodeHandler->Status)
                     {
                         case PacketStatus::STATUS_AUTHENTICATION:
                         {
-                            if (m_Player || m_Player->IsLoggedIn())
+                            if (!m_Player || m_Player->IsLoggedIn())
                             {
                                 LOG_WARNING("GameSocket", "Recieved opcode %0 from player %1 but player is already in world!", sOpCode->GetClientOpCodeName(l_Opcode), m_Player->GetName());
                                 return true;
@@ -141,9 +141,21 @@ namespace SteerStone { namespace Game { namespace Server {
             LOG_INFO("GameSocket", "Received packet %0 from %1", sOpCode->GetClientOpCodeName(static_cast<ClientOpCodes>(p_Packet->GetHeader())), GetRemoteAddress());
         #endif
 
-        (this->*sOpCode->GetClientPacket(ClientOpCodes::CLIENT_PACKET_LOGIN)->Handler)(p_Packet);
+        /// This is a cheeky way of doing it
+        /// The issue is, if we add the player to the map on player thread,
+        /// there will be a race condition, so initialize the player and then pass the packet to the world thread
+        /// the world thread gets updated before the map thread
+        m_Player              = new Entity::Player(this);
+        m_Player->m_Id        = p_Packet->ReadInt32();
+        m_Player->m_SessionId = p_Packet->ReadString();
 
-        delete p_Packet;
+        if (!m_Player->LoadFromDB())
+        {
+            LOG_WARNING("Player", "Failed to load player details from database. User Id: %0", m_Player->GetId());
+            CloseSocket(); ///< Close socket, nothing we can do without having player stored info
+        }
+        else
+            sWorldManager->AddPlayer(m_Player);
     }
     /// Ping Handler
     /// @p_ClientPacket : Packet recieved from client

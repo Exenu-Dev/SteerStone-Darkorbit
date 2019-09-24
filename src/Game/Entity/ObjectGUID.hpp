@@ -54,7 +54,7 @@ namespace SteerStone { namespace Game { namespace Entity {
         /// Generate Unique Counter
         uint32 Generate()
         {
-            static uint32 l_NextGUID = 0;
+            static uint32 l_NextGUID = 1000000;
             if (l_NextGUID >= GetMaxCounter() - 1)
                 LOG_ASSERT(false, "ObjectGuidGenerator", "Reach maxed 32 interger! Overflow!");
 

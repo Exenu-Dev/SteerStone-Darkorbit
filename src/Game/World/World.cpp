@@ -19,6 +19,7 @@
 #include "World.hpp"
 #include "Player.hpp"
 #include "ZoneManager.hpp"
+#include "ObjectManager.hpp"
 #include "Config/Config.hpp"
 
 namespace SteerStone { namespace Game { namespace World {
@@ -48,6 +49,9 @@ namespace SteerStone { namespace Game { namespace World {
     {
         LoadConfigs();
 
+        sObjectManager->LoadMobTemplate();
+        sObjectManager->LoadPortalTemplate();
+        sObjectManager->LoadStationTemplate();
         sZoneManager->LoadMaps();
     }
 
@@ -59,13 +63,13 @@ namespace SteerStone { namespace Game { namespace World {
         while (m_PlayerQueue.Next(l_Player))
             ProcessPlayer(l_Player);
 
-        UpdatePlayers(p_Diff);
+        ProcessPlayerPackets(p_Diff);
 
         sZoneManager->Update(p_Diff);
     }
     /// Update Players
     /// @p_Diff : Execution Diff
-    void Base::UpdatePlayers(uint32 p_Diff)
+    void Base::ProcessPlayerPackets(uint32 p_Diff)
     {
         for (auto& l_Itr = m_Players.begin(); l_Itr != m_Players.end();)
         {
@@ -75,7 +79,7 @@ namespace SteerStone { namespace Game { namespace World {
 
             Server::WorldUpdateFilter l_Filter(l_Player);
 
-            if (!l_Player->Update(p_Diff, l_Filter))
+            if (!l_Player->ProcessPacket(l_Filter))
             {
                 l_Itr = m_Players.erase(l_Itr);
                 RemovePlayer(l_Player);

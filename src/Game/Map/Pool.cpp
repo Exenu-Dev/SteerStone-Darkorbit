@@ -16,26 +16,13 @@
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "Socket.hpp"
+#include "Pool.hpp"
 #include "Player.hpp"
 #include "World.hpp"
-#include "ZoneManager.hpp"
 
-namespace SteerStone { namespace Game { namespace Server {
+namespace SteerStone { namespace Game { namespace Map {
 
-    /// Login Handler
-    /// @p_ClientPacket : Packet recieved from client
-    void GameSocket::HandleLogin(ClientPacket* p_Packet)
-    {
-        m_Player->SendClientSettings();
-        m_Player->SendInitializeShip();
-        m_Player->GetShip()->SendMapUpdate();
-        m_Player->GetShip()->SendAmmoUpdate();
-        m_Player->SendAccountRank();
-        m_Player->SendLoggedIn();
-        sZoneManager->AddToMap(m_Player);
-    }
 
-}   ///< namespace Server
+}   ///< namespace Map
 }   ///< namespace Game
-}   ///< namespace SteerStone
+}   ///< namespace Steerstone

@@ -27,6 +27,8 @@ namespace SteerStone { namespace Game { namespace Entity {
 
     class Object;
     class Portal;
+    class Mob;
+    class Unit;
 
 }   ///< namespace Entity
 }   ///< namespace Game
@@ -87,24 +89,27 @@ namespace SteerStone { namespace Game { namespace Map {
         /// @p_Object : Object being checked
         Entity::Portal* CanJumpPortal(Entity::Object* p_Object);
 
-        /// Build Player Spawn Packet
+        /// Build Object Spawn Packet
         /// @p_Object : Object being built
-        void BuildPlayerSpawnAndSend(Entity::Object* p_Object);
+        void BuildObjectSpawnAndSend(Entity::Object* p_Object);
         /// Build Player Spawn Packet
         /// @p_ObjectBuilt : Object being built
         /// @p_Object      : Object
         Server::PacketBuffer const BuildPlayerSpawn(Entity::Object* p_ObjectBuilt, Entity::Object* p_Object);
-        /// Build Player Despawn Packet
+        /// Build Object Despawn Packet
         /// @p_Object : Object being built
-        void BuildPlayerDespawnAndSend(Entity::Object* p_Object);
+        void BuildObjectDespawnAndSend(Entity::Object* p_Object);
 
         /// Move Object
         /// @p_Object : Object being moved
         void Move(Entity::Object* p_Object);
 
         /// Find Player
-        /// @p_Id : Id of Player
+        /// @p_Id : Account Id of Player
         Entity::Object* FindPlayer(uint32 const p_Id);
+        /// Find Object
+        /// @p_Counter : Counter of Object
+        Entity::Object* FindObject(uint32 const p_Counter);
 
         /// Send Packet to everyone
         /// @p_Packet : Packing being sent

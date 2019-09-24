@@ -89,7 +89,7 @@ namespace SteerStone { namespace Game { namespace Server {
             void HandleObjectMove(ClientPacket* p_Packet);
             /// Map Handler
             /// @p_ClientPacket : Packet recieved from client
-            void HandleInitializePlayer(ClientPacket* p_Packet);
+            void HandleInitializeOpponent(ClientPacket* p_Packet);
             /// Map Handler
             /// @p_ClientPacket : Packet recieved from client
             void HandlePortalJump(ClientPacket* p_Packet);

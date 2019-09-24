@@ -18,7 +18,7 @@
 
 #pragma once
 #include <PCH/Precompiled.hpp>
-#include "Grid.hpp"
+#include "PoolManager.hpp"
 #include "GameFlags.hpp"
 #include <mutex>
 
@@ -51,10 +51,13 @@ namespace SteerStone { namespace Game { namespace Map {
         //////////////////////////////////////////////////////////////////////////
         //////////////////////////////////////////////////////////////////////////
 
-        /// Get Map Id
-        uint32 GetId() const;
-        /// Get Map Type
-        MapType GetMapType() const;
+        /// Getter Functions
+        uint32 GetId()          const { return m_Id;          }
+        MapType GetMapType()    const { return m_MapType;     }
+        uint32 GetGridRadiusX() const { return m_GridRadiusX; }
+        uint32 GetGridRadiusY() const { return m_GridRadiusY; }
+        uint32 GetMapSizeX()   const  { return m_MapSizeX;    }
+        uint32 GetMapSizeY()   const  { return m_MapSizeY;    }
 
         /// Load Map
         void Load();
@@ -63,6 +66,8 @@ namespace SteerStone { namespace Game { namespace Map {
         void LoadPortals();
         /// Load Stations to map
         void LoadStations();
+        /// Load Mobs to map
+        void LoadMobs();
 
         /// Send Objects which always appear on map regardless of what grid user is in
         /// @p_Object : Packet being sent to
@@ -105,6 +110,10 @@ namespace SteerStone { namespace Game { namespace Map {
         /// @p_Object : Object we are getting grid from
         Grid* GetGrid(Entity::Object const* p_Object);
 
+        /// Find Object in map
+        /// @p_Counter : Counter of object
+        Entity::Object* FindObject(uint32 const p_Counter);
+
         /// Send Packet to everyone in map
         /// @p_PacketBuffer : Packet being sent to
         void SendPacketEveryone(Server::PacketBuffer const* p_PacketBuffer);
@@ -122,7 +131,10 @@ namespace SteerStone { namespace Game { namespace Map {
         MapType m_MapType;                                    ///< Map Type
         uint32 m_GridRadiusX;                                 ///< Grid Radius X
         uint32 m_GridRadiusY;                                 ///< Grid Radius Y
+        uint32 m_MapSizeX;                                    ///< Map Size X
+        uint32 m_MapSizeY;                                    ///< Map Size Y
         Grid* m_Grids[GRID_CELLS][GRID_CELLS];                ///< Grids
+        PoolManager m_PoolManager;                                ///< Pool Manager
         std::vector<Entity::Object*> m_ConstantObjects;       ///< Constant Objects
         std::unordered_map<Entity::Object*, Entity::Object*> m_PlayersToJump;///< Process players to jump
         Core::Diagnostic::IntervalTimer m_IntervalJumpPlayer; ///< Interval Timer

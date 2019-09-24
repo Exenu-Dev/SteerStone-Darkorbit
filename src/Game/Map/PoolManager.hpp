@@ -19,53 +19,50 @@
 #pragma once
 #include <PCH/Precompiled.hpp>
 #include "Core/Core.hpp"
-#include "Unit.hpp"
-#include "GameFlags.hpp"
+#include "Pool.hpp"
 
-#define STATION_RADIUS 500ul
+namespace SteerStone { namespace Game { namespace Map {
 
-namespace SteerStone { namespace Game { namespace Entity {
+    class Base;
 
-    /// Portal
-    class Station : public Object
+    /// Pool Manager
+    class PoolManager
     {
-        DISALLOW_COPY_AND_ASSIGN(Station);
+        DISALLOW_COPY_AND_ASSIGN(PoolManager);
 
         //////////////////////////////////////////////////////////////////////////
         //////////////////////////////////////////////////////////////////////////
-
-    public:
-        friend class Map::Base;
 
     public:
         /// Constructor
-        Station();
+        /// @p_Map : Reference of map
+        PoolManager(Base* p_Map);
         /// Deconstructor
-        ~Station();
+        ~PoolManager();
 
         //////////////////////////////////////////////////////////////////////////
         //////////////////////////////////////////////////////////////////////////
+    
+    public:
+        /// Initialize Pool for map
+        void Initialize();
 
-        /// Is Object near Station
-        /// @p_Object : Object being checked
-        bool IsInStationRadius(Entity::Object* p_Object);
-
-        /// Getters Functions
-        uint32 GetId()         const { return m_Id;          }
-        Company GetCompany()   const { return m_CompanyId;   }
-        StationType GetType()  const { return m_Type;        }
-        bool IsPeace()         const { return m_Peace;       }
+        /// Update Pool
+        /// @p_Diff : Execution Time
+        void Update(uint32 const p_Diff);
 
         //////////////////////////////////////////////////////////////////////////
         //////////////////////////////////////////////////////////////////////////
+    
+    private:
+        /// Load Mobs into pool
+        void InitializeMobs();
 
     private:
-        uint32 m_Id;
-        Company m_CompanyId;
-        StationType m_Type;
-        bool m_Peace;
+        Pool<Entity::Mob*> m_MobPool;
+        Base* m_Map;
     };
 
-}   ///< namespace Entity
+}   ///< namespace Map
 }   ///< namespace Game
 }   ///< namespace Steerstone

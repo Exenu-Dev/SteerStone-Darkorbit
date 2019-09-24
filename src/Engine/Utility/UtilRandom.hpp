@@ -20,7 +20,7 @@
 #pragma once
 #include <PCH/Precompiled.hpp>
 #include "Core/Core.hpp"
-#include "Singleton.hpp"
+#include "Singleton/Singleton.hpp"
 
 #include <limits>
 

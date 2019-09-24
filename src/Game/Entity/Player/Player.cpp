@@ -30,7 +30,6 @@ namespace SteerStone { namespace Game { namespace Entity {
     /// @p_GameSocket : Socket
     Player::Player(Server::GameSocket* p_GameSocket) :
         m_Socket(p_GameSocket ? p_GameSocket->Shared<Server::GameSocket>() : nullptr),
-        m_GUID(GUIDType::Player),
         m_Ship(this)
     {
         m_Id                    = 0;
@@ -41,11 +40,6 @@ namespace SteerStone { namespace Game { namespace Entity {
         m_Level                  = 0;
         m_Experience             = 0;
         m_Honor                  = 0;
-        m_GatesAchieved          = 0;
-        m_ClanId                 = 0;
-        m_ClanName.clear();
-        m_CompanyId              = Company::NOMAD;
-        m_Rank                   = 0;
         m_Premium                = 0;
 
         m_DisplayBoost          = false;
@@ -79,7 +73,6 @@ namespace SteerStone { namespace Game { namespace Entity {
         m_Event           = EventType::EVENT_TYPE_NONE;
 
         SetType(Type::OBJECT_TYPE_PLAYER);
-        SetGUID(ObjectGUID(GUIDType::Player));
     }
     /// Deconstructor
     Player::~Player()
@@ -123,7 +116,7 @@ namespace SteerStone { namespace Game { namespace Entity {
             m_GatesAchieved             = l_Result[7].GetUInt16();
             m_ClanId                    = l_Result[8].GetUInt32();
             m_ClanName                  = l_Result[9].GetString();
-            m_CompanyId                 = static_cast<Company>(l_Result[10].GetUInt16());
+            m_Company                   = static_cast<Company>(l_Result[10].GetUInt16());
             m_Rank                      = l_Result[11].GetUInt16();
             m_Premium                   = l_Result[12].GetBool();
 
@@ -155,6 +148,16 @@ namespace SteerStone { namespace Game { namespace Entity {
 
             /// Now load ship details
             m_Ship.LoadFromDB();
+
+            #ifdef  HEADLESS_DEBUG
+                if (m_Id == 4)
+                {
+                    static uint32 l_Counter = 4;
+                    m_Id = l_Counter++;
+                }
+            #endif
+
+            SetGUID(ObjectGUID(GUIDType::Player, 0, m_Id));
 
             return true;
         }
@@ -198,9 +201,9 @@ namespace SteerStone { namespace Game { namespace Entity {
     void Player::SendInitializeShip()
     {
         Server::Packets::InitializeShip l_Packet;
-        l_Packet.Id             = m_Id;
+        l_Packet.Id             = GetObjectGUID().GetCounter();
         l_Packet.Username       = GetName();
-        l_Packet.CompanyId      = static_cast<uint16>(m_CompanyId);
+        l_Packet.CompanyId      = static_cast<uint16>(m_Company);
         l_Packet.ClanId         = m_ClanId;
         l_Packet.IsPremium      = m_Premium;
         l_Packet.Experience     = m_Experience;
@@ -251,12 +254,29 @@ namespace SteerStone { namespace Game { namespace Entity {
     }
 
     /// Update Player
-    /// @p_Diff         : Execution Time
-    /// @p_PacketFilter : Type of packet
-    bool Player::Update(uint32 p_Diff, Server::PacketFilter& p_PacketFilter)
+    /// @p_Diff : Execution Time
+    bool Player::Update(uint32 p_Diff)
     {
         Core::Diagnostic::StopWatch l_StopWatch;
         l_StopWatch.Start();
+
+        Unit::Update(p_Diff);
+
+        m_OperatorProcessor.ProcessOperators();
+
+        l_StopWatch.Stop();
+        if (l_StopWatch.GetElapsed() > 20)
+            LOG_WARNING("Player", "Took more than 20ms to update Player!");
+
+        return true;
+    }
+
+    /// Process Packets
+    /// @p_PacketFilter : Type of packet
+    bool Player::ProcessPacket(Server::PacketFilter& p_PacketFilter)
+    {
+        if (!m_Socket || m_Socket->IsClosed())
+            return false;
 
         Server::ClientPacket* l_ClientPacket = nullptr;
         while (m_Socket && m_RecievedQueue.Next(l_ClientPacket, p_PacketFilter))
@@ -265,15 +285,6 @@ namespace SteerStone { namespace Game { namespace Entity {
             m_Socket->ExecutePacket(l_OpCodeHandler, l_ClientPacket);
             delete l_ClientPacket;
         }
-
-        if (!m_Socket || m_Socket->IsClosed())
-            return false;
-
-        m_OperatorProcessor.ProcessOperators();
-
-        l_StopWatch.Stop();
-        if (l_StopWatch.GetElapsed() > 20)
-            LOG_WARNING("Player", "Took more than 20ms to update Player!");
 
         return true;
     }
@@ -290,6 +301,8 @@ namespace SteerStone { namespace Game { namespace Entity {
     {
         if (!m_Socket || !p_PacketBuffer)
             return;
+
+        //LOG_INFO("Packet", "%0", (char*)& p_PacketBuffer->GetContents()[0]);
 
         m_Socket->SendPacket(p_PacketBuffer);
     }

@@ -19,6 +19,7 @@
 #include "Player.hpp"
 #include "Station.hpp"
 #include "Portal.hpp"
+#include "ZoneManager.hpp"
 
 namespace SteerStone { namespace Game { namespace Entity {
 
@@ -32,6 +33,7 @@ namespace SteerStone { namespace Game { namespace Entity {
     /// Deconstructor
     Object::~Object()
     {
+        sZoneManager->RemoveFromMap(this);
     }
 
     //////////////////////////////////////////////////////////////////////////
@@ -68,9 +70,9 @@ namespace SteerStone { namespace Game { namespace Entity {
         m_ObjectGUID = p_ObjectGUID;
     }
     /// Return Object GUID
-    const ObjectGUID* Object::GetObjectGUID()
+    ObjectGUID const& Object::GetObjectGUID()
     {
-        return &m_ObjectGUID;
+        return m_ObjectGUID;
     }
     /// Returns Object GUID
     uint64 Object::GetGUID() const
@@ -93,7 +95,7 @@ namespace SteerStone { namespace Game { namespace Entity {
     /// Set Map for Object
     void Object::SetMap(Map::Base* p_Map)
     {
-        //LOG_ASSERT(p_Map, "Object", "Attempted to assign Object Map to nullptr! for Object %0", GetGUID());
+        LOG_ASSERT(p_Map, "Object", "Attempted to assign Object Map to nullptr! for Object %0", GetGUID());
 
         m_Map = p_Map;
     }
@@ -134,6 +136,14 @@ namespace SteerStone { namespace Game { namespace Entity {
     {
         if (GetType() == Type::OBJECT_TYPE_STATION)
             return reinterpret_cast<Station*>(this);
+
+        return nullptr;
+    }
+    /// To Mob Class
+    Mob* Object::ToMob()
+    {
+        if (GetType() == Type::OBJECT_TYPE_NPC)
+            return reinterpret_cast<Mob*>(this);
 
         return nullptr;
     }

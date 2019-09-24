@@ -30,15 +30,10 @@ namespace SteerStone { namespace Game { namespace Entity {
         : m_Player(p_Player)
     {
         m_ShipId         = PlayerShips::Phoenix;
-        m_Shield         = 0;
-        m_MaxShield      = 0;
-        m_HitPoints      = 0;
-        m_MaxHitPoints   = 0;
         m_CargoSpace     = 0;
         m_MaxCargoSpace  = 0;
         m_MaxBattery     = 0;
         m_MaxRockets     = 0;
-        m_WeaponState    = 0;
         m_UseSystemFont  = 0;
     }
     /// Deconstructor
@@ -64,34 +59,34 @@ namespace SteerStone { namespace Game { namespace Entity {
 
             m_ShipId        = static_cast<PlayerShips>(l_Result[0].GetUInt16());
             m_Player->GetSpline()->SetSpeed(l_Result[1].GetUInt32());
-            m_Shield        = l_Result[2].GetInt32();
-            m_MaxShield     = l_Result[3].GetUInt32();
-            m_HitPoints     = l_Result[4].GetInt32();
-            m_MaxHitPoints  = l_Result[5].GetUInt32();
-            m_CargoSpace    = l_Result[6].GetUInt32();
-            m_MaxCargoSpace = l_Result[7].GetUInt32();
+            m_Player->m_Shield          = l_Result[2].GetInt32();
+            m_Player->m_MaxShield       = l_Result[3].GetUInt32();
+            m_Player->m_HitPoints       = l_Result[4].GetInt32();
+            m_Player->m_MaxHitPoints    = l_Result[5].GetUInt32();
+            m_CargoSpace                = l_Result[6].GetUInt32();
+            m_MaxCargoSpace             = l_Result[7].GetUInt32();
 
             m_Player->GetSpline()->SetPosition(l_Result[8].GetFloat(), l_Result[9].GetFloat(), l_Result[8].GetFloat(), l_Result[9].GetFloat());
             m_Player->SetMap(sZoneManager->GetMap(l_Result[10].GetUInt32()));
 
-            m_MaxBattery    = l_Result[11].GetUInt32();
-            m_MaxRockets    = l_Result[12].GetUInt32();
-            m_WeaponState   = l_Result[13].GetUInt16();
-            m_UseSystemFont = l_Result[14].GetBool();
+            m_MaxBattery                = l_Result[11].GetUInt32();
+            m_MaxRockets                = l_Result[12].GetUInt32();
+            m_Player->m_WeaponState     = l_Result[13].GetUInt16();
+            m_UseSystemFont             = l_Result[14].GetBool();
 
-            m_Ammo.m_BatteryLCB10   = l_Result[15].GetInt32();
-            m_Ammo.m_BatteryMCB25   = l_Result[16].GetInt32();
-            m_Ammo.m_BatteryMCB50   = l_Result[17].GetInt32();
-            m_Ammo.m_BatteryUCB100  = l_Result[18].GetInt32();
-            m_Ammo.m_BatterySAB50   = l_Result[19].GetInt32();
+            m_Ammo.m_BatteryLCB10       = l_Result[15].GetInt32();
+            m_Ammo.m_BatteryMCB25       = l_Result[16].GetInt32();
+            m_Ammo.m_BatteryMCB50       = l_Result[17].GetInt32();
+            m_Ammo.m_BatteryUCB100      = l_Result[18].GetInt32();
+            m_Ammo.m_BatterySAB50       = l_Result[19].GetInt32();
 
-            m_Ammo.m_RocketR310     = l_Result[20].GetInt32();
-            m_Ammo.m_RocketPLT2026  = l_Result[21].GetInt32();
-            m_Ammo.m_RocketPLT2021  = l_Result[22].GetInt32();
+            m_Ammo.m_RocketR310         = l_Result[20].GetInt32();
+            m_Ammo.m_RocketPLT2026      = l_Result[21].GetInt32();
+            m_Ammo.m_RocketPLT2021      = l_Result[22].GetInt32();
 
-            m_Ammo.m_Mines          = l_Result[23].GetInt32();
-            m_Ammo.m_SmartBombs     = l_Result[24].GetInt32();
-            m_Ammo.m_InstantShields = l_Result[25].GetInt32();
+            m_Ammo.m_Mines              = l_Result[23].GetInt32();
+            m_Ammo.m_SmartBombs         = l_Result[24].GetInt32();
+            m_Ammo.m_InstantShields     = l_Result[25].GetInt32();
 
             return true;
         }
@@ -105,10 +100,10 @@ namespace SteerStone { namespace Game { namespace Entity {
     {
         p_Packet.ShipId         = static_cast<uint16>(m_ShipId);
         p_Packet.Speed          = m_Player->GetSpline()->GetSpeed();
-        p_Packet.Shield         = m_Shield;
-        p_Packet.MaxShield      = m_MaxShield;
-        p_Packet.HitPoints      = m_HitPoints;
-        p_Packet.m_MaxHitPoints = m_MaxHitPoints;
+        p_Packet.Shield         = m_Player->m_Shield;
+        p_Packet.MaxShield      = m_Player->m_MaxShield;
+        p_Packet.HitPoints      = m_Player->m_HitPoints;
+        p_Packet.m_MaxHitPoints = m_Player->m_MaxHitPoints;
         p_Packet.CargoSpace     = m_CargoSpace;
         p_Packet.MaxCargoSpace  = m_MaxCargoSpace;
         p_Packet.PositionX      = m_Player->GetSpline()->GetPositionX();
@@ -116,7 +111,7 @@ namespace SteerStone { namespace Game { namespace Entity {
         p_Packet.MapId          = m_Player->GetMap()->GetId();
         p_Packet.MaxBattery     = m_MaxBattery;
         p_Packet.MaxRockets     = m_MaxRockets;
-        p_Packet.WeaponState    = m_WeaponState;
+        p_Packet.WeaponState    = m_Player->m_WeaponState;
     }
     /// Send Map update
     void Ship::SendMapUpdate()

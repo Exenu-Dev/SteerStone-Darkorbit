@@ -18,54 +18,32 @@
 
 #pragma once
 #include <PCH/Precompiled.hpp>
-#include "Core/Core.hpp"
-#include "Unit.hpp"
+#include "Grid.hpp"
 #include "GameFlags.hpp"
 
-#define STATION_RADIUS 500ul
+namespace SteerStone { namespace Game { namespace Map {
 
-namespace SteerStone { namespace Game { namespace Entity {
-
-    /// Portal
-    class Station : public Object
+    /// Mob Pool
+    template <typename T> class Pool
     {
-        DISALLOW_COPY_AND_ASSIGN(Station);
-
         //////////////////////////////////////////////////////////////////////////
         //////////////////////////////////////////////////////////////////////////
-
     public:
-        friend class Map::Base;
-
-    public:
-        /// Constructor
-        Station();
-        /// Deconstructor
-        ~Station();
-
-        //////////////////////////////////////////////////////////////////////////
-        //////////////////////////////////////////////////////////////////////////
-
-        /// Is Object near Station
-        /// @p_Object : Object being checked
-        bool IsInStationRadius(Entity::Object* p_Object);
-
-        /// Getters Functions
-        uint32 GetId()         const { return m_Id;          }
-        Company GetCompany()   const { return m_CompanyId;   }
-        StationType GetType()  const { return m_Type;        }
-        bool IsPeace()         const { return m_Peace;       }
+        /// Add to pool
+        /// @p_Grid : Grid Target
+        /// @p_Object : Object being added
+        void Add(Grid* p_Grid, T p_Object)
+        {
+            m_Pool[p_Grid].push_back(p_Object);
+        }
 
         //////////////////////////////////////////////////////////////////////////
         //////////////////////////////////////////////////////////////////////////
 
     private:
-        uint32 m_Id;
-        Company m_CompanyId;
-        StationType m_Type;
-        bool m_Peace;
+        std::map<Grid*, std::vector<T>> m_Pool;
     };
 
-}   ///< namespace Entity
+}   ///< namespace Map
 }   ///< namespace Game
 }   ///< namespace Steerstone

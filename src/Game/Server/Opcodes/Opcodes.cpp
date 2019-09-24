@@ -52,13 +52,13 @@ namespace SteerStone { namespace Game { namespace Server {
     /// Load our packets into storages to be accessed later
     void OpCodes::InitializePackets()
     {
-        StoreClientPacket(ClientOpCodes::CLIENT_PACKET_LOGIN,             "CLIENT_PACKET_LOGIN",              PacketStatus::STATUS_AUTHENTICATION, PacketProcess::PROCESS_PLAYER_THREAD, &GameSocket::HandleLogin               );
+        StoreClientPacket(ClientOpCodes::CLIENT_PACKET_LOGIN,             "CLIENT_PACKET_LOGIN",              PacketStatus::STATUS_AUTHENTICATION, PacketProcess::PROCESS_WORLD_THREAD,  &GameSocket::HandleLogin               );
         StoreClientPacket(ClientOpCodes::CLIENT_PACKET_CHANGE_LASER,      "CLIENT_PACKET_CHANGE_LASER",       PacketStatus::STATUS_LOGGED_IN,      PacketProcess::PROCESS_WORLD_THREAD,  &GameSocket::HandleChangeLaser         );
         StoreClientPacket(ClientOpCodes::CLIENT_PACKET_CHANGE_ROCKET,     "CLIENT_PACKET_CHANGE_ROCKET",      PacketStatus::STATUS_LOGGED_IN,      PacketProcess::PROCESS_WORLD_THREAD,  &GameSocket::HandleChangeRocket        );
         StoreClientPacket(ClientOpCodes::CLIENT_PACKET_PING,              "CLIENT_PACKET_PING",               PacketStatus::STATUS_LOGGED_IN,      PacketProcess::PROCESS_PLAYER_THREAD, &GameSocket::HandleClient              );
         StoreClientPacket(ClientOpCodes::CLIENT_PACKET_OBJECT_MOVE,       "CLIENT_PACKET_OBJECT_MOVE",        PacketStatus::STATUS_LOGGED_IN,      PacketProcess::PROCESS_MAP_THREAD,    &GameSocket::HandleObjectMove          );
-        StoreClientPacket(ClientOpCodes::CLIENT_PACKET_INITIALIZE_PLAYER, "CLIENT_PACKET_INITIALIZE_PLAYER",  PacketStatus::STATUS_LOGGED_IN,      PacketProcess::PROCESS_MAP_THREAD,    &GameSocket::HandleInitializePlayer    );
-        StoreClientPacket(ClientOpCodes::CLIENT_PACKET_PORTAL_JUMP,       "CLIENT_PACKET_PORTAL_JUMP",        PacketStatus::STATUS_LOGGED_IN,      PacketProcess::PROCESS_WORLD_THREAD,    &GameSocket::HandlePortalJump          );
+        StoreClientPacket(ClientOpCodes::CLIENT_PACKET_INITIALIZE_SHIP,   "CLIENT_PACKET_INITIALIZE_SHIP",    PacketStatus::STATUS_LOGGED_IN,      PacketProcess::PROCESS_MAP_THREAD,    &GameSocket::HandleInitializeOpponent  );
+        StoreClientPacket(ClientOpCodes::CLIENT_PACKET_PORTAL_JUMP,       "CLIENT_PACKET_PORTAL_JUMP",        PacketStatus::STATUS_LOGGED_IN,      PacketProcess::PROCESS_MAP_THREAD,    &GameSocket::HandlePortalJump          );
         StoreClientPacket(ClientOpCodes::CLIENT_PACKET_TRADE_ORE,         "CLIENT_PACKET_TRADE_ORE",          PacketStatus::STATUS_LOGGED_IN,      PacketProcess::PROCESS_PLAYER_THREAD, &GameSocket::HandleNULL                );
 
         //////////////////////////////////////////////////////////////////////////

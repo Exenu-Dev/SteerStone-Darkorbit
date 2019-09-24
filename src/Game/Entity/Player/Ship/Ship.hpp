@@ -102,61 +102,50 @@ namespace SteerStone { namespace Game { namespace Entity {
     /// Ship Data for player class
     class Ship
     {
-        friend class Player;
-
-        public:
-            /// Constructor
-            /// @p_Player : Player
-            Ship(Player* p_Player);
-            /// Deconstructor
-            ~Ship();
+    public:
+        /// Constructor
+        /// @p_Player : Player
+        Ship(Player* p_Player);
+        /// Deconstructor
+        ~Ship();
 
         //////////////////////////////////////////////////////////////////////////
         //////////////////////////////////////////////////////////////////////////
 
-            /// Load player details from database
-            bool LoadFromDB();
+    public:
+        /// Load player details from database
+        bool LoadFromDB();
 
-            /// Send ship details
-            /// @p_Packet : Packet being formed
-            void FormulateInitializeShip(Server::Packets::InitializeShip& p_Packet);
-            /// Send Map update
-            void SendMapUpdate();
-            /// Send Battery, Rocket and mine update
-            void SendAmmoUpdate();
+        /// Send ship details
+        /// @p_Packet : Packet being formed
+        void FormulateInitializeShip(Server::Packets::InitializeShip& p_Packet);
+        /// Send Map update
+        void SendMapUpdate();
+        /// Send Battery, Rocket and mine update
+        void SendAmmoUpdate();
 
-            /// Get Ammo
-            Ammo* GetAmmo();
+        /// Get Ammo
+        Ammo* GetAmmo();
 
-            PlayerShips GetShipId()     const { return m_ShipId;            }
-            int32 GetShield()           const { return m_Shield;            }
-            uint32 GetMaxShield()       const { return m_MaxShield;         }
-            int32 GetHitPoints()        const { return m_HitPoints;         }
-            uint32 GetHitMaxPoints()    const { return m_MaxHitPoints;      }
-            uint32 GetCargoSpace()      const { return m_CargoSpace;        }
-            uint32 GetMaxCargoSpace()   const { return m_MaxCargoSpace;     }
-            uint32 GetMaxBattery()      const { return m_MaxBattery;        }
-            uint16 GetWeaponState()     const { return m_WeaponState;       }
-            bool UseSystemFont()        const { return m_UseSystemFont;     }
+        PlayerShips GetShipId()     const { return m_ShipId;                 }
+        uint32 GetCargoSpace()      const { return m_CargoSpace;             }
+        uint32 GetMaxCargoSpace()   const { return m_MaxCargoSpace;          }
+        uint32 GetMaxBattery()      const { return m_MaxBattery;             }
+        bool UseSystemFont()        const { return m_UseSystemFont;          }
 
-        //////////////////////////////////////////////////////////////////////////
-        //////////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////////
 
-        private:
-            PlayerShips m_ShipId;
-            int32 m_Shield;
-            uint32 m_MaxShield;
-            int32 m_HitPoints;
-            uint32 m_MaxHitPoints;
-            uint32 m_CargoSpace;
-            uint32 m_MaxCargoSpace;
-            uint32 m_MaxBattery;
-            uint32 m_MaxRockets;
-            uint16 m_WeaponState;
-            bool m_UseSystemFont;
-            Ammo m_Ammo;
+    protected:
+        PlayerShips m_ShipId;
+        uint32 m_CargoSpace;
+        uint32 m_MaxCargoSpace;
+        uint32 m_MaxBattery;
+        uint32 m_MaxRockets;
+        bool m_UseSystemFont;
+        Ammo m_Ammo;
 
-            Player* m_Player;   ///< Player
+        Player* m_Player;   ///< Player
     };
 
 }   ///< namespace Entity

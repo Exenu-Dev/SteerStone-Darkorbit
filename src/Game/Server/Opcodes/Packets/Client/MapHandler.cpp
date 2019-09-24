@@ -40,25 +40,19 @@ namespace SteerStone { namespace Game { namespace Server {
         float l_PrevPositionY = static_cast<float>(p_Packet->ReadUInt32());
 
         m_Player->GetSpline()->Move(l_NewPositionX, l_NewPositionY, 0, 0);
-
-
     }
     /// Map Handler
     /// @p_ClientPacket : Packet recieved from client
-    void GameSocket::HandleInitializePlayer(ClientPacket* p_Packet)
+    void GameSocket::HandleInitializeOpponent(ClientPacket* p_Packet)
     {
         uint32 l_Id = p_Packet->ReadUInt32();
 
-        /// Attempt to find player in grid
-        Entity::Object* l_Player = m_Player->GetMap()->GetGrid(m_Player)->FindPlayer(l_Id);
+        /// Attempt to find player in map
+        Entity::Object* l_Object = m_Player->GetMap()->FindObject(l_Id);
 
-        /// If not find in world
-        if (!l_Player)
-            l_Player = sWorldManager->FindPlayer(l_Id);
-        
-        LOG_ASSERT(l_Player, "World", "Cannot find player Id: %0", l_Id);
+        LOG_ASSERT(l_Object, "Map", "Cannot find player Id: %0", l_Id);
 
-        m_Player->SendPacket(&m_Player->GetMap()->GetGrid(m_Player)->BuildPlayerSpawn(l_Player, m_Player));
+        m_Player->SendPacket(&m_Player->GetMap()->GetGrid(m_Player)->BuildPlayerSpawn(l_Object, m_Player));
     }
 
     /// Map Handler
@@ -73,7 +67,7 @@ namespace SteerStone { namespace Game { namespace Server {
             /// Send Packet
             Server::Packets::JumpPortal l_Packet;
             l_Packet.MapId      = l_Portal->GetToMapId();
-            l_Packet.PortalId   = l_Portal->GetId();
+            l_Packet.PortalId   = l_Portal->GetObjectGUID().GetCounter();
             m_Player->SendPacket(l_Packet.Write());
 
             m_Player->GetMap()->AddToJumpQueue(m_Player, l_Portal);

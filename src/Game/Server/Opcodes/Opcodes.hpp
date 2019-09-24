@@ -45,7 +45,7 @@ enum ClientOpCodes : uint8
     CLIENT_PACKET_CHANGE_ROCKET         = 0x64,
     CLIENT_PACKET_PING                  = 0x50,
     CLIENT_PACKET_OBJECT_MOVE           = 0x31,
-    CLIENT_PACKET_INITIALIZE_PLAYER     = 0x69,
+    CLIENT_PACKET_INITIALIZE_SHIP       = 0x69,
     CLIENT_PACKET_PORTAL_JUMP           = 0x6A,
     CLIENT_PACKET_TRADE_ORE             = 0x62,
     CLIENT_MAX_OPCODE                   = 0x7B

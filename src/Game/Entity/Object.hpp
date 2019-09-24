@@ -36,6 +36,7 @@ namespace SteerStone { namespace Game { namespace Entity {
     class Player;
     class Portal;
     class Station;
+    class Mob;
 
     class Object
     {
@@ -70,7 +71,7 @@ namespace SteerStone { namespace Game { namespace Entity {
         /// @p_ObjectGUID : Object GUID
         void SetGUID(ObjectGUID& p_ObjectGUID);
         /// Return Object GUID
-        const ObjectGUID* GetObjectGUID();
+        ObjectGUID const& GetObjectGUID();
         /// Returns Object GUID
         uint64 GetGUID() const;
 
@@ -95,6 +96,8 @@ namespace SteerStone { namespace Game { namespace Entity {
         Portal* ToPortal();
         /// To Station Class
         Station* ToStation();
+        /// To Mob Class
+        Mob* ToMob();
 
     //////////////////////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////////////////////

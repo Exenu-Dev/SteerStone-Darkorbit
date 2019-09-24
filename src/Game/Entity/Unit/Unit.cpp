@@ -24,17 +24,33 @@ namespace SteerStone { namespace Game { namespace Entity {
     /// Constructor
     Unit::Unit()
     {
+        m_Shield         = 0;
+        m_MaxShield      = 0;
+        m_HitPoints      = 0;
+        m_MaxHitPoints   = 0;
+        m_GatesAchieved  = 0;
+        m_ClanId         = 0;
+        m_ClanName.clear();
+        m_Company        = Company::NOMAD;
+        m_Rank           = 0;
+        m_WeaponState    = 0;
+
         SetType(Type::OBJECT_TYPE_NPC);
         SetGUID(ObjectGUID(GUIDType::NPC));
     }
     /// Deconstructor
     Unit::~Unit()
     {
-        sZoneManager->RemoveFromMap(this);
     }
 
     //////////////////////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////////////////////
+
+    /// Update
+    /// @p_Diff : Execution Time
+    void Unit::Update(uint32 const p_Diff)
+    {
+    }
 
 }   ///< namespace Entity
 }   ///< namespace Game
