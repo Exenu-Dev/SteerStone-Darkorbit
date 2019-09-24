@@ -52,7 +52,7 @@ namespace SteerStone { namespace Game { namespace Server {
 
         LOG_ASSERT(l_Object, "Map", "Cannot find player Id: %0", l_Id);
 
-        m_Player->SendPacket(&m_Player->GetMap()->GetGrid(m_Player)->BuildPlayerSpawn(l_Object, m_Player));
+        m_Player->SendPacket(&m_Player->GetMap()->GetGrid(m_Player)->BuildObjectSpawn(l_Object, m_Player));
     }
 
     /// Map Handler

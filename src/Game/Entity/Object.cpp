@@ -114,7 +114,11 @@ namespace SteerStone { namespace Game { namespace Entity {
     {
         return &m_Spline;
     }
-
+    /// To Unit Class
+    Unit* Object::ToUnit()
+    {
+        return reinterpret_cast<Unit*>(this);
+    }
     /// To Player Class
     Player* Object::ToPlayer()
     {

@@ -61,6 +61,7 @@ namespace SteerStone { namespace Game { namespace Map {
                 m_Grids[l_X][l_Y] = new Grid(l_X, l_Y);
 
         m_IntervalJumpPlayer.SetInterval(sWorldManager->GetIntConfig(World::IntConfigs::INT_CONFIG_JUMP_DELAY));
+        m_IntervalDelayRemoval.SetInterval(sWorldManager->GetIntConfig(World::IntConfigs::INT_CONFIG_DELAY_REMOVAL));
     }
     /// Deconstructor
     Base::~Base()
@@ -205,6 +206,13 @@ namespace SteerStone { namespace Game { namespace Map {
     {
         m_Grids[std::get<0>(p_Object->GetGridIndex())][std::get<1>(p_Object->GetGridIndex())]->Remove(p_Object);
     }
+    /// Delay Removal
+    /// @p_Player : Player
+    /// @p_Object : Object
+    void Base::AddToDelayRemoval(Entity::Object* p_Player, Entity::Object* p_Object)
+    {
+        m_DelayRemoval[p_Player].insert(p_Object);
+    }
 
     /// Unload Maps
     void Base::UnloadAll()
@@ -325,11 +333,61 @@ namespace SteerStone { namespace Game { namespace Map {
                 m_Grids[l_X][l_Y]->SendPacketEveryone(p_PacketBuffer);
     }
 
+    void Base::UpdateRemoval(uint32 const p_Diff)
+    {
+        m_IntervalDelayRemoval.Update(p_Diff);
+        if (!m_IntervalDelayRemoval.Passed())
+        {
+            for (auto l_Itr : m_DelayRemoval)
+            {
+                for (auto l_SecondItr = l_Itr.second.begin(); l_SecondItr != l_Itr.second.end();)
+                {
+                    /// If unit is dead, remove from client
+                    if ((*l_SecondItr)->ToUnit()->GetDeathState() == Entity::DeathState::DEAD)
+                    {
+                        Server::Packets::DespawnShip l_Packet;
+                        l_Packet.Id = (*l_SecondItr)->GetObjectGUID().GetCounter();
+                        l_Itr.first->ToPlayer()->SendPacket(l_Packet.Write());
+
+                        l_SecondItr = l_Itr.second.erase(l_SecondItr);
+                    }
+                    else
+                    {
+                        Server::Packets::ObjectMove l_Packet;
+                        l_Packet.Id        = (*l_SecondItr)->GetObjectGUID().GetCounter();
+                        l_Packet.PositionX = (*l_SecondItr)->GetSpline()->GetPlannedPositionX();
+                        l_Packet.PositionY = (*l_SecondItr)->GetSpline()->GetPlannedPositionY();
+                        l_Packet.Time      = (*l_SecondItr)->GetSpline()->GetDestinationTime();
+                        l_Itr.first->ToPlayer()->SendPacket(l_Packet.Write());
+
+                        l_SecondItr++;
+                    }
+                }
+            }
+
+            return;
+        }
+
+        /// Now remove from client
+        for (auto l_Itr : m_DelayRemoval)
+        {
+            for (auto l_SecondItr : l_Itr.second)
+            {
+                Server::Packets::DespawnShip l_Packet;
+                l_Packet.Id = l_SecondItr->GetObjectGUID().GetCounter();
+                l_Itr.first->ToPlayer()->SendPacket(l_Packet.Write());
+            }
+        }
+
+        m_DelayRemoval.clear();
+    }
+
     /// Update Maps
     /// @p_Diff : Execution Time
     bool Base::Update(uint32 const p_Diff)
     {
         ProcessJumpQueue(p_Diff);
+        UpdateRemoval(p_Diff);
 
         for (uint32 l_X = 0; l_X < GRID_CELLS; l_X++)
         {

@@ -59,6 +59,7 @@ namespace SteerStone { namespace Game { namespace Entity {
         uint32 GetClanId()         const { return m_ClanId;         }
         std::string GetClanName()  const { return m_ClanName;       }
         uint16 GetWeaponState()    const { return m_WeaponState;    }
+        uint16 GetDeathState()     const { return m_DeathState;     }
 
         /// Update
         /// @p_Diff : Execution Time
@@ -79,6 +80,7 @@ namespace SteerStone { namespace Game { namespace Entity {
         uint32 m_ClanId;
         std::string m_ClanName;
         uint16 m_WeaponState;
+        uint16 m_DeathState;
 
     //////////////////////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////////////////////

@@ -19,13 +19,15 @@
 #pragma once
 #include <PCH/Precompiled.hpp>
 
-#define MAX_GRIDS 64
-#define GRID_CELLS 8
+#define MAX_GRIDS 64ul
+#define GRID_CELLS 8ul
 
-#define NORMAL_MAP_SIZE_X 21000
-#define NORMAL_MAP_SIZE_Y 14100
+#define NORMAL_MAP_SIZE_X 21000ul
+#define NORMAL_MAP_SIZE_Y 14100ul
 
-#define BIG_MAP_SIZE_X 42000
-#define BIG_MAP_SIZE_Y 28200
+#define BIG_MAP_SIZE_X 42000ul
+#define BIG_MAP_SIZE_Y 28200ul
 
-#define MAX_MAP_ID 29
+#define IN_SCREEN_RADIUS 300ul
+
+#define MAX_MAP_ID 29ul

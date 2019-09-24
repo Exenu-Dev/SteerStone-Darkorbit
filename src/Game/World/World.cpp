@@ -101,6 +101,7 @@ namespace SteerStone { namespace Game { namespace World {
         m_IntConfigs[IntConfigs::INT_CONFIG_CHECK_FOR_PLAYER]             = sConfigManager->GetInt("CheckForPlayer", 60000);
         m_IntConfigs[IntConfigs::INT_CONFIG_CHECK_FOR_INTERACTIVE_EVENTS] = sConfigManager->GetInt("CheckForInteractiveEvents", 5000);
         m_IntConfigs[IntConfigs::INT_CONFIG_JUMP_DELAY]                   = sConfigManager->GetInt("JumpDelay", 2000);
+        m_IntConfigs[IntConfigs::INT_CONFIG_DELAY_REMOVAL]                = sConfigManager->GetInt("DelayRemoval", 5000);
     }
 
     /// Returns bool value

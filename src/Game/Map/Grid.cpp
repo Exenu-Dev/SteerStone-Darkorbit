@@ -25,6 +25,7 @@
 #include "Player.hpp"
 #include "World.hpp"
 #include "Database/DatabaseTypes.hpp"
+#include "Utility/UtilMaths.hpp"
 
 namespace SteerStone { namespace Game { namespace Map {
 
@@ -76,6 +77,7 @@ namespace SteerStone { namespace Game { namespace Map {
         if (p_Object->GetType() == Entity::Type::OBJECT_TYPE_PLAYER)
         {
             m_Players.erase(p_Object);
+
             BuildObjectDespawnAndSend(p_Object);
         }
 

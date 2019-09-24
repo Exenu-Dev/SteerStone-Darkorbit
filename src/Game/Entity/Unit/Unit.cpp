@@ -34,6 +34,7 @@ namespace SteerStone { namespace Game { namespace Entity {
         m_Company        = Company::NOMAD;
         m_Rank           = 0;
         m_WeaponState    = 0;
+        m_DeathState     = DeathState::ALIVE;
 
         SetType(Type::OBJECT_TYPE_NPC);
         SetGUID(ObjectGUID(GUIDType::NPC));

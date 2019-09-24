@@ -10,8 +10,8 @@
 
 ## Game Port
 #   Description: TCP port to reach the server.
-#   Default: 37120
-GamePort = 37120
+#   Default: 5152
+GamePort = 5152
 
 ## BindIP
 #	Description: Bind server to Ip/Host Name
@@ -67,5 +67,10 @@ CheckForInteractiveEvents = 5000
 ##	Description: Jump delay when changing maps
 #	Default: 2000 (same as official servers)
 JumpDelay = 2000
+
+## Delay Removal
+##	Description: When to remove Object(s) from client
+#	Default: 5000
+DelayRemoval = 5000
 
 ### MOB SETTINGS ###

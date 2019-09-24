@@ -95,7 +95,7 @@ namespace SteerStone { namespace Game { namespace Map {
         /// Build Player Spawn Packet
         /// @p_ObjectBuilt : Object being built
         /// @p_Object      : Object
-        Server::PacketBuffer const BuildPlayerSpawn(Entity::Object* p_ObjectBuilt, Entity::Object* p_Object);
+        Server::PacketBuffer const BuildObjectSpawn(Entity::Object* p_ObjectBuilt, Entity::Object* p_Object);
         /// Build Object Despawn Packet
         /// @p_Object : Object being built
         void BuildObjectDespawnAndSend(Entity::Object* p_Object);

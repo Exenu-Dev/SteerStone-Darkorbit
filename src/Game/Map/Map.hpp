@@ -50,6 +50,7 @@ namespace SteerStone { namespace Game { namespace Map {
 
         //////////////////////////////////////////////////////////////////////////
         //////////////////////////////////////////////////////////////////////////
+    public:
 
         /// Getter Functions
         uint32 GetId()          const { return m_Id;          }
@@ -89,6 +90,10 @@ namespace SteerStone { namespace Game { namespace Map {
         /// Remove Object from map
         /// @p_Object : Object being removed from map
         void Remove(Entity::Object* p_Object);
+        /// Delay Removal
+        /// @p_Player : Player
+        /// @p_Object : Object
+        void AddToDelayRemoval(Entity::Object* p_Player, Entity::Object* p_Object);
 
         /// Unload Maps
         void UnloadAll();
@@ -118,6 +123,10 @@ namespace SteerStone { namespace Game { namespace Map {
         /// @p_PacketBuffer : Packet being sent to
         void SendPacketEveryone(Server::PacketBuffer const* p_PacketBuffer);
 
+        /// Update Removal
+        /// @p_Diff : Execution Time
+        void UpdateRemoval(uint32 const p_Diff);
+
         /// Update Maps
         /// @p_Diff : Execution Time
         bool Update(uint32 const p_Diff);
@@ -134,8 +143,10 @@ namespace SteerStone { namespace Game { namespace Map {
         uint32 m_MapSizeX;                                    ///< Map Size X
         uint32 m_MapSizeY;                                    ///< Map Size Y
         Grid* m_Grids[GRID_CELLS][GRID_CELLS];                ///< Grids
-        PoolManager m_PoolManager;                                ///< Pool Manager
+        PoolManager m_PoolManager;                            ///< Pool Manager
         std::vector<Entity::Object*> m_ConstantObjects;       ///< Constant Objects
+        std::unordered_map<Entity::Object*, std::set<Entity::Object*>> m_DelayRemoval; ///< Delay Removal
+        Core::Diagnostic::IntervalTimer m_IntervalDelayRemoval; ///< Interval Timer
         std::unordered_map<Entity::Object*, Entity::Object*> m_PlayersToJump;///< Process players to jump
         Core::Diagnostic::IntervalTimer m_IntervalJumpPlayer; ///< Interval Timer
         std::mutex m_Mutex;                                   ///< Mutex

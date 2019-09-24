@@ -20,6 +20,7 @@
 #include "Grid.hpp"
 #include "Mob.hpp"
 #include "Player.hpp"
+#include "Utility/UtilMaths.hpp"
 
 namespace SteerStone { namespace Game { namespace Map {
     
@@ -108,7 +109,7 @@ namespace SteerStone { namespace Game { namespace Map {
     /// Build Player Spawn Packet
     /// @p_ObjectBuilt : Object being built
     /// @p_Object      : Object
-    Server::PacketBuffer const Grid::BuildPlayerSpawn(Entity::Object* p_ObjectBuilt, Entity::Object* p_Object)
+    Server::PacketBuffer const Grid::BuildObjectSpawn(Entity::Object* p_ObjectBuilt, Entity::Object* p_Object)
     {
         Server::Packets::SpawnShip l_Packet;
 
@@ -165,9 +166,18 @@ namespace SteerStone { namespace Game { namespace Map {
                 }
             }
 
-            Server::Packets::DespawnShip l_Packet;
-            l_Packet.Id = l_Itr.second->GetObjectGUID().GetCounter();
-            p_Object->ToPlayer()->SendPacket(l_Packet.Write());
+            if (Core::Utils::IsInSquareRadius(p_Object->GetSpline()->GetPositionX(), p_Object->GetSpline()->GetPositionY(),
+                l_Itr.second->GetSpline()->GetPositionX(), l_Itr.second->GetSpline()->GetPositionY(), IN_SCREEN_RADIUS))
+            {
+                if (!p_Object->ToPlayer()->IsJumping())
+                    p_Object->GetMap()->AddToDelayRemoval(p_Object, l_Itr.second);
+            }
+            else
+            {
+                Server::Packets::DespawnShip l_Packet;
+                l_Packet.Id = l_Itr.second->GetObjectGUID().GetCounter();
+                p_Object->ToPlayer()->SendPacket(l_Packet.Write());
+            }
         }
     }
 }   ///< namespace Map

@@ -33,6 +33,7 @@ namespace SteerStone { namespace Game { namespace Entity {
         OBJECT_TYPE_STATION = 4
     };
 
+    class Unit;
     class Player;
     class Portal;
     class Station;
@@ -90,6 +91,8 @@ namespace SteerStone { namespace Game { namespace Entity {
         /// Get Spline
         Spline* GetSpline();
 
+        /// To Unit Class
+        Unit* ToUnit();
         /// To Player Class
         Player* ToPlayer();
         /// To Portal Class
