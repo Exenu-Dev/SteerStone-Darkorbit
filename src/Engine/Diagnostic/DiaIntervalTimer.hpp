@@ -62,6 +62,12 @@ namespace SteerStone { namespace Core { namespace Diagnostic {
             m_Interval = p_Interval;
         }
 
+        /// Reset current time back to 0
+        void ResetCurrent()
+        {
+            m_Current = 0;
+        }
+
         /// Get Interval
         uint32 GetInterval() const
         {

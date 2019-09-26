@@ -20,9 +20,9 @@
 #include <PCH/Precompiled.hpp>
 
 #include "Core/Core.hpp"
-#include "Socket.hpp"
 #include "Ship/Ship.hpp"
 #include "Unit/Unit.hpp"
+#include "SurroundingObject.hpp"
 #include "Database/OperatorProcessor.hpp"
 #include "Utility/UtiLockedQueue.hpp"
 
@@ -30,131 +30,175 @@ namespace SteerStone { namespace Game { namespace Entity {
 
     class Server::ClientPacket;
 
+    typedef std::unordered_map<uint64, std::unique_ptr<SurroundingObject>> SurroundingMap;
+
     /// Main entry for session in world
     class Player : public Unit
     {
-        DISALLOW_COPY_AND_ASSIGN(Player);
+    DISALLOW_COPY_AND_ASSIGN(Player);
 
-        friend class Server::GameSocket;
-        friend class Ship;
+    friend class Server::GameSocket;
+    friend class Ship;
 
-        //////////////////////////////////////////////////////////////////////////
-        //////////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////////
 
-        public:
-            /// Constructor
-            /// @p_GameSocket : Socket
-            Player(Server::GameSocket* p_GameSocket);
-            /// Deconstructor
-            virtual ~Player();
+    public:
+        /// Constructor
+        /// @p_GameSocket : Socket
+        Player(Server::GameSocket* p_GameSocket);
+        /// Deconstructor
+        ~Player();
 
-        //////////////////////////////////////////////////////////////////////////
-        //////////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////////
 
-            /// Load player details from database
-            bool LoadFromDB();
+        ///////////////////////////////////////////
+        //              GENERAL
+        ///////////////////////////////////////////
 
-            /// Send Client In-game settings
-            void SendClientSettings();
-            /// Send ship details
-            void SendInitializeShip();
-            /// Send Logged In
-            void SendLoggedIn();
-            /// Send Account Rank
-            void SendAccountRank();
-            /// Send Display Star System
-            void SendDisplayStarSystem();
+        /// Load Player Info from database
+        bool LoadFromDB();
 
-            /// Get Ship
-            Ship* GetShip();
+        /// Remove player from world
+        void RemoveFromWorld();
 
-            /// Update Player
-            /// @p_Diff         : Execution Time
-            bool Update(uint32 p_Diff);
+        /// Update Player
+        /// @p_Diff : Execution Time
+        bool Update(uint32 p_Diff);
 
-            /// Process Packets
-            /// @p_PacketFilter : Type of packet
-            bool ProcessPacket(Server::PacketFilter& p_PacketFilter);
+        ///////////////////////////////////////////
+        //        SURROUNDING SYSTEM
+        ///////////////////////////////////////////
+    public:
+        /// Add Object to surrounding
+        /// @p_Object : Object being added
+        void AddToSurrounding(Object* p_Object);
+        /// Remove Object from being despawned
+        /// @p_Object : Object
+        void RemoveScheduleDespawn(Object* p_Object);
+        /// Check if Object is in surrounding
+        /// @p_Object     : Object being checked
+        bool IsInSurrounding(Object* p_Object);
+        /// Schedule all surroundings to be despawned
+        void ScheduleSurroundingsForDespawn();
+        /// Clear and despawn all surroundings
+        void ClearSurroundings();
+        /// Send Packet to surroundings
+        /// @p_PacketBuffer : Packet being sent
+        void SendPacketToSurroundings(Server::PacketBuffer const* p_PacketBuffer);
+    private:
+        /// Update Surroundings
+        /// @p_Diff : Execution Time
+        void UpdateSurroundings(uint32 const p_Diff);
 
-            /// Queue Packet
-            /// @_ClientPacket : Packet being queued
-            void QueuePacket(Server::ClientPacket* p_ClientPacket);
-            /// Send Packet
-            /// @p_PacketBuffer : Packet Buffer
-            void SendPacket(Server::PacketBuffer const* p_PacketBuffer);
-            /// Kick Player from world
-            void KickPlayer();
+        ///////////////////////////////////////////
+        //              PACKETS
+        ///////////////////////////////////////////
+    public:
+        /// Send Client In-game settings
+        void SendClientSettings();
+        /// Send ship details
+        void SendInitializeShip();
+        /// Send Logged In
+        void SendLoggedIn();
+        /// Send Account Rank
+        void SendAccountRank();
+        /// Send Display Star System
+        void SendDisplayStarSystem();
+        /// Process Packets
+        /// @p_PacketFilter : Type of packet
+        bool ProcessPacket(Server::PacketFilter& p_PacketFilter);
+        /// Queue Packet
+        /// @_ClientPacket : Packet being queued
+        void QueuePacket(Server::ClientPacket* p_ClientPacket);
+        /// Send Packet
+        /// @p_PacketBuffer : Packet Buffer
+        void SendPacket(Server::PacketBuffer const* p_PacketBuffer);
+        /// Kick Player from world
+        void KickPlayer();
 
-            /// Getters Function
-            uint32 GetId()             const     { return m_Id;             }
-            std::string GetSessionId() const     { return m_SessionId;      }
-            uint32 GetUridium()        const     { return m_Uridium;        }
-            uint32 GetCredits()        const     { return m_Credits;        }
-            uint32 GetJackPot()        const     { return m_Jackpot;        }
-            uint32 GetLevel()          const     { return m_Level;          }
-            uint32 GetExperience()     const     { return m_Experience;     }
-            uint32 GetHonor()          const     { return m_Honor;          }
-            bool IsPremium()           const     { return m_Premium;        }
-            bool IsLoggedIn()          const     { return m_LoggedIn;       }
-            bool IsJumping()           const     { return m_Jumping;        }
-            EventType GetEvent()       const     { return m_Event;          } 
-            std::shared_ptr<Server::GameSocket> ToSocket() { return m_Socket; }
+        ///////////////////////////////////////////
+        //            GETTERS/SETTERS
+        ///////////////////////////////////////////
+    public:
+        /// Getters Function
+        uint32 GetId()             const     { return m_Id;             }
+        std::string GetSessionId() const     { return m_SessionId;      }
+        uint32 GetUridium()        const     { return m_Uridium;        }
+        uint32 GetCredits()        const     { return m_Credits;        }
+        uint32 GetJackPot()        const     { return m_Jackpot;        }
+        uint32 GetLevel()          const     { return m_Level;          }
+        uint32 GetExperience()     const     { return m_Experience;     }
+        uint32 GetHonor()          const     { return m_Honor;          }
+        bool IsPremium()           const     { return m_Premium;        }
+        bool IsLoggedIn()          const     { return m_LoggedIn;       }
+        bool IsJumping()           const     { return m_Jumping;        }
+        Ship* GetShip()                      { return &m_Ship;          }
+        EventType GetEvent()       const     { return m_Event;          } 
+        bool IsScheduledForDeletion() const  { return m_ScheduledForDeletion; }
+        std::shared_ptr<Server::GameSocket> ToSocket() { return m_Socket; }
             
-            /// Setters Function
-            void SetEventType(EventType const p_EventType) { m_Event = p_EventType; }
-            void SetIsJumping(bool const p_Jumping)        { m_Jumping = p_Jumping; }
+        /// Setters Function
+        void SetEventType(EventType const p_EventType) { m_Event = p_EventType;         }
+        void SetIsJumping(bool const p_Jumping)        { m_Jumping = p_Jumping;         }
+        void SetScheduleForDeletion()                  { m_ScheduledForDeletion = true; }
 
-        //////////////////////////////////////////////////////////////////////////
-        //////////////////////////////////////////////////////////////////////////
+        Core::Diagnostic::IntervalTimer IntervalDeletionRemoval;
 
-        private:
-            /// Stored Player Info
-            uint32 m_Id;
-            ObjectGUID m_GUID;
-            std::string m_SessionId;
-            uint32 m_Uridium;
-            uint32 m_Credits;
-            uint32 m_Jackpot;
-            uint32 m_Level;
-            uint32 m_Experience;
-            uint32 m_Honor;
-            bool m_Premium;
+    //////////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////////
 
-            /// Player Settings
-            bool m_DisplayBoost;
-            bool m_DisplayDamage;
-            bool m_DisplayAllLas;
-            bool m_DisplayExploration;
-            bool m_DisplayName;
-            bool m_DisplayFirmIcon;
-            bool m_DisplayAlphaBG;
-            bool m_IgnoreRes;
-            bool m_IgnoreBox;
-            bool m_ConvertGates;
-            bool m_ConvertOppo;
-            bool m_SoundOff;
-            bool m_BackgroundMusicOff;
-            bool m_DisplayStatus;
-            bool m_DisplayBubble;
-            uint32 m_SelectedLaser;
-            uint32 m_SelectedRocket;
-            bool m_DisplayDigits;
-            bool m_DisplayChat;
-            bool m_DisplayDrones;
-            bool m_ShowStarSystem;
-            bool m_IgnoreCargo;
-            bool m_IgnoreHostileCargo;
-            bool m_AutoChangeAmmo;
-            bool m_EnableBuyFast;
+    private:
+        /// Stored Player Info
+        uint32 m_Id;
+        ObjectGUID m_GUID;
+        std::string m_SessionId;
+        uint32 m_Uridium;
+        uint32 m_Credits;
+        uint32 m_Jackpot;
+        uint32 m_Level;
+        uint32 m_Experience;
+        uint32 m_Honor;
+        bool m_Premium;
 
-            bool m_LoggedIn;
-            bool m_Jumping;
-            EventType m_Event;
+        /// Player Settings
+        bool m_DisplayBoost;
+        bool m_DisplayDamage;
+        bool m_DisplayAllLas;
+        bool m_DisplayExploration;
+        bool m_DisplayName;
+        bool m_DisplayFirmIcon;
+        bool m_DisplayAlphaBG;
+        bool m_IgnoreRes;
+        bool m_IgnoreBox;
+        bool m_ConvertGates;
+        bool m_ConvertOppo;
+        bool m_SoundOff;
+        bool m_BackgroundMusicOff;
+        bool m_DisplayStatus;
+        bool m_DisplayBubble;
+        uint32 m_SelectedLaser;
+        uint32 m_SelectedRocket;
+        bool m_DisplayDigits;
+        bool m_DisplayChat;
+        bool m_DisplayDrones;
+        bool m_ShowStarSystem;
+        bool m_IgnoreCargo;
+        bool m_IgnoreHostileCargo;
+        bool m_AutoChangeAmmo;
+        bool m_EnableBuyFast;
 
-            Core::Utils::LockedQueue<Server::ClientPacket*> m_RecievedQueue; ///< Packets
-            Ship m_Ship;                                                     ///< Ship
-            std::shared_ptr<Server::GameSocket> m_Socket;                    ///< Socket
-            Core::Database::OperatorProcessor m_OperatorProcessor;           ///< Process Asynchronous Queries
+        bool m_LoggedIn;
+        bool m_Jumping;
+        bool m_ScheduledForDeletion;
+        EventType m_Event;
+
+        Ship m_Ship;                                                     ///< Ship
+        SurroundingMap m_Surroundings;                                   ///< Objects surrounding player
+        std::shared_ptr<Server::GameSocket> m_Socket;                    ///< Socket
+        Core::Database::OperatorProcessor m_OperatorProcessor;           ///< Process Asynchronous Queries
+        Core::Utils::LockedQueue<Server::ClientPacket*> m_RecievedQueue; ///< Packets
     };
 
 }   ///< namespace Entity

@@ -40,7 +40,7 @@ enum class PacketProcess
 
 enum ClientOpCodes : uint8
 {
-    CLIENT_PACKET_LOGIN                 = 0x4C,
+    CLIENT_PACKET_LOGIN                 = 0x21,
     CLIENT_PACKET_CHANGE_LASER          = 0x75,
     CLIENT_PACKET_CHANGE_ROCKET         = 0x64,
     CLIENT_PACKET_PING                  = 0x50,
@@ -48,6 +48,9 @@ enum ClientOpCodes : uint8
     CLIENT_PACKET_INITIALIZE_SHIP       = 0x69,
     CLIENT_PACKET_PORTAL_JUMP           = 0x6A,
     CLIENT_PACKET_TRADE_ORE             = 0x62,
+    CLIENT_PACKET_SELECT_TARGET         = 0x4C,
+    CLIENT_PACKET_LASER_SHOOT           = 0x61,
+    CLIENT_PACKET_ABORT_LASER           = 0X47,
     CLIENT_MAX_OPCODE                   = 0x7B
 };
 
@@ -70,6 +73,7 @@ enum ServerOpCodes : uint8
     SERVER_PACKET_EVENT                 = 0x44,
     SERVER_PACKET_JUMP_PORTAL           = 0x55,
     SERVER_PACKET_DISPLAY_STAR_SYSTEM   = 0x7A,
+    SERVER_PACKET_LASER_SHOOT           = 0x61,
 
     /// Debug Headless Packets
     SERVER_PACKET_HEADLESS_MOVE         = 0x21,

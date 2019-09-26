@@ -99,29 +99,17 @@ namespace SteerStone { namespace Game { namespace Entity {
     void Ship::FormulateInitializeShip(Server::Packets::InitializeShip& p_Packet)
     {
         p_Packet.ShipId         = static_cast<uint16>(m_ShipId);
-        p_Packet.Speed          = m_Player->GetSpline()->GetSpeed();
-        p_Packet.Shield         = m_Player->m_Shield;
-        p_Packet.MaxShield      = m_Player->m_MaxShield;
-        p_Packet.HitPoints      = m_Player->m_HitPoints;
-        p_Packet.m_MaxHitPoints = m_Player->m_MaxHitPoints;
         p_Packet.CargoSpace     = m_CargoSpace;
         p_Packet.MaxCargoSpace  = m_MaxCargoSpace;
-        p_Packet.PositionX      = m_Player->GetSpline()->GetPositionX();
-        p_Packet.PositionY      = m_Player->GetSpline()->GetPositionY();
-        p_Packet.MapId          = m_Player->GetMap()->GetId();
         p_Packet.MaxBattery     = m_MaxBattery;
         p_Packet.MaxRockets     = m_MaxRockets;
-        p_Packet.WeaponState    = m_Player->m_WeaponState;
     }
     /// Send Map update
     void Ship::SendMapUpdate()
     {
         Server::Packets::MapUpdate l_MapUpdatePacket;
         l_MapUpdatePacket.MapId = m_Player->GetMap()->GetId();
-
-        /// TODO; Mini map seems to also update the background
-        /// maybe this packet has a purpose, not sure yet
-        //m_Player->SendPacket(l_MapUpdatePacket.Write());
+        m_Player->SendPacket(l_MapUpdatePacket.Write());
 
         Server::Packets::MiniMapUpdate l_MiniMapUpdatePacket;
         l_MiniMapUpdatePacket.MapId = m_Player->GetMap()->GetId();

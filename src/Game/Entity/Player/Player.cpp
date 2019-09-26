@@ -21,6 +21,8 @@
 #include "Packets/Server/ShipPackets.hpp"
 #include "Packets/Server/MiscPackets.hpp"
 #include "Player.hpp"
+#include "World.hpp"
+#include "ZoneManager.hpp"
 #include "Database/DatabaseTypes.hpp"
 #include "Diagnostic/DiaStopWatch.hpp"
 
@@ -70,7 +72,9 @@ namespace SteerStone { namespace Game { namespace Entity {
 
         m_LoggedIn              = false;
         m_Jumping               = false;
+        m_ScheduledForDeletion  = false;
         m_Event           = EventType::EVENT_TYPE_NONE;
+        IntervalDeletionRemoval.SetInterval(sWorldManager->GetIntConfig(World::IntConfigs::INT_CONFIG_DELAY_REMOVAL));
 
         SetType(Type::OBJECT_TYPE_PLAYER);
     }
@@ -89,6 +93,13 @@ namespace SteerStone { namespace Game { namespace Entity {
         while (m_RecievedQueue.Next(l_Packet))
             delete l_Packet;
     }
+
+    //////////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////////
+
+    ///////////////////////////////////////////
+    //              GENERAL
+    ///////////////////////////////////////////
 
     /// Load player details from database
     bool Player::LoadFromDB()
@@ -165,6 +176,103 @@ namespace SteerStone { namespace Game { namespace Entity {
         return false;
     }
 
+    /// Remove player from world
+    void Player::RemoveFromWorld()
+    {
+        sZoneManager->RemoveFromMap(this);
+    }
+
+    /// Update Player
+    /// @p_Diff : Execution Time
+    bool Player::Update(uint32 p_Diff)
+    {
+        Core::Diagnostic::StopWatch l_StopWatch;
+        l_StopWatch.Start();
+
+        m_OperatorProcessor.ProcessOperators();
+
+        UpdateSurroundings(p_Diff);
+
+        Unit::Update(p_Diff);
+
+        l_StopWatch.Stop();
+        if (l_StopWatch.GetElapsed() > 20)
+            LOG_WARNING("Player", "Took more than 20ms to update Player!");
+
+        return true;
+    }
+
+    ///////////////////////////////////////////
+    //        SURROUNDING SYSTEM
+    ///////////////////////////////////////////
+
+    /// Add Object to surrounding
+    /// @p_Object : Object being added
+    void Player::AddToSurrounding(Object* p_Object)
+    {
+        auto l_Itr = m_Surroundings.find(p_Object->GetGUID());
+        if (l_Itr == m_Surroundings.end())
+            m_Surroundings[p_Object->GetGUID()] = std::make_unique<SurroundingObject>(p_Object, this);
+    }
+    /// Remove Object from being despawned
+    /// @p_Object : Object
+    void Player::RemoveScheduleDespawn(Object* p_Object)
+    {
+        auto l_Itr = m_Surroundings.find(p_Object->GetGUID());
+        if (l_Itr != m_Surroundings.end())
+            l_Itr->second->RemoveScheduleFromDespawn();
+    }
+    /// Check if Object is in surrounding
+    /// @p_Object : Object being checked
+    bool Player::IsInSurrounding(Object* p_Object)
+    {
+        auto l_Itr = m_Surroundings.find(p_Object->GetGUID());
+        if (l_Itr != m_Surroundings.end())
+            return true;
+
+        return false;
+    }
+    /// Schedule all surroundings to be despawned
+    void Player::ScheduleSurroundingsForDespawn()
+    {
+        for (auto l_Itr = m_Surroundings.begin(); l_Itr != m_Surroundings.end(); l_Itr++)
+            l_Itr->second->ScheduleForDespawn();
+    }
+    /// Clear and despawn all surroundings
+    void Player::ClearSurroundings()
+    {
+        for (auto l_Itr = m_Surroundings.begin(); l_Itr != m_Surroundings.end(); l_Itr++)
+            l_Itr->second->Despawn();
+       
+        m_Surroundings.clear();
+    }
+    /// Send Packet to surroundings
+    /// @p_PacketBuffer : Packet being sent
+    void Player::SendPacketToSurroundings(Server::PacketBuffer const* p_PacketBuffer)
+    {
+        for (auto l_Itr = m_Surroundings.begin(); l_Itr != m_Surroundings.end(); l_Itr++)
+            l_Itr->second->SendPacket(p_PacketBuffer);
+    }
+    /// Update Surroundings
+    /// @p_Diff : Execution Time
+    void Player::UpdateSurroundings(uint32 const p_Diff)
+    {
+        for (auto l_Itr = m_Surroundings.begin(); l_Itr != m_Surroundings.end();)
+        {
+            if (!l_Itr->second->Update(p_Diff))
+            {
+                l_Itr = m_Surroundings.erase(l_Itr);
+                continue;
+            }
+            else
+                l_Itr++;
+        }
+    }
+
+    ///////////////////////////////////////////
+    //              PACKETS
+    ///////////////////////////////////////////
+
     /// Send Client In-game settings
     void Player::SendClientSettings()
     {
@@ -214,6 +322,15 @@ namespace SteerStone { namespace Game { namespace Entity {
         l_Packet.Uridium        = m_Uridium;
         l_Packet.JackPot        = m_Jackpot;
         l_Packet.Rank           = m_Rank;
+        l_Packet.Speed          = GetSpline()->GetSpeed();
+        l_Packet.Shield         = m_Shield;
+        l_Packet.MaxShield      = m_MaxShield;
+        l_Packet.HitPoints      = m_HitPoints;
+        l_Packet.MaxHitPoints = m_MaxHitPoints;
+        l_Packet.PositionX      = GetSpline()->GetPositionX();
+        l_Packet.PositionY      = GetSpline()->GetPositionY();
+        l_Packet.MapId          = GetMap()->GetId();
+        l_Packet.WeaponState    = m_WeaponState;
         m_Ship.FormulateInitializeShip(l_Packet);
 
         SendPacket(l_Packet.Write());
@@ -246,31 +363,6 @@ namespace SteerStone { namespace Game { namespace Entity {
         Server::Packets::DisplayStarSystem l_Packet;
         SendPacket(l_Packet.Write());
     }
-
-    /// Get Ship
-    Ship* Player::GetShip()
-    {
-        return &m_Ship;
-    }
-
-    /// Update Player
-    /// @p_Diff : Execution Time
-    bool Player::Update(uint32 p_Diff)
-    {
-        Core::Diagnostic::StopWatch l_StopWatch;
-        l_StopWatch.Start();
-
-        Unit::Update(p_Diff);
-
-        m_OperatorProcessor.ProcessOperators();
-
-        l_StopWatch.Stop();
-        if (l_StopWatch.GetElapsed() > 20)
-            LOG_WARNING("Player", "Took more than 20ms to update Player!");
-
-        return true;
-    }
-
     /// Process Packets
     /// @p_PacketFilter : Type of packet
     bool Player::ProcessPacket(Server::PacketFilter& p_PacketFilter)
@@ -288,7 +380,6 @@ namespace SteerStone { namespace Game { namespace Entity {
 
         return true;
     }
-
     /// Queue Packet
     /// @_ClientPacket : Packet being queued
     void Player::QueuePacket(Server::ClientPacket* p_ClientPacket)
@@ -302,7 +393,7 @@ namespace SteerStone { namespace Game { namespace Entity {
         if (!m_Socket || !p_PacketBuffer)
             return;
 
-        //LOG_INFO("Packet", "%0", (char*)& p_PacketBuffer->GetContents()[0]);
+        LOG_INFO("Packet", "%0", (char*)&p_PacketBuffer->GetContents()[0]);
 
         m_Socket->SendPacket(p_PacketBuffer);
     }

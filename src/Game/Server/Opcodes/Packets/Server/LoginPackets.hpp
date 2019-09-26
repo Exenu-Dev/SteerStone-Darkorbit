@@ -87,7 +87,7 @@ namespace SteerStone { namespace Game { namespace Server { namespace Packets {
         int32 Shield;
         uint32 MaxShield;
         int32 HitPoints;
-        uint32 m_MaxHitPoints;
+        uint32 MaxHitPoints;
         uint32 CargoSpace;
         uint32 MaxCargoSpace;
         float PositionX;

@@ -49,8 +49,12 @@ namespace SteerStone { namespace Game { namespace Server {
 
         /// Attempt to find player in map
         Entity::Object* l_Object = m_Player->GetMap()->FindObject(l_Id);
-
-        LOG_ASSERT(l_Object, "Map", "Cannot find player Id: %0", l_Id);
+        
+        if (!l_Object)
+        {
+            LOG_WARNING("Map", "Cannot find player Id: %0", l_Id);
+            return;
+        }
 
         m_Player->SendPacket(&m_Player->GetMap()->GetGrid(m_Player)->BuildObjectSpawn(l_Object, m_Player));
     }
@@ -80,6 +84,49 @@ namespace SteerStone { namespace Game { namespace Server {
             l_Packet.Text = "You are not near a portal!";
             SendPacket(l_Packet.Write());
         }
+    }
+
+    /// Map Handler
+    /// @p_ClientPacket : Packet recieved from client
+    void GameSocket::HandleSelectTarget(ClientPacket* p_Packet)
+    {
+        uint32 l_Id = p_Packet->ReadUInt32();
+
+        /// Cannot target ourself
+        if (l_Id == m_Player->GetObjectGUID().GetCounter())
+            return;
+
+        Entity::Object* l_Object = m_Player->GetMap()->FindObject(l_Id);
+
+        if (!l_Object)
+        {
+            LOG_WARNING("Socket", "Attempted to find object %0 in map but does not exist!", l_Id);
+            return;
+        }
+
+        m_Player->SetTarget(l_Object);
+    }
+
+    /// Map Handler
+    /// @p_ClientPacket : Packet recieved from client
+    void GameSocket::HandleLaserShoot(ClientPacket* p_Packet)
+    {
+        uint32 l_Id = p_Packet->ReadUInt32();
+
+        /// Cannot target ourself
+        if (l_Id == m_Player->GetObjectGUID().GetCounter())
+            return;
+
+        Entity::Object* l_Object = m_Player->GetMap()->FindObject(l_Id);
+
+        if (!l_Object)
+        {
+            LOG_WARNING("Socket", "Attempted to find object %0 in map but does not exist!", l_Id);
+            return;
+        }
+
+        m_Player->Attack(l_Object);
+
     }
 }   ///< namespace Server
 }   ///< namespace Game

@@ -55,53 +55,37 @@ namespace SteerStone { namespace Game { namespace Entity {
     //////////////////////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////////////////////
 
+        ///////////////////////////////////////////
+        //            GETTERS/SETTERS
+        ///////////////////////////////////////////
     public:
-        /// Set Object Type
-        /// @p_Type : Type of Object
-        void SetType(Type const p_Type);
-        /// Return Object Type
-        Type GetType() const;
+        Map::Base* GetMap()                       const { return m_Map;                  }
+        Map::Grid* GetGrid()                      const { return m_Map->GetGrid(this);   }
+        Spline* GetSpline()                             { return &m_Spline;              }
+        Spline const* GetSpline() const                 { return &m_Spline;              }
+        ObjectGUID const& GetObjectGUID()         const { return m_ObjectGUID;           }
+        uint64 GetGUID()                          const { return m_ObjectGUID.GetGUID(); }
+        Type GetType()                            const { return m_Type;                 }
+        std::string GetName()                     const { return m_Name;                 }
+        std::tuple<uint32, uint32> GetGridIndex() const { return m_GridIndex;            }
 
-        /// Set Object Name
-        /// @p_Name : Name of Object
-        void SetName(std::string const p_Name);
-        /// Return Object Name
-        std::string GetName() const;
+        Unit* ToUnit()                      { return reinterpret_cast<Unit*>(this);                                                                         }
+        Unit const* ToUnit()        const   { return reinterpret_cast<Unit const*>(this);                                                                   }
+        Player* ToPlayer()                  { if (GetType() == Type::OBJECT_TYPE_PLAYER)  return reinterpret_cast<Player*>(this);  return nullptr;          }
+        Player const* ToPlayer()    const   { if (GetType() == Type::OBJECT_TYPE_PLAYER)  return reinterpret_cast<Player const*>(this);  return nullptr;    }
+        Portal* ToPortal()                  { if (GetType() == Type::OBJECT_TYPE_PORTAL)  return reinterpret_cast<Portal*>(this);  return nullptr;          }
+        Portal const* ToPortal()    const   { if (GetType() == Type::OBJECT_TYPE_PORTAL)  return reinterpret_cast<Portal const*>(this);  return nullptr;    }
+        Station* ToStation()                { if (GetType() == Type::OBJECT_TYPE_STATION) return reinterpret_cast<Station*>(this); return nullptr;          }
+        Station const* ToStation()  const   { if (GetType() == Type::OBJECT_TYPE_STATION) return reinterpret_cast<Station const*>(this); return nullptr;    }
+        Mob* ToMob()                        { if (GetType() == Type::OBJECT_TYPE_NPC)     return reinterpret_cast<Mob*>(this);     return nullptr;          }
+        Mob const* ToMob()          const   { if (GetType() == Type::OBJECT_TYPE_NPC)     return reinterpret_cast<Mob const*>(this);     return nullptr;    }
 
-        /// Set Object GUID
-        /// @p_ObjectGUID : Object GUID
-        void SetGUID(ObjectGUID& p_ObjectGUID);
-        /// Return Object GUID
-        ObjectGUID const& GetObjectGUID();
-        /// Returns Object GUID
-        uint64 GetGUID() const;
-
-        /// Set Grid Index
-        /// @p_GridIndex : Grid Index
-        void SetGridIndex(std::tuple<uint32, uint32> const p_GridIndex);
-        /// Return Grid Index
-        std::tuple<uint32, uint32> GetGridIndex() const;
-
-        /// Set Map for Object
-        void SetMap(Map::Base* p_Map);
-        /// Get Map
-        Map::Base* GetMap() const;
-        /// Get Grid
-        Map::Grid* GetGrid() const;
-        /// Get Spline
-        Spline* GetSpline();
-
-        /// To Unit Class
-        Unit* ToUnit();
-        /// To Player Class
-        Player* ToPlayer();
-        /// To Portal Class
-        Portal* ToPortal();
-        /// To Station Class
-        Station* ToStation();
-        /// To Mob Class
-        Mob* ToMob();
-
+        void SetGridIndex(std::tuple<uint32, uint32> const p_GridIndex) { m_GridIndex = p_GridIndex; }
+        void SetName(std::string const p_Name)                          { m_Name = p_Name; }
+        void SetType(Type const p_Type)                                 { m_Type = p_Type; }
+        void SetGUID(ObjectGUID const& p_ObjectGUID)                    { m_ObjectGUID = p_ObjectGUID; }
+        void SetMap(Map::Base* p_Map)                                   { LOG_ASSERT(p_Map, "Object", "Attempted to assign Object Map to nullptr! for Object %0", GetGUID());  m_Map = p_Map; }
+    
     //////////////////////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////////////////////
 
@@ -109,7 +93,6 @@ namespace SteerStone { namespace Game { namespace Entity {
         Type m_Type;
         ObjectGUID m_ObjectGUID;
         std::string m_Name;
-
         Spline m_Spline;
         Map::Base* m_Map;
         std::tuple<uint32, uint32> m_GridIndex;

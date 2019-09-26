@@ -20,6 +20,8 @@
 #include <PCH/Precompiled.hpp>
 #include "Core/Core.hpp"
 
+#define PLAYER_RADIUS_SCAN 1500
+
 enum PlayerShips
 {
     Phoenix     = 1,

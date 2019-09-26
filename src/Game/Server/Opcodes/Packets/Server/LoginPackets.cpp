@@ -75,7 +75,7 @@ namespace SteerStone { namespace Game { namespace Server { namespace Packets {
         m_Buffer.AppendInt32(Shield);
         m_Buffer.AppendUInt32(MaxShield);
         m_Buffer.AppendInt32(HitPoints);
-        m_Buffer.AppendUInt32(m_MaxHitPoints);
+        m_Buffer.AppendUInt32(MaxHitPoints);
         m_Buffer.AppendUInt32(CargoSpace);
         m_Buffer.AppendUInt32(MaxCargoSpace);
         m_Buffer.AppendFloat(PositionX);
@@ -107,6 +107,9 @@ namespace SteerStone { namespace Game { namespace Server { namespace Packets {
     /// SERVER_PACKET_LOGGED_IN
     PacketBuffer const* LoggedIn::Write()
     {
+        m_Buffer.AppendEndSplitter();
+        m_Buffer.AppendCarriage();
+
         return &m_Buffer;
     }
 

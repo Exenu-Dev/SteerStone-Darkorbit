@@ -41,41 +41,39 @@ namespace SteerStone { namespace Game { namespace Entity {
     //////////////////////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////////////////////
 
-    public:
-        /// Set Speed
-        /// @p_Speed : Speed
-        void SetSpeed(uint32 const p_Speed);
-        /// Return Speed
-        uint32 GetSpeed() const;
-
-        /// Set Object Position
-        /// @p_PositionX : X Axis
-        /// @p_PositionY : Y Axis
-        void SetPosition(float const p_PositionX, float const p_PositionY, float const p_PlannedPositionX = 0.0f, float const p_PlannedPositionY = 0.0f);
-        /// Return Position X
-        float GetPositionX() const;
-        /// Return Position Y
-        float GetPositionY() const;
-        /// Return Planned Position X
-        float GetPlannedPositionX() const;
-        /// Return Planned Position Y
-        float GetPlannedPositionY() const;
-
-        /// Update Position
+        ///////////////////////////////////////////
+        //                GENERAL
+        ///////////////////////////////////////////
+         /// Update Position
         void UpdatePosition();
 
         /// Return Time in milliseconds to reach destination
         int32 CalculateDestinationTime();
 
-        /// Get Destination time in milliseconds
-        uint32 GetDestinationTime() const;
-     
         /// Move Object
         /// @p_PlannedPositionX : Planned X Axis
         /// @p_PlannedPositionY : Planned Y Axis
         /// @p_CurrentPositionX : Current X Axis
         /// @p_CurrentPositionY : Current Y Axis
         void Move(float const p_PlannedPositionX, float const p_PlannedPositionY, float const p_CurrentPositionX, float const p_CurrentPositionY);
+
+        ///////////////////////////////////////////
+        //            GETTERS/SETTERS
+        ///////////////////////////////////////////
+    public:
+        uint32 GetSpeed()           const { return m_Speed;              }
+        float GetPositionX()        const { return m_PositionX;          }
+        float GetPositionY()        const { return m_PositionY;          }
+        float GetPlannedPositionX() const { return m_PlannedPositionX;   }
+        float GetPlannedPositionY() const { return m_PlannedPositionY;   }
+        float GetOrientation()      const { return m_Orientation;        }
+        bool IsMoving()             const { return m_Moving;             }
+        uint32 GetDestinationTime() const { return m_TimeForDestination; }
+        uint32 GetLastTimeCalled()  const { return m_LastCalled;         }
+
+        void SetPosition(float const p_PositionX, float const p_PositionY, float const p_PlannedPositionX = 0.0f, float const p_PlannedPositionY = 0.0f) { m_PositionX = p_PositionX; m_PositionY = p_PositionY; if (p_PlannedPositionX) m_PlannedPositionX = p_PlannedPositionX;     if (p_PlannedPositionY) m_PlannedPositionY = p_PlannedPositionY; }
+        void SetIsMoving(bool const p_Moving) { m_Moving = p_Moving; }
+        void SetSpeed(uint32 const p_Speed)   { m_Speed = p_Speed;   }
 
     //////////////////////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////////////////////
@@ -85,6 +83,8 @@ namespace SteerStone { namespace Game { namespace Entity {
         float m_PositionY;
         float m_PlannedPositionX;
         float m_PlannedPositionY;
+        float m_Orientation;
+        bool m_Moving;
         uint32 m_Speed;
         uint32 m_TimeForDestination;
         uint32 m_LastCalled;

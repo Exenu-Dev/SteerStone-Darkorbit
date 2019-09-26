@@ -22,6 +22,12 @@
 #include "Diagnostic/DiaIntervalTimer.hpp"
 #include "Unit.hpp"
 
+#define MAX_DISTANCE_FOLLOW 500
+#define MAX_DISTANCE_ROAMING_RANGE 200
+#define DISTANCE_AWAY_FROM_BORDER 500
+#define FIND_PLAYER_DISTANCE 800
+#define MAX_DISTANCE_AWAY_FROM_PLAYER 100
+
 namespace SteerStone { namespace Game { namespace Map {
 
     class PoolManager;
@@ -31,6 +37,12 @@ namespace SteerStone { namespace Game { namespace Map {
 }   ///< namespace SteerStone
 
 namespace SteerStone { namespace Game { namespace Entity {
+
+    enum Behaviour
+    {
+        BEHAVIOUR_PASSIVE   = 0,
+        BEHAVIOUR_AGGESSIVE = 1
+    };
 
     /// Mob
     class Mob : public Unit
@@ -103,6 +115,9 @@ namespace SteerStone { namespace Game { namespace Entity {
 
         uint32 m_MoveTimeMax;
         uint32 m_MoveTimeMin;
+
+        float m_HomePositionX;
+        float m_HomePositionY;
 
         Core::Diagnostic::IntervalTimer m_IntervalMoveTimer;
     };

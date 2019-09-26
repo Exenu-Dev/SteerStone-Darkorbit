@@ -32,8 +32,10 @@ namespace SteerStone { namespace Game { namespace Entity {
         m_PositionY          = 0.0f;
         m_PlannedPositionX   = 0.0f;
         m_PlannedPositionY   = 0.0f;
+        m_Orientation        = 0.0f;
         m_TimeForDestination = 0;
         m_LastCalled         = 0;
+        m_Moving             = false;
         m_GridIndex          = std::make_tuple(0, 0);
         m_Speed              = 0;
     }
@@ -45,50 +47,9 @@ namespace SteerStone { namespace Game { namespace Entity {
     //////////////////////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////////////////////
 
-    void Spline::SetSpeed(uint32 const p_Speed)
-    {
-        m_Speed = p_Speed;
-    }
-    /// Return Speed
-    uint32 Spline::GetSpeed() const
-    {
-        return m_Speed;
-    }
-
-    /// Set Object Position
-    /// @p_PositionX : X
-    /// @p_PositionY : Y
-    void Spline::SetPosition(float const p_PositionX, float const p_PositionY, float const p_PlannedPositionX, float const p_PlannedPositionY)
-    {
-        m_PositionX         = p_PositionX;
-        m_PositionY         = p_PositionY;
-
-        if (p_PlannedPositionX)
-            m_PlannedPositionX = p_PlannedPositionX;
-
-        if (p_PlannedPositionY)
-            m_PlannedPositionY = p_PlannedPositionY;
-    }
-    /// Return Position X
-    float Spline::GetPositionX() const
-    {
-        return m_PositionX;
-    }
-    /// Return Position Y
-    float Spline::GetPositionY() const
-    {
-        return m_PositionY;
-    }
-    /// Return Planned Position X
-    float Spline::GetPlannedPositionX() const
-    {
-        return m_PlannedPositionX;
-    }
-    /// Return Planned Position X
-    float Spline::GetPlannedPositionY() const
-    {
-        return m_PlannedPositionY;
-    }
+    ///////////////////////////////////////////
+    //                GENERAL
+    ///////////////////////////////////////////
 
     /// Update Position
     void Spline::UpdatePosition()
@@ -102,14 +63,14 @@ namespace SteerStone { namespace Game { namespace Entity {
             return;
         }
 
-        int32 l_DeltaX    = m_PlannedPositionX - m_PositionX;
-        int32 l_DeltaY    = m_PlannedPositionY - m_PositionY;
+        int32 l_DeltaX = m_PlannedPositionX - m_PositionX;
+        int32 l_DeltaY = m_PlannedPositionY - m_PositionY;
 
         /// Get time in milliseconds
-        float  l_Delta    = (static_cast<float>(l_TimeDistance) / 1000) * m_Speed;
+        float l_Delta = (static_cast<float>(l_TimeDistance) / 1000) * m_Speed;
 
         /// Get Intersect point
-        double l_Degree   = std::atan2(l_DeltaY, l_DeltaX);
+        double l_Degree = std::atan2(l_DeltaY, l_DeltaX);
 
         int32 l_PositionX = std::cos(l_Degree) * l_Delta + m_PositionX;
         int32 l_PositionY = std::sin(l_Degree) * l_Delta + m_PositionY;
@@ -122,6 +83,7 @@ namespace SteerStone { namespace Game { namespace Entity {
             m_PositionY >= m_PlannedPositionY && l_PositionY < m_PlannedPositionY)
             l_PositionY = m_PlannedPositionY;
 
+        m_Orientation = std::round(static_cast<float>(l_Degree + 4 % 8));
         m_PositionX = l_PositionX;
         m_PositionY = l_PositionY;
     }
@@ -136,18 +98,12 @@ namespace SteerStone { namespace Game { namespace Entity {
         return static_cast<int32>((l_Delta / m_Speed) * 1000);
     }
 
-    /// Get Destination time in milliseconds
-    uint32 Spline::GetDestinationTime() const
-    {
-        return m_TimeForDestination;
-    }
-
     /// Move Object
     /// @p_PlannedPositionX : Planned X Axis
     /// @p_PlannedPositionY : Planned Y Axis
     /// @p_CurrentPositionX : Current X Axis
     /// @p_CurrentPositionY : Current Y Axis
-    void Spline ::Move(float const p_PlannedPositionX, float const p_PlannedPositionY, float const p_CurrentPositionX, float const p_CurrentPositionY)
+    void Spline::Move(float const p_PlannedPositionX, float const p_PlannedPositionY, float const p_CurrentPositionX, float const p_CurrentPositionY)
     {
         LOG_ASSERT(m_Object->GetMap(), "Object", "Object %0 attempted to move, but object is not in a map!", m_Object->GetGUID());
 
@@ -157,6 +113,7 @@ namespace SteerStone { namespace Game { namespace Entity {
         m_PlannedPositionY   = p_PlannedPositionY;
         m_TimeForDestination = CalculateDestinationTime();
         m_LastCalled         = sServerTimeManager->GetServerTime();
+        m_Moving             = true;
 
         m_Object->GetMap()->Move(m_Object);
     }

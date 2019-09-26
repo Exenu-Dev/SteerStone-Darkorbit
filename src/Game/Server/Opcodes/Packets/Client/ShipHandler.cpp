@@ -34,7 +34,7 @@ namespace SteerStone { namespace Game { namespace Server {
             return;
         }
 
-        m_Player->GetShip()->GetAmmo()->SetLaserType(l_LaserType);
+        m_Player->SetLaserType(l_LaserType);
     }
 
     /// Ship Handler
@@ -49,7 +49,7 @@ namespace SteerStone { namespace Game { namespace Server {
             return;
         }
 
-        m_Player->GetShip()->GetAmmo()->SetRocketType(l_RocketType);
+        m_Player->SetRocketType(l_RocketType);
     }
 
 }   ///< namespace Server

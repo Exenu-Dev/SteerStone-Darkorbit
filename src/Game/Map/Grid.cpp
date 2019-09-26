@@ -19,6 +19,7 @@
 #include "Packets/Server/DebugPackets.hpp"
 #include "Packets/Server/MapPackets.hpp"
 #include "Grid.hpp"
+#include "Map.hpp"
 #include "Mob.hpp"
 #include "Portal.hpp"
 #include "Station.hpp"
@@ -30,10 +31,11 @@
 namespace SteerStone { namespace Game { namespace Map {
 
     /// Constructor
+    /// @p_Map   : Map who owns the grid
     /// @p_GridX : Grid X
     /// @p_GridY : Grid Y
-    Grid::Grid(uint32 const p_GridX, uint32 const p_GridY)
-        : m_GridX(p_GridX), m_GridY(p_GridY)
+    Grid::Grid(Base* p_Map, uint32 const p_GridX, uint32 const p_GridY)
+        : m_Map(p_Map),m_GridX(p_GridX), m_GridY(p_GridY)
     {
         /// Grids are active on creation
         m_State = State::Active;
@@ -49,156 +51,9 @@ namespace SteerStone { namespace Game { namespace Map {
     //////////////////////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////////////////////
 
-    /// Add Object to Grid
-    /// @p_Object : Object being added
-    void Grid::Add(Entity::Object* p_Object)
-    {
-        m_Objects[p_Object->GetObjectGUID().GetCounter()] = p_Object;
-
-        /// If a player is joining then set grid to active
-        if (p_Object->GetType() == Entity::Type::OBJECT_TYPE_PLAYER)
-        {
-            m_Players.insert(p_Object);
-
-            if (m_State == State::Idle)
-                m_State = State::Active;
-
-            BuildObjectSpawnAndSend(p_Object);
-        }
-
-        LOG_INFO("Grid", "Added GUID: %0 to Grid: X %1 Y %2", p_Object->GetGUID(), m_GridX, m_GridY);
-    }
-    /// Remove Object from Grid
-    /// @p_Object : Object being removed
-    void Grid::Remove(Entity::Object* p_Object)
-    {
-        m_Objects.erase(p_Object->GetGUID());
-
-        if (p_Object->GetType() == Entity::Type::OBJECT_TYPE_PLAYER)
-        {
-            m_Players.erase(p_Object);
-
-            BuildObjectDespawnAndSend(p_Object);
-        }
-
-        LOG_INFO("Grid", "Removed GUID: %0 from Grid: X %1 Y %2", p_Object->GetGUID(), m_GridX, m_GridY);
-    }
-
-    /// Unload objects from map
-    void Grid::Unload()
-    {
-        for (auto l_Itr : m_Objects)
-        {
-            if (l_Itr.second->GetType() == Entity::Type::OBJECT_TYPE_PLAYER)
-            {
-                l_Itr.second->ToPlayer()->ToSocket()->CloseSocket();
-            }
-        }
-
-        m_Objects.clear();
-        m_Players.clear();
-    }
-
-    /// Check if near portal
-    /// @p_Object : Object being checked
-    Entity::Portal* Grid::CanJumpPortal(Entity::Object* p_Object)
-    {
-        for (auto l_Itr : m_Objects)
-        {
-            if (l_Itr.second->GetType() == Entity::Type::OBJECT_TYPE_PORTAL)
-            {
-                if (l_Itr.second->ToPortal()->IsInPortalRadius(p_Object))
-                    return l_Itr.second->ToPortal();
-            }
-        }
-
-        return nullptr;
-    }
-
-    /// Move Object
-    /// @p_Object : Object being moved
-    /// @p_PositionX : New X Axis
-    /// @p_PositionY : New Y Axis
-    void Grid::Move(Entity::Object* p_Object)
-    {
-        Server::Packets::ObjectMove l_Packet;
-        l_Packet.Id        = p_Object->GetObjectGUID().GetCounter();
-        l_Packet.PositionX = p_Object->GetSpline()->GetPlannedPositionX();
-        l_Packet.PositionY = p_Object->GetSpline()->GetPlannedPositionY();
-        l_Packet.Time      = p_Object->GetSpline()->GetDestinationTime();
-        SendPacketEveryone(l_Packet.Write());
-    }
-
-    /// Find Player
-    /// @p_Id : Account Id of Player
-    Entity::Object* Grid::FindPlayer(uint32 const p_Id)
-    {
-        for (auto l_Itr : m_Players)
-        {
-            if (l_Itr->ToPlayer()->GetId() == p_Id)
-                return l_Itr;
-        }
-
-        return nullptr;
-    }
-    /// Find Object
-    /// @p_Counter : Counter of Object
-    Entity::Object* Grid::FindObject(uint32 const p_Counter)
-    {
-        for (auto l_Itr : m_Objects)
-        {
-            if (l_Itr.second->GetObjectGUID().GetCounter() == p_Counter)
-                return l_Itr.second;
-        }
-
-        return nullptr;
-    }
-
-    /// Send Packet to everyone
-    /// @p_Packet : Packing being sent
-    /// @p_Object : Send packet to self
-    void Grid::SendPacketEveryone(Server::PacketBuffer const* p_Packet, Entity::Object* p_Object)
-    {
-        for (auto l_Itr : m_Players)
-        {
-            if (p_Object)
-                if (p_Object->GetGUID() == l_Itr->GetGUID())
-                    continue;
-
-            l_Itr->ToPlayer()->SendPacket(p_Packet);
-        }
-    }
-
-    /// Get State of Grid
-    State Grid::GetState() const
-    {
-        return m_State;
-    }
-
-    /// Check if a Player is inside the grid
-    /// @p_Diff : Execution Time
-    void Grid::CheckForPlayer(uint32 const p_Diff)
-    {
-        m_IntervalCheckPlayer.Update(p_Diff);
-        if (!m_IntervalCheckPlayer.Passed())
-            return;
-
-        if (!m_Players.empty())
-        {
-            #ifdef STEERSTONE_CORE_DEBUG
-                LOG_INFO("Grid", "Player found in Grid %0 %1 - Keeping grid active!", m_GridX, m_GridY);
-            #endif
-        }
-        else
-        {
-            /// We have not found a player, turn the grid to idle
-            m_State = State::Idle;
-
-            #ifdef STEERSTONE_CORE_DEBUG
-                LOG_INFO("Grid", "Player not found in Grid %0 %1 - Grid is now idle!", m_GridX, m_GridY);
-            #endif
-        }
-    }
+    ///////////////////////////////////////////
+    //               GENERAL
+    ///////////////////////////////////////////
 
     /// Check if Player is near any interactive events
     /// @p_Diff : Execution Time
@@ -278,13 +133,53 @@ namespace SteerStone { namespace Game { namespace Map {
             }
         }
     }
+    /// Update Surrounding objects for players
+    void Grid::UpdateSurroundingObjects()
+    {
+        if (m_Players.empty())
+            return;
 
+        /// Get nearby grids and check if they are within range
+        std::vector<Grid*> l_Grids;
+        m_Map->GetNearbyGrids(m_GridX, m_GridY, l_Grids);
+
+        for (auto l_Itr : m_Players)
+        {
+            for (auto l_SecondItr : l_Grids)
+                l_SecondItr->BuildSurroundingObjects(l_Itr);
+        }
+    }
+    /// Check if a Player is inside the grid
+    /// @p_Diff : Execution Time
+    void Grid::CheckForPlayer(uint32 const p_Diff)
+    {
+        m_IntervalCheckPlayer.Update(p_Diff);
+        if (!m_IntervalCheckPlayer.Passed())
+            return;
+
+        if (!m_Players.empty())
+        {
+        #ifdef STEERSTONE_CORE_DEBUG
+            LOG_INFO("Grid", "Player found in Grid %0 %1 - Keeping grid active!", m_GridX, m_GridY);
+        #endif
+        }
+        else
+        {
+            /// We have not found a player, turn the grid to idle
+            m_State = State::Idle;
+
+        #ifdef STEERSTONE_CORE_DEBUG
+            LOG_INFO("Grid", "Player not found in Grid %0 %1 - Grid is now idle!", m_GridX, m_GridY);
+        #endif
+        }
+    }
     /// Update Grid
     /// @p_Diff : Execution Time
     bool Grid::Update(uint32 const p_Diff)
     {
-        CheckForPlayer(p_Diff);
+        //CheckForPlayer(p_Diff);
         UpdateInteractiveEvents(p_Diff);
+        UpdateSurroundingObjects();
 
         /// TODO; This isn't really ideal, because the mobs can move to different grids
         /// find a better way instead of copying, but this is okay for now
@@ -307,10 +202,162 @@ namespace SteerStone { namespace Game { namespace Map {
         return false;
     }
 
+    /// Check if near portal
+    /// @p_Object : Object being checked
+    Entity::Portal* Grid::CanJumpPortal(Entity::Object* p_Object)
+    {
+        for (auto l_Itr : m_Objects)
+        {
+            if (l_Itr.second->GetType() == Entity::Type::OBJECT_TYPE_PORTAL)
+            {
+                if (l_Itr.second->ToPortal()->IsInPortalRadius(p_Object))
+                    return l_Itr.second->ToPortal();
+            }
+        }
+
+        return nullptr;
+    }
+
+    ///////////////////////////////////////////
+    //               OBJECTS
+    ///////////////////////////////////////////
+
+    /// Add Object to Grid
+    /// @p_Object       : Object being added
+    /// @p_SendMovement : Send Movement packet when joining
+    void Grid::Add(Entity::Object* p_Object, bool p_SendMovement)
+    {
+        m_Objects[p_Object->GetObjectGUID().GetCounter()] = p_Object;
+
+        /// If a player is joining then set grid to active
+        if (p_Object->GetType() == Entity::Type::OBJECT_TYPE_PLAYER)
+        {
+            m_Players.insert(p_Object);
+
+            if (m_State == State::Idle)
+                m_State = State::Active;
+        }
+
+        LOG_INFO("Grid", "Added GUID: %0 to Grid: X %1 Y %2", p_Object->GetGUID(), m_GridX, m_GridY);
+    }
+    /// Remove Object from Grid
+    /// @p_Object : Object being removed
+    void Grid::Remove(Entity::Object* p_Object)
+    {
+        if (p_Object->GetType() == Entity::Type::OBJECT_TYPE_PLAYER)
+            m_Players.erase(p_Object);
+        
+        m_Objects.erase(p_Object->GetGUID());
+
+        LOG_INFO("Grid", "Removed GUID: %0 from Grid: X %1 Y %2", p_Object->GetGUID(), m_GridX, m_GridY);
+    }
+    /// Unload objects from map
+    void Grid::Unload()
+    {
+        for (auto l_Itr : m_Objects)
+        {
+            if (l_Itr.second->GetType() == Entity::Type::OBJECT_TYPE_PLAYER)
+            {
+                l_Itr.second->ToPlayer()->ToSocket()->CloseSocket();
+            }
+        }
+
+        m_Objects.clear();
+        m_Players.clear();
+    }
+
+    ///////////////////////////////////////////
+    //               FINDER
+    ///////////////////////////////////////////
+    
+    /// Find Player
+    /// @p_Id : Account Id of Player
+    Entity::Object* Grid::FindPlayer(uint32 const p_Id)
+    {
+        for (auto l_Itr : m_Players)
+        {
+            if (l_Itr->ToPlayer()->GetId() == p_Id)
+                return l_Itr;
+        }
+
+        return nullptr;
+    }
+    /// Find Nearest Player to Object
+    /// @p_Object : Object which we are checking against
+    /// @p_Distance : Find Object in a specific range
+    Entity::Object* Grid::FindNearestPlayer(Entity::Object* p_Object, float p_Distance)
+    {
+        Entity::Object* l_Object = nullptr;
+        float l_MinDistance = 500000.0f;
+        for (auto l_Itr : m_Players)
+        {
+            float l_Distance = Core::Utils::DistanceSquared(p_Object->GetSpline()->GetPositionX(), p_Object->GetSpline()->GetPositionY(),
+                l_Itr->GetSpline()->GetPositionX(), l_Itr->GetSpline()->GetPositionY());
+
+            if (l_Distance < p_Distance)
+            {
+                if (l_MinDistance > l_Distance)
+                {
+                    l_MinDistance = l_Distance;
+                    l_Object = l_Itr;
+                }
+            }
+        }
+
+        return l_Object;
+    }
+    /// Find Object
+    /// @p_Counter : Counter of Object
+    Entity::Object* Grid::FindObject(uint32 const p_Counter)
+    {
+        for (auto l_Itr : m_Objects)
+        {
+            if (l_Itr.second->GetObjectGUID().GetCounter() == p_Counter)
+                return l_Itr.second;
+        }
+
+        return nullptr;
+    }
+
+    ///////////////////////////////////////////
+    //               PACKETS
+    ///////////////////////////////////////////
+
+    /// Send Packet to everyone in grid
+    /// @p_Packet : Packet being sent
+    void Grid::SendPacketToEveryone(Server::PacketBuffer const* p_Packet)
+    {
+        for (auto l_Itr : m_Players)
+            l_Itr->ToPlayer()->SendPacket(p_Packet);
+    }
+    /// Send Packet to everyone if object is in surrounding
+    /// @p_Packet : Packet being sent
+    /// @p_Object : Object being checked
+    void Grid::SendPacketIfInSurrounding(Server::PacketBuffer const* p_Packet, Entity::Object* p_Object)
+    {
+        for (auto l_Itr : m_Players)
+        {
+            if (l_Itr->ToPlayer()->IsInSurrounding(p_Object))
+                l_Itr->ToPlayer()->SendPacket(p_Packet);
+        }
+    }
+    /// Move Object
+    /// @p_Object : Object being moved
+    /// @p_PositionX : New X Axis
+    /// @p_PositionY : New Y Axis
+    void Grid::Move(Entity::Object* p_Object)
+    {
+        Server::Packets::ObjectMove l_Packet;
+        l_Packet.Id        = p_Object->GetObjectGUID().GetCounter();
+        l_Packet.PositionX = p_Object->GetSpline()->GetPlannedPositionX();
+        l_Packet.PositionY = p_Object->GetSpline()->GetPlannedPositionY();
+        l_Packet.Time      = p_Object->GetSpline()->GetDestinationTime();
+        p_Object->GetMap()->SendPacketToNearByGrids(l_Packet.Write(), p_Object);
+    }
+
     //////////////////////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////////////////////
 
-   
 }   ///< namespace Map
 }   ///< namespace Game
 }   ///< namespace Steerstone

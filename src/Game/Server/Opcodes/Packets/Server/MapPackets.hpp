@@ -196,6 +196,26 @@ namespace SteerStone { namespace Game { namespace Server { namespace Packets {
         PacketBuffer const* Write();
     };
 
+    /// SERVER_PACKET_LASER_SHOOT packet builder
+    class LaserShoot final : public ServerPacket
+    {
+    public:
+        /// Constructor 
+        LaserShoot() : ServerPacket(ServerOpCodes::SERVER_PACKET_LASER_SHOOT)
+        {
+        }
+
+        //////////////////////////////////////////////////////////////////////////
+        //////////////////////////////////////////////////////////////////////////
+
+        /// Write the packet
+        PacketBuffer const* Write();
+
+        uint32 FromId;
+        uint32 ToId;
+        uint32 LaserId;
+    };
+
 }   ///< Packets
 }   ///< Server
 }   ///< Game

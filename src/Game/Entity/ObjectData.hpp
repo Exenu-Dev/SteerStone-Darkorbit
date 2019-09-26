@@ -30,9 +30,11 @@ namespace SteerStone { namespace Game { namespace Entity {
             Entry       = 0;
             Name.clear();
             Type        = 0;
+            WeaponState = 0;
             HitPoints   = 0;
             Shield      = 0;
-            Damage      = 0;
+            MinDamage   = 0;
+            MaxDamage   = 0;
             Behaviour   = 0;
             Speed       = 0;
             Experience  = 0;
@@ -56,9 +58,11 @@ namespace SteerStone { namespace Game { namespace Entity {
         uint32 Entry;
         std::string Name;
         uint16 Type;
+        uint16 WeaponState;
         int32 HitPoints;
         int32 Shield;
-        uint32 Damage;
+        uint32 MinDamage;
+        uint32 MaxDamage;
         uint16 Behaviour;
         uint32 Speed;
         uint32 Experience;

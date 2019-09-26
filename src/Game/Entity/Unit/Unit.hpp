@@ -48,10 +48,41 @@ namespace SteerStone { namespace Game { namespace Entity {
     //////////////////////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////////////////////
 
+        ///////////////////////////////////////////
+        //                GENERAL
+        ///////////////////////////////////////////
+
+        /// Attack
+        /// @p_Victim : Victim we are attacking
+        void Attack(Object* p_Victim);
+
+        /// Update Attack
+        /// @p_Diff : Execution Time
+        void AttackerStateUpdate(uint32 const p_Diff);
+
+        /// Update
+        /// @p_Diff : Execution Time
+        void Update(uint32 const p_Diff);
+
+        ///////////////////////////////////////////
+        //                TARGET
+        ///////////////////////////////////////////
+
+        void SetTarget(Object const* p_Target)  { m_Target = p_Target; m_TargetGUID = p_Target->GetGUID();  }
+        bool HasTarget()                        { return m_Target != nullptr;                               }
+        Object const* GetTarget()               { return m_Target;                                          }
+        uint64 GetTargetGUID() const            { return m_TargetGUID;                                      }
+        void ClearTarget()                      { m_Target = nullptr; m_TargetGUID = 0;                     }
+
+        ///////////////////////////////////////////
+        //            GETTERS/SETTERS
+        ///////////////////////////////////////////
     public:
         int32 GetShield()          const { return m_Shield;         }
         uint32 GetMaxShield()      const { return m_MaxShield;      }
         int32 GetHitPoints()       const { return m_HitPoints;      }
+        uint32 GetMinDamage()      const { return m_MinDamage;      }    
+        uint32 GetMaxDamage()      const { return m_MaxDamage;      }    
         uint32 GetHitMaxPoints()   const { return m_MaxHitPoints;   }
         Company GetCompany()       const { return m_Company;        }
         uint16 GetRank()           const { return m_Rank;           }
@@ -61,9 +92,8 @@ namespace SteerStone { namespace Game { namespace Entity {
         uint16 GetWeaponState()    const { return m_WeaponState;    }
         uint16 GetDeathState()     const { return m_DeathState;     }
 
-        /// Update
-        /// @p_Diff : Execution Time
-        void Update(uint32 const p_Diff);
+        void SetLaserType(uint16 const p_LaserType)   { m_LaserType = p_LaserType;   }
+        void SetRocketType(uint16 const p_RocketType) { m_RocketType = p_RocketType; }
 
     //////////////////////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////////////////////
@@ -73,19 +103,24 @@ namespace SteerStone { namespace Game { namespace Entity {
         uint32 m_MaxHitPoints;
         int32 m_Shield;
         uint32 m_MaxShield;
-        uint32 Damage;
+        uint32 m_MinDamage;
+        uint32 m_MaxDamage;
         Company m_Company;
         uint16 m_Rank;
         uint16 m_GatesAchieved;
         uint32 m_ClanId;
         std::string m_ClanName;
         uint16 m_WeaponState;
+        uint16 m_LaserType;
+        uint16 m_RocketType;
         uint16 m_DeathState;
+        bool m_Attacking;
+
+        Object const* m_Target;
+        uint64 m_TargetGUID;
 
     //////////////////////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////////////////////
-
-    private:
     };
 
 }   ///< namespace Entity

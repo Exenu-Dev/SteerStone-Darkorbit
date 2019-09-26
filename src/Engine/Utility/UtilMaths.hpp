@@ -20,6 +20,8 @@
 #include <PCH/Precompiled.hpp>
 #include "Core/Core.hpp"
 
+#define M_PI 3.14159265358979323846
+
 namespace SteerStone { namespace Core { namespace Utils {
 
     /// Check if position is in radius
@@ -29,15 +31,15 @@ namespace SteerStone { namespace Core { namespace Utils {
     /// @p_OtherPositiony   : Y Axis
     inline bool IsInCircleRadius(float const p_PositionX, float const p_PositionY, float const p_OtherPositionX, float const p_OtherPositionY, float const p_Radius)
     {
-        float l_DistanceSquared = std::sqrt((p_PositionX - p_OtherPositionX)
-            * (p_OtherPositionX - p_PositionX)
-            + (p_PositionY - p_OtherPositionY)
-            * (p_PositionY - p_OtherPositionY));
+        float l_DistX = (p_PositionX - p_OtherPositionX);
+        l_DistX = l_DistX * l_DistX;
 
-        if (l_DistanceSquared <= p_Radius || std::isnan(l_DistanceSquared))
-            return true;
+        float l_DistY = (p_PositionY - p_OtherPositionY);
+        l_DistY = l_DistY * l_DistY;
 
-        return false;
+        int32 l_Total = l_DistX + l_DistY;
+
+        return l_Total < p_Radius * p_Radius;
     }
     /// Check if position is in radius
     /// @p_PositionX        : X Axis
@@ -56,6 +58,18 @@ namespace SteerStone { namespace Core { namespace Utils {
             return false;
         
         return true;
+    }
+    /// Get Distance Squared
+    /// @p_PositionX        : X Axis
+    /// @p_PositionY        : Y Axis
+    /// @p_OtherPositionX   : x Axis
+    /// @p_OtherPositiony   : Y Axis
+    inline float DistanceSquared(float const p_PositionX, float const p_PositionY, float const p_OtherPositionX, float const p_OtherPositionY)
+    {
+        float l_DeltaX = p_PositionX - p_OtherPositionX;
+        float l_DeltaY = p_PositionY - p_OtherPositionY;
+
+        return std::sqrt((l_DeltaX * l_DeltaX) + (l_DeltaY * l_DeltaY));
     }
 
 }   ///< namespace Utils

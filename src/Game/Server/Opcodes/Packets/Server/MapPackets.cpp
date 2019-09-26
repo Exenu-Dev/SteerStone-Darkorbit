@@ -139,6 +139,21 @@ namespace SteerStone { namespace Game { namespace Server { namespace Packets {
         return &m_Buffer;
     }
 
+    /// SERVER_PACKET_LASER_SHOOT
+    PacketBuffer const* LaserShoot::Write()
+    {
+        m_Buffer.AppendUInt32(FromId);
+        m_Buffer.AppendUInt32(ToId);
+        m_Buffer.AppendUInt32(LaserId);
+
+        m_Buffer.AppendEndSplitter();
+        m_Buffer.AppendCarriage();
+
+        char* l_Ptr = (char*)&m_Buffer.GetContents()[0];
+
+        return &m_Buffer;
+    }
+
 }   ///< Packets
 }   ///< Server
 }   ///< Game

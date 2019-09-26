@@ -81,8 +81,18 @@ namespace SteerStone { namespace Game { namespace World {
 
             if (!l_Player->ProcessPacket(l_Filter))
             {
-                l_Itr = m_Players.erase(l_Itr);
-                RemovePlayer(l_Player);
+                if (!l_Player->IsScheduledForDeletion())
+                    l_Player->SetScheduleForDeletion();
+                else
+                {
+                    l_Player->IntervalDeletionRemoval.Update(p_Diff);
+                    if (l_Player->IntervalDeletionRemoval.Passed())
+                    {
+                        l_Player->RemoveFromWorld();
+                        l_Itr = m_Players.erase(l_Itr);
+                        RemovePlayer(l_Player);
+                    }
+                }
             }
             else
                 l_Itr++;
@@ -136,8 +146,8 @@ namespace SteerStone { namespace Game { namespace World {
             LOG_INFO("World", "Removed Player Id %0 from World", p_Player->GetId());
         #endif
 
-        delete p_Player;
         p_Player = nullptr;
+        delete p_Player;
     }
     /// Return Player in world
     /// @p_Id : Id of player
@@ -161,7 +171,7 @@ namespace SteerStone { namespace Game { namespace World {
 
         auto l_Itr = m_Players.find(p_Player->GetId());
         if (l_Itr != m_Players.end())
-            LOG_ASSERT(!p_Player, "World", "Attempted to add player but player already exists!");
+            p_Player->KickPlayer();
 
         m_Players[p_Player->GetId()] = p_Player;
     }

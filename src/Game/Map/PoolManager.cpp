@@ -94,11 +94,13 @@ namespace SteerStone { namespace Game { namespace Map {
                             Entity::Mob* l_Mob = new Entity::Mob();
                             l_Mob->m_Entry          = l_MobTemplate->Entry;
                             l_Mob->m_Type           = l_MobTemplate->Type;
+                            l_Mob->m_WeaponState    = l_MobTemplate->WeaponState;
                             l_Mob->m_HitPoints      = l_MobTemplate->HitPoints;
                             l_Mob->m_MaxHitPoints   = l_MobTemplate->HitPoints;
                             l_Mob->m_Shield         = l_MobTemplate->Shield;
                             l_Mob->m_MaxShield      = l_MobTemplate->Shield;
-                            l_Mob->Damage           = l_MobTemplate->Damage;
+                            l_Mob->m_MinDamage      = l_MobTemplate->MinDamage;
+                            l_Mob->m_MaxDamage      = l_MobTemplate->MaxDamage;
                             l_Mob->m_Behaviour      = l_MobTemplate->Behaviour;
                             l_Mob->m_Experience     = l_MobTemplate->Experience;
                             l_Mob->m_Honor          = l_MobTemplate->Honor;
@@ -120,11 +122,11 @@ namespace SteerStone { namespace Game { namespace Map {
                             l_Mob->m_IntervalMoveTimer.SetInterval(Core::Utils::FloatRandom(l_Mob->m_MoveTimeMin, l_Mob->m_MoveTimeMin));
                             l_Mob->SetMap(m_Map);
 
-                            float l_PositionX = Core::Utils::FloatRandom(l_PreviousRadiusX, l_MaxX);
-                            float l_PositionY = Core::Utils::FloatRandom(l_PreviousRadiusY, l_MaxY);
+                            float l_PositionX = Core::Utils::FloatRandom(l_PreviousRadiusX, l_MaxX - DISTANCE_AWAY_FROM_BORDER);
+                            float l_PositionY = Core::Utils::FloatRandom(l_PreviousRadiusY, l_MaxY - DISTANCE_AWAY_FROM_BORDER);
                             l_Mob->GetSpline()->SetPosition(l_PositionX, l_PositionY, l_PositionX, l_PositionY);
-
-                            LOG_INFO("Position", "Min: %0 %1 -- Max: %2 %3", l_PreviousRadiusX, l_PreviousRadiusY, l_MaxX, l_MaxY);
+                            l_Mob->m_HomePositionX = l_PositionX;
+                            l_Mob->m_HomePositionY = l_PositionY;
 
                             m_Map->Add(l_Mob);
                             m_MobPool.Add(m_Map->GetGrid(l_Mob), l_Mob);

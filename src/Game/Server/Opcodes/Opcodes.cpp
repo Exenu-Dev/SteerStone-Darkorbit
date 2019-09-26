@@ -60,6 +60,9 @@ namespace SteerStone { namespace Game { namespace Server {
         StoreClientPacket(ClientOpCodes::CLIENT_PACKET_INITIALIZE_SHIP,   "CLIENT_PACKET_INITIALIZE_SHIP",    PacketStatus::STATUS_LOGGED_IN,      PacketProcess::PROCESS_MAP_THREAD,    &GameSocket::HandleInitializeOpponent  );
         StoreClientPacket(ClientOpCodes::CLIENT_PACKET_PORTAL_JUMP,       "CLIENT_PACKET_PORTAL_JUMP",        PacketStatus::STATUS_LOGGED_IN,      PacketProcess::PROCESS_MAP_THREAD,    &GameSocket::HandlePortalJump          );
         StoreClientPacket(ClientOpCodes::CLIENT_PACKET_TRADE_ORE,         "CLIENT_PACKET_TRADE_ORE",          PacketStatus::STATUS_LOGGED_IN,      PacketProcess::PROCESS_PLAYER_THREAD, &GameSocket::HandleNULL                );
+        StoreClientPacket(ClientOpCodes::CLIENT_PACKET_SELECT_TARGET,     "CLIENT_PACKET_SELECT_TARGET",      PacketStatus::STATUS_LOGGED_IN,      PacketProcess::PROCESS_MAP_THREAD,    &GameSocket::HandleSelectTarget        );
+        StoreClientPacket(ClientOpCodes::CLIENT_PACKET_LASER_SHOOT ,      "CLIENT_PACKET_LASER_SHOOT",        PacketStatus::STATUS_LOGGED_IN,      PacketProcess::PROCESS_MAP_THREAD,    &GameSocket::HandleLaserShoot          );
+        StoreClientPacket(ClientOpCodes::CLIENT_PACKET_ABORT_LASER,       "CLIENT_PACKET_ABORT_LASER",        PacketStatus::STATUS_LOGGED_IN,      PacketProcess::PROCESS_PLAYER_THREAD, &GameSocket::HandleNULL                );
 
         //////////////////////////////////////////////////////////////////////////
         //////////////////////////////////////////////////////////////////////////
@@ -80,6 +83,7 @@ namespace SteerStone { namespace Game { namespace Server {
         StoreServerPacket(ServerOpCodes::SERVER_PACKET_EVENT,               "SERVER_PACKET_EVENT",              &GameSocket::HandleServer);
         StoreServerPacket(ServerOpCodes::SERVER_PACKET_JUMP_PORTAL,         "SERVER_PACKET_SEND_MESSAGE",       &GameSocket::HandleServer);
         StoreServerPacket(ServerOpCodes::SERVER_PACKET_DISPLAY_STAR_SYSTEM, "SERVER_PACKET_DISPLAY_STAR_SYSTEM",&GameSocket::HandleServer);
+        StoreServerPacket(ServerOpCodes::SERVER_PACKET_LASER_SHOOT,         "SERVER_PACKET_LASER_SHOOT",        &GameSocket::HandleServer);
 
         /// Debug Headless Packets
         StoreServerPacket(ServerOpCodes::SERVER_PACKET_HEADLESS_MOVE,       "SERVER_PACKET_HEADLESS_MOVE",      &GameSocket::HandleServer);

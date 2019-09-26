@@ -88,13 +88,13 @@ namespace SteerStone { namespace Game { namespace Map {
 
     void Manager::AddToMap(Entity::Object* p_Object)
     {
-        p_Object->GetMap()->Add(p_Object);
+        p_Object->GetMap()->Add(p_Object, true);
     }
     /// Remove From Map
     /// @p_Object : Object being removed from map
     void Manager::RemoveFromMap(Entity::Object* p_Object)
     {
-        p_Object->GetMap()->Remove(p_Object);
+        p_Object->GetMap()->Remove(p_Object, true);
     }
 
     /// Unload Maps

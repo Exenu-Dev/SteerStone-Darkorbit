@@ -16,10 +16,7 @@
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "Player.hpp"
-#include "Station.hpp"
-#include "Portal.hpp"
-#include "ZoneManager.hpp"
+#include "Object.hpp"
 
 namespace SteerStone { namespace Game { namespace Entity {
 
@@ -27,130 +24,18 @@ namespace SteerStone { namespace Game { namespace Entity {
     Object::Object()
         : m_Spline(this)
     {
-        m_Type    = Type::OBJECT_TYPE_NON;
-        m_Map     = nullptr;
+        m_Type      = Type::OBJECT_TYPE_NON;
+        m_Name.clear();
+        m_GridIndex = std::make_tuple(0, 0);
+        m_Map       = nullptr;
     }
     /// Deconstructor
     Object::~Object()
     {
-        sZoneManager->RemoveFromMap(this);
     }
 
     //////////////////////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////////////////////
-
-    /// Set Type
-    /// @p_Type : Type of Object
-    void Object::SetType(Type const p_Type)
-    {
-        m_Type = p_Type;
-    }
-    /// Return Type
-    Type Object::GetType() const
-    {
-        return m_Type;
-    }
-
-    /// Set Object Name
-    /// @p_Name : Name of Object
-    void Object::SetName(std::string const p_Name)
-    {
-        m_Name = p_Name;
-    }
-    /// Return Object Name
-    std::string Object::GetName() const
-    {
-        return m_Name;
-    }
-
-    /// Set Object GUID
-    /// @p_ObjectGUID : Object GUID
-    void Object::SetGUID(ObjectGUID& p_ObjectGUID)
-    {
-        m_ObjectGUID = p_ObjectGUID;
-    }
-    /// Return Object GUID
-    ObjectGUID const& Object::GetObjectGUID()
-    {
-        return m_ObjectGUID;
-    }
-    /// Returns Object GUID
-    uint64 Object::GetGUID() const
-    {
-        return m_ObjectGUID.GetGUID();
-    }
-
-    /// Set Grid Index
-    /// @p_GridIndex : Grid Index
-    void Object::SetGridIndex(std::tuple<uint32, uint32> const p_GridIndex)
-    {
-        m_GridIndex = p_GridIndex;
-    }
-    /// Return Grid Index
-    std::tuple<uint32, uint32> Object::GetGridIndex() const
-    {
-        return m_GridIndex;
-    }
-
-    /// Set Map for Object
-    void Object::SetMap(Map::Base* p_Map)
-    {
-        LOG_ASSERT(p_Map, "Object", "Attempted to assign Object Map to nullptr! for Object %0", GetGUID());
-
-        m_Map = p_Map;
-    }
-    /// Get Map
-    Map::Base* Object::GetMap() const
-    {
-        return m_Map;
-    }
-    /// Get Grid
-    Map::Grid* Object::GetGrid() const
-    {
-        return m_Map->GetGrid(this);
-    }
-    /// Get Spline
-    Spline* Object::GetSpline()
-    {
-        return &m_Spline;
-    }
-    /// To Unit Class
-    Unit* Object::ToUnit()
-    {
-        return reinterpret_cast<Unit*>(this);
-    }
-    /// To Player Class
-    Player* Object::ToPlayer()
-    {
-         if (GetType() == Type::OBJECT_TYPE_PLAYER) 
-             return reinterpret_cast<Player*>(this);
-
-         return nullptr;
-    }
-    /// To Portal Class
-    Portal* Object::ToPortal()
-    {
-        if (GetType() == Type::OBJECT_TYPE_PORTAL)
-            return reinterpret_cast<Portal*>(this);
-
-        return nullptr;
-    }
-    /// To Station Class
-    Station* Object::ToStation()
-    {
-        if (GetType() == Type::OBJECT_TYPE_STATION)
-            return reinterpret_cast<Station*>(this);
-
-        return nullptr;
-    }
-    /// To Mob Class
-    Mob* Object::ToMob()
-    {
-        if (GetType() == Type::OBJECT_TYPE_NPC)
-            return reinterpret_cast<Mob*>(this);
-
-        return nullptr;
-    }
 
 }   ///< namespace Entity
 }   ///< namespace Game

@@ -51,10 +51,13 @@ namespace SteerStone { namespace Game { namespace Map {
         InActive    ///< Grid is turned off regardless if there's players
     };
 
-
     class Entity::Object;
     class Entity::Portal;
     class Server::PacketBuffer;
+    class Base;
+
+    typedef std::unordered_map<uint32, Entity::Object*> ObjectMap;
+    typedef std::unordered_set<Entity::Object*> PlayerMap;
 
     /// Grid
     class Grid
@@ -65,33 +68,52 @@ namespace SteerStone { namespace Game { namespace Map {
         //////////////////////////////////////////////////////////////////////////
     public:
         /// Constructor
+        /// @p_Map   : Map who owns the grid
         /// @p_GridX : Grid X
         /// @p_GridY : Grid Y
-        Grid(uint32 const p_GridX, uint32 const p_GridY);
+        Grid(Base* p_Map, uint32 const p_GridX, uint32 const p_GridY);
         /// Deconstructor
         ~Grid();
 
         //////////////////////////////////////////////////////////////////////////
         //////////////////////////////////////////////////////////////////////////
 
+        ///////////////////////////////////////////
+        //               GENERAL
+        ///////////////////////////////////////////
     public:
-        /// Add Object to Grid
-        /// @p_Object : Object being added
-        void Add(Entity::Object* p_Object);
-        /// Remove Object from Grid
-        /// @p_Object : Object being removed
-        void Remove(Entity::Object* p_Object);
-
-        /// Unload objects from map
-        void Unload();
+        /// Check if Player is near any interactive events
+        /// @p_Diff : Execution Time
+        void UpdateInteractiveEvents(uint32 const p_Diff);
+        /// Update Surrounding objects for players
+        void UpdateSurroundingObjects();
+        /// Check if a Player is inside the grid
+        /// @p_Diff : Execution Time
+        void CheckForPlayer(uint32 const p_Diff);
+        /// Update Grid
+        /// @p_Diff : Execution Time
+        bool Update(uint32 const p_Diff);
 
         /// Check if near portal
         /// @p_Object : Object being checked
         Entity::Portal* CanJumpPortal(Entity::Object* p_Object);
 
-        /// Build Object Spawn Packet
-        /// @p_Object : Object being built
-        void BuildObjectSpawnAndSend(Entity::Object* p_Object);
+        ///////////////////////////////////////////
+        //               OBJECTS
+        ///////////////////////////////////////////
+    public:
+        /// Add Object to Grid
+        /// @p_Object       : Object being added
+        /// @p_SendMovement : Send Movement packet when joining
+        void Add(Entity::Object* p_Object, bool p_SendMovement = false);
+        /// Remove Object from Grid
+        /// @p_Object : Object being removed
+        void Remove(Entity::Object* p_Object);
+        /// Unload objects from map
+        void Unload();
+        /// Build surrounding objects near player
+        /// @p_Object       : Player
+        void BuildSurroundingObjects(Entity::Object* p_Object);
         /// Build Player Spawn Packet
         /// @p_ObjectBuilt : Object being built
         /// @p_Object      : Object
@@ -100,50 +122,54 @@ namespace SteerStone { namespace Game { namespace Map {
         /// @p_Object : Object being built
         void BuildObjectDespawnAndSend(Entity::Object* p_Object);
 
-        /// Move Object
-        /// @p_Object : Object being moved
-        void Move(Entity::Object* p_Object);
-
+        ///////////////////////////////////////////
+        //               FINDER
+        ///////////////////////////////////////////
+    public:
         /// Find Player
         /// @p_Id : Account Id of Player
         Entity::Object* FindPlayer(uint32 const p_Id);
+        /// Find Nearest Player to Object
+        /// @p_Object : Object which we are checking against
+        /// @p_Distance : Find Object in a specific range
+        Entity::Object* FindNearestPlayer(Entity::Object* p_Object, float p_Distance = 0.0f);
         /// Find Object
         /// @p_Counter : Counter of Object
         Entity::Object* FindObject(uint32 const p_Counter);
 
-        /// Send Packet to everyone
-        /// @p_Packet : Packing being sent
-        /// @p_Object : Send packet to self
-        void SendPacketEveryone(Server::PacketBuffer const* p_Packet, Entity::Object* p_Object = nullptr);
+        ///////////////////////////////////////////
+        //               PACKETS
+        ///////////////////////////////////////////
+    public:
+        /// Send Packet to everyone in grid
+        /// @p_Packet : Packet being sent
+        void SendPacketToEveryone(Server::PacketBuffer const* p_Packet);
+        /// Send Packet to everyone if object is in surrounding
+        /// @p_Packet : Packet being sent
+        /// @p_Object : Object being checked
+        void SendPacketIfInSurrounding(Server::PacketBuffer const* p_Packet, Entity::Object* p_Object);
+        /// Move Object
+        /// @p_Object : Object being moved
+        void Move(Entity::Object* p_Object);
 
-        /// Get State of Grid
-        State GetState() const;
-
-        /// Check if a Player is inside the grid
-        /// @p_Diff : Execution Time
-        void CheckForPlayer(uint32 const p_Diff);
-
-        /// Check if Player is near any interactive events
-        /// @p_Diff : Execution Time
-        void UpdateInteractiveEvents(uint32 const p_Diff);
-
-        /// Update Grid
-        /// @p_Diff : Execution Time
-        bool Update(uint32 const p_Diff);
-
+        ///////////////////////////////////////////
+        //            GETTERS/SETTERS
+        ///////////////////////////////////////////
+    public:
+        State GetState() const { return m_State; }
 
         //////////////////////////////////////////////////////////////////////////
         //////////////////////////////////////////////////////////////////////////
 
     private:
-        std::unordered_map<uint32, Entity::Object*> m_Objects;       ///< Objects in Grid
-        std::unordered_set<Entity::Object*> m_Players;               ///< Players in Grid
+        ObjectMap m_Objects;                                         ///< Objects in Grid
+        PlayerMap m_Players;                                         ///< Players in Grid
+        Base* m_Map;                                                 ///< Map
         State m_State;                                               ///< Grid State
         uint32 m_GridX;                                              ///< Grid Index X
         uint32 m_GridY;                                              ///< Grid Index Y
         Core::Diagnostic::IntervalTimer m_IntervalCheckPlayer;       ///< Interval Timer
         Core::Diagnostic::IntervalTimer m_IntervalInteractiveEvents; ///< Interval Timer
-        std::mutex m_Mutex;                                          ///< Global Mutex
     };
 
 }   ///< namespace Map

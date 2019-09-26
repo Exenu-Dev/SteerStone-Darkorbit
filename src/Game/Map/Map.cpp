@@ -58,15 +58,44 @@ namespace SteerStone { namespace Game { namespace Map {
         /// Load Grids
         for (uint32 l_X = 0; l_X < GRID_CELLS; l_X++)
             for (uint32 l_Y = 0; l_Y < GRID_CELLS; l_Y++)
-                m_Grids[l_X][l_Y] = new Grid(l_X, l_Y);
+                m_Grids[l_X][l_Y] = new Grid(this, l_X, l_Y);
 
         m_IntervalJumpPlayer.SetInterval(sWorldManager->GetIntConfig(World::IntConfigs::INT_CONFIG_JUMP_DELAY));
-        m_IntervalDelayRemoval.SetInterval(sWorldManager->GetIntConfig(World::IntConfigs::INT_CONFIG_DELAY_REMOVAL));
     }
     /// Deconstructor
     Base::~Base()
     {
 
+    }
+
+    //////////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////////
+
+    ///////////////////////////////////////////
+    //              GENERAL
+    ///////////////////////////////////////////
+
+    /// Update Maps
+    /// @p_Diff : Execution Time
+    bool Base::Update(uint32 const p_Diff)
+    {
+        ProcessJumpQueue(p_Diff);
+
+        for (uint32 l_X = 0; l_X < GRID_CELLS; l_X++)
+        {
+            for (uint32 l_Y = 0; l_Y < GRID_CELLS; l_Y++)
+            {
+                Grid* l_Grid = m_Grids[l_X][l_Y];
+
+                /// If there's no players inside the grid, then no point in updating
+                if (l_Grid->GetState() == State::Idle)
+                    continue;
+
+                l_Grid->Update(p_Diff);
+            }
+        }
+
+        return true;
     }
 
     /// Load Map
@@ -76,7 +105,6 @@ namespace SteerStone { namespace Game { namespace Map {
         LoadStations();
         LoadMobs();
     }
-
     /// Load Portals to map
     void Base::LoadPortals()
     {
@@ -125,40 +153,38 @@ namespace SteerStone { namespace Game { namespace Map {
         m_PoolManager.Initialize();
     }
 
-    /// Send Objects which always appear on map regardless of what grid user is in
-    /// @p_Object : Packet being sent to
-    void Base::SendConstantObjects(Entity::Object* p_Object)
+    ///////////////////////////////////////////
+    //            GRID SYSTEM
+    ///////////////////////////////////////////
+
+    /// Get near by grids
+    /// @p_GridX : Origin Grid X
+    /// @p_GridY : Origin Grid Y
+    /// @p_Grids : Storage for the nearby grids
+    void Base::GetNearbyGrids(uint32 const p_GridX, uint32 const p_GridY, std::vector<Grid*>& p_Grids)
     {
-        /// Only players
-        if (p_Object->GetType() != Entity::Type::OBJECT_TYPE_PLAYER)
-            return;
+        static const int32 l_X[] = { -1, -1, -1,  1, 1, 1,  0, 0 };
+        static const int32 l_Y[] = { -1,  0,  1, -1, 0, 1, -1, 1 };
 
-        for (auto l_Itr : m_ConstantObjects)
+        /// Find neighbour girds
+        for (uint32 l_I = 0; l_I < GRID_CELLS; l_I++)
         {
-            if (l_Itr->GetType() == Entity::Type::OBJECT_TYPE_PORTAL)
-            {
-                Server::Packets::CreatePortal l_Packet;
-                l_Packet.Id         = l_Itr->GetObjectGUID().GetCounter();
-                l_Packet.Type       = static_cast<uint16>(l_Itr->ToPortal()->GetType());
-                l_Packet.PositionX  = l_Itr->GetSpline()->GetPositionX();
-                l_Packet.PositionY  = l_Itr->GetSpline()->GetPositionY();
-                p_Object->ToPlayer()->SendPacket(l_Packet.Write());
-            }
-            else if (l_Itr->GetType() == Entity::Type::OBJECT_TYPE_STATION)
-            {
-                Server::Packets::CreateStation l_Packet;
-                l_Packet.Id         = l_Itr->GetObjectGUID().GetCounter();
-                l_Packet.Type       = static_cast<uint16>(l_Itr->ToStation()->GetType());
-                l_Packet.Name       = l_Itr->GetName();
-                l_Packet.CompanyId  = static_cast<uint16>(l_Itr->ToStation()->GetCompany());
-                l_Packet.Peace      = l_Itr->ToStation()->IsPeace();
-                l_Packet.PositionX  = l_Itr->GetSpline()->GetPositionX();
-                l_Packet.PositionY  = l_Itr->GetSpline()->GetPositionY();
-                p_Object->ToPlayer()->SendPacket(l_Packet.Write());
-            }
-        }
-    }
+            int32 l_GridX = p_GridX + l_X[l_I];
+            int32 l_GridY = p_GridY + l_Y[l_I];
 
+            if (IsWithinGridRange(l_GridX, l_GridY))
+                p_Grids.push_back(m_Grids[l_GridX][l_GridY]);
+        }
+
+        /// Also Push origin grid
+        p_Grids.push_back(m_Grids[p_GridX][p_GridY]);
+    }
+    /// Return Grid
+    /// @p_Object : Object we are getting grid from
+    Grid* Base::GetGrid(Entity::Object const* p_Object)
+    {
+        return m_Grids[std::get<0>(p_Object->GetGridIndex())][std::get<1>(p_Object->GetGridIndex())];
+    }
     /// Calculate Grid By Object Position
     /// @p_Object : Object
     std::tuple<uint32, uint32> Base::CalculateGridByPosition(Entity::Object* p_Object)
@@ -172,7 +198,6 @@ namespace SteerStone { namespace Game { namespace Map {
 
         return std::make_tuple(static_cast<uint32>(l_GridX), static_cast<uint32>(l_GridY));
     }
-
     /// Calculate Grid By Object Position
     /// @p_Object : Object
     /// @p_PositionX : X Axis
@@ -188,11 +213,11 @@ namespace SteerStone { namespace Game { namespace Map {
 
         return std::make_tuple(static_cast<uint32>(l_GridX), static_cast<uint32>(l_GridY));
     }
-
     /// This function is only called when object is added to map
     /// Add Object to map
-    /// @p_Object : Object being added to map
-    void Base::Add(Entity::Object* p_Object)
+    /// @p_Object      : Object being added to map
+    /// @p_SendMovement : Send movement packet when joining
+    void Base::Add(Entity::Object* p_Object, bool p_SendMovement)
     {
         p_Object->SetGridIndex(CalculateGridByPosition(p_Object));
         m_Grids[std::get<0>(p_Object->GetGridIndex())][std::get<1>(p_Object->GetGridIndex())]->Add(p_Object);
@@ -202,32 +227,29 @@ namespace SteerStone { namespace Game { namespace Map {
     }
     /// Remove Object from map
     /// @p_Object : Object being removed from map
-    void Base::Remove(Entity::Object* p_Object)
+    /// @p_Immediantly : Remove Object from map without delay
+    void Base::Remove(Entity::Object* p_Object, bool p_Immediantly)
     {
         m_Grids[std::get<0>(p_Object->GetGridIndex())][std::get<1>(p_Object->GetGridIndex())]->Remove(p_Object);
     }
-    /// Delay Removal
-    /// @p_Player : Player
-    /// @p_Object : Object
-    void Base::AddToDelayRemoval(Entity::Object* p_Player, Entity::Object* p_Object)
-    {
-        m_DelayRemoval[p_Player].insert(p_Object);
-    }
-
-    /// Unload Maps
-    void Base::UnloadAll()
+    /// Find Object in map
+    /// @p_Counter : Counter of object
+    Entity::Object* Base::FindObject(uint32 const p_Counter)
     {
         for (uint32 l_X = 0; l_X < GRID_CELLS; l_X++)
         {
             for (uint32 l_Y = 0; l_Y < GRID_CELLS; l_Y++)
             {
                 Grid* l_Grid = m_Grids[l_X][l_Y];
-                l_Grid->Unload();
-                delete l_Grid;
+
+                Entity::Object* l_Object = l_Grid->FindObject(p_Counter);
+                if (l_Object)
+                    return l_Object;
             }
         }
-    }
 
+        return nullptr;
+    }
     /// Move Object
     /// @p_Object : Object being moved
     void Base::Move(Entity::Object* p_Object)
@@ -243,11 +265,41 @@ namespace SteerStone { namespace Game { namespace Map {
 
             /// Add new grid
             p_Object->SetGridIndex(l_GridIndex);
-            m_Grids[std::get<0>(p_Object->GetGridIndex())][std::get<1>(p_Object->GetGridIndex())]->Add(p_Object);
+            m_Grids[std::get<0>(p_Object->GetGridIndex())][std::get<1>(p_Object->GetGridIndex())]->Add(p_Object, true);
         }
 
         m_Grids[std::get<0>(p_Object->GetGridIndex())][std::get<1>(p_Object->GetGridIndex())]->Move(p_Object);
     }
+    /// Unload Grids
+    void Base::UnloadAll()
+    {
+        for (uint32 l_X = 0; l_X < GRID_CELLS; l_X++)
+        {
+            for (uint32 l_Y = 0; l_Y < GRID_CELLS; l_Y++)
+            {
+                Grid* l_Grid = m_Grids[l_X][l_Y];
+                l_Grid->Unload();
+                delete l_Grid;
+            }
+        }
+    }
+    /// Check whether coordinates is within grid
+    /// @p_PositionX : X Axis
+    /// @p_PositionY : Y Axis
+    bool Base::IsWithinGridRange(uint32 const p_PositionX, uint32 const p_PositionY)
+    {
+        if (p_PositionX < 0 || p_PositionX >= 8)
+            return false;
+
+        if (p_PositionY < 0 || p_PositionY >= 8)
+            return false;
+
+        return true;
+    }
+
+    ///////////////////////////////////////////
+    //              JUMP QUEUE
+    ///////////////////////////////////////////
 
     /// Add Player to Jump Queue
     /// @p_ObjectPlayer : Player being added
@@ -257,11 +309,8 @@ namespace SteerStone { namespace Game { namespace Map {
         if (p_ObjectPlayer->ToPlayer()->IsJumping())
             return;
 
-        m_JumpPlayerMutex.lock();
         m_PlayersToJump[p_ObjectPlayer] = p_ObjectPortal;
-        m_JumpPlayerMutex.unlock();
     }
-
     /// Process Jump Queue
     /// @p_Diff : Execution Time
     void Base::ProcessJumpQueue(uint32 const p_Diff)
@@ -270,14 +319,11 @@ namespace SteerStone { namespace Game { namespace Map {
         if (!m_IntervalJumpPlayer.Passed())
             return;
 
-        m_JumpPlayerMutex.lock();
-        std::unordered_map<Entity::Object*, Entity::Object*> l_Copy(m_PlayersToJump);
-        m_JumpPlayerMutex.unlock();
-
-        for (auto l_Itr : l_Copy)
+        for (auto l_Itr : m_PlayersToJump)
         {
             /// Remove player from map
             sZoneManager->RemoveFromMap(l_Itr.first);
+            l_Itr.first->ToPlayer()->ClearSurroundings();
 
             /// Add to map
             l_Itr.first->SetMap(sZoneManager->GetMap(l_Itr.second->ToPortal()->GetToMapId()));
@@ -298,112 +344,76 @@ namespace SteerStone { namespace Game { namespace Map {
         m_PlayersToJump.clear();
     }
 
-    /// Return Grid
-    /// @p_Object : Object we are getting grid from
-    Grid* Base::GetGrid(Entity::Object const* p_Object)
-    {
-        return m_Grids[std::get<0>(p_Object->GetGridIndex())][std::get<1>(p_Object->GetGridIndex())];
-    }
-
-    /// Find Object in map
-    /// @p_Counter : Counter of object
-    Entity::Object* Base::FindObject(uint32 const p_Counter)
-    {
-        for (uint32 l_X = 0; l_X < GRID_CELLS; l_X++)
-        {
-            for (uint32 l_Y = 0; l_Y < GRID_CELLS; l_Y++)
-            {
-                Grid* l_Grid = m_Grids[l_X][l_Y];
-                
-                Entity::Object* l_Object = l_Grid->FindObject(p_Counter);
-                if (l_Object)
-                    return l_Object;
-            }
-        }
-
-        return nullptr;
-    }
+    ///////////////////////////////////////////
+    //              PACKETS
+    ///////////////////////////////////////////
 
     /// Send Packet to everyone in map
     /// @p_PacketBuffer : Packet being sent to
-    void Base::SendPacketEveryone(Server::PacketBuffer const* p_PacketBuffer)
+    void Base::SendPacketToMap(Server::PacketBuffer const* p_PacketBuffer)
     {
         for (uint32 l_X = 0; l_X < GRID_CELLS; l_X++)
             for (uint32 l_Y = 0; l_Y < GRID_CELLS; l_Y++)
-                m_Grids[l_X][l_Y]->SendPacketEveryone(p_PacketBuffer);
+                m_Grids[l_X][l_Y]->SendPacketToEveryone(p_PacketBuffer);
     }
-
-    void Base::UpdateRemoval(uint32 const p_Diff)
+    /// Send Packet to nearby grids if in surrounding
+    /// p_Object : Object responsible for building packet
+    void Base::SendPacketToNearByGrids(Server::PacketBuffer const* p_PacketBuffer, Entity::Object* p_Object)
     {
-        m_IntervalDelayRemoval.Update(p_Diff);
-        if (!m_IntervalDelayRemoval.Passed())
+        static const int32 l_X[] = { -1, -1, -1,  1, 1, 1,  0, 0 };
+        static const int32 l_Y[] = { -1,  0,  1, -1, 0, 1, -1, 1 };
+
+        std::vector<Grid*> l_Grids;
+
+        /// Find neighbour girds
+        for (uint32 l_I = 0; l_I < GRID_CELLS; l_I++)
         {
-            for (auto l_Itr : m_DelayRemoval)
-            {
-                for (auto l_SecondItr = l_Itr.second.begin(); l_SecondItr != l_Itr.second.end();)
-                {
-                    /// If unit is dead, remove from client
-                    if ((*l_SecondItr)->ToUnit()->GetDeathState() == Entity::DeathState::DEAD)
-                    {
-                        Server::Packets::DespawnShip l_Packet;
-                        l_Packet.Id = (*l_SecondItr)->GetObjectGUID().GetCounter();
-                        l_Itr.first->ToPlayer()->SendPacket(l_Packet.Write());
+            int32 l_GridX = std::get<0>(p_Object->GetGridIndex()) + l_X[l_I];
+            int32 l_GridY = std::get<1>(p_Object->GetGridIndex()) + l_Y[l_I];
 
-                        l_SecondItr = l_Itr.second.erase(l_SecondItr);
-                    }
-                    else
-                    {
-                        Server::Packets::ObjectMove l_Packet;
-                        l_Packet.Id        = (*l_SecondItr)->GetObjectGUID().GetCounter();
-                        l_Packet.PositionX = (*l_SecondItr)->GetSpline()->GetPlannedPositionX();
-                        l_Packet.PositionY = (*l_SecondItr)->GetSpline()->GetPlannedPositionY();
-                        l_Packet.Time      = (*l_SecondItr)->GetSpline()->GetDestinationTime();
-                        l_Itr.first->ToPlayer()->SendPacket(l_Packet.Write());
+            if (IsWithinGridRange(l_GridX, l_GridY))
+                l_Grids.push_back(m_Grids[l_GridX][l_GridY]);
+        }
 
-                        l_SecondItr++;
-                    }
-                }
-            }
-
+        /// Push object grid into storage
+        l_Grids.push_back(m_Grids[std::get<0>(p_Object->GetGridIndex())][std::get<1>(p_Object->GetGridIndex())]);
+        
+        /// Now send packet to players if object is in their surroundings
+        for (auto l_Itr : l_Grids)
+            l_Itr->SendPacketIfInSurrounding(p_PacketBuffer, p_Object);
+    }
+    /// Send Objects which always appear on map regardless of what grid user is in
+    /// @p_Object : Packet being sent to
+    void Base::SendConstantObjects(Entity::Object* p_Object)
+    {
+        /// Only players
+        if (p_Object->GetType() != Entity::Type::OBJECT_TYPE_PLAYER)
             return;
-        }
 
-        /// Now remove from client
-        for (auto l_Itr : m_DelayRemoval)
+        for (auto l_Itr : m_ConstantObjects)
         {
-            for (auto l_SecondItr : l_Itr.second)
+            if (l_Itr->GetType() == Entity::Type::OBJECT_TYPE_PORTAL)
             {
-                Server::Packets::DespawnShip l_Packet;
-                l_Packet.Id = l_SecondItr->GetObjectGUID().GetCounter();
-                l_Itr.first->ToPlayer()->SendPacket(l_Packet.Write());
+                Server::Packets::CreatePortal l_Packet;
+                l_Packet.Id = l_Itr->GetObjectGUID().GetCounter();
+                l_Packet.Type = static_cast<uint16>(l_Itr->ToPortal()->GetType());
+                l_Packet.PositionX = l_Itr->GetSpline()->GetPositionX();
+                l_Packet.PositionY = l_Itr->GetSpline()->GetPositionY();
+                p_Object->ToPlayer()->SendPacket(l_Packet.Write());
+            }
+            else if (l_Itr->GetType() == Entity::Type::OBJECT_TYPE_STATION)
+            {
+                Server::Packets::CreateStation l_Packet;
+                l_Packet.Id = l_Itr->GetObjectGUID().GetCounter();
+                l_Packet.Type = static_cast<uint16>(l_Itr->ToStation()->GetType());
+                l_Packet.Name = l_Itr->GetName();
+                l_Packet.CompanyId = static_cast<uint16>(l_Itr->ToStation()->GetCompany());
+                l_Packet.Peace = l_Itr->ToStation()->IsPeace();
+                l_Packet.PositionX = l_Itr->GetSpline()->GetPositionX();
+                l_Packet.PositionY = l_Itr->GetSpline()->GetPositionY();
+                p_Object->ToPlayer()->SendPacket(l_Packet.Write());
             }
         }
-
-        m_DelayRemoval.clear();
-    }
-
-    /// Update Maps
-    /// @p_Diff : Execution Time
-    bool Base::Update(uint32 const p_Diff)
-    {
-        ProcessJumpQueue(p_Diff);
-        UpdateRemoval(p_Diff);
-
-        for (uint32 l_X = 0; l_X < GRID_CELLS; l_X++)
-        {
-            for (uint32 l_Y = 0; l_Y < GRID_CELLS; l_Y++)
-            {
-                Grid* l_Grid = m_Grids[l_X][l_Y];
-
-                /// If there's no players inside the grid, then no point in updating
-                if (l_Grid->GetState() == State::Idle)
-                    continue;
-
-                l_Grid->Update(p_Diff);
-            }
-        }
-
-        return true;
     }
 
     //////////////////////////////////////////////////////////////////////////
