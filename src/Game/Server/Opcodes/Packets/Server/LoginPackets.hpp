@@ -127,6 +127,22 @@ namespace SteerStone { namespace Game { namespace Server { namespace Packets {
         PacketBuffer const* Write();
     };
 
+    /// SERVER_PACKET_LOG_OUT packet builder
+    class LogOut final : public ServerPacket
+    {
+    public:
+        /// Constructor 
+        LogOut() : ServerPacket(ServerOpCodes::SERVER_PACKET_LOG_OUT)
+        {
+        }
+
+        //////////////////////////////////////////////////////////////////////////
+        //////////////////////////////////////////////////////////////////////////
+
+        /// Write the packet
+        PacketBuffer const* Write();
+    };
+
 }   ///< Packets
 }   ///< Server
 }   ///< Game

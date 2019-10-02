@@ -97,8 +97,8 @@ namespace SteerStone { namespace Game { namespace Map {
         void Add(Entity::Object* p_Object, bool p_SendMovement = false);
         /// Remove Object from map
         /// @p_Object : Object being removed from map
-        /// @p_Immediantly : Remove Object from map without delay
-        void Remove(Entity::Object* p_Object, bool p_Immediantly = false);
+        /// @p_SendPacket : Send Despawn Packet
+        void Remove(Entity::Object* p_Object, bool p_SendPacket = false);
         /// Find Object in map
         /// @p_Counter : Counter of object
         Entity::Object* FindObject(uint32 const p_Counter);
@@ -133,8 +133,9 @@ namespace SteerStone { namespace Game { namespace Map {
         /// @p_PacketBuffer : Packet being sent to
         void SendPacketToMap(Server::PacketBuffer const* p_PacketBuffer);
         /// Send Packet to nearby grids if in surrounding
-        /// p_Object : Object responsible for building packet
-        void SendPacketToNearByGrids(Server::PacketBuffer const* p_PacketBuffer, Entity::Object* p_Object);
+        /// @p_Object : Object responsible for building packet
+        /// @p_SendToSelf : Send Packet to self
+        void SendPacketToNearByGridsIfInSurrounding(Server::PacketBuffer const* p_PacketBuffer, Entity::Object* p_Object, bool p_SendToSelf = false);
         /// Send Objects which always appear on map regardless of what grid user is in
         /// @p_Object : Packet being sent to
         void SendConstantObjects(Entity::Object* p_Object);

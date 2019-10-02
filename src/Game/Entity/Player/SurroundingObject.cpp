@@ -47,11 +47,7 @@ namespace SteerStone { namespace Game { namespace Entity {
     {
         /// This can happen if object (player) logs out
         if (!m_Object)
-        {
-            /// Send despawn packet just to make sure
-            Despawn();
             return false;
-        }
 
         /// If unit is dead, remove from client
         if (m_Object->ToUnit()->GetDeathState() == Entity::DeathState::DEAD)
@@ -66,8 +62,10 @@ namespace SteerStone { namespace Game { namespace Entity {
             m_IntervalDelayRemoval.Update(p_Diff);
             if (m_IntervalDelayRemoval.Passed())
             {
-                Despawn();
-                return false;
+                if (Despawn())
+                    return false;
+                else
+                    return true;
             }
         }
 
@@ -116,11 +114,27 @@ namespace SteerStone { namespace Game { namespace Entity {
     }
 
     /// Despawn Object
-    void SurroundingObject::Despawn()
+    bool SurroundingObject::Despawn()
     {
+        /// If we are still targetting the object, keep it in client
+        if (m_PlayerObject->ToUnit()->GetTarget() && m_PlayerObject->ToUnit()->GetTarget()->GetObjectGUID().GetCounter() ==
+            m_Object->GetObjectGUID().GetCounter())
+        {
+            /// If its a mob, then clear the target of the mob
+            if (m_Object->GetType() == Type::OBJECT_TYPE_NPC)
+                m_Object->ToUnit()->CancelAttack();
+
+            /// And reset timer
+            m_IntervalDelayRemoval.ResetCurrent();
+
+            return false;
+        }
+
         Server::Packets::DespawnShip l_Packet;
         l_Packet.Id = m_Object->GetObjectGUID().GetCounter();
         m_PlayerObject->ToPlayer()->SendPacket(l_Packet.Write());
+
+        return true;
     }
 
 }   ///< namespace Entity

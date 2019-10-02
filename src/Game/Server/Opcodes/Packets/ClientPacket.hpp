@@ -118,7 +118,7 @@ namespace SteerStone { namespace Game { namespace Server {
         private:
             uint8 m_Header;                     ///< Header
             std::vector<std::string> m_Payload; ///< Payload
-            std::size_t m_ReadPosition;              ///< Read Position
+            std::size_t m_ReadPosition;         ///< Read Position
     };
 }   ///< namespace Server
 }   ///< namespace Game

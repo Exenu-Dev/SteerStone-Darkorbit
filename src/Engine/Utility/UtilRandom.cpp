@@ -66,7 +66,7 @@ namespace SteerStone { namespace Core { namespace Utils {
     /// Return a random number in the range min..max (inclusive)
     uint32 UInt32Random(uint32 p_Min, uint32 p_Max)
     {
-        if (p_Max < p_Min)
+        if (p_Max <= p_Min)
             return p_Min;
 
         return GetRng()->URandom(p_Min, p_Max);
@@ -97,6 +97,7 @@ namespace SteerStone { namespace Core { namespace Utils {
     {
         return p_Chance > RandomChance();
     }
+    /// Return true if a random roll fits in the specified chance (range 0-100)
     bool RollChanceInterger32(int32 p_Chance)
     {
         return p_Chance > Int32Random(0, 99);

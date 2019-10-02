@@ -19,60 +19,48 @@
 #pragma once
 #include <PCH/Precompiled.hpp>
 #include "Core/Core.hpp"
-#include "Socket.hpp"
-#include "Unit.hpp"
-
-#include "Diagnostic/DiaIntervalTimer.hpp"
 
 namespace SteerStone { namespace Game { namespace Entity {
 
-    class SurroundingObject
+    class ItemTemplate;
+
+    class Item
     {
-        DISALLOW_COPY_AND_ASSIGN(SurroundingObject);
+    public:
+        friend class Inventory;
 
     //////////////////////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////////////////////
 
     public:
         /// Constructor
-        /// @p_Object       : Object
-        /// @p_PlayerObject : Player
-        SurroundingObject(Object* p_Object, Object* p_PlayerObject);
+        Item();
         /// Deconstructor
-        ~SurroundingObject();
+        ~Item();
 
     //////////////////////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////////////////////
 
+    ///////////////////////////////////////////
+    //            GETTERS/SETTERS
+    ///////////////////////////////////////////
     public:
-        /// Update
-        /// @p_Diff : Execution Time
-        bool Update(uint32 const p_Diff);
+        bool IsWeapon()   const { return m_IsWeapon; }
+        bool IsSpeed()    const { return m_IsSpeed;  }
+        bool IsShield()   const { return m_IsShield; }
+        uint32 GetCount() const { return m_Count;    }
 
-        /// Schedule to despawn object
-        void ScheduleForDespawn();
-
-        /// Remove object from being despawned
-        void RemoveScheduleFromDespawn();
-        
-        /// Send Packet
-        /// @p_PacketBuffer : Packet being sent
-        void SendPacket(Server::PacketBuffer const* p_PacketBuffer);
-
-        /// Whether object is set to be despawned
-        bool IsScheduledForDespawn() const;
-
-        /// Despawn Object
-        bool Despawn();
+        ItemTemplate const* GetItemTemplate() { return m_ItemTemplate; }
 
     //////////////////////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////////////////////
 
     private:
-        Object* m_Object;
-        Object* m_PlayerObject;
-        Core::Diagnostic::IntervalTimer m_IntervalDelayRemoval;
-        bool m_ScheduleForDespawn;
+        uint32 m_Count;
+        bool m_IsWeapon;
+        bool m_IsSpeed;
+        bool m_IsShield;
+        ItemTemplate const* m_ItemTemplate;
     };
 
 }   ///< namespace Entity

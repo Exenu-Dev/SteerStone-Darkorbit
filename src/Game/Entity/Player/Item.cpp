@@ -16,30 +16,28 @@
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#pragma once
-#include <PCH/Precompiled.hpp>
-#include "Core/Core.hpp"
+#include "Item.hpp"
+#include "ObjectData.hpp"
 
-namespace SteerStone { namespace Core { namespace Database {
-
-    class Operator
+namespace SteerStone { namespace Game { namespace Entity {
+    
+    /// Constructor
+    Item::Item()
     {
-    public:
-        /// Constructor
-        Operator() {}
+        m_Count         = 0;
+        m_IsWeapon      = false;
+        m_IsSpeed       = false;
+        m_IsShield      = false;
+        m_ItemTemplate  = nullptr;
+    }
+    /// Deconstructor
+    Item::~Item()
+    {
+    }
 
-        /// Virtual Deconstructor
-        virtual ~Operator() {}
+    //////////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////////
 
-        //////////////////////////////////////////////////////////////////////////
-        //////////////////////////////////////////////////////////////////////////
-
-    public:
-        /// Execute
-        /// Execute Query
-        virtual bool Execute() = 0;
-    };
-
-}   ///< namespace Database
-}   ///< namespace Core
-}   ///< namespace SteerStone
+}   ///< namespace Entity
+}   ///< namespace Game
+}   ///< namespace Steerstone

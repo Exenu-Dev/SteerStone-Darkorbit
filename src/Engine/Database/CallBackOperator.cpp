@@ -42,10 +42,13 @@ namespace SteerStone { namespace Core { namespace Database {
     /// Check if operator is ready to be called
     bool CallBackOperator::InvokeOperator()
     {
-        /// Is our promise ready?
+        /// No delay, if it's not ready - then try again on next update
         if (m_PreparedFuture.wait_for(std::chrono::seconds(0)) == std::future_status::ready)
         {
             std::unique_ptr<PreparedResultSet> l_PreparedResultSet = m_PreparedFuture.get();
+
+            /// Now allow to free the statement on deconstruction
+            l_PreparedResultSet->AllowToFreeStatement();
 
             /// If there's a function, then execute the function with our result set
             if (m_OperatorFunction)

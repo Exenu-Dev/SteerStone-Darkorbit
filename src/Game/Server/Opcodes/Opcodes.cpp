@@ -62,28 +62,41 @@ namespace SteerStone { namespace Game { namespace Server {
         StoreClientPacket(ClientOpCodes::CLIENT_PACKET_TRADE_ORE,         "CLIENT_PACKET_TRADE_ORE",          PacketStatus::STATUS_LOGGED_IN,      PacketProcess::PROCESS_PLAYER_THREAD, &GameSocket::HandleNULL                );
         StoreClientPacket(ClientOpCodes::CLIENT_PACKET_SELECT_TARGET,     "CLIENT_PACKET_SELECT_TARGET",      PacketStatus::STATUS_LOGGED_IN,      PacketProcess::PROCESS_MAP_THREAD,    &GameSocket::HandleSelectTarget        );
         StoreClientPacket(ClientOpCodes::CLIENT_PACKET_LASER_SHOOT ,      "CLIENT_PACKET_LASER_SHOOT",        PacketStatus::STATUS_LOGGED_IN,      PacketProcess::PROCESS_MAP_THREAD,    &GameSocket::HandleLaserShoot          );
-        StoreClientPacket(ClientOpCodes::CLIENT_PACKET_ABORT_LASER,       "CLIENT_PACKET_ABORT_LASER",        PacketStatus::STATUS_LOGGED_IN,      PacketProcess::PROCESS_PLAYER_THREAD, &GameSocket::HandleNULL                );
+        StoreClientPacket(ClientOpCodes::CLIENT_PACKET_ABORT_LASER,       "CLIENT_PACKET_ABORT_LASER",        PacketStatus::STATUS_LOGGED_IN,      PacketProcess::PROCESS_MAP_THREAD,    &GameSocket::HandleAbortLaser          );
+        StoreClientPacket(ClientOpCodes::CLIENT_PACKET_LOG_OUT,           "CLIENT_PACKET_LOG_OUT",            PacketStatus::STATUS_LOGGED_IN,      PacketProcess::PROCESS_WORLD_THREAD,  &GameSocket::HandleLogout              );
+        StoreClientPacket(ClientOpCodes::CLIENT_PACKET_CANCEL_LOG_OUT,    "CLIENT_PACKET_CANCEL_LOG_OUT",     PacketStatus::STATUS_LOGGED_IN,      PacketProcess::PROCESS_WORLD_THREAD,  &GameSocket::HandleCancelLogout        );
 
         //////////////////////////////////////////////////////////////////////////
         //////////////////////////////////////////////////////////////////////////
 
-        StoreServerPacket(ServerOpCodes::SERVER_PACKET_PLAYER_INFO,         "SERVER_PACKET_PLAYER_INFO",        &GameSocket::HandleServer);
-        StoreServerPacket(ServerOpCodes::SERVER_PACKET_INITIALIZE_SHIP,     "SERVER_PACKET_INITIALIZE_SHIP",    &GameSocket::HandleServer);
-        StoreServerPacket(ServerOpCodes::SERVER_PACKET_MAP_UPDATE,          "SERVER_PACKET_MAP_UPDATE",         &GameSocket::HandleServer);
-        StoreServerPacket(ServerOpCodes::SERVER_PACKET_MINI_MAP_UPDATE,     "SERVER_PACKET_MINI_MAP_UPDATE",    &GameSocket::HandleServer);
-        StoreServerPacket(ServerOpCodes::SERVER_PACKET_UPDATE_ROCKET_MINE,  "SERVER_PACKET_MISC_AMMO_UPDATE",   &GameSocket::HandleServer);
-        StoreServerPacket(ServerOpCodes::SERVER_PACKET_UPDATE_BATTERY,      "SERVER_PACKET_UPDATE_BATTERY",     &GameSocket::HandleServer);
-        StoreServerPacket(ServerOpCodes::SERVER_PACKET_LOGGED_IN,           "SERVER_PACKET_LOGGED_IN",          &GameSocket::HandleServer);
-        StoreServerPacket(ServerOpCodes::SERVER_PACKET_SPAWN_SHIP,          "SERVER_PACKET_SPAWN_SHIP",         &GameSocket::HandleServer);
-        StoreServerPacket(ServerOpCodes::SERVER_PACKET_DESPAWN_SHIP,        "SERVER_PACKET_DESPAWN_SHIP",       &GameSocket::HandleServer);
-        StoreServerPacket(ServerOpCodes::SERVER_PACKET_OBJECT_MOVE,         "SERVER_PACKET_OBJECT_MOVE",        &GameSocket::HandleServer);
-        StoreServerPacket(ServerOpCodes::SERVER_PACKET_CREATE_PORTAL,       "SERVER_PACKET_CREATE_PORTAL",      &GameSocket::HandleServer);
-        StoreServerPacket(ServerOpCodes::SERVER_PACKET_CREATE_STATION,      "SERVER_PACKET_CREATE_STATION",     &GameSocket::HandleServer);
-        StoreServerPacket(ServerOpCodes::SERVER_PACKET_SEND_MESSAGE,        "SERVER_PACKET_SEND_MESSAGE",       &GameSocket::HandleServer);
-        StoreServerPacket(ServerOpCodes::SERVER_PACKET_EVENT,               "SERVER_PACKET_EVENT",              &GameSocket::HandleServer);
-        StoreServerPacket(ServerOpCodes::SERVER_PACKET_JUMP_PORTAL,         "SERVER_PACKET_SEND_MESSAGE",       &GameSocket::HandleServer);
-        StoreServerPacket(ServerOpCodes::SERVER_PACKET_DISPLAY_STAR_SYSTEM, "SERVER_PACKET_DISPLAY_STAR_SYSTEM",&GameSocket::HandleServer);
-        StoreServerPacket(ServerOpCodes::SERVER_PACKET_LASER_SHOOT,         "SERVER_PACKET_LASER_SHOOT",        &GameSocket::HandleServer);
+        StoreServerPacket(ServerOpCodes::SERVER_PACKET_PLAYER_INFO,         "SERVER_PACKET_PLAYER_INFO",            &GameSocket::HandleServer);
+        StoreServerPacket(ServerOpCodes::SERVER_PACKET_INITIALIZE_SHIP,     "SERVER_PACKET_INITIALIZE_SHIP",        &GameSocket::HandleServer);
+        StoreServerPacket(ServerOpCodes::SERVER_PACKET_MAP_UPDATE,          "SERVER_PACKET_MAP_UPDATE",             &GameSocket::HandleServer);
+        StoreServerPacket(ServerOpCodes::SERVER_PACKET_MINI_MAP_UPDATE,     "SERVER_PACKET_MINI_MAP_UPDATE",        &GameSocket::HandleServer);
+        StoreServerPacket(ServerOpCodes::SERVER_PACKET_UPDATE_ROCKET_MINE,  "SERVER_PACKET_MISC_AMMO_UPDATE",       &GameSocket::HandleServer);
+        StoreServerPacket(ServerOpCodes::SERVER_PACKET_UPDATE_BATTERY,      "SERVER_PACKET_UPDATE_BATTERY",         &GameSocket::HandleServer);
+        StoreServerPacket(ServerOpCodes::SERVER_PACKET_LOGGED_IN,           "SERVER_PACKET_LOGGED_IN",              &GameSocket::HandleServer);
+        StoreServerPacket(ServerOpCodes::SERVER_PACKET_SPAWN_SHIP,          "SERVER_PACKET_SPAWN_SHIP",             &GameSocket::HandleServer);
+        StoreServerPacket(ServerOpCodes::SERVER_PACKET_DESPAWN_SHIP,        "SERVER_PACKET_DESPAWN_SHIP",           &GameSocket::HandleServer);
+        StoreServerPacket(ServerOpCodes::SERVER_PACKET_OBJECT_MOVE,         "SERVER_PACKET_OBJECT_MOVE",            &GameSocket::HandleServer);
+        StoreServerPacket(ServerOpCodes::SERVER_PACKET_CREATE_PORTAL,       "SERVER_PACKET_CREATE_PORTAL",          &GameSocket::HandleServer);
+        StoreServerPacket(ServerOpCodes::SERVER_PACKET_CREATE_STATION,      "SERVER_PACKET_CREATE_STATION",         &GameSocket::HandleServer);
+        StoreServerPacket(ServerOpCodes::SERVER_PACKET_SEND_MESSAGE,        "SERVER_PACKET_SEND_MESSAGE",           &GameSocket::HandleServer);
+        StoreServerPacket(ServerOpCodes::SERVER_PACKET_EVENT,               "SERVER_PACKET_EVENT",                  &GameSocket::HandleServer);
+        StoreServerPacket(ServerOpCodes::SERVER_PACKET_JUMP_PORTAL,         "SERVER_PACKET_SEND_MESSAGE",           &GameSocket::HandleServer);
+        StoreServerPacket(ServerOpCodes::SERVER_PACKET_DISPLAY_STAR_SYSTEM, "SERVER_PACKET_DISPLAY_STAR_SYSTEM",    &GameSocket::HandleServer);
+        StoreServerPacket(ServerOpCodes::SERVER_PACKET_LASER_SHOOT,         "SERVER_PACKET_LASER_SHOOT",            &GameSocket::HandleServer);
+        StoreServerPacket(ServerOpCodes::SERVER_PACKET_LOG_OUT,             "SERVER_PACKET_LOG_OUT",                &GameSocket::HandleServer);
+        StoreServerPacket(ServerOpCodes::SERVER_PACKET_ATTACK_OUT_OF_RANGE, "SERVER_PACKET_ATTACK_OUT_OF_RANGE",    &GameSocket::HandleServer);
+        StoreServerPacket(ServerOpCodes::SERVER_PACKET_ATTACK_IN_RANGE,     "SERVER_PACKET_ATTACK_IN_RANGE",        &GameSocket::HandleServer);
+        StoreServerPacket(ServerOpCodes::SERVER_PACKET_CANCEL_LASTER_SHOOT, "SERVER_PACKET_CANCEL_LASTER_SHOOT",    &GameSocket::HandleServer);
+        StoreServerPacket(ServerOpCodes::SERVER_PACKET_RECIEVED_DAMAGE,     "SERVER_PACKET_RECIEVED_DAMAGE",        &GameSocket::HandleServer);
+        StoreServerPacket(ServerOpCodes::SERVER_PACKET_MAKE_DAMAGE,         "SERVER_PACKET_MAKE_DAMAGE",            &GameSocket::HandleServer);
+        StoreServerPacket(ServerOpCodes::SERVER_PACKET_KILL,                "SERVER_PACKET_KILL",                   &GameSocket::HandleServer);
+        StoreServerPacket(ServerOpCodes::SERVER_PACKET_MISS_SELF,           "SERVER_PACKET_MISS_SELF",              &GameSocket::HandleServer);
+        StoreServerPacket(ServerOpCodes::SERVER_PACKET_MISS_TARGET,         "SERVER_PACKET_MISS_TARGET",            &GameSocket::HandleServer);
+        StoreServerPacket(ServerOpCodes::SERVER_PACKET_ESCAPED_THE_ATTACK,  "SERVER_PACKET_ESCAPED_THE_ATTACK",     &GameSocket::HandleServer);
+        StoreServerPacket(ServerOpCodes::SERVER_PACKET_MISC_INFO,           "SERVER_PACKET_MISC_INFO",              &GameSocket::HandleServer);
 
         /// Debug Headless Packets
         StoreServerPacket(ServerOpCodes::SERVER_PACKET_HEADLESS_MOVE,       "SERVER_PACKET_HEADLESS_MOVE",      &GameSocket::HandleServer);

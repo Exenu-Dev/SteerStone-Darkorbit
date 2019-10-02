@@ -21,6 +21,10 @@
 #include "Core/Core.hpp"
 #include "Object.hpp"
 
+#include "Diagnostic/DiaIntervalTimer.hpp"
+
+#define ATTACK_UPDATE_INTERVAL 1000
+
 namespace SteerStone { namespace Game { namespace Entity {
 
     /// Death State of unit
@@ -30,6 +34,13 @@ namespace SteerStone { namespace Game { namespace Entity {
         JUST_DIED       = 1,
         DEAD            = 3,
         JUST_RESPAWNED  = 4,
+    };
+
+    enum AttackState
+    {
+        ATTACK_STATE_NONE           = 0,
+        ATTACK_STATE_IN_RANGE       = 1,
+        ATTACK_STATE_OUT_OF_RANGE   = 2,
     };
 
     class Unit : public Object
@@ -52,25 +63,38 @@ namespace SteerStone { namespace Game { namespace Entity {
         //                GENERAL
         ///////////////////////////////////////////
 
-        /// Attack
-        /// @p_Victim : Victim we are attacking
-        void Attack(Object* p_Victim);
-
-        /// Update Attack
-        /// @p_Diff : Execution Time
-        void AttackerStateUpdate(uint32 const p_Diff);
-
         /// Update
         /// @p_Diff : Execution Time
         void Update(uint32 const p_Diff);
 
         ///////////////////////////////////////////
+        //             ATTACK SYSTEM
+        ///////////////////////////////////////////
+
+        /// Attack
+        /// @p_Victim : Victim we are attacking
+        void Attack(Object* p_Victim);
+        /// Update Attack
+        /// @p_Diff : Execution Time
+        void AttackerStateUpdate(uint32 const p_Diff);
+        /// Cancel Attack
+        void CancelAttack();
+        /// Calculate Hit chance whether we can hit target
+        bool CalculateHitChance();
+        /// Calculate Damage done for target
+        uint32 CalculateDamageDone();
+        /// Calculate Damage takem for target
+        /// @p_Damage : Damage taken
+        /// @p_ShieldDamage : Shield Damage taken
+        void CalculateDamageTaken(int32& p_Damage, int32& p_ShieldDamage);
+
+        ///////////////////////////////////////////
         //                TARGET
         ///////////////////////////////////////////
 
-        void SetTarget(Object const* p_Target)  { m_Target = p_Target; m_TargetGUID = p_Target->GetGUID();  }
+        void SetTarget(Object* p_Target)        { m_Target = p_Target; m_TargetGUID = p_Target->GetGUID();  }
         bool HasTarget()                        { return m_Target != nullptr;                               }
-        Object const* GetTarget()               { return m_Target;                                          }
+        Object* GetTarget()                     { return m_Target;                                          }
         uint64 GetTargetGUID() const            { return m_TargetGUID;                                      }
         void ClearTarget()                      { m_Target = nullptr; m_TargetGUID = 0;                     }
 
@@ -79,6 +103,7 @@ namespace SteerStone { namespace Game { namespace Entity {
         ///////////////////////////////////////////
     public:
         int32 GetShield()          const { return m_Shield;         }
+        uint32 GetShieldResistance()const { return m_ShieldResistance; }
         uint32 GetMaxShield()      const { return m_MaxShield;      }
         int32 GetHitPoints()       const { return m_HitPoints;      }
         uint32 GetMinDamage()      const { return m_MinDamage;      }    
@@ -91,9 +116,22 @@ namespace SteerStone { namespace Game { namespace Entity {
         std::string GetClanName()  const { return m_ClanName;       }
         uint16 GetWeaponState()    const { return m_WeaponState;    }
         uint16 GetDeathState()     const { return m_DeathState;     }
+        bool IsAttacking()         const { return m_Attacking;      }
+        uint16 GetLaserType()      const { return m_LaserType;      }    
 
+        void SetHitPoints(uint32 const p_HitPoints)   { m_HitPoints = p_HitPoints;   }
+        void SetShield(uint32 const p_Shield)         { m_Shield = p_Shield;         }
         void SetLaserType(uint16 const p_LaserType)   { m_LaserType = p_LaserType;   }
         void SetRocketType(uint16 const p_RocketType) { m_RocketType = p_RocketType; }
+        void SetStats(uint32 const p_MinDamage, uint32 const p_MaxDamage, uint32 const p_Speed, uint32 const p_Shield, uint32 const p_ShieldResistance)
+        {
+            m_MinDamage         = p_MinDamage;
+            m_MaxDamage         = p_MaxDamage;
+            GetSpline()->SetSpeed(GetSpline()->GetSpeed() + p_Speed);
+            m_MaxShield         += p_Shield;
+            m_Shield            = m_MaxShield;
+            m_ShieldResistance  = p_ShieldResistance;
+        }
 
     //////////////////////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////////////////////
@@ -102,6 +140,7 @@ namespace SteerStone { namespace Game { namespace Entity {
         int32 m_HitPoints;
         uint32 m_MaxHitPoints;
         int32 m_Shield;
+        uint32 m_ShieldResistance;
         uint32 m_MaxShield;
         uint32 m_MinDamage;
         uint32 m_MaxDamage;
@@ -114,10 +153,16 @@ namespace SteerStone { namespace Game { namespace Entity {
         uint16 m_LaserType;
         uint16 m_RocketType;
         uint16 m_DeathState;
+        uint16 m_AttackRange;
+        uint16 m_AttackState;
+        uint32 m_SelectedLaser;
+        uint32 m_SelectedRocket;
         bool m_Attacking;
+        Core::Diagnostic::IntervalTimer m_IntervalAttackUpdate;
 
-        Object const* m_Target;
+        Object* m_Target;
         uint64 m_TargetGUID;
+
 
     //////////////////////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////////////////////

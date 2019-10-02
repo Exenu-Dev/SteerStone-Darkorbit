@@ -28,14 +28,31 @@ namespace SteerStone { namespace Game { namespace Server {
     void GameSocket::HandleLogin(ClientPacket* p_Packet)
     {
         m_Player->SendClientSettings();
+        m_Player->GetInventory()->CalculateStats();
         m_Player->SendInitializeShip();
-        m_Player->GetShip()->SendMapUpdate();
-        m_Player->GetShip()->SendAmmoUpdate();
+        m_Player->SendDrones();
+        m_Player->SendMapUpdate();
+        m_Player->SendAmmoUpdate();
         m_Player->SendAccountRank();
         m_Player->SendLoggedIn();
         sZoneManager->AddToMap(m_Player);
     }
 
+    /// Login Handler
+    /// @p_ClientPacket : Packet recieved from client
+    void GameSocket::HandleLogout(ClientPacket* p_Packet)
+    {
+        m_Player->SetLogout(true);
+        sWorldManager->AddPlayerToRemoval(m_Player);
+    }
+
+    /// Login Handler
+    /// @p_ClientPacket : Packet recieved from client
+    void GameSocket::HandleCancelLogout(ClientPacket* p_Packet)
+    {
+        m_Player->m_LoggedIn = true;
+        m_Player->SetLogout(false);
+    }
 }   ///< namespace Server
 }   ///< namespace Game
 }   ///< namespace SteerStone

@@ -20,6 +20,7 @@
 #include <PCH/Precompiled.hpp>
 #include "Singleton/Singleton.hpp"
 #include "Utility/UtiLockedQueue.hpp"
+#include "Player.hpp"
 #include "GameFlags.hpp"
 
 #define WORLD_SLEEP_TIMER 60
@@ -48,6 +49,10 @@ namespace SteerStone { namespace Game { namespace World {
         INT_CONFIG_CHECK_FOR_INTERACTIVE_EVENTS,
         INT_CONFIG_JUMP_DELAY,
         INT_CONFIG_DELAY_REMOVAL,
+        INT_CONFIG_LOG_OUT_TIMER,
+        INT_CONFIG_PREMIUM_LOG_OUT_TIMER,
+        INT_CONFIG_PLAYER_ATTACK_RANGE,
+        INT_CONFIG_MOB_ATTACK_RANGE,
         INT_CONFIG_MAX,
     };
 
@@ -61,53 +66,72 @@ namespace SteerStone { namespace Game { namespace World {
     {
         SINGLETON_P_D(Base);
 
-        //////////////////////////////////////////////////////////////////////////
-        //////////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////////
 
-        public:
-            /// Load the World
-            void Load();
+        ///////////////////////////////////////////
+        //                 WORLD
+        ///////////////////////////////////////////
+    public:
+        /// Update World
+        /// @p_Diff : Execution Diff
+        void Update(uint32 const p_Diff);
+        /// Stop World Updating
+        bool StopWorld() const;
+        /// Load the World
+        void Load();
 
-            /// Update World
-            /// @p_Diff : Execution Diff
-            void Update(uint32 const p_Diff);
-            /// Update Players
-            /// @p_Diff : Execution Diff
-            void ProcessPlayerPackets(uint32 p_Diff);
-            /// Stop World Updating
-            bool StopWorld() const;
+        ///////////////////////////////////////////
+        //             CONFIGURATION
+        ///////////////////////////////////////////
+    public:
+        /// Load Configs
+        void LoadConfigs();
+        /// Returns bool value
+        bool GetBoolConfig(BoolConfigs p_Index);
+        /// Returns integer value
+        uint32 GetIntConfig(IntConfigs p_Index);
+        /// Returns float value
+        float GetFloatConfig(FloatConfigs p_Index);
 
-            /// Load Configs
-            void LoadConfigs();
+        ///////////////////////////////////////////
+        //             PLAYER HANDLE
+        ///////////////////////////////////////////
+    public:
+        /// Add Player to queue
+        /// @p_Player : Player being added
+        void AddPlayer(Entity::Player* p_Player);
+        /// Remove Player from world
+        /// @p_Player : Player being removed
+        void RemovePlayer(Entity::Player* p_Player);
+        /// Return Player in world
+        /// @p_Id : Id of player
+        Entity::Player* FindPlayer(uint32 const p_Id);
+        /// Process Player in queue
+        /// @p_Player : Being processed
+        void ProcessPlayer(Entity::Player* p_Player);
+        /// Remove from world
+        /// @p_Player : Player being removed from world
+        void AddPlayerToRemoval(Entity::Player* p_Player);
+        /// Process the removal of the player from world
+        /// @p_Diff : Execution Time
+        void ProcessRemovalPlayer(uint32 const p_Diff);
+        /// Update Players
+        /// @p_Diff : Execution Diff
+        void ProcessPlayerPackets(uint32 p_Diff);
 
-            /// Returns bool value
-            bool GetBoolConfig(BoolConfigs p_Index);
-            /// Returns integer value
-            uint32 GetIntConfig(IntConfigs p_Index);
-            /// Returns float value
-            float GetFloatConfig(FloatConfigs p_Index);
+    //////////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////////
 
-            /// Add Player to queue
-            /// @p_Player : Player being added
-            void AddPlayer(Entity::Player* p_Player);
-            /// Remove Player from world
-            /// @p_Player : Player being removed
-            void RemovePlayer(Entity::Player* p_Player);
-            /// Return Player in world
-            /// @p_Id : Id of player
-            Entity::Player* FindPlayer(uint32 const p_Id);
-            /// Process Player in queue
-            /// @p_Player : being processed
-            void ProcessPlayer(Entity::Player* p_Player);
+    private:
+        std::map<uint32, Entity::Player*> m_Players;                        ///< Player in world storage
+        Core::Utils::LockedQueue<Entity::Player*> m_PlayerQueue;            ///< Player in queue storage
+        std::set<Entity::Player*> m_PlayerRemovalQueue;                     ///< Player in removal queue storage
+        uint32 m_IntConfigs[INT_CONFIG_MAX];                                ///< Holds config settings for int
+        bool m_BoolConfigs[BOOL_CONFIG_MAX];                                ///< Holds config settings for bool
+        float m_FloatConfigs[FLOAT_CONFIG_MAX];                             ///< Holds config settings for float
 
-        private:
-            std::map<uint32, Entity::Player*> m_Players;                ///< Player in world
-            Core::Utils::LockedQueue<Entity::Player*> m_PlayerQueue;    ///< Player in queue storage
-            uint32 m_IntConfigs[INT_CONFIG_MAX];                        ///< Holds config settings for int
-            bool m_BoolConfigs[BOOL_CONFIG_MAX];                        ///< Holds config settings for bool
-            float m_FloatConfigs[FLOAT_CONFIG_MAX];                     ///< Holds config settings for float
-
-            static volatile bool s_StopWorld;                           ///< Stop World Updating
+        static volatile bool s_StopWorld;                                   ///< Stop World Updating
     };
 
 }   ///< namespace World

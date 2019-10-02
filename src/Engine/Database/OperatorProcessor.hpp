@@ -27,6 +27,11 @@ namespace SteerStone { namespace Core { namespace Database {
     /// Stores the operators and calls the operator once query is done on database thread worker function
     class OperatorProcessor
     {
+        DISALLOW_COPY_AND_ASSIGN(OperatorProcessor);
+
+        //////////////////////////////////////////////////////////////////////////
+        //////////////////////////////////////////////////////////////////////////
+
     public:
         /// Constructor
         OperatorProcessor();
@@ -34,10 +39,8 @@ namespace SteerStone { namespace Core { namespace Database {
         /// Deconstructor
         ~OperatorProcessor();
 
-    public:
-        /// This class should never be copied
-        OperatorProcessor(OperatorProcessor const& p_Right) = delete;
-        OperatorProcessor& operator=(OperatorProcessor const& p_Right) = delete;
+        //////////////////////////////////////////////////////////////////////////
+        //////////////////////////////////////////////////////////////////////////
 
     public:
         /// AddOperator
@@ -47,6 +50,9 @@ namespace SteerStone { namespace Core { namespace Database {
         /// ProcessOperators
         /// Process any operators which are not pending
         void ProcessOperators();
+
+        //////////////////////////////////////////////////////////////////////////
+        //////////////////////////////////////////////////////////////////////////
 
     private:
         std::vector<CallBackOperator> m_Operators; ///< Holds the operators

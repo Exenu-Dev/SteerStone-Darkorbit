@@ -51,6 +51,8 @@ enum ClientOpCodes : uint8
     CLIENT_PACKET_SELECT_TARGET         = 0x4C,
     CLIENT_PACKET_LASER_SHOOT           = 0x61,
     CLIENT_PACKET_ABORT_LASER           = 0X47,
+    CLIENT_PACKET_LOG_OUT               = 0x6C,
+    CLIENT_PACKET_CANCEL_LOG_OUT        = 0x6F,
     CLIENT_MAX_OPCODE                   = 0x7B
 };
 
@@ -74,6 +76,17 @@ enum ServerOpCodes : uint8
     SERVER_PACKET_JUMP_PORTAL           = 0x55,
     SERVER_PACKET_DISPLAY_STAR_SYSTEM   = 0x7A,
     SERVER_PACKET_LASER_SHOOT           = 0x61,
+    SERVER_PACKET_LOG_OUT               = 0x6C,
+    SERVER_PACKET_ATTACK_OUT_OF_RANGE   = 0x4F,
+    SERVER_PACKET_ATTACK_IN_RANGE       = 0x58,
+    SERVER_PACKET_CANCEL_LASTER_SHOOT   = 0x47,
+    SERVER_PACKET_RECIEVED_DAMAGE       = 0x59,
+    SERVER_PACKET_MAKE_DAMAGE           = 0x48,
+    SERVER_PACKET_KILL                  = 0x4B,
+    SERVER_PACKET_MISS_SELF             = 0x4D,
+    SERVER_PACKET_MISS_TARGET           = 0x5A,
+    SERVER_PACKET_ESCAPED_THE_ATTACK    = 0x56,
+    SERVER_PACKET_MISC_INFO             = 0x6E,
 
     /// Debug Headless Packets
     SERVER_PACKET_HEADLESS_MOVE         = 0x21,

@@ -39,6 +39,7 @@ namespace SteerStone { namespace Game { namespace Global {
     typedef std::unordered_map<uint32, Entity::MobTemplate*> MobMap;
     typedef std::unordered_map<uint32, std::vector<Entity::PortalTemplate*>> PortalMap;
     typedef std::unordered_map<uint32, Entity::StationTemplate*> StationMap;
+    typedef std::unordered_map<uint32, Entity::ItemTemplate*> ItemTemplate;
 
     /// Object Manager
     class Manager
@@ -55,6 +56,8 @@ namespace SteerStone { namespace Game { namespace Global {
         void LoadPortalTemplate();
         /// Load Station Template
         void LoadStationTemplate();
+        /// Load Item Template
+        void LoadItemTemplate();
 
         /// Returns Mob Template
         /// @p_Entry : Entry
@@ -65,6 +68,9 @@ namespace SteerStone { namespace Game { namespace Global {
         /// Returns Station Template
         /// @p_Entry : Map Id
         Entity::StationTemplate const* GetStationTemplate(uint32 const p_MapId);
+        /// Returns Item Template
+        /// @p_Entry : Map Id
+        Entity::ItemTemplate const* GetItemTemplate(uint32 const p_Entry);
 
         //////////////////////////////////////////////////////////////////////////
         //////////////////////////////////////////////////////////////////////////
@@ -73,6 +79,7 @@ namespace SteerStone { namespace Game { namespace Global {
         MobMap m_MobTemplate;
         PortalMap m_PortalTemplate;
         StationMap m_StationTemplate;
+        ItemTemplate m_ItemTemplate;
     };
 
 }   ///< namespace Global

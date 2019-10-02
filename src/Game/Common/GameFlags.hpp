@@ -20,7 +20,7 @@
 #include <PCH/Precompiled.hpp>
 #include "Core/Core.hpp"
 
-#define PLAYER_RADIUS_SCAN 1500
+#define PLAYER_RADIUS_SCAN 1500.0f
 
 enum PlayerShips
 {
@@ -170,6 +170,13 @@ enum class Company : uint16
     MAX_COMPANY  = 4
 };
 
+enum InventoryType
+{
+    INVENTORY_TYPE_BATTERY              = 0,
+    INVENTORY_TYPE_SPEED_GENERATOR      = 1,
+    INVENTORY_TYPE_SHIELD_GENERATOR     = 2,
+};
+
 enum RocketType
 {
     ROCKET_TYPE_R310     = 0,
@@ -180,12 +187,12 @@ enum RocketType
 
 enum BatteryType
 {
-    BATTERY_TYPE_LCB10  = 0,
-    BATTERY_TYPE_MCB25  = 1,
-    BATTERY_TYPE_MCB50  = 2,
-    BATTERY_TYPE_UCB100 = 3,
-    BATTERY_TYPE_SAB50  = 4,
-    MAX_BATTERY         = 5
+    BATTERY_TYPE_LCB10  = 1,
+    BATTERY_TYPE_MCB25  = 2,
+    BATTERY_TYPE_MCB50  = 3,
+    BATTERY_TYPE_UCB100 = 4,
+    BATTERY_TYPE_SAB50  = 5,
+    MAX_BATTERY         = 6
 };
 
 enum MinesType
@@ -244,4 +251,20 @@ enum class MapType
 {
     MAP_TYPE_NORMAL,
     MAP_TYPE_BIG
+};
+
+enum DroneType
+{
+    DRONE_TYPE_FLAK = 0,
+    DRONE_TYPE_IRIS = 1
+};
+
+enum DroneLevel
+{
+    DRONE_LEVEL_1 = 1,
+    DRONE_LEVEL_2 = 2,
+    DRONE_LEVEL_3 = 3,
+    DRONE_LEVEL_4 = 4,
+    DRONE_LEVEL_5 = 5,
+    DRONE_LEVEL_6 = 6
 };

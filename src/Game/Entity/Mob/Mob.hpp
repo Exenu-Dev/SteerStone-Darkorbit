@@ -22,11 +22,14 @@
 #include "Diagnostic/DiaIntervalTimer.hpp"
 #include "Unit.hpp"
 
-#define MAX_DISTANCE_FOLLOW 500
-#define MAX_DISTANCE_ROAMING_RANGE 200
-#define DISTANCE_AWAY_FROM_BORDER 500
-#define FIND_PLAYER_DISTANCE 800
-#define MAX_DISTANCE_AWAY_FROM_PLAYER 100
+/// TODO; Put this into configs maybe?
+#define MIN_DISTANCE_FOLLOW 200             ///< Min distance for mob to  follow
+#define MAX_DISTANCE_FOLLOW 4000            ///< maximum distance between mob and player before leaving clearing combat
+
+#define MAX_DISTANCE_ROAMING_RANGE 200      ///< Maximum distance can travel
+#define DISTANCE_AWAY_FROM_BORDER 500       ///< Distance away from border
+#define FIND_PLAYER_DISTANCE 800            ///< Scan radius for searching players
+#define MAX_DISTANCE_AWAY_FROM_PLAYER 100   ///< Distance away from player when moving to player
 
 namespace SteerStone { namespace Game { namespace Map {
 
@@ -115,6 +118,9 @@ namespace SteerStone { namespace Game { namespace Entity {
 
         uint32 m_MoveTimeMax;
         uint32 m_MoveTimeMin;
+
+        int32 m_RandomDistanceFromPlayerX;
+        int32 m_RandomDistanceFromPlayerY;
 
         float m_HomePositionX;
         float m_HomePositionY;

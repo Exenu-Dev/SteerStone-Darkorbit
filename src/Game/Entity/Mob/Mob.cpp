@@ -16,7 +16,7 @@
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "Player.hpp"
+#include "World.hpp"
 #include "Mob.hpp"
 #include "Utility/UtilRandom.hpp"
 #include "Utility/UtilMaths.hpp"
@@ -45,6 +45,11 @@ namespace SteerStone { namespace Game { namespace Entity {
 
         m_MoveTimeMax   = 0;
         m_MoveTimeMin   = 0;
+
+        m_RandomDistanceFromPlayerX = 0;
+        m_RandomDistanceFromPlayerY = 0;
+
+        m_AttackRange = sWorldManager->GetIntConfig(World::IntConfigs::INT_CONFIG_MOB_ATTACK_RANGE);
     }
     /// Deconstructor
     Mob::~Mob()
@@ -58,9 +63,17 @@ namespace SteerStone { namespace Game { namespace Entity {
     /// @p_Diff : Execution Time
     void Mob::Update(uint32 const p_Diff)
     {
-        UpdateMovement(p_Diff);
+        switch (m_DeathState)
+        {
+            case DeathState::ALIVE:
+            {
+                UpdateMovement(p_Diff);
 
-        Unit::Update(p_Diff);
+                Unit::Update(p_Diff);
+            }
+            break;
+        }
+       
     }
 
     //////////////////////////////////////////////////////////////////////////
@@ -70,101 +83,145 @@ namespace SteerStone { namespace Game { namespace Entity {
     /// @p_Diff : Execution Time
     void Mob::UpdateMovement(uint32 const p_Diff)
     {
-        /// This switch statement is not affected by move timer
+        m_IntervalMoveTimer.Update(p_Diff);
+        if (!m_IntervalMoveTimer.Passed())
+            return;
+
         switch (m_Behaviour)
         {
             /// Find closest player, and move to player
-           /* case Behaviour::BEHAVIOUR_PASSIVE:
+            case Behaviour::BEHAVIOUR_PASSIVE:
             {
                 if (!HasTarget())
                 {
-                    Entity::Object* l_Player = GetGrid()->FindNearestPlayer(this, MAX_DISTANCE_FOLLOW);
+                    Entity::Object* l_Player = GetGrid()->FindNearestPlayer(this, FIND_PLAYER_DISTANCE);
 
                     if (!l_Player)
                         break;
 
                     /// Set our target
                     SetTarget(l_Player);
+
+                    m_RandomDistanceFromPlayerX = Core::Utils::Int32Random(-400, 200);
+                    m_RandomDistanceFromPlayerY = Core::Utils::Int32Random(-100, 200);
                 }
 
                 Object const* l_Target = GetTarget();
 
-                float l_PositionX = l_Target->GetSpline()->GetPositionX();
-                float l_PositionY = l_Target->GetSpline()->GetPositionY();
-
-                float l_Distance = Core::Utils::DistanceSquared(GetSpline()->GetPositionX(), GetSpline()->GetPositionY(), l_PositionX, l_PositionY);
-
-                /// It doesn't matter if mob is on another grid, the pooling system will handle this
-                if (l_Target->ToUnit()->GetTargetGUID() != GetGUID() && l_Target->ToUnit()->GetDeathState() != DeathState::ALIVE || l_Target->ToPlayer()->IsJumping() || l_Distance > MAX_DISTANCE_FOLLOW)
+                /// Cancel attack if target does not exist
+                if (!l_Target->ToPlayer())
                 {
-                    ClearTarget();
+                    CancelAttack();
                     break;
                 }
 
-                /// If target is moving, then start following
-                /// TODO; Check for out of bounds
-                if (l_Target->GetSpline()->IsMoving())
-                    GetSpline()->Move(l_PositionX + MAX_DISTANCE_AWAY_FROM_PLAYER, l_PositionY + MAX_DISTANCE_AWAY_FROM_PLAYER, 0, 0);
+                float l_PositionX = l_Target->GetSpline()->GetPlannedPositionX();
+                float l_PositionY = l_Target->GetSpline()->GetPlannedPositionY();
+                float l_Distance = Core::Utils::DistanceSquared(GetSpline()->GetPlannedPositionX(), GetSpline()->GetPlannedPositionY(), l_PositionX, l_PositionY);
 
+                /// Clear target if target is jumping or our target is far away
+                if (l_Target->ToPlayer()->IsJumping())
+                {
+                    CancelAttack();
+                    break;
+                }
+                /// Follow the target if our distance is out of range
+                else if (l_Distance > MIN_DISTANCE_FOLLOW && l_Distance < MAX_DISTANCE_FOLLOW)
+                {
+                    GetSpline()->Move(l_PositionX + m_RandomDistanceFromPlayerX, l_PositionY + m_RandomDistanceFromPlayerY, 0, 0);
+
+                    /// We want to update the movement, as soon as possible to ensure we are keeping up to the player
+                    m_IntervalMoveTimer.SetInterval(m_MoveTimeMax / 2);
+                }
+                else if (l_Distance > MAX_DISTANCE_FOLLOW)
+                {
+                    /// If target is far away, cancel the target and continue moving around in the ground
+                    CancelAttack();
+                    break;
+                }
+                else if (!IsAttacking())
+                {
+                    float l_Degree = Core::Utils::FloatRandom(0, 360) * M_PI / 180;
+
+                    l_PositionX += std::abs(m_RandomDistanceFromPlayerX) * std::cos(l_Degree);
+                    l_PositionY += std::abs(m_RandomDistanceFromPlayerY) * std::sin(l_Degree);
+
+                    GetSpline()->Move(l_PositionX, l_PositionY, 0, 0);
+
+                    m_IntervalMoveTimer.SetInterval(m_MoveTimeMax);
+                }
+                
                 return;
             }
-            break;*/
+            break;
             /// Find closest player, and move to player
             case Behaviour::BEHAVIOUR_AGGESSIVE:
             {
                 if (!HasTarget())
                 {
-                    Entity::Object* l_Player = GetGrid()->FindNearestPlayer(this, MAX_DISTANCE_FOLLOW);
+                    Entity::Object* l_Player = GetGrid()->FindNearestPlayer(this, FIND_PLAYER_DISTANCE);
 
                     if (!l_Player)
                         break;
 
                     /// Set our target
                     SetTarget(l_Player);
+
+                    m_RandomDistanceFromPlayerX = Core::Utils::Int32Random(-400, 200);
+                    m_RandomDistanceFromPlayerY = Core::Utils::Int32Random(-100, 200);
                 }
 
-                Object const* l_Target = GetTarget();
-               
-                float l_PositionX = l_Target->GetSpline()->GetPositionX();
-                float l_PositionY = l_Target->GetSpline()->GetPositionY();
+                Object* l_Target = GetTarget();
 
-                float l_Distance = Core::Utils::DistanceSquared(GetSpline()->GetPositionX(), GetSpline()->GetPositionY(), l_PositionX, l_PositionY);
-
-                /// It doesn't matter if mob is on another grid, the pooling system will handle this
-                if (l_Target->ToUnit()->GetDeathState() != DeathState::ALIVE || l_Target->ToPlayer()->IsJumping() || l_Distance > MAX_DISTANCE_FOLLOW)
+                /// Cancel attack if target does not exist
+                if (!l_Target->ToPlayer())
                 {
-                    ClearTarget();
+                    CancelAttack();
                     break;
                 }
 
-                /// If target is moving, then start following
-                /// TODO; Check for out of bounds
-                if (l_Target->GetSpline()->IsMoving())
-                    GetSpline()->Move(l_PositionX + MAX_DISTANCE_AWAY_FROM_PLAYER, l_PositionY + MAX_DISTANCE_AWAY_FROM_PLAYER, 0, 0);
-                else
-                {
-                    m_IntervalMoveTimer.Update(p_Diff);
-                    if (!m_IntervalMoveTimer.Passed())
-                        return;
+                float l_PositionX = l_Target->GetSpline()->GetPlannedPositionX();
+                float l_PositionY = l_Target->GetSpline()->GetPlannedPositionY();
+                float l_Distance = Core::Utils::DistanceSquared(GetSpline()->GetPlannedPositionX(), GetSpline()->GetPlannedPositionY(), l_PositionX, l_PositionY);
 
+                /// Clear target if target is jumping or our target is far away
+                if (l_Target->ToPlayer()->IsJumping())
+                {
+                    CancelAttack();
+                    break;
+                }
+                /// Follow the target if our distance is out of range
+                else if (l_Distance > MIN_DISTANCE_FOLLOW && l_Distance < MAX_DISTANCE_FOLLOW)
+                {
+                    GetSpline()->Move(l_PositionX + m_RandomDistanceFromPlayerX, l_PositionY + m_RandomDistanceFromPlayerY, 0, 0);
+
+                    /// We want to update the movement, as soon as possible to ensure we are keeping up to the player
+                    m_IntervalMoveTimer.SetInterval(m_MoveTimeMax / 2);
+                }
+                else if (l_Distance > MAX_DISTANCE_FOLLOW)
+                {
+                    /// If target is far away, cancel the target and continue moving around in the ground
+                    CancelAttack();
+                    break;
+                }
+                else if (l_Distance < MIN_DISTANCE_FOLLOW)
+                {
                     float l_Degree = Core::Utils::FloatRandom(0, 360) * M_PI / 180;
 
-                    l_PositionX += MAX_DISTANCE_AWAY_FROM_PLAYER * std::cos(l_Degree);
-                    l_PositionY += MAX_DISTANCE_AWAY_FROM_PLAYER * std::sin(l_Degree);
+                    l_PositionX += std::abs(m_RandomDistanceFromPlayerX) * std::cos(l_Degree);
+                    l_PositionY += std::abs(m_RandomDistanceFromPlayerY) * std::sin(l_Degree);
 
                     GetSpline()->Move(l_PositionX, l_PositionY, 0, 0);
 
                     m_IntervalMoveTimer.SetInterval(m_MoveTimeMax);
                 }
 
+                Attack(l_Target);
+
                 return;
             }
             break;
         }
-
-        m_IntervalMoveTimer.Update(p_Diff);
-        if (!m_IntervalMoveTimer.Passed())
-            return;
 
         /// Move around in our grid
         float l_GridX = std::get<0>(GetGridIndex()) + 1;

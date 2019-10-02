@@ -172,6 +172,43 @@ namespace SteerStone { namespace Game { namespace Global {
 
         LOG_INFO("ObjectManager", "Loaded %0 Station Templates in %1 ms", l_Counter, sServerTimeManager->GetTimeDifference(l_StartTime, sServerTimeManager->GetServerTime()));
     }
+    /// Load Item Template
+    void Manager::LoadItemTemplate()
+    {
+        uint32 l_StartTime = sServerTimeManager->GetServerTime();
+
+        Core::Database::PreparedStatement* l_PreparedStatement = GameDatabase.GetPrepareStatement();
+        l_PreparedStatement->PrepareStatement("SELECT entry, name, type, gfx, value, percentage_value, credits, uridium "
+            "FROM item_template");
+        std::unique_ptr<Core::Database::PreparedResultSet> l_PreparedResultSet = l_PreparedStatement->ExecuteStatement();
+
+        uint32 l_Counter = 0;
+
+        if (l_PreparedResultSet)
+        {
+            do
+            {
+                Core::Database::ResultSet* l_Result = l_PreparedResultSet->FetchResult();
+
+                Entity::ItemTemplate* l_ItemTemplate = new Entity::ItemTemplate();
+                l_ItemTemplate->Id              = l_Result[0].GetUInt32();
+                l_ItemTemplate->Name            = l_Result[1].GetString();
+                l_ItemTemplate->Type            = l_Result[2].GetUInt32();
+                l_ItemTemplate->GFX             = l_Result[3].GetUInt16();
+                l_ItemTemplate->Value           = l_Result[4].GetUInt32();
+                l_ItemTemplate->ValuePercentage = l_Result[5].GetUInt32();
+                l_ItemTemplate->Credits         = l_Result[6].GetUInt32();
+                l_ItemTemplate->Uridium         = l_Result[7].GetUInt32();
+
+                m_ItemTemplate[l_ItemTemplate->Id] = l_ItemTemplate;
+
+                l_Counter++;
+
+            } while (l_PreparedResultSet->GetNextRow());
+        }
+
+        LOG_INFO("ObjectManager", "Loaded %0 Item Templates in %1 ms", l_Counter, sServerTimeManager->GetTimeDifference(l_StartTime, sServerTimeManager->GetServerTime()));
+    }
 
     /// Returns Mob Template
     /// @p_Entry : Entry
@@ -199,6 +236,16 @@ namespace SteerStone { namespace Game { namespace Global {
     {
         auto const l_Itr = m_StationTemplate.find(p_MapId);
         if (l_Itr != m_StationTemplate.end())
+            return l_Itr->second;
+
+        return nullptr;
+    }
+    /// Returns Item Template
+    /// @p_Entry : Map Id
+    Entity::ItemTemplate const* Manager::GetItemTemplate(uint32 const p_Entry)
+    {
+        auto const l_Itr = m_ItemTemplate.find(p_Entry);
+        if (l_Itr != m_ItemTemplate.end())
             return l_Itr->second;
 
         return nullptr;

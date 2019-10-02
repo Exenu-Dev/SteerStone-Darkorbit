@@ -140,6 +140,33 @@ namespace SteerStone { namespace Game { namespace Entity {
         float PositionY;
     };
 
+    struct ItemTemplate
+    {
+        ItemTemplate()
+        {
+            Id                  = 0;
+            Name.clear();
+            Type                = 0;
+            GFX                 = 0;
+            Value               = 0;
+            ValuePercentage     = 0;
+            Credits             = 0;
+            Uridium             = 0;
+        }
+
+        //////////////////////////////////////////////////////////////////////////
+        //////////////////////////////////////////////////////////////////////////
+
+        uint32 Id;
+        std::string Name;
+        uint16 Type;
+        uint16 GFX;
+        uint32 Value;
+        uint32 ValuePercentage;
+        uint32 Credits;
+        uint32 Uridium;
+    };
+
 }   ///< namespace Entity
 }   ///< namespace Game
 }   ///< namespace Steerstone

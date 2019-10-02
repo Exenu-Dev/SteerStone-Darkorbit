@@ -49,8 +49,9 @@ namespace SteerStone { namespace Game { namespace Map {
         /// @p_Object : Object being added to map
         void AddToMap(Entity::Object* p_Object);
         /// Remove From Map
-        /// @p_Object    : Object being removed from map
-        void RemoveFromMap(Entity::Object* p_Object);
+        /// @p_Object     : Object being removed from map
+        /// @p_SendPacket : Send Despawn Packet
+        void RemoveFromMap(Entity::Object* p_Object, bool p_SendPacket = false);
 
         /// Unload Maps
         void UnloadAll();

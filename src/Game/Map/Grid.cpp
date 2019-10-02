@@ -242,10 +242,18 @@ namespace SteerStone { namespace Game { namespace Map {
     }
     /// Remove Object from Grid
     /// @p_Object : Object being removed
-    void Grid::Remove(Entity::Object* p_Object)
+    /// @p_SendPacket : Send Despawn Packet
+    void Grid::Remove(Entity::Object* p_Object, bool p_SendPacket)
     {
         if (p_Object->GetType() == Entity::Type::OBJECT_TYPE_PLAYER)
             m_Players.erase(p_Object);
+
+        if (p_SendPacket)
+        {
+            Server::Packets::DespawnShip l_Packet;
+            l_Packet.Id = p_Object->GetObjectGUID().GetCounter();
+            p_Object->GetMap()->SendPacketToNearByGridsIfInSurrounding(l_Packet.Write(), p_Object);
+        }
         
         m_Objects.erase(p_Object->GetGUID());
 
@@ -333,8 +341,12 @@ namespace SteerStone { namespace Game { namespace Map {
     /// Send Packet to everyone if object is in surrounding
     /// @p_Packet : Packet being sent
     /// @p_Object : Object being checked
-    void Grid::SendPacketIfInSurrounding(Server::PacketBuffer const* p_Packet, Entity::Object* p_Object)
+    /// @p_SendToSelf : Send Packet to self
+    void Grid::SendPacketIfInSurrounding(Server::PacketBuffer const* p_Packet, Entity::Object* p_Object, bool p_SendToSelf)
     {
+        if (p_SendToSelf && p_Object->GetType() == Entity::Type::OBJECT_TYPE_PLAYER)
+            p_Object->ToPlayer()->SendPacket(p_Packet);
+            
         for (auto l_Itr : m_Players)
         {
             if (l_Itr->ToPlayer()->IsInSurrounding(p_Object))
@@ -352,7 +364,7 @@ namespace SteerStone { namespace Game { namespace Map {
         l_Packet.PositionX = p_Object->GetSpline()->GetPlannedPositionX();
         l_Packet.PositionY = p_Object->GetSpline()->GetPlannedPositionY();
         l_Packet.Time      = p_Object->GetSpline()->GetDestinationTime();
-        p_Object->GetMap()->SendPacketToNearByGrids(l_Packet.Write(), p_Object);
+        p_Object->GetMap()->SendPacketToNearByGridsIfInSurrounding(l_Packet.Write(), p_Object);
     }
 
     //////////////////////////////////////////////////////////////////////////

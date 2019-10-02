@@ -3,6 +3,7 @@
 ### SECTION INDEX ###
 #   SERVER SETTINGS
 #   MYSQL SETTINGS
+#   PLAYER SETTINGS
 # 	MAP SETTINGS
 # 	MOB SETTINGS
 
@@ -15,8 +16,8 @@ GamePort = 5152
 
 ## BindIP
 #	Description: Bind server to Ip/Host Name
-#	Default: "127.0.0.1" - (Bind to all IPs on the system)
-BindIP = "127.0.0.1"
+#	Default: "0.0.0.0" - (Bind to all IPs on the system)
+BindIP = "0.0.0.0"
 
 ## Child Listeners
 #	Description: Amount of Child Listeners to spawn
@@ -40,6 +41,23 @@ GameWorkerThreads = 1
 #	Description: Amount of MySQL instances to spawn
 #   Default:     5 (max 5)
 MySQLInstances = 5
+
+### PLAYER SETTINGS ###
+
+## Log Out Timer
+# 	Description: Logout timer
+# 	Default: 20000 (in milliseconds)
+LogOutTimer = 20000
+
+## Premium Log Out Timer
+# 	Description: Premium Logout timer
+# 	Default: 5000 (in milliseconds)
+PremiumLogOutTimer = 5000
+
+## Attack Range
+#	Description: The maximum attack range
+# 	Default: 700
+PlayerAttackRange = 700
 
 ### MAP SETTINGS ###
 
@@ -69,8 +87,13 @@ CheckForInteractiveEvents = 5000
 JumpDelay = 2000
 
 ## Delay Removal
-##	Description: When to remove Object(s) from client
+##	Description: Timer when to remove Object(s) from client
 #	Default: 5000
 DelayRemoval = 5000
 
 ### MOB SETTINGS ###
+
+## Attack Range
+#	Description: The maximum attack range
+# 	Default: 500
+MobAttackRange = 500

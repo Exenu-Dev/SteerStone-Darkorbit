@@ -227,10 +227,10 @@ namespace SteerStone { namespace Game { namespace Map {
     }
     /// Remove Object from map
     /// @p_Object : Object being removed from map
-    /// @p_Immediantly : Remove Object from map without delay
-    void Base::Remove(Entity::Object* p_Object, bool p_Immediantly)
+    /// @p_SendPacket : Send Despawn Packet
+    void Base::Remove(Entity::Object* p_Object, bool p_SendPacket)
     {
-        m_Grids[std::get<0>(p_Object->GetGridIndex())][std::get<1>(p_Object->GetGridIndex())]->Remove(p_Object);
+        m_Grids[std::get<0>(p_Object->GetGridIndex())][std::get<1>(p_Object->GetGridIndex())]->Remove(p_Object, p_SendPacket);
     }
     /// Find Object in map
     /// @p_Counter : Counter of object
@@ -322,7 +322,8 @@ namespace SteerStone { namespace Game { namespace Map {
         for (auto l_Itr : m_PlayersToJump)
         {
             /// Remove player from map
-            sZoneManager->RemoveFromMap(l_Itr.first);
+            sZoneManager->RemoveFromMap(l_Itr.first, true);
+            l_Itr.first->ToPlayer()->ClearTarget();
             l_Itr.first->ToPlayer()->ClearSurroundings();
 
             /// Add to map
@@ -332,8 +333,8 @@ namespace SteerStone { namespace Game { namespace Map {
             l_Itr.first->GetSpline()->SetPosition(l_Itr.second->ToPortal()->GetToPositionX(), l_Itr.second->ToPortal()->GetToPositionY(),
                 l_Itr.second->ToPortal()->GetToPositionX(), l_Itr.second->ToPortal()->GetToPositionY());
             l_Itr.first->ToPlayer()->SendInitializeShip();
-            l_Itr.first->ToPlayer()->GetShip()->SendMapUpdate();
-            l_Itr.first->ToPlayer()->GetShip()->SendAmmoUpdate();
+            l_Itr.first->ToPlayer()->SendMapUpdate();
+            l_Itr.first->ToPlayer()->SendAmmoUpdate();
             l_Itr.first->ToPlayer()->SendAccountRank();
 
             /// Must be called after we send initial login packets
@@ -358,7 +359,8 @@ namespace SteerStone { namespace Game { namespace Map {
     }
     /// Send Packet to nearby grids if in surrounding
     /// p_Object : Object responsible for building packet
-    void Base::SendPacketToNearByGrids(Server::PacketBuffer const* p_PacketBuffer, Entity::Object* p_Object)
+    /// @p_SendToSelf : Send Packet to self
+    void Base::SendPacketToNearByGridsIfInSurrounding(Server::PacketBuffer const* p_PacketBuffer, Entity::Object* p_Object, bool p_SendToSelf)
     {
         static const int32 l_X[] = { -1, -1, -1,  1, 1, 1,  0, 0 };
         static const int32 l_Y[] = { -1,  0,  1, -1, 0, 1, -1, 1 };
@@ -378,6 +380,9 @@ namespace SteerStone { namespace Game { namespace Map {
         /// Push object grid into storage
         l_Grids.push_back(m_Grids[std::get<0>(p_Object->GetGridIndex())][std::get<1>(p_Object->GetGridIndex())]);
         
+        if (p_SendToSelf && p_Object->GetType() == Entity::Type::OBJECT_TYPE_PLAYER)
+            p_Object->ToPlayer()->SendPacket(p_PacketBuffer);
+
         /// Now send packet to players if object is in their surroundings
         for (auto l_Itr : l_Grids)
             l_Itr->SendPacketIfInSurrounding(p_PacketBuffer, p_Object);

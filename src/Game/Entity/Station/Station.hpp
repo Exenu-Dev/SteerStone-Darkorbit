@@ -22,7 +22,7 @@
 #include "Unit.hpp"
 #include "GameFlags.hpp"
 
-#define STATION_RADIUS 500ul
+#define STATION_RADIUS 500.0f
 
 namespace SteerStone { namespace Game { namespace Entity {
 

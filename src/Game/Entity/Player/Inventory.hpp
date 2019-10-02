@@ -19,60 +19,43 @@
 #pragma once
 #include <PCH/Precompiled.hpp>
 #include "Core/Core.hpp"
-#include "Socket.hpp"
-#include "Unit.hpp"
 
-#include "Diagnostic/DiaIntervalTimer.hpp"
+#include "Item.hpp"
 
 namespace SteerStone { namespace Game { namespace Entity {
 
-    class SurroundingObject
+    class Player;
+
+    class Inventory
     {
-        DISALLOW_COPY_AND_ASSIGN(SurroundingObject);
+        DISALLOW_COPY_AND_ASSIGN(Inventory);
 
     //////////////////////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////////////////////
 
     public:
         /// Constructor
-        /// @p_Object       : Object
-        /// @p_PlayerObject : Player
-        SurroundingObject(Object* p_Object, Object* p_PlayerObject);
+        /// @p_Player : Player owner
+        Inventory(Player* p_Player);
         /// Deconstructor
-        ~SurroundingObject();
+        ~Inventory();
 
     //////////////////////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////////////////////
 
     public:
-        /// Update
-        /// @p_Diff : Execution Time
-        bool Update(uint32 const p_Diff);
+        /// Load Inventory from database
+        void LoadInventory();
 
-        /// Schedule to despawn object
-        void ScheduleForDespawn();
-
-        /// Remove object from being despawned
-        void RemoveScheduleFromDespawn();
-        
-        /// Send Packet
-        /// @p_PacketBuffer : Packet being sent
-        void SendPacket(Server::PacketBuffer const* p_PacketBuffer);
-
-        /// Whether object is set to be despawned
-        bool IsScheduledForDespawn() const;
-
-        /// Despawn Object
-        bool Despawn();
+        /// Calculate player stats
+        void CalculateStats() const;
 
     //////////////////////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////////////////////
 
     private:
-        Object* m_Object;
-        Object* m_PlayerObject;
-        Core::Diagnostic::IntervalTimer m_IntervalDelayRemoval;
-        bool m_ScheduleForDespawn;
+        std::vector<Item> m_Items;
+        Player* m_Player;
     };
 
 }   ///< namespace Entity

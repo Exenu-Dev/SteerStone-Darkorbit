@@ -113,6 +113,15 @@ namespace SteerStone { namespace Game { namespace Server { namespace Packets {
         return &m_Buffer;
     }
 
+    /// SERVER_PACKET_LOG_OUT
+    PacketBuffer const* LogOut::Write()
+    {
+        m_Buffer.AppendEndSplitter();
+        m_Buffer.AppendCarriage();
+
+        return &m_Buffer;
+    }
+
 }   ///< Packets
 }   ///< Server
 }   ///< Game

@@ -108,7 +108,8 @@ namespace SteerStone { namespace Game { namespace Map {
         void Add(Entity::Object* p_Object, bool p_SendMovement = false);
         /// Remove Object from Grid
         /// @p_Object : Object being removed
-        void Remove(Entity::Object* p_Object);
+        /// @p_SendPacket : Send Despawn Packet
+        void Remove(Entity::Object* p_Object, bool p_SendPacket = false);
         /// Unload objects from map
         void Unload();
         /// Build surrounding objects near player
@@ -117,7 +118,7 @@ namespace SteerStone { namespace Game { namespace Map {
         /// Build Player Spawn Packet
         /// @p_ObjectBuilt : Object being built
         /// @p_Object      : Object
-        Server::PacketBuffer const BuildObjectSpawn(Entity::Object* p_ObjectBuilt, Entity::Object* p_Object);
+        void BuildObjectSpawnAndSend(Entity::Object* p_ObjectBuilt, Entity::Object* p_Object);
         /// Build Object Despawn Packet
         /// @p_Object : Object being built
         void BuildObjectDespawnAndSend(Entity::Object* p_Object);
@@ -147,7 +148,8 @@ namespace SteerStone { namespace Game { namespace Map {
         /// Send Packet to everyone if object is in surrounding
         /// @p_Packet : Packet being sent
         /// @p_Object : Object being checked
-        void SendPacketIfInSurrounding(Server::PacketBuffer const* p_Packet, Entity::Object* p_Object);
+        /// @p_SendToSelf : Send Packet to self
+        void SendPacketIfInSurrounding(Server::PacketBuffer const* p_Packet, Entity::Object* p_Object, bool p_SendToSelf = false);
         /// Move Object
         /// @p_Object : Object being moved
         void Move(Entity::Object* p_Object);

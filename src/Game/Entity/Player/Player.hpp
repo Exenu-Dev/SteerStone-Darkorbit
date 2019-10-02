@@ -18,19 +18,84 @@
 
 #pragma once
 #include <PCH/Precompiled.hpp>
-
 #include "Core/Core.hpp"
-#include "Ship/Ship.hpp"
-#include "Unit/Unit.hpp"
-#include "SurroundingObject.hpp"
-#include "Database/OperatorProcessor.hpp"
+
 #include "Utility/UtiLockedQueue.hpp"
+#include "SurroundingObject.hpp"
+#include "Database/DatabaseTypes.hpp"
+#include "Inventory.hpp"
 
 namespace SteerStone { namespace Game { namespace Entity {
 
     class Server::ClientPacket;
+    class Player;
 
     typedef std::unordered_map<uint64, std::unique_ptr<SurroundingObject>> SurroundingMap;
+
+    /// Holds Ammo data
+    struct Ammo
+    {
+        friend class Player;
+
+    public:
+        /// Constructor
+        Ammo()
+        {
+            m_BatteryLCB10   = 0;
+            m_BatteryMCB25   = 0;
+            m_BatteryMCB50   = 0;
+            m_BatteryUCB100  = 0;
+            m_BatterySAB50   = 0;
+
+            m_RocketR310     = 0;
+            m_RocketPLT2026  = 0;
+            m_RocketPLT2021  = 0;
+
+            m_Mines          = 0;
+            m_SmartBombs     = 0;
+            m_InstantShields = 0;
+        }
+        /// Deconstructor
+        ~Ammo()
+        {
+        }
+
+        //////////////////////////////////////////////////////////////////////////
+        //////////////////////////////////////////////////////////////////////////
+
+    private:
+        int32 m_BatteryLCB10;
+        int32 m_BatteryMCB25;
+        int32 m_BatteryMCB50;
+        int32 m_BatteryUCB100;
+        int32 m_BatterySAB50;
+
+        int32 m_RocketR310;
+        int32 m_RocketPLT2026;
+        int32 m_RocketPLT2021;
+
+        int32 m_Mines;
+        int32 m_SmartBombs;
+        int32 m_InstantShields;
+    };
+
+    /// Player Drone Info
+    struct Drone
+    {
+    public:
+        /// Constructor
+        Drone()
+        {
+            Type   = 0;
+            Points = 0;
+        }
+
+        //////////////////////////////////////////////////////////////////////////
+        //////////////////////////////////////////////////////////////////////////
+
+        uint16 Type;
+        uint16 Points;
+    };
 
     /// Main entry for session in world
     class Player : public Unit
@@ -38,7 +103,6 @@ namespace SteerStone { namespace Game { namespace Entity {
     DISALLOW_COPY_AND_ASSIGN(Player);
 
     friend class Server::GameSocket;
-    friend class Ship;
 
     //////////////////////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////////////////////
@@ -56,13 +120,23 @@ namespace SteerStone { namespace Game { namespace Entity {
         ///////////////////////////////////////////
         //              GENERAL
         ///////////////////////////////////////////
-
+    public:
         /// Load Player Info from database
         bool LoadFromDB();
-
-        /// Remove player from world
-        void RemoveFromWorld();
-
+        /// Load Ship Info from database
+        void LoadShipFromDB();
+        /// Load Drone Info from database
+        void LoadDrones();
+    private:
+        /// Save Player details to database
+        void SaveToDB();
+        /// Save Ship details to database
+        void SaveShipToDB();
+    private:
+        /// Return Drone Level
+        /// @p_Drone : Drone
+        uint16 GetDroneLevel(Drone& p_Drone);
+    public:
         /// Update Player
         /// @p_Diff : Execution Time
         bool Update(uint32 p_Diff);
@@ -106,6 +180,14 @@ namespace SteerStone { namespace Game { namespace Entity {
         void SendAccountRank();
         /// Send Display Star System
         void SendDisplayStarSystem();
+        /// Send Map update
+        void SendMapUpdate();
+        /// Send Battery, Rocket and mine update
+        void SendAmmoUpdate();
+        /// Send Drone Info
+        Server::PacketBuffer const BuildDronePacket();
+        /// Send Drone Info
+        void SendDrones();
         /// Process Packets
         /// @p_PacketFilter : Type of packet
         bool ProcessPacket(Server::PacketFilter& p_PacketFilter);
@@ -123,28 +205,35 @@ namespace SteerStone { namespace Game { namespace Entity {
         ///////////////////////////////////////////
     public:
         /// Getters Function
-        uint32 GetId()             const     { return m_Id;             }
-        std::string GetSessionId() const     { return m_SessionId;      }
-        uint32 GetUridium()        const     { return m_Uridium;        }
-        uint32 GetCredits()        const     { return m_Credits;        }
-        uint32 GetJackPot()        const     { return m_Jackpot;        }
-        uint32 GetLevel()          const     { return m_Level;          }
-        uint32 GetExperience()     const     { return m_Experience;     }
-        uint32 GetHonor()          const     { return m_Honor;          }
-        bool IsPremium()           const     { return m_Premium;        }
-        bool IsLoggedIn()          const     { return m_LoggedIn;       }
-        bool IsJumping()           const     { return m_Jumping;        }
-        Ship* GetShip()                      { return &m_Ship;          }
-        EventType GetEvent()       const     { return m_Event;          } 
-        bool IsScheduledForDeletion() const  { return m_ScheduledForDeletion; }
+        uint32 GetId()             const     { return m_Id;               }
+        std::string GetSessionId() const     { return m_SessionId;        }
+        uint32 GetUridium()        const     { return m_Uridium;          }
+        uint32 GetCredits()        const     { return m_Credits;          }
+        uint32 GetJackPot()        const     { return m_Jackpot;          }
+        uint32 GetLevel()          const     { return m_Level;            }
+        uint32 GetExperience()     const     { return m_Experience;       }
+        uint32 GetHonor()          const     { return m_Honor;            }
+        bool IsPremium()           const     { return m_Premium;          }
+        bool IsLoggingOut()        const     { return m_LoggingOut;       }
+        bool IsLoggedIn()          const     { return m_LoggedIn;         }
+        bool IsJumping()           const     { return m_Jumping;          }
+        PlayerShips GetShipId()    const     { return m_ShipId;           }
+        uint32 GetCargoSpace()     const     { return m_CargoSpace;       }
+        uint32 GetMaxCargoSpace()  const     { return m_MaxCargoSpace;    }
+        uint32 GetMaxBattery()     const     { return m_MaxBattery;       }
+        EventType GetEvent()       const     { return m_Event;            } 
+        bool HasLoggedOut() const            { return m_LoggingOut;       }
+        bool HasDrones()           const     { return !m_Drones.empty();  }
+        Ammo const* GetAmmo()      const     { return &m_Ammo;            }
+        Inventory const* GetInventory() const{ return &m_Inventory;       }
         std::shared_ptr<Server::GameSocket> ToSocket() { return m_Socket; }
-            
+
         /// Setters Function
         void SetEventType(EventType const p_EventType) { m_Event = p_EventType;         }
         void SetIsJumping(bool const p_Jumping)        { m_Jumping = p_Jumping;         }
-        void SetScheduleForDeletion()                  { m_ScheduledForDeletion = true; }
+        void SetLogout(bool const p_LoggedOut)         { m_LoggingOut = p_LoggedOut;     }
 
-        Core::Diagnostic::IntervalTimer IntervalDeletionRemoval;
+        Core::Diagnostic::IntervalTimer IntervalLogout;
 
     //////////////////////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////////////////////
@@ -160,6 +249,11 @@ namespace SteerStone { namespace Game { namespace Entity {
         uint32 m_Level;
         uint32 m_Experience;
         uint32 m_Honor;
+        uint32 m_MaxCargoSpace;
+        uint32 m_MaxBattery;
+        uint32 m_MaxRockets;
+        uint32 m_CargoSpace;
+        PlayerShips m_ShipId;
         bool m_Premium;
 
         /// Player Settings
@@ -178,8 +272,6 @@ namespace SteerStone { namespace Game { namespace Entity {
         bool m_BackgroundMusicOff;
         bool m_DisplayStatus;
         bool m_DisplayBubble;
-        uint32 m_SelectedLaser;
-        uint32 m_SelectedRocket;
         bool m_DisplayDigits;
         bool m_DisplayChat;
         bool m_DisplayDrones;
@@ -187,14 +279,17 @@ namespace SteerStone { namespace Game { namespace Entity {
         bool m_IgnoreCargo;
         bool m_IgnoreHostileCargo;
         bool m_AutoChangeAmmo;
+        bool m_UseSystemFont;
         bool m_EnableBuyFast;
 
         bool m_LoggedIn;
         bool m_Jumping;
-        bool m_ScheduledForDeletion;
+        bool m_LoggingOut;
         EventType m_Event;
-
-        Ship m_Ship;                                                     ///< Ship
+        Ammo m_Ammo;
+        Inventory m_Inventory;
+        
+        std::vector<Drone> m_Drones;                                     ///< Ship Drones
         SurroundingMap m_Surroundings;                                   ///< Objects surrounding player
         std::shared_ptr<Server::GameSocket> m_Socket;                    ///< Socket
         Core::Database::OperatorProcessor m_OperatorProcessor;           ///< Process Asynchronous Queries

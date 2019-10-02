@@ -29,7 +29,7 @@ namespace SteerStone { namespace Core { namespace Utils {
     /// @p_PositionY        : Y Axis
     /// @p_OtherPositionX   : x Axis
     /// @p_OtherPositiony   : Y Axis
-    inline bool IsInCircleRadius(float const p_PositionX, float const p_PositionY, float const p_OtherPositionX, float const p_OtherPositionY, float const p_Radius)
+    inline bool IsInCircleRadius(float const& p_PositionX, float const& p_PositionY, float const& p_OtherPositionX, float const& p_OtherPositionY, float const p_Radius)
     {
         float l_DistX = (p_PositionX - p_OtherPositionX);
         l_DistX = l_DistX * l_DistX;
@@ -46,7 +46,7 @@ namespace SteerStone { namespace Core { namespace Utils {
     /// @p_PositionY        : Y Axis
     /// @p_OtherPositionX   : x Axis
     /// @p_OtherPositiony   : Y Axis
-    inline bool IsInSquareRadius(float const p_PositionX, float const p_PositionY, float const p_OtherPositionX, float const p_OtherPositionY, float const p_Radius)
+    inline bool IsInSquareRadius(float const& p_PositionX, float const& p_PositionY, float const& p_OtherPositionX, float const& p_OtherPositionY, float const p_Radius)
     {
         if (p_PositionX < p_OtherPositionX - p_Radius) 
             return false;
@@ -64,12 +64,37 @@ namespace SteerStone { namespace Core { namespace Utils {
     /// @p_PositionY        : Y Axis
     /// @p_OtherPositionX   : x Axis
     /// @p_OtherPositiony   : Y Axis
-    inline float DistanceSquared(float const p_PositionX, float const p_PositionY, float const p_OtherPositionX, float const p_OtherPositionY)
+    inline float DistanceSquared(float const& p_PositionX, float const& p_PositionY, float const& p_OtherPositionX, float const& p_OtherPositionY)
     {
         float l_DeltaX = p_PositionX - p_OtherPositionX;
         float l_DeltaY = p_PositionY - p_OtherPositionY;
 
         return std::sqrt((l_DeltaX * l_DeltaX) + (l_DeltaY * l_DeltaY));
+    }
+
+    /// Percentage calculation
+    /// @p_Base : Value
+    /// @p_Percentage : Percentage
+    template <class T, class U>
+    inline T CalculatePercentage(T p_Base, U p_Percentage)
+    {
+        return T(p_Base * static_cast<float>(p_Percentage) / 100.0f);
+    }
+    /// Percentage calculation
+    /// @p_Base : Value
+    /// @p_Percentage : Percentage
+    template <class T, class U>
+    inline T AddPercentage(T& p_Base, U p_Percentage)
+    {
+        return p_Base += CalculatePercentage(p_Base, p_Percentage);
+    }
+    /// Percentage calculation
+    /// @p_Base : Value
+    /// @p_Percentage : Percentage
+    template <class T, class U>
+    inline T ApplyPercentage(T& p_Base, U p_Percentage)
+    {
+        return p_Base = CalculatePercentage(p_Base, p_Percentage);
     }
 
 }   ///< namespace Utils

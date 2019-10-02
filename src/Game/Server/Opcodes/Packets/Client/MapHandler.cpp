@@ -31,7 +31,12 @@ namespace SteerStone { namespace Game { namespace Server {
     /// @p_ClientPacket : Packet recieved from client
     void GameSocket::HandleObjectMove(ClientPacket* p_Packet)
     {
-        float l_NewPositionX = static_cast<float>(p_Packet->ReadUInt32());
+        /// Client sends NaN when user is logging out
+        std::string l_LoggingOut = p_Packet->ReadString();
+        if (l_LoggingOut == "NaN")
+            return;
+
+        float l_NewPositionX = std::stof(l_LoggingOut);
         float l_NewPositionY = static_cast<float>(p_Packet->ReadUInt32());
 
         /// The client sends the current position - but we should never trust the client
@@ -56,7 +61,7 @@ namespace SteerStone { namespace Game { namespace Server {
             return;
         }
 
-        m_Player->SendPacket(&m_Player->GetMap()->GetGrid(m_Player)->BuildObjectSpawn(l_Object, m_Player));
+        m_Player->GetMap()->GetGrid(m_Player)->BuildObjectSpawnAndSend(l_Object, m_Player);
     }
 
     /// Map Handler
@@ -127,6 +132,13 @@ namespace SteerStone { namespace Game { namespace Server {
 
         m_Player->Attack(l_Object);
 
+    }
+
+    /// Map Handler
+    /// @p_ClientPacket : Packet recieved from client
+    void GameSocket::HandleAbortLaser(ClientPacket* p_Packet)
+    {
+        m_Player->CancelAttack();
     }
 }   ///< namespace Server
 }   ///< namespace Game

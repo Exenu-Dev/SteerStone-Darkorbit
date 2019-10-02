@@ -149,7 +149,121 @@ namespace SteerStone { namespace Game { namespace Server { namespace Packets {
         m_Buffer.AppendEndSplitter();
         m_Buffer.AppendCarriage();
 
-        char* l_Ptr = (char*)&m_Buffer.GetContents()[0];
+        return &m_Buffer;
+    }
+
+    /// SERVER_PACKET_ATTACK_OUT_OF_RANGE
+    PacketBuffer const* AttackOutOfRange::Write()
+    {
+        m_Buffer.AppendEndSplitter();
+        m_Buffer.AppendCarriage();
+
+        return &m_Buffer;
+    }
+
+    /// SERVER_PACKET_ATTACK_IN_RANGE
+    PacketBuffer const* AttackInRange::Write()
+    {
+        m_Buffer.AppendEndSplitter();
+        m_Buffer.AppendCarriage();
+
+        return &m_Buffer;
+    }
+
+    /// SERVER_PACKET_CANCEL_LASTER_SHOOT
+    PacketBuffer const* CancelLaserShoot::Write()
+    {
+        m_Buffer.AppendUInt32(FromId);
+        m_Buffer.AppendUInt32(ToId);
+
+        m_Buffer.AppendEndSplitter();
+        m_Buffer.AppendCarriage();
+
+        return &m_Buffer;
+    }
+
+    /// SERVER_PACKET_RECIEVED_DAMAGE
+    PacketBuffer const* RecievedDamage::Write()
+    {
+        m_Buffer.AppendUInt32(HitPoints);
+        m_Buffer.AppendUInt32(Shield);
+        m_Buffer.AppendUInt32(0); ///< Not Used
+        m_Buffer.AppendUInt32(Damage);
+
+        m_Buffer.AppendEndSplitter();
+        m_Buffer.AppendCarriage();
+
+        return &m_Buffer;
+    }
+
+    /// SERVER_PACKET_KILL
+    PacketBuffer const* Kill::Write()
+    {
+        m_Buffer.AppendUInt32(Id);
+
+        m_Buffer.AppendEndSplitter();
+        m_Buffer.AppendCarriage();
+
+        return &m_Buffer;
+    }
+
+    /// SERVER_PACKET_MISS_SELF
+    PacketBuffer const* MissSelf::Write()
+    {
+        m_Buffer.AppendEndSplitter();
+        m_Buffer.AppendCarriage();
+
+        return &m_Buffer;
+    }
+
+    /// SERVER_PACKET_MISS_TARGET
+    PacketBuffer const* MissTarget::Write()
+    {
+        m_Buffer.AppendEndSplitter();
+        m_Buffer.AppendCarriage();
+
+        return &m_Buffer;
+    }
+
+    /// SERVER_PACKET_MAKE_DAMAGE
+    PacketBuffer const* MakeDamage::Write()
+    {
+        if (UpdateAmmo)
+            m_Buffer.AppendChar("L");
+        else
+            m_Buffer.AppendChar("NaN");
+
+        m_Buffer.AppendUInt32(HitPoints);
+        m_Buffer.AppendUInt32(Shield);
+        m_Buffer.AppendUInt32(Damage);
+
+        m_Buffer.AppendEndSplitter();
+        m_Buffer.AppendCarriage();
+
+        return &m_Buffer;
+    }
+
+    /// SERVER_PACKET_ESCAPED_THE_ATTACK
+    PacketBuffer const* EscapedTheAttack::Write()
+    {
+        m_Buffer.AppendEndSplitter();
+        m_Buffer.AppendCarriage();
+
+        return &m_Buffer;
+    }
+
+    /// SERVER_PACKET_MISC_INFO
+    PacketBuffer const* MiscInfo::Write()
+    {
+        if (Type == "d") ///< Drones
+        {
+            m_Buffer.AppendChar(Type.c_str());
+            m_Buffer.AppendUInt32(Id);
+            m_Buffer.AppendChar(Misc.c_str());
+        }
+
+        m_Buffer.AppendEndSplitter();
+        m_Buffer.AppendCarriage();
 
         return &m_Buffer;
     }

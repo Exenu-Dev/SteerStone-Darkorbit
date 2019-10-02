@@ -38,13 +38,15 @@ namespace SteerStone { namespace Core { namespace Database {
         /// @p_Statement : Prepare Statement
         /// @p_Result : Result
         /// @p_FieldCount : Field count
-        PreparedResultSet(PreparedStatement* p_Statement, MYSQL_RES* p_Result, uint32 p_FieldCount);
+        /// @p_FreeAutomatically : Free the preparedstatement on PreparedResultSet deconstructor
+        PreparedResultSet(PreparedStatement* p_Statement, MYSQL_RES* p_Result, uint32 p_FieldCount, bool p_FreeAutomatically);
         /// Deconstructor
         ~PreparedResultSet();
 
         //////////////////////////////////////////////////////////////////////////
         //////////////////////////////////////////////////////////////////////////
 
+    public:
         /// Return result
         ResultSet* FetchResult() const;
         /// Get Next Row
@@ -52,9 +54,10 @@ namespace SteerStone { namespace Core { namespace Database {
         /// Get Total Row Count
         uint64 GetRowCount() const { return m_RowCount; }
 
+        /// Allow the statement to be freed automatically
+        void AllowToFreeStatement() { m_FreeAutomatically = true; }
         /// Get Prepare Statement
         PreparedStatement* GetPreparedStatement() { return m_PreparedStatement; }
-
         /// [] Operator
         ResultSet const& operator[](std::size_t p_Index) const;
 
@@ -67,6 +70,7 @@ namespace SteerStone { namespace Core { namespace Database {
         /// Get Next Row
         bool NextRow();
 
+    private:
         PreparedStatement* m_PreparedStatement; ///< Prepare Statement
         MYSQL_RES* m_Result;                    ///< Result
         MYSQL_FIELD* m_Fields;                  ///< Field
@@ -79,6 +83,8 @@ namespace SteerStone { namespace Core { namespace Database {
 
         uint32 m_RowPosition;                   ///< Row Position
         std::vector<ResultSet> m_Results;       ///< Result set
+
+        bool m_FreeAutomatically;               ///< Free the prepared statement on deconstructor
     };
 
 }   ///< namespace Database

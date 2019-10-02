@@ -51,127 +51,33 @@ namespace SteerStone { namespace Game { namespace Map {
             {
                 if (l_Itr.second->GetType() == Entity::Type::OBJECT_TYPE_PLAYER)
                 {
-                    /// If player is not in surrounding, then create ship
                     if (!l_Itr.second->ToPlayer()->IsInSurrounding(p_Object))
-                    {
-                        Server::Packets::SpawnShip l_Packet;
-                        l_Packet.UserId                 = p_Object->ToPlayer()->GetObjectGUID().GetCounter();
-                        l_Packet.ShipId                 = static_cast<uint16>(p_Object->ToPlayer()->GetShip()->GetShipId());
-                        l_Packet.WeaponState            = p_Object->ToPlayer()->GetWeaponState();
-                        l_Packet.Clan                   = p_Object->ToPlayer()->GetClanName();
-                        l_Packet.Name                   = p_Object->GetName();
-                        l_Packet.PositionX              = p_Object->GetSpline()->GetPositionX();
-                        l_Packet.PositionY              = p_Object->GetSpline()->GetPositionY();
-                        l_Packet.CompanyId              = static_cast<uint16>(p_Object->ToPlayer()->GetCompany());
-                        l_Packet.ClanId                 = p_Object->ToPlayer()->GetClanId();
-                        l_Packet.Rank                   = p_Object->ToPlayer()->GetRank();
-                        l_Packet.ClanDiplomat           = 0;
-                        l_Packet.ShowRedSquareOnMiniMap = l_Itr.second->ToPlayer()->GetCompany() != p_Object->ToPlayer()->GetCompany();
-                        l_Packet.GalaxyGatesAchieved    = p_Object->ToPlayer()->GetGatesAchieved();
-                        l_Packet.UseBigFont             = false; ///< TODO; For big ships only?
-                        l_Itr.second->ToPlayer()->SendPacket(l_Packet.Write());
-
-                        /// This desync issue with client, for some reason creating the ship with correct x and y does not work?
-                        /// it's a client bug..
-                        if (!p_Object->GetSpline()->IsMoving())
-                        {
-                            Server::Packets::ObjectMove l_Packet;
-                            l_Packet.Id         = p_Object->GetObjectGUID().GetCounter();
-                            l_Packet.PositionX  = p_Object->GetSpline()->GetPositionX();
-                            l_Packet.PositionY  = p_Object->GetSpline()->GetPositionY();
-                            l_Packet.Time       = 0;
-                            l_Itr.second->GetGrid()->SendPacketToEveryone(l_Packet.Write());
-                        }
-
-                        l_Itr.second->ToPlayer()->AddToSurrounding(p_Object);
-                    }
-                    else ///< If object is already in surrounding, then make sure the object is not scheduled to be despawned
+                        BuildObjectSpawnAndSend(p_Object, l_Itr.second);
+                    else
                         l_Itr.second->ToPlayer()->RemoveScheduleDespawn(p_Object);
-
-                    if (!p_Object->ToPlayer()->IsInSurrounding(l_Itr.second))
-                    { 
-                        Server::Packets::SpawnShip l_Packet;
-                        l_Packet.UserId                     = l_Itr.second->GetObjectGUID().GetCounter();
-                        l_Packet.ShipId                     = static_cast<uint16>(l_Itr.second->ToPlayer()->GetShip()->GetShipId());
-                        l_Packet.WeaponState                = l_Itr.second->ToPlayer()->GetWeaponState();
-                        l_Packet.Clan                       = l_Itr.second->ToPlayer()->GetClanName();
-                        l_Packet.Name                       = l_Itr.second->GetName();
-                        l_Packet.PositionX                  = l_Itr.second->GetSpline()->GetPositionX();
-                        l_Packet.PositionY                  = l_Itr.second->GetSpline()->GetPositionY();
-                        l_Packet.CompanyId                  = static_cast<uint16>(l_Itr.second->ToPlayer()->GetCompany());
-                        l_Packet.ClanId                     = l_Itr.second->ToPlayer()->GetClanId();
-                        l_Packet.Rank                       = l_Itr.second->ToPlayer()->GetRank();
-                        l_Packet.ClanDiplomat               = 0;
-                        l_Packet.ShowRedSquareOnMiniMap     = l_Itr.second->ToPlayer()->GetCompany() != p_Object->ToPlayer()->GetCompany();
-                        l_Packet.GalaxyGatesAchieved        = l_Itr.second->ToPlayer()->GetGatesAchieved();
-                        l_Packet.UseBigFont                 = false; ///< TODO; For big ships only?
-                        p_Object->ToPlayer()->SendPacket(l_Packet.Write());
-
-                        if (!l_Itr.second->GetSpline()->IsMoving())
-                        {
-                            Server::Packets::ObjectMove l_Packet;
-                            l_Packet.Id = l_Itr.second->GetObjectGUID().GetCounter();
-                            l_Packet.PositionX = l_Itr.second->GetSpline()->GetPositionX();
-                            l_Packet.PositionY = l_Itr.second->GetSpline()->GetPositionY();
-                            l_Packet.Time = 0;
-                            p_Object->GetGrid()->SendPacketToEveryone(l_Packet.Write());
-                        }
-
-                        p_Object->ToPlayer()->AddToSurrounding(l_Itr.second);
-                    }
-                    else
-                        p_Object->ToPlayer()->RemoveScheduleDespawn(l_Itr.second);
                 }
-                else if (l_Itr.second->GetType() == Entity::Type::OBJECT_TYPE_NPC)
-                {
-                    if (!p_Object->ToPlayer()->IsInSurrounding(l_Itr.second))
-                    { 
-                        Server::Packets::SpawnShip l_Packet;
-                        l_Packet.UserId                     = l_Itr.second->GetObjectGUID().GetCounter();
-                        l_Packet.ShipId                     = l_Itr.second->ToMob()->GetShipId();
-                        l_Packet.WeaponState                = l_Itr.second->ToMob()->GetWeaponState();
-                        l_Packet.Clan                       = l_Itr.second->ToMob()->GetClanName();
-                        l_Packet.Name                       = l_Itr.second->GetName();
-                        l_Packet.PositionX                  = l_Itr.second->GetSpline()->GetPositionX();
-                        l_Packet.PositionY                  = l_Itr.second->GetSpline()->GetPositionY();
-                        l_Packet.CompanyId                  = static_cast<uint16>(l_Itr.second->ToMob()->GetCompany());
-                        l_Packet.ClanId                     = l_Itr.second->ToMob()->GetClanId();
-                        l_Packet.Rank                       = l_Itr.second->ToMob()->GetRank();
-                        l_Packet.ClanDiplomat               = 0;
-                        l_Packet.ShowRedSquareOnMiniMap     = false;
-                        l_Packet.GalaxyGatesAchieved        = l_Itr.second->ToMob()->GetGatesAchieved();
-                        l_Packet.UseBigFont                 = false; ///< TODO; For big ships only?
-                        p_Object->ToPlayer()->SendPacket(l_Packet.Write());
 
-                        if (!l_Itr.second->GetSpline()->IsMoving())
-                        {
-                            Server::Packets::ObjectMove l_Packet;
-                            l_Packet.Id = l_Itr.second->GetObjectGUID().GetCounter();
-                            l_Packet.PositionX = l_Itr.second->GetSpline()->GetPositionX();
-                            l_Packet.PositionY = l_Itr.second->GetSpline()->GetPositionY();
-                            l_Packet.Time = 0;
-                            p_Object->GetGrid()->SendPacketToEveryone(l_Packet.Write());
-                        }
-
-                        p_Object->ToPlayer()->AddToSurrounding(l_Itr.second);
-                    }
-                    else
-                        p_Object->ToPlayer()->RemoveScheduleDespawn(l_Itr.second);
-                }
+                if (!p_Object->ToPlayer()->IsInSurrounding(l_Itr.second))
+                    BuildObjectSpawnAndSend(l_Itr.second, p_Object);
+                else
+                    p_Object->ToPlayer()->RemoveScheduleDespawn(l_Itr.second);
             }
         }
     }
     /// Build Player Spawn Packet
     /// @p_ObjectBuilt : Object being built
     /// @p_Object      : Object
-    Server::PacketBuffer const Grid::BuildObjectSpawn(Entity::Object* p_ObjectBuilt, Entity::Object* p_Object)
+    void Grid::BuildObjectSpawnAndSend(Entity::Object* p_ObjectBuilt, Entity::Object* p_Object)
     {
+        /// This must be at the top or else we will enter a infinite recursive function
+        p_Object->ToPlayer()->AddToSurrounding(p_ObjectBuilt);
+
         Server::Packets::SpawnShip l_Packet;
 
         if (p_ObjectBuilt->GetType() == Entity::Type::OBJECT_TYPE_PLAYER)
         {
             l_Packet.UserId                 = p_ObjectBuilt->GetObjectGUID().GetCounter();
-            l_Packet.ShipId                 = static_cast<uint16>(p_ObjectBuilt->ToPlayer()->GetShip()->GetShipId());
+            l_Packet.ShipId                 = static_cast<uint16>(p_ObjectBuilt->ToPlayer()->GetShipId());
             l_Packet.WeaponState            = p_ObjectBuilt->ToPlayer()->GetWeaponState();
             l_Packet.Clan                   = p_ObjectBuilt->ToPlayer()->GetClanName();
             l_Packet.Name                   = p_ObjectBuilt->GetName();
@@ -184,6 +90,11 @@ namespace SteerStone { namespace Game { namespace Map {
             l_Packet.ShowRedSquareOnMiniMap = p_ObjectBuilt->ToPlayer()->GetCompany() != p_Object->ToPlayer()->GetCompany();
             l_Packet.GalaxyGatesAchieved    = p_ObjectBuilt->ToPlayer()->GetGatesAchieved();
             l_Packet.UseBigFont             = false; ///< TODO; For big ships only?
+            p_Object->ToPlayer()->SendPacket(l_Packet.Write());
+
+            /// Also Send drone info
+            if (p_ObjectBuilt->ToPlayer()->HasDrones())
+                p_Object->ToPlayer()->SendPacket(&p_ObjectBuilt->ToPlayer()->BuildDronePacket());
         }
         else if (p_ObjectBuilt->GetType() == Entity::Type::OBJECT_TYPE_NPC)
         {
@@ -201,9 +112,31 @@ namespace SteerStone { namespace Game { namespace Map {
             l_Packet.ShowRedSquareOnMiniMap = false;
             l_Packet.GalaxyGatesAchieved    = p_ObjectBuilt->ToMob()->GetGatesAchieved();
             l_Packet.UseBigFont             = false; ///< TODO; For big ships only?
+            p_Object->ToPlayer()->SendPacket(l_Packet.Write());
         }
 
-        return *l_Packet.Write();
+        if (p_ObjectBuilt->ToUnit()->IsAttacking())
+        {
+            if (!p_Object->ToPlayer()->IsInSurrounding(p_ObjectBuilt->ToUnit()->GetTarget()))
+                BuildObjectSpawnAndSend(p_ObjectBuilt->ToUnit()->GetTarget(), p_Object);
+
+            /// Send Attack
+            Server::Packets::LaserShoot l_Packet;
+            l_Packet.FromId = p_ObjectBuilt->GetObjectGUID().GetCounter();
+            l_Packet.ToId = p_ObjectBuilt->ToUnit()->GetTarget()->GetObjectGUID().GetCounter();
+            l_Packet.LaserId = p_ObjectBuilt->ToUnit()->GetLaserType();
+            p_Object->ToPlayer()->SendPacket(l_Packet.Write());
+        }
+
+        if (!p_ObjectBuilt->GetSpline()->IsMoving())
+        {
+            Server::Packets::ObjectMove l_ObjectMovePacket;
+            l_ObjectMovePacket.Id        = p_ObjectBuilt->GetObjectGUID().GetCounter();
+            l_ObjectMovePacket.PositionX = p_ObjectBuilt->GetSpline()->GetPositionX();
+            l_ObjectMovePacket.PositionY = p_ObjectBuilt->GetSpline()->GetPositionY();
+            l_ObjectMovePacket.Time      = 0;
+            p_Object->ToPlayer()->SendPacket(l_ObjectMovePacket.Write());
+        }
     }
     /// Build Object Despawn Packet
     /// @p_Object : Object being built

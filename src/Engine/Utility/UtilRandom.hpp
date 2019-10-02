@@ -39,9 +39,9 @@ namespace SteerStone { namespace Core { namespace Utils {
     /// Return a random double from 0.0 to 100.0 (exclusive)
     double RandomChance();
     /// Return true if a random roll fits in the specified chance (range 0-100)
-    inline bool RoleChanceFloat(float p_Chance);
+    bool RoleChanceFloat(float p_Chance);
     /// Return true if a random roll fits in the specified chance (range 0-100)
-    inline bool RollChanceInterger32(int32 p_Chance);
+    bool RollChanceInterger32(int32 p_Chance);
 
     class SFMTEngine
     {
