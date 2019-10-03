@@ -320,8 +320,7 @@ namespace SteerStone { namespace Game { namespace Entity {
         l_PreparedStatement->SetBool(35, m_AutoChangeAmmo);
         l_PreparedStatement->SetBool(36, m_EnableBuyFast);
         l_PreparedStatement->SetUint32(37, m_Id);
-
-        m_OperatorProcessor.AddOperator(GameDatabase.PrepareOperator(l_PreparedStatement));
+        l_PreparedStatement->ExecuteStatement();
 
         SaveShipToDB();
     }
@@ -354,7 +353,7 @@ namespace SteerStone { namespace Game { namespace Entity {
         l_PreparedStatement->SetUint32(17, m_Ammo.m_InstantShields);
         l_PreparedStatement->SetUint32(18, m_Id);
 
-        m_OperatorProcessor.AddOperator(GameDatabase.PrepareOperator(l_PreparedStatement));
+        l_PreparedStatement->ExecuteStatement();
     }
     /// Return Drone Level
     /// @p_Drone : Drone
