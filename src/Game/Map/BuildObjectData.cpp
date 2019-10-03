@@ -117,7 +117,7 @@ namespace SteerStone { namespace Game { namespace Map {
 
         if (p_ObjectBuilt->ToUnit()->IsAttacking())
         {
-            if (!p_Object->ToPlayer()->IsInSurrounding(p_ObjectBuilt->ToUnit()->GetTarget()))
+            if (p_ObjectBuilt->ToUnit()->GetTarget() && !p_Object->ToPlayer()->IsInSurrounding(p_ObjectBuilt->ToUnit()->GetTarget()))
                 BuildObjectSpawnAndSend(p_ObjectBuilt->ToUnit()->GetTarget(), p_Object);
 
             /// Send Attack
