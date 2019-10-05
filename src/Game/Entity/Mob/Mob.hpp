@@ -22,14 +22,7 @@
 #include "Diagnostic/DiaIntervalTimer.hpp"
 #include "Unit.hpp"
 
-/// TODO; Put this into configs maybe?
-#define MIN_DISTANCE_FOLLOW 200             ///< Min distance for mob to  follow
-#define MAX_DISTANCE_FOLLOW 4000            ///< maximum distance between mob and player before leaving clearing combat
-
-#define MAX_DISTANCE_ROAMING_RANGE 200      ///< Maximum distance can travel
-#define DISTANCE_AWAY_FROM_BORDER 500       ///< Distance away from border
-#define FIND_PLAYER_DISTANCE 800            ///< Scan radius for searching players
-#define MAX_DISTANCE_AWAY_FROM_PLAYER 100   ///< Distance away from player when moving to player
+#define DISTANCE_AWAY_FROM_BORDER 100          ///< Distance away from border
 
 namespace SteerStone { namespace Game { namespace Map {
 

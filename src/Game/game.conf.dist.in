@@ -97,3 +97,28 @@ DelayRemoval = 5000
 #	Description: The maximum attack range
 # 	Default: 500
 MobAttackRange = 500
+
+## Min Follow Distance
+#	Description: Min follow distance
+# 	Default: 200
+MinFollowDistance = 200
+
+## Max Follow Distance
+#	Description: Max follow distance
+# 	Default: 4000
+MaxFollowDistance = 4000
+
+## Max Roaming Distance
+#	Description: Max Roaming Distance
+# 	Default: 200
+MaxRoamingDistance = 200
+
+## Find Player Distance (radius)
+#	Description: Max distance for searching player(s)
+# 	Default: 800
+FindPlayerDistance = 800
+
+## Distance away from player
+#	Description: Gap Distance when following player
+# 	Default: 100
+DistanceAwayFromPlayer = 100

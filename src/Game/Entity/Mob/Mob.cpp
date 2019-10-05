@@ -136,7 +136,7 @@ namespace SteerStone { namespace Game { namespace Entity {
             {
                 if (!HasTarget())
                 {
-                    Entity::Object* l_Player = GetGrid()->FindNearestPlayer(this, FIND_PLAYER_DISTANCE);
+                    Entity::Object* l_Player = GetGrid()->FindNearestPlayer(this, sWorldManager->GetIntConfig(World::IntConfigs::INT_CONFIG_FIND_PLAYER_DISTANCE));
 
                     if (!l_Player)
                         break;
@@ -168,14 +168,14 @@ namespace SteerStone { namespace Game { namespace Entity {
                     break;
                 }
                 /// Follow the target if our distance is out of range
-                else if (l_Distance > MIN_DISTANCE_FOLLOW && l_Distance < MAX_DISTANCE_FOLLOW)
+                else if (l_Distance > sWorldManager->GetIntConfig(World::IntConfigs::INT_CONFIG_MIN_FOLLOW_DISTANCE) && l_Distance < sWorldManager->GetIntConfig(World::IntConfigs::INT_CONFIG_MAX_FOLLOW_DISTANCE))
                 {
                     GetSpline()->Move(l_PositionX + m_RandomDistanceFromPlayerX, l_PositionY + m_RandomDistanceFromPlayerY, 0, 0);
 
                     /// We want to update the movement, as soon as possible to ensure we are keeping up to the player
                     m_IntervalMoveTimer.SetInterval(m_MoveTimeMax / 2);
                 }
-                else if (l_Distance > MAX_DISTANCE_FOLLOW)
+                else if (l_Distance > sWorldManager->GetIntConfig(World::IntConfigs::INT_CONFIG_MAX_FOLLOW_DISTANCE))
                 {
                     /// If target is far away, cancel the target and continue moving around in the ground
                     CancelAttack();
@@ -201,7 +201,7 @@ namespace SteerStone { namespace Game { namespace Entity {
             {
                 if (!HasTarget())
                 {
-                    Entity::Object* l_Player = GetGrid()->FindNearestPlayer(this, FIND_PLAYER_DISTANCE);
+                    Entity::Object* l_Player = GetGrid()->FindNearestPlayer(this, sWorldManager->GetIntConfig(World::IntConfigs::INT_CONFIG_FIND_PLAYER_DISTANCE));
 
                     if (!l_Player)
                         break;
@@ -233,20 +233,20 @@ namespace SteerStone { namespace Game { namespace Entity {
                     break;
                 }
                 /// Follow the target if our distance is out of range
-                else if (l_Distance > MIN_DISTANCE_FOLLOW && l_Distance < MAX_DISTANCE_FOLLOW)
+                else if (l_Distance > sWorldManager->GetIntConfig(World::IntConfigs::INT_CONFIG_MIN_FOLLOW_DISTANCE) && l_Distance < sWorldManager->GetIntConfig(World::IntConfigs::INT_CONFIG_MAX_FOLLOW_DISTANCE))
                 {
                     GetSpline()->Move(l_PositionX + m_RandomDistanceFromPlayerX, l_PositionY + m_RandomDistanceFromPlayerY, 0, 0);
 
                     /// We want to update the movement, as soon as possible to ensure we are keeping up to the player
                     m_IntervalMoveTimer.SetInterval(m_MoveTimeMax / 2);
                 }
-                else if (l_Distance > MAX_DISTANCE_FOLLOW)
+                else if (l_Distance > sWorldManager->GetIntConfig(World::IntConfigs::INT_CONFIG_MAX_FOLLOW_DISTANCE))
                 {
                     /// If target is far away, cancel the target and continue moving around in the ground
                     CancelAttack();
                     break;
                 }
-                else if (l_Distance < MIN_DISTANCE_FOLLOW)
+                else if (l_Distance < sWorldManager->GetIntConfig(World::IntConfigs::INT_CONFIG_MIN_FOLLOW_DISTANCE))
                 {
                     float l_Degree = Core::Utils::FloatRandom(0, 360) * M_PI / 180;
 
@@ -275,8 +275,8 @@ namespace SteerStone { namespace Game { namespace Entity {
         float l_MinPositionX = l_MaxPositionX - DISTANCE_AWAY_FROM_BORDER;
         float l_MinPositionY = l_MaxPositionY - DISTANCE_AWAY_FROM_BORDER;
         
-        l_MinPositionX = (l_MinPositionX + MAX_DISTANCE_ROAMING_RANGE) - l_MinPositionX;
-        l_MinPositionY = (l_MinPositionY + MAX_DISTANCE_ROAMING_RANGE) - l_MinPositionY;
+        l_MinPositionX = (l_MinPositionX + sWorldManager->GetIntConfig(World::IntConfigs::INT_CONFIG_MAX_ROAMING_DISTANCE) - l_MinPositionX);
+        l_MinPositionY = (l_MinPositionY + sWorldManager->GetIntConfig(World::IntConfigs::INT_CONFIG_MAX_ROAMING_DISTANCE) - l_MinPositionY);
 
         if (l_GridX > 1)
             l_MinPositionX = (l_GridX - 1) * GetMap()->GetGridRadiusX();
