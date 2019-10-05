@@ -17,6 +17,7 @@
 */
 
 #include "Server/Opcodes/Packets/Server/MapPackets.hpp"
+#include "Server/Opcodes/Packets/Server/ShipPackets.hpp"
 #include "Player.hpp"
 #include "World.hpp"
 #include "Utility/UtilMaths.hpp"
@@ -130,7 +131,7 @@ namespace SteerStone { namespace Game { namespace Entity {
             return false;
         }
 
-        Server::Packets::DespawnShip l_Packet;
+        Server::Packets::Ship::DespawnShip l_Packet;
         l_Packet.Id = m_Object->GetObjectGUID().GetCounter();
         m_PlayerObject->ToPlayer()->SendPacket(l_Packet.Write());
 

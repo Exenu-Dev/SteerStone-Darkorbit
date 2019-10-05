@@ -18,7 +18,7 @@
 
 #include "LoginPackets.hpp"
 
-namespace SteerStone { namespace Game { namespace Server { namespace Packets {
+namespace SteerStone { namespace Game { namespace Server { namespace Packets { namespace Login {
 
     /// SERVER_PACKET_LOGIN
     PacketBuffer const* PlayerInfo::Write()
@@ -122,7 +122,8 @@ namespace SteerStone { namespace Game { namespace Server { namespace Packets {
         return &m_Buffer;
     }
 
-}   ///< Packets
-}   ///< Server
-}   ///< Game
-}   ///< SteerStone
+}   ///< namespace Login
+}   ///< namespace Packets
+}   ///< namespace Server
+}   ///< namespace Game
+}   ///< namespace SteerStone

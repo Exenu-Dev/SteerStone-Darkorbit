@@ -19,7 +19,7 @@
 #pragma once
 #include "Socket.hpp"
 
-namespace SteerStone { namespace Game { namespace Server { namespace Packets {
+namespace SteerStone { namespace Game { namespace Server { namespace Packets { namespace Login {
 
     /// SERVER_PACKET_PLAYER_INFO packet builder
     class PlayerInfo final : public ServerPacket
@@ -143,7 +143,8 @@ namespace SteerStone { namespace Game { namespace Server { namespace Packets {
         PacketBuffer const* Write();
     };
 
-}   ///< Packets
-}   ///< Server
-}   ///< Game
-}   ///< SteerStone
+}   ///< namespace Login
+}   ///< namespace Packets
+}   ///< namespace Server
+}   ///< namespace Game
+}   ///< namespace SteerStone

@@ -17,6 +17,8 @@
 */
 
 #include "Opcodes/Packets/Server/MapPackets.hpp"
+#include "Opcodes/Packets/Server/MiscPackets.hpp"
+#include "Opcodes/Packets/Server/AttackPackets.hpp"
 #include "Player.hpp"
 #include "Mob.hpp"
 #include "ZoneManager.hpp"
@@ -81,11 +83,15 @@ namespace SteerStone { namespace Game { namespace Entity {
         m_AttackState = AttackState::ATTACK_STATE_IN_RANGE;
 
         /// Send Attack
-        Server::Packets::LaserShoot l_Packet;
+        Server::Packets::Attack::LaserShoot l_Packet;
         l_Packet.FromId     = GetObjectGUID().GetCounter();
         l_Packet.ToId       = GetTarget()->GetObjectGUID().GetCounter();
         l_Packet.LaserId    = m_LaserType;
         GetMap()->SendPacketToNearByGridsIfInSurrounding(l_Packet.Write(), this, true);
+
+        /// Grey Opponent
+        if (!GetTarget()->ToUnit()->IsAttacking())
+            GetGrid()->SendPacketIfInSurrounding(Server::Packets::Misc::Info().Write(Server::Packets::Misc::InfoType::INFO_TYPE_GREY_OPPONENT, { GetTarget()->GetObjectGUID().GetCounter(), GetObjectGUID().GetCounter() }), this, false);
 
         m_Attacking = true;
     }
@@ -112,19 +118,19 @@ namespace SteerStone { namespace Game { namespace Entity {
             {
                 if (GetType() == Type::OBJECT_TYPE_PLAYER)
                 {
-                    Server::Packets::AttackOutOfRange l_Packet;
+                    Server::Packets::Attack::AttackOutOfRange l_Packet;
                     ToPlayer()->SendPacket(l_Packet.Write());
                 }
 
                 if (GetTarget()->GetType() == Type::OBJECT_TYPE_PLAYER)
                 {
-                    Server::Packets::EscapedTheAttack l_Packet;
+                    Server::Packets::Attack::EscapedTheAttack l_Packet;
                     GetTarget()->ToPlayer()->SendPacket(l_Packet.Write());
                 }
 
                 /// The client automatically cancels the shooting lasers
                 /// but the other client doesn't - weird.
-                Server::Packets::CancelLaserShoot l_Packet;
+                Server::Packets::Attack::CancelLaserShoot l_Packet;
                 l_Packet.FromId = GetObjectGUID().GetCounter();
                 l_Packet.ToId   = GetTarget()->GetObjectGUID().GetCounter();
                 GetMap()->SendPacketToNearByGridsIfInSurrounding(l_Packet.Write(), this);
@@ -149,13 +155,9 @@ namespace SteerStone { namespace Game { namespace Entity {
                     int32 l_HitPoints = GetTarget()->ToUnit()->GetHitPoints() - l_Damage;
                     int32 l_Shield = GetTarget()->ToUnit()->GetShield() - l_ShieldDamage;
 
-                    if (l_HitPoints < 0)
+                    if (l_HitPoints <= 0)
                     {
-                        //Server::Packets::Kill l_KillPacket;
-                        //l_KillPacket.Id = GetTarget()->GetObjectGUID().GetCounter();
-                        //GetMap()->SendPacketToNearByGridsIfInSurrounding(l_KillPacket.Write(), this, true);
-
-                        //m_DeathState = DeathState::JUST_DIED;
+                        Kill(GetTarget()->ToUnit());
                         return;
                     }
 
@@ -167,7 +169,7 @@ namespace SteerStone { namespace Game { namespace Entity {
 
                     if (GetType() == Type::OBJECT_TYPE_PLAYER)
                     {
-                        Server::Packets::MakeDamage l_MakeDamage;
+                        Server::Packets::Attack::MakeDamage l_MakeDamage;
                         l_MakeDamage.UpdateAmmo = false;
                         l_MakeDamage.HitPoints  = GetTarget()->ToUnit()->GetHitPoints();
                         l_MakeDamage.Shield     = GetTarget()->ToUnit()->GetShield();
@@ -177,7 +179,7 @@ namespace SteerStone { namespace Game { namespace Entity {
 
                     if (GetTarget()->GetType() == Entity::Type::OBJECT_TYPE_PLAYER)
                     {
-                        Server::Packets::RecievedDamage l_ReceivedDamagePacket;
+                        Server::Packets::Attack::RecievedDamage l_ReceivedDamagePacket;
                         l_ReceivedDamagePacket.HitPoints = GetTarget()->ToUnit()->GetHitPoints();
                         l_ReceivedDamagePacket.Shield    = GetTarget()->ToUnit()->GetShield();
                         l_ReceivedDamagePacket.Damage    = l_ShieldDamage + l_Damage; ///< Total Damage
@@ -188,13 +190,13 @@ namespace SteerStone { namespace Game { namespace Entity {
                 {
                     if (GetType() == Type::OBJECT_TYPE_PLAYER)
                     {
-                        Server::Packets::MissSelf l_MissPacket;
+                        Server::Packets::Attack::MissSelf l_MissPacket;
                         ToPlayer()->SendPacket(l_MissPacket.Write());
                     }
 
                     if (GetTarget()->GetType() == Type::OBJECT_TYPE_PLAYER)
                     {
-                        Server::Packets::MissTarget l_MissPacket;
+                        Server::Packets::Attack::MissTarget l_MissPacket;
                         GetTarget()->ToPlayer()->SendPacket(l_MissPacket.Write());
                     }
                 }
@@ -208,7 +210,7 @@ namespace SteerStone { namespace Game { namespace Entity {
             {
                 if (GetType() == Type::OBJECT_TYPE_PLAYER)
                 {
-                    Server::Packets::AttackInRange l_Packet;
+                    Server::Packets::Attack::AttackInRange l_Packet;
                     ToPlayer()->SendPacket(l_Packet.Write());
                 }
 
@@ -218,7 +220,7 @@ namespace SteerStone { namespace Game { namespace Entity {
                         GetTarget()->ToUnit()->Attack(this);
 
                 /// Send Attack
-                Server::Packets::LaserShoot l_Packet;
+                Server::Packets::Attack::LaserShoot l_Packet;
                 l_Packet.FromId     = GetObjectGUID().GetCounter();
                 l_Packet.ToId       = GetTarget()->GetObjectGUID().GetCounter();
                 l_Packet.LaserId    = m_LaserType;
@@ -236,10 +238,20 @@ namespace SteerStone { namespace Game { namespace Entity {
 
         LOG_ASSERT(GetTarget(), "Unit", "Attempted to cancel attack but target does not exist!");
 
-        Server::Packets::CancelLaserShoot l_Packet;
+        Server::Packets::Attack::CancelLaserShoot l_Packet;
         l_Packet.FromId = GetObjectGUID().GetCounter();
         l_Packet.ToId   = GetTarget()->GetObjectGUID().GetCounter();
         GetMap()->SendPacketToNearByGridsIfInSurrounding(l_Packet.Write(), this, true);
+
+        /// Clear Gray Target
+        if (GetType() == Type::OBJECT_TYPE_NPC)
+        {
+            GetGrid()->SendPacketIfInSurrounding(Server::Packets::Misc::Info().Write(Server::Packets::Misc::InfoType::INFO_TYPE_UNGREY_OPPONENT, { GetObjectGUID().GetCounter() }), this, false);
+
+            /// The target may be on other side of the map if still targetting, so send packet specifically to target
+            if (GetTarget()->ToPlayer())
+                GetTarget()->ToPlayer()->SendPacket(Server::Packets::Misc::Info().Write(Server::Packets::Misc::InfoType::INFO_TYPE_UNGREY_OPPONENT, { GetObjectGUID().GetCounter() }));
+        }
 
         m_Attacking     = false;
         m_AttackState   = AttackState::ATTACK_STATE_NONE;
@@ -291,6 +303,26 @@ namespace SteerStone { namespace Game { namespace Entity {
                 GetSpline()->SetIsMoving(false);
 
         AttackerStateUpdate(p_Diff);
+    }
+
+    /// Kill
+    /// @p_Unit : Unit being killed
+    void Unit::Kill(Unit* p_Unit)
+    {
+        Server::Packets::Attack::Kill l_Packet;
+        l_Packet.Id = p_Unit->GetObjectGUID().GetCounter();
+        GetMap()->SendPacketToNearByGridsIfInSurrounding(l_Packet.Write(), p_Unit, true);
+
+        Server::Packets::Attack::CancelLaserShoot l_CancelLaserPacket;
+        l_CancelLaserPacket.FromId  = GetObjectGUID().GetCounter();
+        l_CancelLaserPacket.ToId    = GetTarget()->GetObjectGUID().GetCounter();
+        GetMap()->SendPacketToNearByGridsIfInSurrounding(l_Packet.Write(), this);
+
+        if (p_Unit->GetType() == Type::OBJECT_TYPE_NPC)
+            p_Unit->ToMob()->RewardKillCredit(ToPlayer());
+
+        p_Unit->m_DeathState = DeathState::JUST_DIED;
+        CancelAttack();
     }
 
 }   ///< namespace Entity

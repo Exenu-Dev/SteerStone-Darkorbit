@@ -16,8 +16,10 @@
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include "Server/MiscPackets.hpp"
 #include "World.hpp"
 #include "Mob.hpp"
+#include "ZoneManager.hpp"
 #include "Utility/UtilRandom.hpp"
 #include "Utility/UtilMaths.hpp"
 
@@ -31,6 +33,7 @@ namespace SteerStone { namespace Game { namespace Entity {
         m_Experience    = 0;
         m_Behaviour     = Behaviour::BEHAVIOUR_PASSIVE;
         m_Honor         = 0;
+        m_RespawnTimer  = 0;
         m_Credits       = 0;
         m_Uridium       = 0;
         m_Prometium     = 0;
@@ -72,8 +75,47 @@ namespace SteerStone { namespace Game { namespace Entity {
                 Unit::Update(p_Diff);
             }
             break;
+            case DeathState::JUST_DIED:
+            {
+                m_DeathState = DeathState::DEAD;
+
+                CancelAttack();
+
+                /// It's easier if we just remove mob from map, so we don't need to do extra
+                /// checks whether object is dead etc...
+                sZoneManager->RemoveFromMap(this);
+            }
+            break;
+            case DeathState::DEAD:
+            {
+                m_IntervalRespawnTimer.Update(p_Diff);
+                if (!m_IntervalRespawnTimer.Passed())
+                    return;
+
+                m_DeathState = DeathState::ALIVE;
+
+                sZoneManager->AddToMap(this);
+            }
+            break;
+            default:
+                break;
         }
        
+    }
+
+    /// Reward Credit/Uridium...
+    /// @p_Player : Player is being rewarded
+    void Mob::RewardKillCredit(Player* p_Player)
+    {
+        p_Player->UpdateCredits(m_Credits);
+        p_Player->UpdateUridium(m_Uridium);
+        p_Player->UpdateExperience(m_Experience);
+        p_Player->UpdateHonor(m_Honor);
+
+        p_Player->ToPlayer()->SendPacket(Server::Packets::Misc::Reward().Write(Server::Packets::Misc::RewardType::REWARD_TYPE_CREDIT,     { m_Credits,    p_Player->GetCredits()    }));
+        p_Player->ToPlayer()->SendPacket(Server::Packets::Misc::Reward().Write(Server::Packets::Misc::RewardType::REWARD_TYPE_URIDIUM,    { m_Uridium,    p_Player->GetUridium()    }));
+        p_Player->ToPlayer()->SendPacket(Server::Packets::Misc::Reward().Write(Server::Packets::Misc::RewardType::REWARD_TYPE_HONOUR,     { m_Honor,      p_Player->GetHonor()      }));
+        p_Player->ToPlayer()->SendPacket(Server::Packets::Misc::Reward().Write(Server::Packets::Misc::RewardType::REWARD_TYPE_EXPERIENCE, { m_Experience, p_Player->GetExperience(), p_Player->GetLevel() }));
     }
 
     //////////////////////////////////////////////////////////////////////////
@@ -119,7 +161,7 @@ namespace SteerStone { namespace Game { namespace Entity {
                 float l_PositionY = l_Target->GetSpline()->GetPlannedPositionY();
                 float l_Distance = Core::Utils::DistanceSquared(GetSpline()->GetPlannedPositionX(), GetSpline()->GetPlannedPositionY(), l_PositionX, l_PositionY);
 
-                /// Clear target if target is jumping or our target is far away
+                /// Clear target if target is jumping
                 if (l_Target->ToPlayer()->IsJumping())
                 {
                     CancelAttack();

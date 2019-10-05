@@ -85,7 +85,8 @@ namespace SteerStone { namespace Game { namespace Map {
 
         m_ZoneUpdater.Activate(l_WorkerCount);
     }
-
+    /// Add to Map
+    /// @p_Object : Object being added to map
     void Manager::AddToMap(Entity::Object* p_Object)
     {
         p_Object->GetMap()->Add(p_Object, true);

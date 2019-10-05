@@ -268,3 +268,51 @@ enum DroneLevel
     DRONE_LEVEL_5 = 5,
     DRONE_LEVEL_6 = 6
 };
+
+namespace LevelExperience
+{
+    enum Level : uint64
+    {
+        LEVEL_1 = 0,
+        LEVEL_2 = 10000,
+        LEVEL_3 = 20000,
+        LEVEL_4 = 40000,
+        LEVEL_5 = 80000,
+        LEVEL_6 = 160000,
+        LEVEL_7 = 320000,
+        LEVEL_8 = 640000,
+        LEVEL_9 = 1280000,
+        LEVEL_10 = 2560000,
+        LEVEL_11 = 5120000,
+        LEVEL_12 = 10240000,
+        LEVEL_13 = 20480000,
+        LEVEL_14 = 40960000,
+        LEVEL_15 = 81920000,
+        LEVEL_16 = 163840000,
+        LEVEL_17 = 327680000,
+        LEVEL_18 = 655360000,
+        LEVEL_19 = 1310720000,
+        LEVEL_20 = 2621440000,
+        LEVEL_21 = 5242880000,
+        LEVEL_22 = 10485760000,
+        LEVEL_23 = 20971520000,
+        LEVEL_24 = 41943040000,
+        LEVEL_25 = 83886080000,
+        LEVEL_26 = 167772160000,
+        LEVEL_27 = 335544320000,
+        LEVEL_28 = 671088640000,
+        MAX_LEVEL = 28
+    };
+
+    static const Level All[] = { LEVEL_1, LEVEL_2, LEVEL_3,
+                                 LEVEL_4, LEVEL_5, LEVEL_6,
+                                 LEVEL_7, LEVEL_8, LEVEL_9,
+                                 LEVEL_10, LEVEL_11, LEVEL_12,
+                                 LEVEL_13, LEVEL_14, LEVEL_15,
+                                 LEVEL_16, LEVEL_17, LEVEL_18,
+                                 LEVEL_19, LEVEL_20, LEVEL_21,
+                                 LEVEL_22, LEVEL_23, LEVEL_24,
+                                 LEVEL_25, LEVEL_26, LEVEL_27,
+                                 LEVEL_28 };
+
+}   ///< namespace LevelExperience

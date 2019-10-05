@@ -83,12 +83,7 @@ namespace SteerStone { namespace Game { namespace Server {
             m_Player->m_Jumping = true;
         }
         else
-        {
-            Packets::Message l_Packet;
-            l_Packet.Type = "STD";
-            l_Packet.Text = "You are not near a portal!";
-            SendPacket(l_Packet.Write());
-        }
+            SendPacket(Packets::Misc::Update().Write(Server::Packets::Misc::InfoUpdate::INFO_UPDATE_MESSAGE, { "You are not near a portal!" }));
     }
 
     /// Map Handler

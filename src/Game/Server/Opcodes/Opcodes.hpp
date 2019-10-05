@@ -71,7 +71,7 @@ enum ServerOpCodes : uint8
     SERVER_PACKET_DISPLAY_SUCC_DEBUG    = 0x53,
     SERVER_PACKET_CREATE_PORTAL         = 0x70,
     SERVER_PACKET_CREATE_STATION        = 0x73,
-    SERVER_PACKET_SEND_MESSAGE          = 0x41,
+    SERVER_PACKET_MISC_UPDATE           = 0x41,
     SERVER_PACKET_EVENT                 = 0x44,
     SERVER_PACKET_JUMP_PORTAL           = 0x55,
     SERVER_PACKET_DISPLAY_STAR_SYSTEM   = 0x7A,
@@ -87,6 +87,7 @@ enum ServerOpCodes : uint8
     SERVER_PACKET_MISS_TARGET           = 0x5A,
     SERVER_PACKET_ESCAPED_THE_ATTACK    = 0x56,
     SERVER_PACKET_MISC_INFO             = 0x6E,
+    SERVER_PACKET_REWARD                = 0x79,
 
     /// Debug Headless Packets
     SERVER_PACKET_HEADLESS_MOVE         = 0x21,

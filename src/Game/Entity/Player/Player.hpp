@@ -136,6 +136,8 @@ namespace SteerStone { namespace Game { namespace Entity {
         /// Return Drone Level
         /// @p_Drone : Drone
         uint16 GetDroneLevel(Drone& p_Drone);
+        /// Returns Level
+        uint32 CalculateLevel();
     public:
         /// Update Player
         /// @p_Diff : Execution Time
@@ -229,9 +231,13 @@ namespace SteerStone { namespace Game { namespace Entity {
         std::shared_ptr<Server::GameSocket> ToSocket() { return m_Socket; }
 
         /// Setters Function
-        void SetEventType(EventType const p_EventType) { m_Event = p_EventType;         }
-        void SetIsJumping(bool const p_Jumping)        { m_Jumping = p_Jumping;         }
-        void SetLogout(bool const p_LoggedOut)         { m_LoggingOut = p_LoggedOut;     }
+        void SetEventType(EventType const p_EventType)   { m_Event = p_EventType;         }
+        void SetIsJumping(bool const p_Jumping)          { m_Jumping = p_Jumping;         }
+        void SetLogout(bool const p_LoggedOut)           { m_LoggingOut = p_LoggedOut;    }
+        void UpdateCredits(uint32 const p_Credits)       { m_Credits += p_Credits;        }
+        void UpdateUridium(uint32 const p_Uridium)       { m_Uridium += p_Uridium;        }
+        void UpdateExperience(uint32 const p_Experience);
+        void UpdateHonor(uint32 const p_Honour)          { m_Honor += p_Honour;           }
 
         Core::Diagnostic::IntervalTimer IntervalLogout;
 

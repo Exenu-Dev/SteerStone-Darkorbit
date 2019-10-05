@@ -48,7 +48,7 @@ namespace SteerStone { namespace Game { namespace Global {
         uint32 l_StartTime = sServerTimeManager->GetServerTime();
 
         Core::Database::PreparedStatement* l_PreparedStatement = GameDatabase.GetPrepareStatement();
-        l_PreparedStatement->PrepareStatement("SELECT entry, name, type, weapon_state, hit_points, shield, min_damage, max_damage, behaviour, speed, experience, honor, credits, uridium, "
+        l_PreparedStatement->PrepareStatement("SELECT entry, name, type, weapon_state, hit_points, shield, shield_resistance, min_damage, max_damage, behaviour, respawn_timer, speed, experience, honor, credits, uridium, "
             "prometium, endurium, terbium, prometid, duranium, promerium, xenomit, seprom, palladium "
             "FROM mob_template");
         std::unique_ptr<Core::Database::PreparedResultSet> l_PreparedResultSet = l_PreparedStatement->ExecuteStatement();
@@ -63,29 +63,31 @@ namespace SteerStone { namespace Game { namespace Global {
 
                 Entity::MobTemplate* l_MobTemplate = new Entity::MobTemplate();
 
-                l_MobTemplate->Entry         = l_Result[0].GetUInt32();
-                l_MobTemplate->Name          = l_Result[1].GetString();
-                l_MobTemplate->Type          = l_Result[2].GetUInt16();
-                l_MobTemplate->WeaponState   = l_Result[3].GetUInt16();
-                l_MobTemplate->HitPoints     = l_Result[4].GetInt32();
-                l_MobTemplate->Shield        = l_Result[5].GetInt32();
-                l_MobTemplate->MinDamage     = l_Result[6].GetUInt32();
-                l_MobTemplate->MaxDamage     = l_Result[7].GetUInt32();
-                l_MobTemplate->Behaviour     = l_Result[8].GetUInt16();
-                l_MobTemplate->Speed         = l_Result[9].GetUInt32();
-                l_MobTemplate->Experience    = l_Result[10].GetUInt32();
-                l_MobTemplate->Honor         = l_Result[11].GetUInt32();
-                l_MobTemplate->Credits       = l_Result[12].GetUInt32();
-                l_MobTemplate->Uridium       = l_Result[13].GetUInt32();
-                l_MobTemplate->Prometium     = l_Result[14].GetUInt32();
-                l_MobTemplate->Endurium      = l_Result[15].GetUInt32();
-                l_MobTemplate->Terbium       = l_Result[16].GetUInt32();
-                l_MobTemplate->Prometid      = l_Result[17].GetUInt32();
-                l_MobTemplate->Duranium      = l_Result[18].GetUInt32();
-                l_MobTemplate->Promerium     = l_Result[19].GetUInt32();
-                l_MobTemplate->Xenomit       = l_Result[20].GetUInt32();
-                l_MobTemplate->Seprom        = l_Result[21].GetUInt32();
-                l_MobTemplate->Palladium     = l_Result[22].GetUInt32();
+                l_MobTemplate->Entry            = l_Result[0].GetUInt32();
+                l_MobTemplate->Name             = l_Result[1].GetString();
+                l_MobTemplate->Type             = l_Result[2].GetUInt16();
+                l_MobTemplate->WeaponState      = l_Result[3].GetUInt16();
+                l_MobTemplate->HitPoints        = l_Result[4].GetInt32();
+                l_MobTemplate->Shield           = l_Result[5].GetInt32();
+                l_MobTemplate->ShieldResistance = l_Result[6].GetInt32();
+                l_MobTemplate->MinDamage        = l_Result[7].GetUInt32();
+                l_MobTemplate->MaxDamage        = l_Result[8].GetUInt32();
+                l_MobTemplate->Behaviour        = l_Result[9].GetUInt16();
+                l_MobTemplate->RespawnTimer     = l_Result[10].GetUInt32();
+                l_MobTemplate->Speed            = l_Result[11].GetUInt32();
+                l_MobTemplate->Experience       = l_Result[12].GetUInt32();
+                l_MobTemplate->Honor            = l_Result[13].GetUInt32();
+                l_MobTemplate->Credits          = l_Result[14].GetUInt32();
+                l_MobTemplate->Uridium          = l_Result[15].GetUInt32();
+                l_MobTemplate->Prometium        = l_Result[16].GetUInt32();
+                l_MobTemplate->Endurium         = l_Result[17].GetUInt32();
+                l_MobTemplate->Terbium          = l_Result[18].GetUInt32();
+                l_MobTemplate->Prometid         = l_Result[19].GetUInt32();
+                l_MobTemplate->Duranium         = l_Result[20].GetUInt32();
+                l_MobTemplate->Promerium        = l_Result[21].GetUInt32();
+                l_MobTemplate->Xenomit          = l_Result[22].GetUInt32();
+                l_MobTemplate->Seprom           = l_Result[23].GetUInt32();
+                l_MobTemplate->Palladium        = l_Result[24].GetUInt32();
 
                 m_MobTemplate[l_MobTemplate->Entry] = l_MobTemplate;
 

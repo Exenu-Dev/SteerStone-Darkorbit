@@ -18,6 +18,7 @@
 
 #include "Packets/Server/DebugPackets.hpp"
 #include "Packets/Server/MapPackets.hpp"
+#include "Packets/Server/ShipPackets.hpp"
 #include "Grid.hpp"
 #include "Map.hpp"
 #include "Mob.hpp"
@@ -250,7 +251,7 @@ namespace SteerStone { namespace Game { namespace Map {
 
         if (p_SendPacket)
         {
-            Server::Packets::DespawnShip l_Packet;
+            Server::Packets::Ship::DespawnShip l_Packet;
             l_Packet.Id = p_Object->GetObjectGUID().GetCounter();
             p_Object->GetMap()->SendPacketToNearByGridsIfInSurrounding(l_Packet.Write(), p_Object);
         }
@@ -359,7 +360,7 @@ namespace SteerStone { namespace Game { namespace Map {
     /// @p_PositionY : New Y Axis
     void Grid::Move(Entity::Object* p_Object)
     {
-        Server::Packets::ObjectMove l_Packet;
+        Server::Packets::Ship::ObjectMove l_Packet;
         l_Packet.Id        = p_Object->GetObjectGUID().GetCounter();
         l_Packet.PositionX = p_Object->GetSpline()->GetPlannedPositionX();
         l_Packet.PositionY = p_Object->GetSpline()->GetPlannedPositionY();

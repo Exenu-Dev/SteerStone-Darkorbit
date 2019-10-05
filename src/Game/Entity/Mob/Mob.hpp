@@ -73,6 +73,7 @@ namespace SteerStone { namespace Game { namespace Entity {
         uint16 GetShipId()      const { return m_Type;          }
         uint32 GetExperience()  const { return m_Experience;    }
         uint16 GetBehaviour()   const { return m_Behaviour;     }
+        uint32 GetRespawnTimer()const { return m_RespawnTimer;  }
         uint32 GetHonor()       const { return m_Honor;         }
         uint32 GetCredits()     const { return m_Credits;       }
         uint32 GetUridium()     const { return m_Uridium;       }
@@ -90,6 +91,10 @@ namespace SteerStone { namespace Game { namespace Entity {
         /// @p_Diff : Execution Time
         void Update(uint32 const p_Diff);
 
+        /// Reward Credit/Uridium...
+        /// @p_Player : Player is being rewarded
+        void RewardKillCredit(Player* p_Player);
+
         //////////////////////////////////////////////////////////////////////////
         //////////////////////////////////////////////////////////////////////////
 
@@ -103,6 +108,7 @@ namespace SteerStone { namespace Game { namespace Entity {
         uint16 m_Type;
         uint32 m_Experience;
         uint16 m_Behaviour;
+        uint32 m_RespawnTimer;
         uint32 m_Honor;
         uint32 m_Credits;
         uint32 m_Uridium;
@@ -126,6 +132,7 @@ namespace SteerStone { namespace Game { namespace Entity {
         float m_HomePositionY;
 
         Core::Diagnostic::IntervalTimer m_IntervalMoveTimer;
+        Core::Diagnostic::IntervalTimer m_IntervalRespawnTimer;
     };
 
 }   ///< namespace Entity

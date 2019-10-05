@@ -19,7 +19,7 @@
 #pragma once
 #include "Socket.hpp"
 
-namespace SteerStone { namespace Game { namespace Server { namespace Packets {
+namespace SteerStone { namespace Game { namespace Server { namespace Packets { namespace Ship {
 
     /// SERVER_PACKET_MAP_UPDATE packet builder
     class MapUpdate final : public ServerPacket
@@ -104,7 +104,78 @@ namespace SteerStone { namespace Game { namespace Server { namespace Packets {
         int32 BatterySAB50;
     };
 
-}   ///< Packets
-}   ///< Server
-}   ///< Game
-}   ///< SteerStone
+    /// SERVER_PACKET_SPAWN_SHIP packet builder
+    class SpawnShip final : public ServerPacket
+    {
+    public:
+        /// Constructor 
+        SpawnShip() : ServerPacket(ServerOpCodes::SERVER_PACKET_SPAWN_SHIP)
+        {
+        }
+
+        //////////////////////////////////////////////////////////////////////////
+        //////////////////////////////////////////////////////////////////////////
+
+        /// Write the packet
+        PacketBuffer const* Write();
+
+        uint32 UserId;
+        uint16 ShipId;
+        uint16 WeaponState;
+        std::string Clan;
+        std::string Name;
+        float PositionX;
+        float PositionY;
+        uint16 CompanyId;
+        uint32 ClanId;
+        uint16 Rank;
+        bool ShowRedSquareOnMiniMap;
+        uint16 ClanDiplomat;
+        uint16 GalaxyGatesAchieved;
+        bool UseBigFont;
+    };
+
+    /// SERVER_PACKET_DESPAWN_SHIP packet builder
+    class DespawnShip final : public ServerPacket
+    {
+    public:
+        /// Constructor 
+        DespawnShip() : ServerPacket(ServerOpCodes::SERVER_PACKET_DESPAWN_SHIP)
+        {
+        }
+
+        //////////////////////////////////////////////////////////////////////////
+        //////////////////////////////////////////////////////////////////////////
+
+        /// Write the packet
+        PacketBuffer const* Write();
+
+        uint32 Id;
+    };
+
+    /// SERVER_PACKET_OBJECT_MOVE packet builder
+    class ObjectMove final : public ServerPacket
+    {
+    public:
+        /// Constructor 
+        ObjectMove() : ServerPacket(ServerOpCodes::SERVER_PACKET_OBJECT_MOVE)
+        {
+        }
+
+        //////////////////////////////////////////////////////////////////////////
+        //////////////////////////////////////////////////////////////////////////
+
+        /// Write the packet
+        PacketBuffer const* Write();
+
+        uint32 Id;
+        float PositionX;
+        float PositionY;
+        uint32 Time;
+    };
+
+}   ///< namespace Ship
+}   ///< namespace Packets
+}   ///< namespace Server
+}   ///< namespace Game
+}   ///< namespace SteerStone

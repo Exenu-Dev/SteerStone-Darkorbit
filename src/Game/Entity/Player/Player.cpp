@@ -89,7 +89,7 @@ namespace SteerStone { namespace Game { namespace Entity {
         /// Delete socket
         if (m_Socket)
         {
-            Server::Packets::LogOut l_Packet;
+            Server::Packets::Login::LogOut l_Packet;
             SendPacket(l_Packet.Write());
 
             m_Socket->CloseSocket();
@@ -117,7 +117,7 @@ namespace SteerStone { namespace Game { namespace Entity {
     bool Player::LoadFromDB()
     {
         Core::Database::PreparedStatement* l_PreparedStatement = GameDatabase.GetPrepareStatement();
-        l_PreparedStatement->PrepareStatement("SELECT accounts.username, accounts.uridium, accounts.credits, accounts.jackpot, accounts.level, accounts.experience, accounts.honor, accounts.gates_achieved, accounts.clan_id, accounts.clan_name, accounts.company, accounts.rank, accounts.premium, "
+        l_PreparedStatement->PrepareStatement("SELECT accounts.username, accounts.uridium, accounts.credits, accounts.jackpot, accounts.experience, accounts.honor, accounts.gates_achieved, accounts.clan_id, accounts.clan_name, accounts.company, accounts.rank, accounts.premium, "
             "account_settings.display_boost, account_settings.display_damage, account_settings.display_all_las, account_settings.display_exploration, account_settings.display_name, account_settings.display_firm_icon, account_settings.display_alpha_bg, account_settings.ignore_res, "
             "account_settings.ignore_box, account_settings.convert_gates, account_settings.convert_oppo, account_settings.sound_off, account_settings.bg_music_off, account_settings.display_status, account_settings.display_bubble, account_settings.selected_laser, account_settings.selected_rocket, account_settings.display_digits, "
             "account_settings.display_chat, account_settings.display_drones, account_settings.show_star_system, account_settings.ignore_cargo, account_settings.ignore_hostile_cargo, account_settings.auto_change_ammo, account_settings.enable_buy_fast"
@@ -133,40 +133,41 @@ namespace SteerStone { namespace Game { namespace Entity {
             m_Uridium                   = l_Result[1].GetUInt32();
             m_Credits                   = l_Result[2].GetUInt32();
             m_Jackpot                   = l_Result[3].GetUInt32();
-            m_Level                     = l_Result[4].GetUInt32();
-            m_Experience                = l_Result[5].GetUInt32();
-            m_Honor                     = l_Result[6].GetUInt32();
-            m_GatesAchieved             = l_Result[7].GetUInt16();
-            m_ClanId                    = l_Result[8].GetUInt32();
-            m_ClanName                  = l_Result[9].GetString();
-            m_Company                   = static_cast<Company>(l_Result[10].GetUInt16());
-            m_Rank                      = l_Result[11].GetUInt16();
-            m_Premium                   = l_Result[12].GetBool();
-            m_DisplayBoost              = l_Result[13].GetBool();
-            m_DisplayDamage             = l_Result[14].GetBool();
-            m_DisplayAllLas             = l_Result[15].GetBool();
-            m_DisplayExploration        = l_Result[16].GetBool();
-            m_DisplayName               = l_Result[17].GetBool();
-            m_DisplayFirmIcon           = l_Result[18].GetBool();
-            m_DisplayAlphaBG            = l_Result[19].GetBool();
-            m_IgnoreRes                 = l_Result[20].GetBool();
-            m_IgnoreBox                 = l_Result[21].GetBool();
-            m_ConvertGates              = l_Result[22].GetBool();
-            m_ConvertOppo               = l_Result[23].GetBool();
-            m_SoundOff                  = l_Result[24].GetBool();
-            m_BackgroundMusicOff        = l_Result[25].GetBool();
-            m_DisplayStatus             = l_Result[26].GetBool();
-            m_DisplayBubble             = l_Result[27].GetBool();
-            m_SelectedLaser             = l_Result[28].GetUInt16();
-            m_SelectedRocket            = l_Result[29].GetUInt16();
-            m_DisplayDigits             = l_Result[30].GetBool();
-            m_DisplayChat               = l_Result[31].GetBool();
-            m_DisplayDrones             = l_Result[32].GetBool();
-            m_ShowStarSystem            = l_Result[33].GetBool();
-            m_IgnoreCargo               = l_Result[34].GetBool();
-            m_IgnoreHostileCargo        = l_Result[35].GetBool();
-            m_AutoChangeAmmo            = l_Result[36].GetBool();
-            m_EnableBuyFast             = l_Result[37].GetBool();
+            m_Experience                = l_Result[4].GetUInt32();
+            m_Honor                     = l_Result[5].GetUInt32();
+            m_GatesAchieved             = l_Result[6].GetUInt16();
+            m_ClanId                    = l_Result[7].GetUInt32();
+            m_ClanName                  = l_Result[8].GetString();
+            m_Company                   = static_cast<Company>(l_Result[9].GetUInt16());
+            m_Rank                      = l_Result[10].GetUInt16();
+            m_Premium                   = l_Result[11].GetBool();
+            m_DisplayBoost              = l_Result[12].GetBool();
+            m_DisplayDamage             = l_Result[13].GetBool();
+            m_DisplayAllLas             = l_Result[14].GetBool();
+            m_DisplayExploration        = l_Result[15].GetBool();
+            m_DisplayName               = l_Result[16].GetBool();
+            m_DisplayFirmIcon           = l_Result[17].GetBool();
+            m_DisplayAlphaBG            = l_Result[18].GetBool();
+            m_IgnoreRes                 = l_Result[19].GetBool();
+            m_IgnoreBox                 = l_Result[20].GetBool();
+            m_ConvertGates              = l_Result[21].GetBool();
+            m_ConvertOppo               = l_Result[22].GetBool();
+            m_SoundOff                  = l_Result[23].GetBool();
+            m_BackgroundMusicOff        = l_Result[24].GetBool();
+            m_DisplayStatus             = l_Result[25].GetBool();
+            m_DisplayBubble             = l_Result[26].GetBool();
+            m_SelectedLaser             = l_Result[27].GetUInt16();
+            m_SelectedRocket            = l_Result[28].GetUInt16();
+            m_DisplayDigits             = l_Result[29].GetBool();
+            m_DisplayChat               = l_Result[30].GetBool();
+            m_DisplayDrones             = l_Result[31].GetBool();
+            m_ShowStarSystem            = l_Result[32].GetBool();
+            m_IgnoreCargo               = l_Result[33].GetBool();
+            m_IgnoreHostileCargo        = l_Result[34].GetBool();
+            m_AutoChangeAmmo            = l_Result[35].GetBool();
+            m_EnableBuyFast             = l_Result[36].GetBool();
+
+            m_Level = CalculateLevel();
 
             if (m_Premium)
                 IntervalLogout.SetInterval(sWorldManager->GetIntConfig(World::IntConfigs::INT_CONFIG_PREMIUM_LOG_OUT_TIMER));
@@ -276,7 +277,7 @@ namespace SteerStone { namespace Game { namespace Entity {
     {
         Core::Database::PreparedStatement* l_PreparedStatement = GameDatabase.GetPrepareStatement();
         l_PreparedStatement->PrepareStatement("UPDATE accounts INNER JOIN account_settings ON account_settings.id = accounts.id "
-            "SET accounts.uridium = ?, accounts.credits = ?, accounts.jackpot = ?, accounts.level = ?, accounts.experience = ?, accounts.honor = ?, accounts.gates_achieved = ?, accounts.clan_id = ?, accounts.clan_name = ?, accounts.company = ?, accounts.rank = ?, accounts.premium = ?, "
+            "SET accounts.uridium = ?, accounts.credits = ?, accounts.jackpot = ?, accounts.experience = ?, accounts.honor = ?, accounts.gates_achieved = ?, accounts.clan_id = ?, accounts.clan_name = ?, accounts.company = ?, accounts.rank = ?, accounts.premium = ?, "
             "account_settings.display_boost = ?, account_settings.display_damage = ?, account_settings.display_all_las = ?, account_settings.display_exploration = ?, account_settings.display_name = ?, account_settings.display_firm_icon = ?, account_settings.display_alpha_bg = ?, account_settings.ignore_res = ?, "
             "account_settings.ignore_box = ?, account_settings.convert_gates = ?, account_settings.convert_oppo = ?, account_settings.sound_off = ?, account_settings.bg_music_off = ?, account_settings.display_status = ?, account_settings.display_bubble = ?, account_settings.selected_laser = ?, account_settings.selected_rocket = ?, account_settings.display_digits = ?, "
             "account_settings.display_chat = ?, account_settings.display_drones = ?, account_settings.show_star_system = ?, account_settings.ignore_cargo = ?, account_settings.ignore_hostile_cargo = ?, account_settings.auto_change_ammo = ?, account_settings.enable_buy_fast = ? "
@@ -285,41 +286,40 @@ namespace SteerStone { namespace Game { namespace Entity {
         l_PreparedStatement->SetUint32(0, m_Uridium);
         l_PreparedStatement->SetUint32(1, m_Credits);
         l_PreparedStatement->SetUint32(2, m_Jackpot);
-        l_PreparedStatement->SetUint32(3, m_Level);
-        l_PreparedStatement->SetUint32(4, m_Experience);
-        l_PreparedStatement->SetUint32(5, m_Honor);
-        l_PreparedStatement->SetUint32(6, m_GatesAchieved);
-        l_PreparedStatement->SetUint32(7, m_ClanId);
-        l_PreparedStatement->SetString(8, m_ClanName);
-        l_PreparedStatement->SetUint16(9, static_cast<uint16>(m_Company));
-        l_PreparedStatement->SetUint16(10, m_Rank);
-        l_PreparedStatement->SetBool(11, m_Premium);
-        l_PreparedStatement->SetBool(12, m_DisplayBoost);
-        l_PreparedStatement->SetBool(13, m_DisplayDamage);
-        l_PreparedStatement->SetBool(14, m_DisplayAllLas);
-        l_PreparedStatement->SetBool(15, m_DisplayExploration);
-        l_PreparedStatement->SetBool(16, m_DisplayName);
-        l_PreparedStatement->SetBool(17, m_DisplayFirmIcon);
-        l_PreparedStatement->SetBool(18, m_DisplayAlphaBG);
-        l_PreparedStatement->SetBool(19, m_IgnoreRes);
-        l_PreparedStatement->SetBool(20, m_IgnoreBox);
-        l_PreparedStatement->SetBool(21, m_ConvertGates);
-        l_PreparedStatement->SetBool(22, m_ConvertOppo);
-        l_PreparedStatement->SetBool(23, m_SoundOff);
-        l_PreparedStatement->SetBool(24, m_BackgroundMusicOff);
-        l_PreparedStatement->SetBool(25, m_DisplayStatus);
-        l_PreparedStatement->SetBool(26, m_DisplayBubble);
-        l_PreparedStatement->SetBool(27, m_SelectedLaser);
-        l_PreparedStatement->SetBool(28, m_SelectedRocket);
-        l_PreparedStatement->SetBool(29, m_DisplayDigits);
-        l_PreparedStatement->SetBool(30, m_DisplayChat);
-        l_PreparedStatement->SetBool(31, m_DisplayDrones);
-        l_PreparedStatement->SetBool(32, m_ShowStarSystem);
-        l_PreparedStatement->SetBool(33, m_IgnoreCargo);
-        l_PreparedStatement->SetBool(34, m_IgnoreHostileCargo);
-        l_PreparedStatement->SetBool(35, m_AutoChangeAmmo);
-        l_PreparedStatement->SetBool(36, m_EnableBuyFast);
-        l_PreparedStatement->SetUint32(37, m_Id);
+        l_PreparedStatement->SetUint32(3, m_Experience);
+        l_PreparedStatement->SetUint32(4, m_Honor);
+        l_PreparedStatement->SetUint32(5, m_GatesAchieved);
+        l_PreparedStatement->SetUint32(6, m_ClanId);
+        l_PreparedStatement->SetString(7, m_ClanName);
+        l_PreparedStatement->SetUint16(8, static_cast<uint16>(m_Company));
+        l_PreparedStatement->SetUint16(9, m_Rank);
+        l_PreparedStatement->SetBool(10, m_Premium);
+        l_PreparedStatement->SetBool(11, m_DisplayBoost);
+        l_PreparedStatement->SetBool(12, m_DisplayDamage);
+        l_PreparedStatement->SetBool(13, m_DisplayAllLas);
+        l_PreparedStatement->SetBool(14, m_DisplayExploration);
+        l_PreparedStatement->SetBool(15, m_DisplayName);
+        l_PreparedStatement->SetBool(16, m_DisplayFirmIcon);
+        l_PreparedStatement->SetBool(17, m_DisplayAlphaBG);
+        l_PreparedStatement->SetBool(18, m_IgnoreRes);
+        l_PreparedStatement->SetBool(19, m_IgnoreBox);
+        l_PreparedStatement->SetBool(20, m_ConvertGates);
+        l_PreparedStatement->SetBool(21, m_ConvertOppo);
+        l_PreparedStatement->SetBool(22, m_SoundOff);
+        l_PreparedStatement->SetBool(23, m_BackgroundMusicOff);
+        l_PreparedStatement->SetBool(24, m_DisplayStatus);
+        l_PreparedStatement->SetBool(25, m_DisplayBubble);
+        l_PreparedStatement->SetBool(26, m_SelectedLaser);
+        l_PreparedStatement->SetBool(27, m_SelectedRocket);
+        l_PreparedStatement->SetBool(28, m_DisplayDigits);
+        l_PreparedStatement->SetBool(29, m_DisplayChat);
+        l_PreparedStatement->SetBool(30, m_DisplayDrones);
+        l_PreparedStatement->SetBool(31, m_ShowStarSystem);
+        l_PreparedStatement->SetBool(32, m_IgnoreCargo);
+        l_PreparedStatement->SetBool(33, m_IgnoreHostileCargo);
+        l_PreparedStatement->SetBool(34, m_AutoChangeAmmo);
+        l_PreparedStatement->SetBool(35, m_EnableBuyFast);
+        l_PreparedStatement->SetUint32(36, m_Id);
         l_PreparedStatement->ExecuteStatement();
 
         SaveShipToDB();
@@ -371,6 +371,19 @@ namespace SteerStone { namespace Game { namespace Entity {
             l_Level = DroneLevel::DRONE_LEVEL_5;
         else if (p_Drone.Points >= 1600)
             l_Level = DroneLevel::DRONE_LEVEL_6;
+
+        return l_Level;
+    }
+    /// Returns Level
+    uint32 Player::CalculateLevel()
+    {
+        uint32 l_Level = 1;
+
+        for (uint32 l_I = 0; l_I < LevelExperience::Level::MAX_LEVEL; l_I++)
+        {
+            if (m_Experience >= LevelExperience::All[l_I])
+                l_Level = l_I + 1;
+        }
 
         return l_Level;
     }
@@ -469,7 +482,7 @@ namespace SteerStone { namespace Game { namespace Entity {
     /// Send Client In-game settings
     void Player::SendClientSettings()
     {
-        Server::Packets::PlayerInfo l_Packet;
+        Server::Packets::Login::PlayerInfo l_Packet;
         l_Packet.Type                    = "SET";
         l_Packet.DisplayBoost            = m_DisplayBoost;
         l_Packet.DisplayDamage           = m_DisplayDamage;
@@ -501,7 +514,7 @@ namespace SteerStone { namespace Game { namespace Entity {
     /// Send ship details
     void Player::SendInitializeShip()
     {
-        Server::Packets::InitializeShip l_Packet;
+        Server::Packets::Login::InitializeShip l_Packet;
         l_Packet.Id             = GetObjectGUID().GetCounter();
         l_Packet.Username       = GetName();
         l_Packet.CompanyId      = static_cast<uint16>(m_Company);
@@ -537,7 +550,7 @@ namespace SteerStone { namespace Game { namespace Entity {
     {
         m_LoggedIn = true;
 
-        Server::Packets::LoggedIn l_Packet;
+        Server::Packets::Login::LoggedIn l_Packet;
         SendPacket(l_Packet.Write());
     }
     /// Send Account Rank
@@ -545,12 +558,12 @@ namespace SteerStone { namespace Game { namespace Entity {
     {
         if (GetRank() == Rank::ADMIN)
         {
-            Server::Packets::PlayerInfo l_Packet;
+            Server::Packets::Login::PlayerInfo l_Packet;
             l_Packet.Type = "ADM";
             l_Packet.EnableDebugWindow = 1;
             SendPacket(l_Packet.Write());
 
-            Server::Packets::DisplaySuccDebug l_DisplaySuccDebugPacket;
+            Server::Packets::Misc::DisplaySuccDebug l_DisplaySuccDebugPacket;
             SendPacket(l_DisplaySuccDebugPacket.Write());
         }
     }
@@ -563,18 +576,18 @@ namespace SteerStone { namespace Game { namespace Entity {
     /// Send Map update
     void Player::SendMapUpdate()
     {
-        Server::Packets::MapUpdate l_MapUpdatePacket;
+        Server::Packets::Ship::MapUpdate l_MapUpdatePacket;
         l_MapUpdatePacket.MapId = GetMap()->GetId();
         SendPacket(l_MapUpdatePacket.Write());
 
-        Server::Packets::MiniMapUpdate l_MiniMapUpdatePacket;
+        Server::Packets::Ship::MiniMapUpdate l_MiniMapUpdatePacket;
         l_MiniMapUpdatePacket.MapId = GetMap()->GetId();
         SendPacket(l_MiniMapUpdatePacket.Write());
     }
     /// Send Battery, Rocket and mine update
     void Player::SendAmmoUpdate()
     {
-        Server::Packets::UpdateRocketMineAmmo l_RocketMineAmmoPacket;
+        Server::Packets::Ship::UpdateRocketMineAmmo l_RocketMineAmmoPacket;
         l_RocketMineAmmoPacket.RocketR310     = m_Ammo.m_RocketR310;
         l_RocketMineAmmoPacket.RocketPLT2021  = m_Ammo.m_RocketPLT2021;
         l_RocketMineAmmoPacket.RocketPLT2026  = m_Ammo.m_RocketPLT2026;
@@ -583,7 +596,7 @@ namespace SteerStone { namespace Game { namespace Entity {
         l_RocketMineAmmoPacket.InstantShields = m_Ammo.m_InstantShields;
         SendPacket(l_RocketMineAmmoPacket.Write());
 
-        Server::Packets::UpdateBatteryAmmo l_BatteryAmmoPacket;
+        Server::Packets::Ship::UpdateBatteryAmmo l_BatteryAmmoPacket;
         l_BatteryAmmoPacket.BatteryLCB10      = m_Ammo.m_BatteryLCB10;
         l_BatteryAmmoPacket.BatteryMCB25      = m_Ammo.m_BatteryMCB25;
         l_BatteryAmmoPacket.BatteryMCB50      = m_Ammo.m_BatteryMCB50;
@@ -763,12 +776,7 @@ namespace SteerStone { namespace Game { namespace Entity {
 
         l_Drones.pop_back();
 
-        Server::Packets::MiscInfo l_Packet;
-        l_Packet.Type   = "d";
-        l_Packet.Id     = GetObjectGUID().GetCounter();
-        l_Packet.Misc   = l_Drones;
-
-        return *l_Packet.Write();
+        return *Server::Packets::Misc::Info().Write(Server::Packets::Misc::InfoType::INFO_TYPE_DRONES, { GetObjectGUID().GetCounter(), l_Drones});
     }
     /// Send Drone Info
     void Player::SendDrones()
@@ -946,12 +954,7 @@ namespace SteerStone { namespace Game { namespace Entity {
 
         l_Drones.pop_back();
 
-        Server::Packets::MiscInfo l_Packet;
-        l_Packet.Type   = "d";
-        l_Packet.Id     = GetObjectGUID().GetCounter();
-        l_Packet.Misc = l_Drones;
-
-        SendPacket(l_Packet.Write());
+        SendPacket(Server::Packets::Misc::Info().Write(Server::Packets::Misc::InfoType::INFO_TYPE_DRONES, { GetObjectGUID().GetCounter(), l_Drones }));
     }
     /// Process Packets
     /// @p_PacketFilter : Type of packet
@@ -992,6 +995,20 @@ namespace SteerStone { namespace Game { namespace Entity {
     {
         if (m_Socket)
             m_Socket->CloseSocket();
+    }
+
+    void Player::UpdateExperience(uint32 const p_Experience)
+    {
+        m_Experience += p_Experience;
+
+        uint32 l_Level = CalculateLevel();
+
+        /// Update level and send to client
+        if (m_Level < l_Level)
+        {
+            SendPacket(Server::Packets::Misc::Update().Write(Server::Packets::Misc::InfoUpdate::INFO_UPDATE_LEVEL_UP, { l_Level, LevelExperience::All[l_Level] - m_Experience }));
+            m_Level = l_Level;
+        }
     }
 
 }   ///< namespace Entity

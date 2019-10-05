@@ -67,6 +67,10 @@ namespace SteerStone { namespace Game { namespace Entity {
         /// @p_Diff : Execution Time
         void Update(uint32 const p_Diff);
 
+        /// Kill
+        /// @p_Unit : Unit being killed
+        void Kill(Unit* p_Unit);
+
         ///////////////////////////////////////////
         //             ATTACK SYSTEM
         ///////////////////////////////////////////
@@ -117,6 +121,7 @@ namespace SteerStone { namespace Game { namespace Entity {
         uint16 GetWeaponState()    const { return m_WeaponState;    }
         uint16 GetDeathState()     const { return m_DeathState;     }
         bool IsAttacking()         const { return m_Attacking;      }
+        bool IsDead()              const { return m_DeathState == DeathState::DEAD; }
         uint16 GetLaserType()      const { return m_LaserType;      }    
 
         void SetHitPoints(uint32 const p_HitPoints)   { m_HitPoints = p_HitPoints;   }
@@ -162,7 +167,6 @@ namespace SteerStone { namespace Game { namespace Entity {
 
         Object* m_Target;
         uint64 m_TargetGUID;
-
 
     //////////////////////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////////////////////

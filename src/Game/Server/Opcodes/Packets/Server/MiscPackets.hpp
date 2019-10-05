@@ -18,8 +18,31 @@
 
 #pragma once
 #include "Socket.hpp"
+#include <variant>
 
-namespace SteerStone { namespace Game { namespace Server { namespace Packets {
+namespace SteerStone { namespace Game { namespace Server { namespace Packets { namespace Misc {
+
+    enum class RewardType
+    {
+        REWARD_TYPE_CREDIT,
+        REWARD_TYPE_URIDIUM,
+        REWARD_TYPE_HONOUR,
+        REWARD_TYPE_EXPERIENCE
+    };
+
+    enum class InfoType
+    {
+        INFO_TYPE_DRONES,
+        INFO_TYPE_GREY_OPPONENT,
+        INFO_TYPE_UNGREY_OPPONENT,
+    };
+
+    enum class InfoUpdate
+    {
+        INFO_UPDATE_MESSAGE,
+        INFO_UPDATE_HEALTH,
+        INFO_UPDATE_LEVEL_UP,
+    };
 
     /// SERVER_PACKET_DISPLAY_SUCC_DEBUG packet builder
     class DisplaySuccDebug final : public ServerPacket
@@ -37,12 +60,12 @@ namespace SteerStone { namespace Game { namespace Server { namespace Packets {
         PacketBuffer const* Write();
     };
 
-    /// SERVER_PACKET_SEND_MESSAGE packet builder
-    class Message final : public ServerPacket
+    /// SERVER_PACKET_MISC_UPDATE packet builder
+    class Update final : public ServerPacket
     {
     public:
         /// Constructor 
-        Message() : ServerPacket(ServerOpCodes::SERVER_PACKET_SEND_MESSAGE)
+        Update() : ServerPacket(ServerOpCodes::SERVER_PACKET_MISC_UPDATE)
         {
         }
 
@@ -50,13 +73,49 @@ namespace SteerStone { namespace Game { namespace Server { namespace Packets {
         //////////////////////////////////////////////////////////////////////////
 
         /// Write the packet
-        PacketBuffer const* Write();
-
-        std::string Type;
-        std::string Text;
+        /// @p_Storage : Storage
+        /// @p_InfoUpdate : Type of Info
+        PacketBuffer const* Write(InfoUpdate p_InfoUpdate, std::initializer_list<std::variant<int32, std::string>> p_Storage);
     };
 
-}   ///< Packets
-}   ///< Server
-}   ///< Game
-}   ///< SteerStone
+    /// SERVER_PACKET_MISC_INFO packet builder
+    class Info final : public ServerPacket
+    {
+    public:
+        /// Constructor 
+        Info() : ServerPacket(ServerOpCodes::SERVER_PACKET_MISC_INFO)
+        {
+        }
+
+        //////////////////////////////////////////////////////////////////////////
+        //////////////////////////////////////////////////////////////////////////
+
+        /// Write the packet
+        /// @p_Storage : Storage
+        /// @p_InfoType : Type of Info
+        PacketBuffer const* Write(InfoType p_InfoType, std::initializer_list<std::variant<int32, std::string>> p_Storage);
+    };
+
+    /// SERVER_PACKET_REWARD packet builder
+    class Reward final : public ServerPacket
+    {
+    public:
+        /// Constructor 
+        Reward() : ServerPacket(ServerOpCodes::SERVER_PACKET_REWARD)
+        {
+        }
+
+        //////////////////////////////////////////////////////////////////////////
+        //////////////////////////////////////////////////////////////////////////
+
+        /// Write the packet
+        /// @p_Storage : Storage of UInt32
+        /// @p_RewardType : Type of Reward
+        PacketBuffer const* Write(RewardType p_RewardType, std::initializer_list<uint32> p_Storage);
+    };
+
+}   ///< namespace Misc
+}   ///< namespace Packets
+}   ///< namespace Server
+}   ///< namespace Game
+}   ///< namespace SteerStone

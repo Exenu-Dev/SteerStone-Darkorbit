@@ -17,6 +17,9 @@
 */
 
 #include "Packets/Server/MapPackets.hpp"
+#include "Packets/Server/ShipPackets.hpp"
+#include "Packets/Server/AttackPackets.hpp"
+#include "Packets/Server/MiscPackets.hpp"
 #include "Grid.hpp"
 #include "Mob.hpp"
 #include "Player.hpp"
@@ -40,6 +43,10 @@ namespace SteerStone { namespace Game { namespace Map {
         {
             /// Don't send packet to self because the initialize packet handles creation of ship for player
             if (l_Itr.second->GetGUID() == p_Object->GetGUID())
+                continue;
+
+            /// Don't add unit if they're dead
+            if (l_Itr.second->ToUnit()->IsDead())
                 continue;
 
             /// Portal and station are not ships but they exist in the grid
@@ -72,7 +79,7 @@ namespace SteerStone { namespace Game { namespace Map {
         /// This must be at the top or else we will enter a infinite recursive function
         p_Object->ToPlayer()->AddToSurrounding(p_ObjectBuilt);
 
-        Server::Packets::SpawnShip l_Packet;
+        Server::Packets::Ship::SpawnShip l_Packet;
 
         if (p_ObjectBuilt->GetType() == Entity::Type::OBJECT_TYPE_PLAYER)
         {
@@ -120,17 +127,20 @@ namespace SteerStone { namespace Game { namespace Map {
             if (p_ObjectBuilt->ToUnit()->GetTarget() && !p_Object->ToPlayer()->IsInSurrounding(p_ObjectBuilt->ToUnit()->GetTarget()))
                 BuildObjectSpawnAndSend(p_ObjectBuilt->ToUnit()->GetTarget(), p_Object);
 
+            if (p_ObjectBuilt->GetType() == Entity::Type::OBJECT_TYPE_PLAYER && p_ObjectBuilt->ToUnit()->GetTarget())
+                p_Object->ToPlayer()->SendPacket(Server::Packets::Misc::Info().Write(Server::Packets::Misc::InfoType::INFO_TYPE_GREY_OPPONENT, { p_ObjectBuilt->ToUnit()->GetTarget()->GetObjectGUID().GetCounter(), p_ObjectBuilt->GetObjectGUID().GetCounter() }));
+
             /// Send Attack
-            Server::Packets::LaserShoot l_Packet;
-            l_Packet.FromId = p_ObjectBuilt->GetObjectGUID().GetCounter();
-            l_Packet.ToId = p_ObjectBuilt->ToUnit()->GetTarget()->GetObjectGUID().GetCounter();
-            l_Packet.LaserId = p_ObjectBuilt->ToUnit()->GetLaserType();
+            Server::Packets::Attack::LaserShoot l_Packet;
+            l_Packet.FromId     = p_ObjectBuilt->GetObjectGUID().GetCounter();
+            l_Packet.ToId       = p_ObjectBuilt->ToUnit()->GetTarget()->GetObjectGUID().GetCounter();
+            l_Packet.LaserId    = p_ObjectBuilt->ToUnit()->GetLaserType();
             p_Object->ToPlayer()->SendPacket(l_Packet.Write());
         }
 
         if (!p_ObjectBuilt->GetSpline()->IsMoving())
         {
-            Server::Packets::ObjectMove l_ObjectMovePacket;
+            Server::Packets::Ship::ObjectMove l_ObjectMovePacket;
             l_ObjectMovePacket.Id        = p_ObjectBuilt->GetObjectGUID().GetCounter();
             l_ObjectMovePacket.PositionX = p_ObjectBuilt->GetSpline()->GetPositionX();
             l_ObjectMovePacket.PositionY = p_ObjectBuilt->GetSpline()->GetPositionY();
@@ -148,13 +158,13 @@ namespace SteerStone { namespace Game { namespace Map {
             {
                 if (l_Itr.second->GetType() == Entity::Type::OBJECT_TYPE_PLAYER)
                 {
-                    Server::Packets::DespawnShip l_Packet;
+                    Server::Packets::Ship::DespawnShip l_Packet;
                     l_Packet.Id = p_Object->GetObjectGUID().GetCounter();
                     l_Itr.second->ToPlayer()->SendPacket(l_Packet.Write());
                 }
             }
             
-            Server::Packets::DespawnShip l_Packet;
+            Server::Packets::Ship::DespawnShip l_Packet;
             l_Packet.Id = l_Itr.second->GetObjectGUID().GetCounter();
             p_Object->ToPlayer()->SendPacket(l_Packet.Write());
         }

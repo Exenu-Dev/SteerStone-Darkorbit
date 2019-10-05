@@ -18,7 +18,7 @@
 
 #include "ShipPackets.hpp"
 
-namespace SteerStone { namespace Game { namespace Server { namespace Packets {
+namespace SteerStone { namespace Game { namespace Server { namespace Packets { namespace Ship {
 
     /// SERVER_PACKET_MAP_UPDATE
     PacketBuffer const* MapUpdate::Write()
@@ -73,7 +73,57 @@ namespace SteerStone { namespace Game { namespace Server { namespace Packets {
         return &m_Buffer;
     }
 
-}   ///< Packets
-}   ///< Server
-}   ///< Game
-}   ///< SteerStone
+    /// SERVER_PACKET_SPAWN_SHIP
+    PacketBuffer const* SpawnShip::Write()
+    {
+        m_Buffer.AppendUInt32(UserId);
+        m_Buffer.AppendUInt16(ShipId);
+        m_Buffer.AppendUInt16(WeaponState);
+        m_Buffer.AppendChar(Clan.c_str());
+        m_Buffer.AppendChar(Name.c_str());
+        m_Buffer.AppendFloat(PositionX);
+        m_Buffer.AppendFloat(PositionY);
+        m_Buffer.AppendUInt16(CompanyId);
+        m_Buffer.AppendUInt32(ClanId);
+        m_Buffer.AppendUInt16(Rank);
+        m_Buffer.AppendBool(ShowRedSquareOnMiniMap);
+        m_Buffer.AppendUInt16(ClanDiplomat);
+        m_Buffer.AppendUInt16(GalaxyGatesAchieved);
+        m_Buffer.AppendBool(UseBigFont);
+
+        m_Buffer.AppendEndSplitter();
+        m_Buffer.AppendCarriage();
+
+        return &m_Buffer;
+    }
+
+    /// SERVER_PACKET_DESPAWN_SHIP
+    PacketBuffer const* DespawnShip::Write()
+    {
+        m_Buffer.AppendUInt32(Id);
+
+        m_Buffer.AppendEndSplitter();
+        m_Buffer.AppendCarriage();
+
+        return &m_Buffer;
+    }
+
+    /// SERVER_PACKET_OBJECT_MOVE
+    PacketBuffer const* ObjectMove::Write()
+    {
+        m_Buffer.AppendUInt32(Id);
+        m_Buffer.AppendUInt32(PositionX);
+        m_Buffer.AppendUInt32(PositionY);
+        m_Buffer.AppendUInt32(Time);
+
+        m_Buffer.AppendEndSplitter();
+        m_Buffer.AppendCarriage();
+
+        return &m_Buffer;
+    }
+
+}   ///< namespace Ship
+}   ///< namespace Packets
+}   ///< namespace Server
+}   ///< namespace Game
+}   ///< namespace SteerStone

@@ -81,7 +81,7 @@ namespace SteerStone { namespace Game { namespace Server {
         StoreServerPacket(ServerOpCodes::SERVER_PACKET_OBJECT_MOVE,         "SERVER_PACKET_OBJECT_MOVE",            &GameSocket::HandleServer);
         StoreServerPacket(ServerOpCodes::SERVER_PACKET_CREATE_PORTAL,       "SERVER_PACKET_CREATE_PORTAL",          &GameSocket::HandleServer);
         StoreServerPacket(ServerOpCodes::SERVER_PACKET_CREATE_STATION,      "SERVER_PACKET_CREATE_STATION",         &GameSocket::HandleServer);
-        StoreServerPacket(ServerOpCodes::SERVER_PACKET_SEND_MESSAGE,        "SERVER_PACKET_SEND_MESSAGE",           &GameSocket::HandleServer);
+        StoreServerPacket(ServerOpCodes::SERVER_PACKET_MISC_UPDATE,         "SERVER_PACKET_MISC_UPDATE",            &GameSocket::HandleServer);
         StoreServerPacket(ServerOpCodes::SERVER_PACKET_EVENT,               "SERVER_PACKET_EVENT",                  &GameSocket::HandleServer);
         StoreServerPacket(ServerOpCodes::SERVER_PACKET_JUMP_PORTAL,         "SERVER_PACKET_SEND_MESSAGE",           &GameSocket::HandleServer);
         StoreServerPacket(ServerOpCodes::SERVER_PACKET_DISPLAY_STAR_SYSTEM, "SERVER_PACKET_DISPLAY_STAR_SYSTEM",    &GameSocket::HandleServer);
@@ -97,6 +97,7 @@ namespace SteerStone { namespace Game { namespace Server {
         StoreServerPacket(ServerOpCodes::SERVER_PACKET_MISS_TARGET,         "SERVER_PACKET_MISS_TARGET",            &GameSocket::HandleServer);
         StoreServerPacket(ServerOpCodes::SERVER_PACKET_ESCAPED_THE_ATTACK,  "SERVER_PACKET_ESCAPED_THE_ATTACK",     &GameSocket::HandleServer);
         StoreServerPacket(ServerOpCodes::SERVER_PACKET_MISC_INFO,           "SERVER_PACKET_MISC_INFO",              &GameSocket::HandleServer);
+        StoreServerPacket(ServerOpCodes::SERVER_PACKET_REWARD,              "SERVER_PACKET_REWARD",                 &GameSocket::HandleServer);
 
         /// Debug Headless Packets
         StoreServerPacket(ServerOpCodes::SERVER_PACKET_HEADLESS_MOVE,       "SERVER_PACKET_HEADLESS_MOVE",      &GameSocket::HandleServer);
