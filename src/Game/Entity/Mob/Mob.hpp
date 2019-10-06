@@ -63,7 +63,6 @@ namespace SteerStone { namespace Game { namespace Entity {
     public:
         /// Getters Functions
         uint32 GetId()          const { return m_Entry;         }
-        uint16 GetShipId()      const { return m_Type;          }
         uint32 GetExperience()  const { return m_Experience;    }
         uint16 GetBehaviour()   const { return m_Behaviour;     }
         uint32 GetRespawnTimer()const { return m_RespawnTimer;  }
@@ -98,7 +97,6 @@ namespace SteerStone { namespace Game { namespace Entity {
 
     private:
         uint32 m_Entry;
-        uint16 m_Type;
         uint32 m_Experience;
         uint16 m_Behaviour;
         uint32 m_RespawnTimer;

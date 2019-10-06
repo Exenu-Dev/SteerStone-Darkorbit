@@ -172,6 +172,7 @@ namespace SteerStone { namespace Game { namespace Server { namespace Packets { n
         float PositionX;
         float PositionY;
         uint32 Time;
+        uint16 ShipType;
     };
 
 }   ///< namespace Ship

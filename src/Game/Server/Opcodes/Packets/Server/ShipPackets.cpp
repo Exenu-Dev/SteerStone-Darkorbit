@@ -115,6 +115,7 @@ namespace SteerStone { namespace Game { namespace Server { namespace Packets { n
         m_Buffer.AppendUInt32(PositionX);
         m_Buffer.AppendUInt32(PositionY);
         m_Buffer.AppendUInt32(Time);
+        m_Buffer.AppendUInt16(ShipType);
 
         m_Buffer.AppendEndSplitter();
         m_Buffer.AppendCarriage();

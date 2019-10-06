@@ -219,7 +219,6 @@ namespace SteerStone { namespace Game { namespace Entity {
         bool IsLoggingOut()        const     { return m_LoggingOut;       }
         bool IsLoggedIn()          const     { return m_LoggedIn;         }
         bool IsJumping()           const     { return m_Jumping;          }
-        PlayerShips GetShipId()    const     { return m_ShipId;           }
         uint32 GetCargoSpace()     const     { return m_CargoSpace;       }
         uint32 GetMaxCargoSpace()  const     { return m_MaxCargoSpace;    }
         uint32 GetMaxBattery()     const     { return m_MaxBattery;       }
@@ -259,7 +258,6 @@ namespace SteerStone { namespace Game { namespace Entity {
         uint32 m_MaxBattery;
         uint32 m_MaxRockets;
         uint32 m_CargoSpace;
-        PlayerShips m_ShipId;
         bool m_Premium;
 
         /// Player Settings

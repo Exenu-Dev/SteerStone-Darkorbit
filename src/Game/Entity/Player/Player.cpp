@@ -40,7 +40,6 @@ namespace SteerStone { namespace Game { namespace Entity {
         m_Level                 = 0;
         m_Experience            = 0;
         m_Honor                 = 0;
-        m_ShipId                = PlayerShips::Phoenix;
         m_CargoSpace            = 0;
         m_MaxCargoSpace         = 0;
         m_MaxBattery            = 0;
@@ -205,7 +204,7 @@ namespace SteerStone { namespace Game { namespace Entity {
         {
             Core::Database::ResultSet* l_Result = l_PreparedResultSet->FetchResult();
 
-            m_ShipId                    = static_cast<PlayerShips>(l_Result[0].GetUInt16());
+            m_ShipType                  = l_Result[0].GetUInt16();
             GetSpline()->SetSpeed(l_Result[1].GetUInt32());
             m_Shield                    = l_Result[2].GetInt32();
             m_MaxShield                 = l_Result[3].GetUInt32();
@@ -333,7 +332,7 @@ namespace SteerStone { namespace Game { namespace Entity {
             "battery_lcb_10 = ?, battery_mcb_25 = ?, battery_mcb_50 = ?, battery_ucb_100 = ?, battery_sab_50 = ?, rocket_r310 = ?, " 
             "rocket_plt_2026 = ?, rocket_plt_2021 = ?, mines = ?, smart_bombs = ?, instant_shields = ? WHERE id = ?");
 
-        l_PreparedStatement->SetUint16(0,  static_cast<uint16>(m_ShipId));
+        l_PreparedStatement->SetUint16(0,  m_ShipType);
         l_PreparedStatement->SetUint32(1,  m_CargoSpace);
         l_PreparedStatement->SetFloat(2,   GetSpline()->GetPositionX());
         l_PreparedStatement->SetFloat(3,   GetSpline()->GetPositionY());
@@ -537,7 +536,7 @@ namespace SteerStone { namespace Game { namespace Entity {
         l_Packet.PositionY      = GetSpline()->GetPositionY();
         l_Packet.MapId          = GetMap()->GetId();
         l_Packet.WeaponState    = m_WeaponState;
-        l_Packet.ShipId         = static_cast<uint16>(m_ShipId);
+        l_Packet.ShipId         = m_ShipType;
         l_Packet.CargoSpace     = m_CargoSpace;
         l_Packet.MaxCargoSpace  = m_MaxCargoSpace;
         l_Packet.MaxBattery     = m_MaxBattery;

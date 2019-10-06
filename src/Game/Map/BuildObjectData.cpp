@@ -84,7 +84,7 @@ namespace SteerStone { namespace Game { namespace Map {
         if (p_ObjectBuilt->GetType() == Entity::Type::OBJECT_TYPE_PLAYER)
         {
             l_Packet.UserId                 = p_ObjectBuilt->GetObjectGUID().GetCounter();
-            l_Packet.ShipId                 = static_cast<uint16>(p_ObjectBuilt->ToPlayer()->GetShipId());
+            l_Packet.ShipId                 = p_ObjectBuilt->ToUnit()->GetShipType();
             l_Packet.WeaponState            = p_ObjectBuilt->ToPlayer()->GetWeaponState();
             l_Packet.Clan                   = p_ObjectBuilt->ToPlayer()->GetClanName();
             l_Packet.Name                   = p_ObjectBuilt->GetName();
@@ -106,7 +106,7 @@ namespace SteerStone { namespace Game { namespace Map {
         else if (p_ObjectBuilt->GetType() == Entity::Type::OBJECT_TYPE_NPC)
         {
             l_Packet.UserId                 = p_ObjectBuilt->GetObjectGUID().GetCounter();
-            l_Packet.ShipId                 = static_cast<uint16>(p_ObjectBuilt->ToMob()->GetShipId());
+            l_Packet.ShipId                 = p_ObjectBuilt->ToUnit()->GetShipType();
             l_Packet.WeaponState            = p_ObjectBuilt->ToMob()->GetWeaponState();
             l_Packet.Clan                   = p_ObjectBuilt->ToMob()->GetClanName();
             l_Packet.Name                   = p_ObjectBuilt->GetName();

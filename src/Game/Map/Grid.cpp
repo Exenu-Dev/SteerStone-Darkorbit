@@ -365,6 +365,7 @@ namespace SteerStone { namespace Game { namespace Map {
         l_Packet.PositionX = p_Object->GetSpline()->GetPlannedPositionX();
         l_Packet.PositionY = p_Object->GetSpline()->GetPlannedPositionY();
         l_Packet.Time      = p_Object->GetSpline()->GetDestinationTime();
+        l_Packet.ShipType  = p_Object->ToUnit()->GetShipType();
         p_Object->GetMap()->SendPacketToNearByGridsIfInSurrounding(l_Packet.Write(), p_Object);
     }
 

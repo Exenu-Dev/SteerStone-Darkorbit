@@ -113,6 +113,7 @@ namespace SteerStone { namespace Game { namespace Entity {
         uint32 GetMinDamage()      const { return m_MinDamage;      }    
         uint32 GetMaxDamage()      const { return m_MaxDamage;      }    
         uint32 GetHitMaxPoints()   const { return m_MaxHitPoints;   }
+        uint16 GetShipType()       const { return m_ShipType;       }
         Company GetCompany()       const { return m_Company;        }
         uint16 GetRank()           const { return m_Rank;           }
         uint16 GetGatesAchieved()  const { return m_GatesAchieved;  }
@@ -150,6 +151,7 @@ namespace SteerStone { namespace Game { namespace Entity {
         uint32 m_MinDamage;
         uint32 m_MaxDamage;
         Company m_Company;
+        uint16 m_ShipType;
         uint16 m_Rank;
         uint16 m_GatesAchieved;
         uint32 m_ClanId;
