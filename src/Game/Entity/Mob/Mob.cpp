@@ -141,6 +141,10 @@ namespace SteerStone { namespace Game { namespace Entity {
                     if (!l_Player)
                         break;
 
+                    /// Cannot target players who are at a portal or station
+                    if (l_Player->ToPlayer()->GetEvent() == EventType::EVENT_TYPE_PORTAL || l_Player->ToPlayer()->GetEvent() == EventType::EVENT_TYPE_STATION)
+                        break;
+
                     /// Set our target
                     SetTarget(l_Player);
 
@@ -204,6 +208,10 @@ namespace SteerStone { namespace Game { namespace Entity {
                     Entity::Object* l_Player = GetGrid()->FindNearestPlayer(this, sWorldManager->GetIntConfig(World::IntConfigs::INT_CONFIG_FIND_PLAYER_DISTANCE));
 
                     if (!l_Player)
+                        break;
+
+                    /// Cannot target players who are at a portal or station
+                    if (l_Player->ToPlayer()->GetEvent() == EventType::EVENT_TYPE_PORTAL || l_Player->ToPlayer()->GetEvent() == EventType::EVENT_TYPE_STATION)
                         break;
 
                     /// Set our target
