@@ -333,6 +333,7 @@ namespace SteerStone { namespace Game { namespace Map {
             l_Itr.first->GetSpline()->SetPosition(l_Itr.second->ToPortal()->GetToPositionX(), l_Itr.second->ToPortal()->GetToPositionY(),
                 l_Itr.second->ToPortal()->GetToPositionX(), l_Itr.second->ToPortal()->GetToPositionY());
             l_Itr.first->ToPlayer()->SendInitializeShip();
+            l_Itr.first->ToPlayer()->SendDrones();
             l_Itr.first->ToPlayer()->SendMapUpdate();
             l_Itr.first->ToPlayer()->SendAmmoUpdate();
             l_Itr.first->ToPlayer()->SendAccountRank();
