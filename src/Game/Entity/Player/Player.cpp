@@ -195,7 +195,7 @@ namespace SteerStone { namespace Game { namespace Entity {
     {
         Core::Database::PreparedStatement* l_PreparedStatement = GameDatabase.GetPrepareStatement();
         l_PreparedStatement->PrepareStatement("SELECT type, speed, shield, max_shield, hit_points, max_hit_points, cargo_space, cargo_space_max, "
-            "position_x, position_y, map_id, max_battery, max_rockets, weapon_state, use_system_font,"
+            "position_x, position_y, map_id, max_battery, max_rockets, use_system_font,"
             " battery_lcb_10, battery_mcb_25, battery_mcb_50, battery_ucb_100, battery_sab_50, rocket_r310, rocket_plt_2026, rocket_plt_2021, mines, smart_bombs, instant_shields FROM account_ship WHERE id = ?");
         l_PreparedStatement->SetUint32(0, m_Id);
         std::unique_ptr<Core::Database::PreparedResultSet> l_PreparedResultSet = l_PreparedStatement->ExecuteStatement();
@@ -219,22 +219,21 @@ namespace SteerStone { namespace Game { namespace Entity {
 
             m_MaxBattery                = l_Result[11].GetUInt32();
             m_MaxRockets                = l_Result[12].GetUInt32();
-            m_WeaponState               = l_Result[13].GetUInt16();
-            m_UseSystemFont             = l_Result[14].GetBool();
+            m_UseSystemFont             = l_Result[13].GetBool();
 
-            m_Ammo.m_BatteryLCB10       = l_Result[15].GetInt32();
-            m_Ammo.m_BatteryMCB25       = l_Result[16].GetInt32();
-            m_Ammo.m_BatteryMCB50       = l_Result[17].GetInt32();
-            m_Ammo.m_BatteryUCB100      = l_Result[18].GetInt32();
-            m_Ammo.m_BatterySAB50       = l_Result[19].GetInt32();
+            m_Ammo.m_BatteryLCB10       = l_Result[14].GetInt32();
+            m_Ammo.m_BatteryMCB25       = l_Result[15].GetInt32();
+            m_Ammo.m_BatteryMCB50       = l_Result[16].GetInt32();
+            m_Ammo.m_BatteryUCB100      = l_Result[17].GetInt32();
+            m_Ammo.m_BatterySAB50       = l_Result[18].GetInt32();
 
-            m_Ammo.m_RocketR310         = l_Result[20].GetInt32();
-            m_Ammo.m_RocketPLT2026      = l_Result[21].GetInt32();
-            m_Ammo.m_RocketPLT2021      = l_Result[22].GetInt32();
+            m_Ammo.m_RocketR310         = l_Result[19].GetInt32();
+            m_Ammo.m_RocketPLT2026      = l_Result[20].GetInt32();
+            m_Ammo.m_RocketPLT2021      = l_Result[21].GetInt32();
 
-            m_Ammo.m_Mines              = l_Result[23].GetInt32();
-            m_Ammo.m_SmartBombs         = l_Result[24].GetInt32();
-            m_Ammo.m_InstantShields     = l_Result[25].GetInt32();
+            m_Ammo.m_Mines              = l_Result[22].GetInt32();
+            m_Ammo.m_SmartBombs         = l_Result[23].GetInt32();
+            m_Ammo.m_InstantShields     = l_Result[24].GetInt32();
         }
         else
             LOG_ASSERT(false, "Player", "Failed to load ship data for player %0", m_Id);
@@ -328,7 +327,7 @@ namespace SteerStone { namespace Game { namespace Entity {
     {
         Core::Database::PreparedStatement* l_PreparedStatement = GameDatabase.GetPrepareStatement();
         l_PreparedStatement->PrepareStatement("UPDATE account_ship SET type = ?, cargo_space = ?, "
-            "position_x = ?, position_y = ?, map_id = ?, weapon_state = ?, use_system_font = ?, "
+            "position_x = ?, position_y = ?, map_id = ?, use_system_font = ?, "
             "battery_lcb_10 = ?, battery_mcb_25 = ?, battery_mcb_50 = ?, battery_ucb_100 = ?, battery_sab_50 = ?, rocket_r310 = ?, " 
             "rocket_plt_2026 = ?, rocket_plt_2021 = ?, mines = ?, smart_bombs = ?, instant_shields = ? WHERE id = ?");
 
@@ -337,20 +336,19 @@ namespace SteerStone { namespace Game { namespace Entity {
         l_PreparedStatement->SetFloat(2,   GetSpline()->GetPositionX());
         l_PreparedStatement->SetFloat(3,   GetSpline()->GetPositionY());
         l_PreparedStatement->SetUint32(4,  GetMap()->GetId());
-        l_PreparedStatement->SetUint16(5,  m_WeaponState);
-        l_PreparedStatement->SetBool(6,    m_UseSystemFont);
-        l_PreparedStatement->SetUint32(7,  m_Ammo.m_BatteryLCB10);
-        l_PreparedStatement->SetUint32(8,  m_Ammo.m_BatteryMCB25);
-        l_PreparedStatement->SetUint32(9,  m_Ammo.m_BatteryMCB50);
-        l_PreparedStatement->SetUint32(10, m_Ammo.m_BatteryUCB100);
-        l_PreparedStatement->SetUint32(11, m_Ammo.m_BatterySAB50);
-        l_PreparedStatement->SetUint32(12, m_Ammo.m_RocketR310);
-        l_PreparedStatement->SetUint32(13, m_Ammo.m_RocketPLT2026);
-        l_PreparedStatement->SetUint32(14, m_Ammo.m_RocketPLT2021);
-        l_PreparedStatement->SetUint32(15, m_Ammo.m_Mines);
-        l_PreparedStatement->SetUint32(16, m_Ammo.m_SmartBombs);
-        l_PreparedStatement->SetUint32(17, m_Ammo.m_InstantShields);
-        l_PreparedStatement->SetUint32(18, m_Id);
+        l_PreparedStatement->SetBool(5,    m_UseSystemFont);
+        l_PreparedStatement->SetUint32(6,  m_Ammo.m_BatteryLCB10);
+        l_PreparedStatement->SetUint32(7,  m_Ammo.m_BatteryMCB25);
+        l_PreparedStatement->SetUint32(8,  m_Ammo.m_BatteryMCB50);
+        l_PreparedStatement->SetUint32(9, m_Ammo.m_BatteryUCB100);
+        l_PreparedStatement->SetUint32(10, m_Ammo.m_BatterySAB50);
+        l_PreparedStatement->SetUint32(11, m_Ammo.m_RocketR310);
+        l_PreparedStatement->SetUint32(12, m_Ammo.m_RocketPLT2026);
+        l_PreparedStatement->SetUint32(13, m_Ammo.m_RocketPLT2021);
+        l_PreparedStatement->SetUint32(14, m_Ammo.m_Mines);
+        l_PreparedStatement->SetUint32(15, m_Ammo.m_SmartBombs);
+        l_PreparedStatement->SetUint32(16, m_Ammo.m_InstantShields);
+        l_PreparedStatement->SetUint32(17, m_Id);
 
         l_PreparedStatement->ExecuteStatement();
     }

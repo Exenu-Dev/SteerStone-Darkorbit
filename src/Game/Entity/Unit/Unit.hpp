@@ -125,6 +125,7 @@ namespace SteerStone { namespace Game { namespace Entity {
         bool IsDead()              const { return m_DeathState == DeathState::DEAD; }
         uint16 GetLaserType()      const { return m_LaserType;      }    
 
+        void SetWeaponState(uint16 const p_WeaponState) { m_WeaponState = p_WeaponState; }
         void SetHitPoints(uint32 const p_HitPoints)   { m_HitPoints = p_HitPoints;   }
         void SetShield(uint32 const p_Shield)         { m_Shield = p_Shield;         }
         void SetLaserType(uint16 const p_LaserType)   { m_LaserType = p_LaserType;   }

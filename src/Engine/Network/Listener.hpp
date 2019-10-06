@@ -47,9 +47,6 @@ namespace SteerStone { namespace Core { namespace Network {
                     m_NetworkThreads.push_back(std::unique_ptr<NetworkThread<T>>(new NetworkThread<T>(l_I)));
 
                 std::function<bool()> l_Service = [this]() -> bool {
-                    #ifdef STEERSTONE_CORE_DEBUG
-                        LOG_INFO("Listener", "IO Service Online!");
-                    #endif
                     this->m_Service->run();
                     return true;
                 };
@@ -58,7 +55,7 @@ namespace SteerStone { namespace Core { namespace Network {
 
                 m_AcceptorTask = sThreadManager->PushTask("LISTENER_THREAD", Threading::TaskType::Moderate, 0, l_Service);
             }
-
+            /// Deconstructor
             ~Listener()
             {
                 m_Acceptor->close();

@@ -19,7 +19,7 @@
 #include "Player.hpp"
 #include "Inventory.hpp"
 #include "ObjectManager.hpp"
-#include "GameFlags.hpp"
+#include "Common.hpp"
 
 #include "Database/DatabaseTypes.hpp"
 
@@ -30,6 +30,7 @@ namespace SteerStone { namespace Game { namespace Entity {
     Inventory::Inventory(Player* p_Player)
         : m_Player(p_Player)
     {
+        m_WeaponCount = 0;
     }
     /// Deconstructor
     Inventory::~Inventory()
@@ -43,7 +44,7 @@ namespace SteerStone { namespace Game { namespace Entity {
     void Inventory::LoadInventory()
     {
         Core::Database::PreparedStatement* l_PreparedStatement = GameDatabase.GetPrepareStatement();
-        l_PreparedStatement->PrepareStatement("SELECT entry, count FROM account_inventory WHERE id = ?");
+        l_PreparedStatement->PrepareStatement("SELECT entry, count FROM account_inventory WHERE id = ? AND equiped = 1");
         l_PreparedStatement->SetUint32(0, m_Player->GetId());
         std::unique_ptr<Core::Database::PreparedResultSet> l_PreparedResultSet = l_PreparedStatement->ExecuteStatement();
 
@@ -94,19 +95,28 @@ namespace SteerStone { namespace Game { namespace Entity {
     }
 
     /// Calculate player stats
-    void Inventory::CalculateStats() const
+    void Inventory::CalculateStats()
     {
         uint32 l_Damage             = 0;
         uint32 l_Speed              = 0;
         uint32 l_Shield             = 0;
         uint32 l_ShieldResistence   = 0;
+        uint32 l_ShipWeaponCount    = Common::GetWeaponCountByShip(m_Player->GetShipType());
+        uint32 l_LF3WeaponCount     = 0;
+        m_WeaponCount               = 0;
 
         for (auto l_Itr : m_Items)
         {
             if (l_Itr.IsWeapon())
             {
                 for (uint32 l_I = 0; l_I < l_Itr.GetCount(); l_I++)
+                {
                     l_Damage += l_Itr.GetItemTemplate()->Value;
+                    if (l_Itr.GetItemTemplate()->Name == "LF-3")
+                        l_LF3WeaponCount++;
+
+                    m_WeaponCount++;
+                }
             }
             else if (l_Itr.IsSpeed())
             {
@@ -127,6 +137,15 @@ namespace SteerStone { namespace Game { namespace Entity {
         }
 
         m_Player->SetStats(l_Damage, l_Damage, l_Speed, l_Shield, l_ShieldResistence);
+
+        if (m_WeaponCount == 0)
+            m_Player->SetWeaponState(0);
+        if (l_LF3WeaponCount >= l_ShipWeaponCount)
+            m_Player->SetWeaponState(3);
+        else if (m_WeaponCount >= l_ShipWeaponCount)
+            m_Player->SetWeaponState(2);
+        else
+            m_Player->SetWeaponState(1);
     }
 
 }   ///< namespace Entity

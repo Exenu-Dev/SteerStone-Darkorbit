@@ -115,7 +115,6 @@ namespace SteerStone { namespace Game { namespace Entity {
         p_Player->ToPlayer()->SendPacket(Server::Packets::Misc::Reward().Write(Server::Packets::Misc::RewardType::REWARD_TYPE_URIDIUM,    { m_Uridium,    p_Player->GetUridium()    }));
         p_Player->ToPlayer()->SendPacket(Server::Packets::Misc::Reward().Write(Server::Packets::Misc::RewardType::REWARD_TYPE_HONOUR,     { m_Honor,      p_Player->GetHonor()      }));
         p_Player->ToPlayer()->SendPacket(Server::Packets::Misc::Reward().Write(Server::Packets::Misc::RewardType::REWARD_TYPE_EXPERIENCE, { m_Experience, p_Player->GetExperience(), p_Player->GetLevel() }));
-        p_Player->ToPlayer()->SendPacket(Server::Packets::Misc::Reward().Write(Server::Packets::Misc::RewardType::REWARD_TYPE_CARGO,      { 2, 2, 2, 2, 2, 2, 2 }));
     }
 
     //////////////////////////////////////////////////////////////////////////

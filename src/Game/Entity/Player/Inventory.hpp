@@ -48,13 +48,16 @@ namespace SteerStone { namespace Game { namespace Entity {
         void LoadInventory();
 
         /// Calculate player stats
-        void CalculateStats() const;
+        void CalculateStats();
+
+        uint32 GetWeaponCount() const { return m_WeaponCount; }
 
     //////////////////////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////////////////////
 
     private:
         std::vector<Item> m_Items;
+        uint32 m_WeaponCount;
         Player* m_Player;
     };
 

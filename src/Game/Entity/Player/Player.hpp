@@ -226,7 +226,7 @@ namespace SteerStone { namespace Game { namespace Entity {
         bool HasLoggedOut() const            { return m_LoggingOut;       }
         bool HasDrones()           const     { return !m_Drones.empty();  }
         Ammo const* GetAmmo()      const     { return &m_Ammo;            }
-        Inventory const* GetInventory() const{ return &m_Inventory;       }
+        Inventory* GetInventory()            { return &m_Inventory;       }
         std::shared_ptr<Server::GameSocket> ToSocket() { return m_Socket; }
 
         /// Setters Function

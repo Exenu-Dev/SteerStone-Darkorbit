@@ -86,7 +86,7 @@ namespace SteerStone { namespace Game { namespace Entity {
         Server::Packets::Attack::LaserShoot l_Packet;
         l_Packet.FromId     = GetObjectGUID().GetCounter();
         l_Packet.ToId       = GetTarget()->GetObjectGUID().GetCounter();
-        l_Packet.LaserId    = m_LaserType;
+        l_Packet.LaserId    = m_WeaponState == 3 ? m_LaserType : 0;
         GetMap()->SendPacketToNearByGridsIfInSurrounding(l_Packet.Write(), this, true);
 
         /// Grey Opponent
