@@ -55,7 +55,7 @@ namespace SteerStone { namespace Game { namespace Map {
             l_WorkerCount = l_Maps;
         }
 
-        for (uint32 l_I = 0; l_I < l_WorkerCount; l_I++)
+        for (std::size_t l_I = 0; l_I < l_WorkerCount; l_I++)
             m_Zones[l_I] = new Zone();
 
         static int16 l_Remainder        = l_Maps % l_WorkerCount;

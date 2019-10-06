@@ -48,7 +48,7 @@ namespace SteerStone { namespace Game { namespace Entity {
         void UpdatePosition();
 
         /// Return Time in milliseconds to reach destination
-        int32 CalculateDestinationTime();
+        [[nodiscard]] int32 CalculateDestinationTime();
 
         /// Move Object
         /// @p_PlannedPositionX : Planned X Axis

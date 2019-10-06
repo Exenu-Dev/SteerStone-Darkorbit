@@ -18,6 +18,7 @@
 
 #include "Object.hpp"
 #include "Diagnostic/DiaServerWatch.hpp"
+#include "Utility/UtilMaths.hpp"
 #include "Logger/Base.hpp"
 #include "Logger/LogDefines.hpp"
 
@@ -89,13 +90,9 @@ namespace SteerStone { namespace Game { namespace Entity {
     }
 
     /// Return Time in milliseconds to reach destination
-    int32 Spline::CalculateDestinationTime()
+    [[nodiscard]] int32 Spline::CalculateDestinationTime()
     {
-        int32 l_DeltaX = m_PlannedPositionX - m_PositionX;
-        int32 l_DeltaY = m_PlannedPositionY - m_PositionY;
-        float l_Delta  = std::sqrt((l_DeltaX * l_DeltaX) + (l_DeltaY * l_DeltaY));
-
-        return static_cast<int32>((l_Delta / m_Speed) * 1000);
+        return static_cast<int32>((Core::Utils::DistanceSquared(m_PlannedPositionX, m_PlannedPositionY, m_PositionX, m_PositionY) / m_Speed) * 1000);
     }
 
     /// Move Object
