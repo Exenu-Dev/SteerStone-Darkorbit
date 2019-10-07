@@ -103,7 +103,7 @@ namespace SteerStone { namespace Game { namespace Map {
             if (p_ObjectBuilt->ToPlayer()->HasDrones())
                 p_Object->ToPlayer()->SendPacket(&p_ObjectBuilt->ToPlayer()->BuildDronePacket());
         }
-        else if (p_ObjectBuilt->GetType() == Entity::Type::OBJECT_TYPE_NPC)
+        else if (p_ObjectBuilt->GetType() == Entity::Type::OBJECT_TYPE_MOB)
         {
             l_Packet.UserId                 = p_ObjectBuilt->GetObjectGUID().GetCounter();
             l_Packet.ShipId                 = p_ObjectBuilt->ToUnit()->GetShipType();
@@ -124,9 +124,6 @@ namespace SteerStone { namespace Game { namespace Map {
 
         if (p_ObjectBuilt->ToUnit()->IsAttacking())
         {
-            if (p_ObjectBuilt->ToUnit()->GetTarget() && !p_Object->ToPlayer()->IsInSurrounding(p_ObjectBuilt->ToUnit()->GetTarget()))
-                BuildObjectSpawnAndSend(p_ObjectBuilt->ToUnit()->GetTarget(), p_Object);
-
             if (p_ObjectBuilt->GetType() == Entity::Type::OBJECT_TYPE_PLAYER && p_ObjectBuilt->ToUnit()->GetTarget())
                 p_Object->ToPlayer()->SendPacket(Server::Packets::Misc::Info().Write(Server::Packets::Misc::InfoType::INFO_TYPE_GREY_OPPONENT, { p_ObjectBuilt->ToUnit()->GetTarget()->GetObjectGUID().GetCounter(), p_ObjectBuilt->GetObjectGUID().GetCounter() }));
 
@@ -138,15 +135,14 @@ namespace SteerStone { namespace Game { namespace Map {
             p_Object->ToPlayer()->SendPacket(l_Packet.Write());
         }
 
-        if (!p_ObjectBuilt->GetSpline()->IsMoving())
-        {
-            Server::Packets::Ship::ObjectMove l_ObjectMovePacket;
-            l_ObjectMovePacket.Id        = p_ObjectBuilt->GetObjectGUID().GetCounter();
-            l_ObjectMovePacket.PositionX = p_ObjectBuilt->GetSpline()->GetPositionX();
-            l_ObjectMovePacket.PositionY = p_ObjectBuilt->GetSpline()->GetPositionY();
-            l_ObjectMovePacket.Time      = 0;
-            p_Object->ToPlayer()->SendPacket(l_ObjectMovePacket.Write());
-        }
+        /// When spawning the ship, we need to spend movement packet otherwise client will incorrectly set position of object
+        /// no idea why it does this
+        Server::Packets::Ship::ObjectMove l_ObjectMovePacket;
+        l_ObjectMovePacket.Id = p_ObjectBuilt->GetObjectGUID().GetCounter();
+        l_ObjectMovePacket.PositionX = p_ObjectBuilt->GetSpline()->GetPositionX();
+        l_ObjectMovePacket.PositionY = p_ObjectBuilt->GetSpline()->GetPositionY();
+        l_ObjectMovePacket.Time = 0;
+        p_Object->ToPlayer()->SendPacket(l_ObjectMovePacket.Write());
     }
     /// Build Object Despawn Packet
     /// @p_Object : Object being built
