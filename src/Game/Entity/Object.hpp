@@ -28,7 +28,7 @@ namespace SteerStone { namespace Game { namespace Entity {
     {
         OBJECT_TYPE_NON     = 0,
         OBJECT_TYPE_PLAYER  = 1,
-        OBJECT_TYPE_NPC     = 2,
+        OBJECT_TYPE_MOB     = 2,
         OBJECT_TYPE_PORTAL  = 3,
         OBJECT_TYPE_STATION = 4
     };
@@ -69,6 +69,11 @@ namespace SteerStone { namespace Game { namespace Entity {
         std::string GetName()                     const { return m_Name;                 }
         std::tuple<uint32, uint32> GetGridIndex() const { return m_GridIndex;            }
 
+        bool IsPlayer()             const   { return m_Type == Type::OBJECT_TYPE_PLAYER;  }
+        bool IsMob()               const    { return m_Type == Type::OBJECT_TYPE_MOB;     }
+        bool IsPortal()             const   { return m_Type == Type::OBJECT_TYPE_PORTAL;  }
+        bool IsStation()            const   { return m_Type == Type::OBJECT_TYPE_STATION; }
+
         Unit* ToUnit()                      { return reinterpret_cast<Unit*>(this);                                                                         }
         Unit const* ToUnit()        const   { return reinterpret_cast<Unit const*>(this);                                                                   }
         Player* ToPlayer()                  { if (GetType() == Type::OBJECT_TYPE_PLAYER)  return reinterpret_cast<Player*>(this);  return nullptr;          }
@@ -77,12 +82,12 @@ namespace SteerStone { namespace Game { namespace Entity {
         Portal const* ToPortal()    const   { if (GetType() == Type::OBJECT_TYPE_PORTAL)  return reinterpret_cast<Portal const*>(this);  return nullptr;    }
         Station* ToStation()                { if (GetType() == Type::OBJECT_TYPE_STATION) return reinterpret_cast<Station*>(this); return nullptr;          }
         Station const* ToStation()  const   { if (GetType() == Type::OBJECT_TYPE_STATION) return reinterpret_cast<Station const*>(this); return nullptr;    }
-        Mob* ToMob()                        { if (GetType() == Type::OBJECT_TYPE_NPC)     return reinterpret_cast<Mob*>(this);     return nullptr;          }
-        Mob const* ToMob()          const   { if (GetType() == Type::OBJECT_TYPE_NPC)     return reinterpret_cast<Mob const*>(this);     return nullptr;    }
+        Mob* ToMob()                        { if (GetType() == Type::OBJECT_TYPE_MOB)     return reinterpret_cast<Mob*>(this);     return nullptr;          }
+        Mob const* ToMob()          const   { if (GetType() == Type::OBJECT_TYPE_MOB)     return reinterpret_cast<Mob const*>(this);     return nullptr;    }
 
-        void SetGridIndex(std::tuple<uint32, uint32> const p_GridIndex) { m_GridIndex = p_GridIndex; }
-        void SetName(std::string const p_Name)                          { m_Name = p_Name; }
-        void SetType(Type const p_Type)                                 { m_Type = p_Type; }
+        void SetGridIndex(std::tuple<uint32, uint32> const p_GridIndex) { m_GridIndex = p_GridIndex;   }
+        void SetName(std::string const p_Name)                          { m_Name = p_Name;             }
+        void SetType(Type const p_Type)                                 { m_Type = p_Type;             }
         void SetGUID(ObjectGUID const& p_ObjectGUID)                    { m_ObjectGUID = p_ObjectGUID; }
         void SetMap(Map::Base* p_Map)                                   { LOG_ASSERT(p_Map, "Object", "Attempted to assign Object Map to nullptr! for Object %0", GetGUID());  m_Map = p_Map; }
     
