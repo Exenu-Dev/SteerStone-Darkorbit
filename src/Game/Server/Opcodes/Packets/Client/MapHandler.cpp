@@ -104,7 +104,13 @@ namespace SteerStone { namespace Game { namespace Server {
             return;
         }
 
-        m_Player->SetTarget(l_Object);
+        if (l_Object->GetType() != Entity::Type::OBJECT_TYPE_MOB && l_Object->GetType() != Entity::Type::OBJECT_TYPE_PLAYER)
+        {
+            LOG_WARNING("Socket", "Attempted to select a target which is not a unit or a player!", l_Id);
+            return;
+        }
+
+        m_Player->SetTarget(l_Object->ToUnit());
     }
 
     /// Map Handler
@@ -125,7 +131,13 @@ namespace SteerStone { namespace Game { namespace Server {
             return;
         }
 
-        m_Player->Attack(l_Object);
+        if (l_Object->GetType() != Entity::Type::OBJECT_TYPE_MOB && l_Object->GetType() != Entity::Type::OBJECT_TYPE_PLAYER)
+        {
+            LOG_WARNING("Socket", "Attempted to select a target which is not a unit or a player!", l_Id);
+            return;
+        }
+
+        m_Player->Attack(l_Object->ToUnit());
 
     }
 

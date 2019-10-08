@@ -98,8 +98,8 @@ namespace SteerStone { namespace Game { namespace World {
         m_IntConfigs[IntConfigs::INT_CONFIG_DELAY_REMOVAL]                = sConfigManager->GetInt("DelayRemoval", 5000);
         m_IntConfigs[IntConfigs::INT_CONFIG_LOG_OUT_TIMER]                = sConfigManager->GetInt("LogOutTimer", 20000);
         m_IntConfigs[IntConfigs::INT_CONFIG_PREMIUM_LOG_OUT_TIMER]        = sConfigManager->GetInt("PremiumLogOutTimer", 5000);
-        m_IntConfigs[IntConfigs::INT_CONFIG_PLAYER_ATTACK_RANGE]          = sConfigManager->GetInt("PlayerAttackRange", 1000);
-        m_IntConfigs[IntConfigs::INT_CONFIG_MOB_ATTACK_RANGE]             = sConfigManager->GetInt("MobAttackRange", 800);
+        m_IntConfigs[IntConfigs::INT_CONFIG_PLAYER_ATTACK_RANGE]          = sConfigManager->GetInt("PlayerAttackRange", 1400);
+        m_IntConfigs[IntConfigs::INT_CONFIG_MOB_ATTACK_RANGE]             = sConfigManager->GetInt("MobAttackRange", 730);
         m_IntConfigs[IntConfigs::INT_CONFIG_MIN_FOLLOW_DISTANCE]          = sConfigManager->GetInt("MinFollowDistance", 200);
         m_IntConfigs[IntConfigs::INT_CONFIG_MAX_FOLLOW_DISTANCE]          = sConfigManager->GetInt("MaxFollowDistance", 4000);
         m_IntConfigs[IntConfigs::INT_CONFIG_MAX_ROAMING_DISTANCE]         = sConfigManager->GetInt("MaxRoamingDistance", 200);

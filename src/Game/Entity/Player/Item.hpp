@@ -22,7 +22,7 @@
 
 namespace SteerStone { namespace Game { namespace Entity {
 
-    class ItemTemplate;
+    struct ItemTemplate;
 
     class Item
     {

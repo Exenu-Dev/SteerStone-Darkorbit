@@ -77,7 +77,7 @@ namespace SteerStone { namespace Game { namespace Entity {
 
         /// Attack
         /// @p_Victim : Victim we are attacking
-        void Attack(Object* p_Victim);
+        void Attack(Unit* p_Victim);
         /// Update Attack
         /// @p_Diff : Execution Time
         void AttackerStateUpdate(uint32 const p_Diff);
@@ -91,14 +91,18 @@ namespace SteerStone { namespace Game { namespace Entity {
         /// @p_Damage : Damage taken
         /// @p_ShieldDamage : Shield Damage taken
         void CalculateDamageTaken(int32& p_Damage, int32& p_ShieldDamage);
+        /// Returns whether unit is attacking us
+        /// @p_Unit : Unit attacking us
+        bool IsAttackingMe(Unit* p_Unit) const;
 
         ///////////////////////////////////////////
         //                TARGET
         ///////////////////////////////////////////
 
-        void SetTarget(Object* p_Target)        { m_Target = p_Target; m_TargetGUID = p_Target->GetGUID();  }
+        void SetTarget(Unit* p_Target)          { m_Target = p_Target; m_TargetGUID = p_Target->GetGUID();  }
         bool HasTarget()                        { return m_Target != nullptr;                               }
-        Object* GetTarget()                     { return m_Target;                                          }
+        Unit* GetTarget()                       { return m_Target;                                          }
+        Unit const* GetTarget() const           { return m_Target;                                          }
         uint64 GetTargetGUID() const            { return m_TargetGUID;                                      }
         void ClearTarget()                      { m_Target = nullptr; m_TargetGUID = 0;                     }
 
@@ -165,10 +169,11 @@ namespace SteerStone { namespace Game { namespace Entity {
         uint16 m_AttackState;
         uint32 m_SelectedLaser;
         uint32 m_SelectedRocket;
+        uint32 m_LastTimeAttacked;
         bool m_Attacking;
         Core::Diagnostic::IntervalTimer m_IntervalAttackUpdate;
 
-        Object* m_Target;
+        Unit* m_Target;
         uint64 m_TargetGUID;
 
     //////////////////////////////////////////////////////////////////////////

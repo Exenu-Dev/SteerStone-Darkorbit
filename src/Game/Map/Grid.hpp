@@ -26,6 +26,7 @@
 namespace SteerStone { namespace Game { namespace Entity {
 
     class Object;
+    class Player;
     class Portal;
     class Mob;
     class Unit;
@@ -52,6 +53,7 @@ namespace SteerStone { namespace Game { namespace Map {
     };
 
     class Entity::Object;
+    class Entity::Player;
     class Entity::Portal;
     class Server::PacketBuffer;
     class Base;
@@ -133,7 +135,7 @@ namespace SteerStone { namespace Game { namespace Map {
         /// Find Nearest Player to Object
         /// @p_Object : Object which we are checking against
         /// @p_Distance : Find Object in a specific range
-        Entity::Object* FindNearestPlayer(Entity::Object* p_Object, float p_Distance = 0.0f);
+        Entity::Player* FindNearestPlayer(Entity::Object* p_Object, float p_Distance = 0.0f);
         /// Find Object
         /// @p_Counter : Counter of Object
         Entity::Object* FindObject(uint32 const p_Counter);

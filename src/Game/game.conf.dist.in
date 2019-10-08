@@ -56,8 +56,8 @@ PremiumLogOutTimer = 5000
 
 ## Attack Range
 #	Description: The maximum attack range
-# 	Default: 700
-PlayerAttackRange = 700
+# 	Default: 1400
+PlayerAttackRange = 1400
 
 ### MAP SETTINGS ###
 
@@ -95,8 +95,8 @@ DelayRemoval = 5000
 
 ## Attack Range
 #	Description: The maximum attack range
-# 	Default: 500
-MobAttackRange = 500
+# 	Default: 730
+MobAttackRange = 730
 
 ## Min Follow Distance
 #	Description: Min follow distance

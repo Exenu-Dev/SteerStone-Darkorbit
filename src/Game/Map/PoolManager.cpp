@@ -59,7 +59,7 @@ namespace SteerStone { namespace Game { namespace Map {
     void PoolManager::InitializeMobs()
     {
         Core::Database::PreparedStatement* l_PreparedStatement = GameDatabase.GetPrepareStatement();
-        l_PreparedStatement->PrepareStatement("SELECT entry, min_movement_time, max_movement_time, min_count, max_count FROM mobs WHERE map_id = ?");
+        l_PreparedStatement->PrepareStatement("SELECT entry, min_count, max_count FROM mobs WHERE map_id = ?");
         l_PreparedStatement->SetUint32(0, m_Map->GetId());
         std::unique_ptr<Core::Database::PreparedResultSet> l_PreparedResultSet = l_PreparedStatement->ExecuteStatement();
 
@@ -89,7 +89,7 @@ namespace SteerStone { namespace Game { namespace Map {
                     {
                         float l_MaxX = (l_RadiusX * l_X);
 
-                        for (uint32 l_I = 0; l_I < Core::Utils::Int32Random(l_Result[3].GetUInt32(), l_Result[4].GetUInt32()); l_I++)
+                        for (uint32 l_I = 0; l_I < Core::Utils::UInt32Random(l_Result[1].GetUInt32(), l_Result[2].GetUInt32()); l_I++)
                         {
                             Entity::Mob* l_Mob = new Entity::Mob();
                             l_Mob->m_Entry              = l_MobTemplate->Entry;
@@ -117,8 +117,8 @@ namespace SteerStone { namespace Game { namespace Map {
                             l_Mob->m_Xenomit            = l_MobTemplate->Xenomit;
                             l_Mob->m_Seprom             = l_MobTemplate->Seprom;
                             l_Mob->m_Palladium          = l_MobTemplate->Palladium;
-                            l_Mob->m_MoveTimeMin        = l_Result[1].GetUInt32();
-                            l_Mob->m_MoveTimeMax        = l_Result[2].GetUInt32();
+                            l_Mob->m_MoveTimeMin        = l_MobTemplate->MinMovementTime;
+                            l_Mob->m_MoveTimeMax        = l_MobTemplate->MaxMovementTime;
                             l_Mob->GetSpline()->SetSpeed(l_MobTemplate->Speed);
                             l_Mob->SetName(l_MobTemplate->Name);
                             l_Mob->m_IntervalMoveTimer.SetInterval(Core::Utils::FloatRandom(l_Mob->m_MoveTimeMin, l_Mob->m_MoveTimeMin));

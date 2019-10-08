@@ -19,6 +19,7 @@
 #include "Opcodes/Packets/Server/MapPackets.hpp"
 #include "Opcodes/Packets/Server/MiscPackets.hpp"
 #include "Opcodes/Packets/Server/AttackPackets.hpp"
+#include "Diagnostic/DiaServerWatch.hpp"
 #include "Player.hpp"
 #include "Mob.hpp"
 #include "ZoneManager.hpp"
@@ -51,14 +52,12 @@ namespace SteerStone { namespace Game { namespace Entity {
         m_AttackState    = AttackState::ATTACK_STATE_NONE;
         m_SelectedLaser  = 1;
         m_SelectedRocket = 1;
+        m_LastTimeAttacked = 0;
 
         m_Target         = nullptr;
         m_TargetGUID     = 0;
 
         m_IntervalAttackUpdate.SetInterval(ATTACK_UPDATE_INTERVAL);
-
-        SetType(Type::OBJECT_TYPE_NPC);
-        SetGUID(ObjectGUID(GUIDType::NPC));
     }
     /// Deconstructor
     Unit::~Unit()
@@ -74,13 +73,11 @@ namespace SteerStone { namespace Game { namespace Entity {
 
     /// Attack
     /// @p_Victim : Victim we are attacking
-    void Unit::Attack(Object* p_Victim)
+    void Unit::Attack(Unit* p_Victim)
     {
         /// Set target if not set
         if (GetTargetGUID() != p_Victim->GetGUID())
             SetTarget(p_Victim);
-
-        m_AttackState = AttackState::ATTACK_STATE_IN_RANGE;
 
         /// Send Attack
         Server::Packets::Attack::LaserShoot l_Packet;
@@ -89,11 +86,22 @@ namespace SteerStone { namespace Game { namespace Entity {
         l_Packet.LaserId    = m_WeaponState == 3 ? m_LaserType : 0;
         GetMap()->SendPacketToNearByGridsIfInSurrounding(l_Packet.Write(), this, true);
 
+        if (GetTarget()->IsMob())
+        {
+            if (!GetTarget()->ToMob()->IsTaggedByPlayer())
+            {
+                GetTarget()->ToMob()->SetTaggedPlayer(ToPlayer());
+                GetTarget()->ToMob()->Attack(this);
+            }
+        }
+
         /// Grey Opponent
-        if (!GetTarget()->ToUnit()->IsAttacking())
+        /// We only want the player to tag, if mob tag player, then player will have grey name
+        if (IsPlayer() && (GetTarget()->IsMob() && GetTarget()->ToMob()->GetTaggedPlayer() == this))
             GetGrid()->SendPacketIfInSurrounding(Server::Packets::Misc::Info().Write(Server::Packets::Misc::InfoType::INFO_TYPE_GREY_OPPONENT, { GetTarget()->GetObjectGUID().GetCounter(), GetObjectGUID().GetCounter() }), this, false);
 
         m_Attacking = true;
+        m_AttackState = AttackState::ATTACK_STATE_IN_RANGE;
     }
 
     /// Update Attack
@@ -107,6 +115,12 @@ namespace SteerStone { namespace Game { namespace Entity {
         m_IntervalAttackUpdate.Update(p_Diff);
         if (!m_IntervalAttackUpdate.Passed())
             return;
+
+        if (GetTarget()->ToUnit()->GetDeathState() == DeathState::DEAD)
+        {
+            CancelAttack();
+            return;
+        }
 
         /// Check if we are in range
         if (m_AttackState == AttackState::ATTACK_STATE_IN_RANGE)
@@ -139,10 +153,8 @@ namespace SteerStone { namespace Game { namespace Entity {
             }
             else
             {
-                /// If we are attacking a mob, then assign mob to attack us
-                if (GetTarget()->GetType() == Type::OBJECT_TYPE_NPC)
-                    if (!GetTarget()->ToMob()->IsAttacking())
-                        GetTarget()->ToUnit()->Attack(this);
+                /// Update last time attacked
+                m_LastTimeAttacked = sServerTimeManager->GetServerTime();
 
                 /// Can we hit target?
                 if (CalculateHitChance())
@@ -215,7 +227,7 @@ namespace SteerStone { namespace Game { namespace Entity {
                 }
 
                 /// If it's a mob, then reassign mob to attack again
-                if (GetTarget()->GetType() == Type::OBJECT_TYPE_NPC)
+                if (GetTarget()->GetType() == Type::OBJECT_TYPE_MOB)
                     if (!GetTarget()->ToMob()->IsAttacking())
                         GetTarget()->ToUnit()->Attack(this);
 
@@ -243,14 +255,15 @@ namespace SteerStone { namespace Game { namespace Entity {
         l_Packet.ToId   = GetTarget()->GetObjectGUID().GetCounter();
         GetMap()->SendPacketToNearByGridsIfInSurrounding(l_Packet.Write(), this, true);
 
-        /// Clear Gray Target
-        if (GetType() == Type::OBJECT_TYPE_NPC)
+        if (IsMob())
         {
             GetGrid()->SendPacketIfInSurrounding(Server::Packets::Misc::Info().Write(Server::Packets::Misc::InfoType::INFO_TYPE_UNGREY_OPPONENT, { GetObjectGUID().GetCounter() }), this, false);
 
             /// The target may be on other side of the map if still targetting, so send packet specifically to target
             if (GetTarget()->ToPlayer())
                 GetTarget()->ToPlayer()->SendPacket(Server::Packets::Misc::Info().Write(Server::Packets::Misc::InfoType::INFO_TYPE_UNGREY_OPPONENT, { GetObjectGUID().GetCounter() }));
+        
+            ToMob()->SetTaggedPlayer(nullptr);
         }
 
         m_Attacking     = false;
@@ -293,6 +306,16 @@ namespace SteerStone { namespace Game { namespace Entity {
 
         p_Damage = p_Damage - p_ShieldDamage;
     }
+    /// Returns whether unit is attacking us
+    /// @p_Unit : Unit attacking us
+    bool SteerStone::Game::Entity::Unit::IsAttackingMe(Unit* p_Unit) const
+    {
+        if (p_Unit->GetTarget())
+            if (GetObjectGUID().GetCounter() == p_Unit->GetTarget()->GetObjectGUID().GetCounter())
+                return true;
+
+        return false;
+    }
 
     /// Update
     /// @p_Diff : Execution Time
@@ -318,7 +341,7 @@ namespace SteerStone { namespace Game { namespace Entity {
         l_CancelLaserPacket.ToId    = GetTarget()->GetObjectGUID().GetCounter();
         GetMap()->SendPacketToNearByGridsIfInSurrounding(l_Packet.Write(), this);
 
-        if (p_Unit->GetType() == Type::OBJECT_TYPE_NPC)
+        if (p_Unit->GetType() == Type::OBJECT_TYPE_MOB)
             p_Unit->ToMob()->RewardKillCredit(ToPlayer());
 
         p_Unit->m_DeathState = DeathState::JUST_DIED;

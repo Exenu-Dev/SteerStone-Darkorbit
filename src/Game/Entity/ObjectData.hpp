@@ -27,31 +27,33 @@ namespace SteerStone { namespace Game { namespace Entity {
     public:
         MobTemplate()
         {
-            Entry        = 0;
+            Entry               = 0;
             Name.clear();
-            Type         = 0;
-            WeaponState  = 0;
-            HitPoints    = 0;
-            Shield       = 0;
-            ShieldResistance = 0;
-            MinDamage    = 0;
-            MaxDamage    = 0;
-            Behaviour    = 0;
-            RespawnTimer = 0;
-            Speed        = 0;
-            Experience   = 0;
-            Honor        = 0;
-            Credits      = 0;
-            Uridium      = 0;
-            Prometium    = 0;
-            Endurium     = 0;
-            Terbium      = 0;
-            Prometid     = 0;
-            Duranium     = 0;
-            Promerium    = 0;
-            Xenomit      = 0;
-            Seprom       = 0;
-            Palladium    = 0;
+            Type                = 0;
+            WeaponState         = 0;
+            HitPoints           = 0;
+            Shield              = 0;
+            ShieldResistance    = 0;
+            MinDamage           = 0;
+            MaxDamage           = 0;
+            Behaviour           = 0;
+            RespawnTimer        = 0;
+            MinMovementTime     = 0;
+            MaxMovementTime     = 0;
+            Speed               = 0;
+            Experience          = 0;
+            Honor               = 0;
+            Credits             = 0;
+            Uridium             = 0;
+            Prometium           = 0;
+            Endurium            = 0;
+            Terbium             = 0;
+            Prometid            = 0;
+            Duranium            = 0;
+            Promerium           = 0;
+            Xenomit             = 0;
+            Seprom              = 0;
+            Palladium           = 0;
         }
 
         //////////////////////////////////////////////////////////////////////////
@@ -68,6 +70,8 @@ namespace SteerStone { namespace Game { namespace Entity {
         uint32 MaxDamage;
         uint16 Behaviour;
         uint32 RespawnTimer;
+        uint32 MinMovementTime;
+        uint32 MaxMovementTime;
         uint32 Speed;
         uint32 Experience;
         uint32 Honor;

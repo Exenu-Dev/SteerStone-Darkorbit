@@ -69,6 +69,26 @@ namespace SteerStone { namespace Game { namespace Map {
         {
             for (auto l_SecondItr : m_Objects)
             {
+                if (l_SecondItr.second->GetType() != Entity::Type::OBJECT_TYPE_PORTAL && l_SecondItr.second->GetType() != Entity::Type::OBJECT_TYPE_STATION)
+                {
+                    if (l_Itr->ToPlayer()->GetEvent() == EventType::EVENT_TYPE_NONE)
+                        continue;
+
+                    Server::Packets::Event l_Packet;
+                    l_Packet.PositionX           = l_Itr->GetSpline()->GetPositionX();
+                    l_Packet.PositionY           = l_Itr->GetSpline()->GetPositionY();
+                    l_Packet.InDemolitionZone    = false;
+                    l_Packet.InRadiationZone     = false;
+                    l_Packet.PlayRepairAnimation = false;
+                    l_Packet.InTradeZone         = false;
+                    l_Packet.InJumpZone          = false;
+                    l_Packet.Repair              = false;
+                    l_Itr->ToPlayer()->SendPacket(l_Packet.Write());
+
+                    l_Itr->ToPlayer()->SetEventType(EventType::EVENT_TYPE_NONE);
+                    break;
+                }
+
                 if (l_SecondItr.second->GetType() == Entity::Type::OBJECT_TYPE_PORTAL)
                 {
                     if (l_SecondItr.second->ToPortal()->IsInPortalRadius(l_Itr))
@@ -112,24 +132,6 @@ namespace SteerStone { namespace Game { namespace Map {
                         l_Itr->ToPlayer()->SetEventType(EventType::EVENT_TYPE_STATION);
                         break;
                     }
-                }
-                else
-                {
-                    if (l_Itr->ToPlayer()->GetEvent() == EventType::EVENT_TYPE_NONE)
-                        continue;
-
-                    Server::Packets::Event l_Packet;
-                    l_Packet.PositionX           = l_Itr->GetSpline()->GetPositionX();
-                    l_Packet.PositionY           = l_Itr->GetSpline()->GetPositionY();
-                    l_Packet.InDemolitionZone    = false;
-                    l_Packet.InRadiationZone     = false;
-                    l_Packet.PlayRepairAnimation = false;
-                    l_Packet.InTradeZone         = false;
-                    l_Packet.InJumpZone          = false;
-                    l_Packet.Repair              = false;
-                    l_Itr->ToPlayer()->SendPacket(l_Packet.Write());
-
-                    l_Itr->ToPlayer()->SetEventType(EventType::EVENT_TYPE_NONE);
                 }
             }
         }
@@ -194,7 +196,7 @@ namespace SteerStone { namespace Game { namespace Map {
                 l_Itr->second->ToPlayer()->ProcessPacket(l_Filter);
                 l_Itr->second->ToPlayer()->Update(p_Diff);
             }
-            else if (l_Itr->second->GetType() == Entity::Type::OBJECT_TYPE_NPC)
+            else if (l_Itr->second->GetType() == Entity::Type::OBJECT_TYPE_MOB)
                 l_Itr->second->ToMob()->Update(p_Diff);
 
             l_Itr = l_Copy.erase(l_Itr);
@@ -294,7 +296,7 @@ namespace SteerStone { namespace Game { namespace Map {
     /// Find Nearest Player to Object
     /// @p_Object : Object which we are checking against
     /// @p_Distance : Find Object in a specific range
-    Entity::Object* Grid::FindNearestPlayer(Entity::Object* p_Object, float p_Distance)
+    Entity::Player* Grid::FindNearestPlayer(Entity::Object* p_Object, float p_Distance)
     {
         Entity::Object* l_Object = nullptr;
         float l_MinDistance = 500000.0f;
@@ -313,7 +315,7 @@ namespace SteerStone { namespace Game { namespace Map {
             }
         }
 
-        return l_Object;
+        return l_Object ? l_Object->ToPlayer() : nullptr;
     }
     /// Find Object
     /// @p_Counter : Counter of Object

@@ -20,6 +20,7 @@
 #include "World.hpp"
 #include "Mob.hpp"
 #include "ZoneManager.hpp"
+#include "Diagnostic/DiaServerWatch.hpp"
 #include "Utility/UtilRandom.hpp"
 #include "Utility/UtilMaths.hpp"
 
@@ -45,6 +46,11 @@ namespace SteerStone { namespace Game { namespace Entity {
         m_Seprom        = 0;
         m_Palladium     = 0;
 
+        m_HomePositionX = 0.0f;
+        m_HomePositionY = 0.0f;
+
+        m_PlayerTagger = nullptr;
+
         m_MoveTimeMax   = 0;
         m_MoveTimeMin   = 0;
 
@@ -52,6 +58,9 @@ namespace SteerStone { namespace Game { namespace Entity {
         m_RandomDistanceFromPlayerY = 0;
 
         m_AttackRange = sWorldManager->GetIntConfig(World::IntConfigs::INT_CONFIG_MOB_ATTACK_RANGE);
+
+        SetType(Type::OBJECT_TYPE_MOB);
+        SetGUID(ObjectGUID(GUIDType::MOB));
     }
     /// Deconstructor
     Mob::~Mob()
@@ -135,7 +144,7 @@ namespace SteerStone { namespace Game { namespace Entity {
             {
                 if (!HasTarget())
                 {
-                    Entity::Object* l_Player = GetGrid()->FindNearestPlayer(this, sWorldManager->GetIntConfig(World::IntConfigs::INT_CONFIG_FIND_PLAYER_DISTANCE));
+                    Entity::Player* l_Player = GetGrid()->FindNearestPlayer(this, sWorldManager->GetIntConfig(World::IntConfigs::INT_CONFIG_FIND_PLAYER_DISTANCE));
 
                     if (!l_Player)
                         break;
@@ -151,40 +160,71 @@ namespace SteerStone { namespace Game { namespace Entity {
                     m_RandomDistanceFromPlayerY = Core::Utils::Int32Random(-100, 200);
                 }
 
-                Object const* l_Target = GetTarget();
+                Player* l_Target = GetTarget()->ToPlayer();
 
                 /// Cancel attack if target does not exist
-                if (!l_Target->ToPlayer())
+                if (!l_Target)
                 {
                     CancelAttack();
                     break;
                 }
+
+                if (GetTaggedPlayer())
+                    LOG_ASSERT(GetTarget()->GetGUID() == GetTaggedPlayer()->GetGUID(), "Mob", "Target and tagged player does not match!");
 
                 float l_PositionX = l_Target->GetSpline()->GetPlannedPositionX();
                 float l_PositionY = l_Target->GetSpline()->GetPlannedPositionY();
                 float l_Distance = Core::Utils::DistanceSquared(GetSpline()->GetPlannedPositionX(), GetSpline()->GetPlannedPositionY(), l_PositionX, l_PositionY);
 
-                /// Clear target if target is jumping
-                if (l_Target->ToPlayer()->IsJumping())
+                /// Don't follow player if player is at an event, we only attack player if player has tagged us
+                if (l_Target->GetEvent() == EventType::EVENT_TYPE_PORTAL || l_Target->GetEvent() == EventType::EVENT_TYPE_STATION)
+                {
+                    if (!GetTaggedPlayer())
+                    {
+                        CancelAttack();
+                        return;
+                    }
+                }
+
+                /// If the player is targetting us, then only cancel attack if target last time shot us is more than 10 seconds ago
+                if (GetTaggedPlayer())
+                {
+                    if (sServerTimeManager->GetTimeDifference(m_LastTimeAttacked, sServerTimeManager->GetServerTime()) > MAX_LAST_TIME_ATTACKED)
+                    {
+                        CancelAttack();
+                        break;
+                    }
+                }
+                /// else if player is farther than max distance, then cancel attack
+                else if (l_Distance > sWorldManager->GetIntConfig(World::IntConfigs::INT_CONFIG_MAX_FOLLOW_DISTANCE))
                 {
                     CancelAttack();
                     break;
                 }
-                /// Follow the target if our distance is out of range
-                else if (l_Distance > sWorldManager->GetIntConfig(World::IntConfigs::INT_CONFIG_MIN_FOLLOW_DISTANCE) && l_Distance < sWorldManager->GetIntConfig(World::IntConfigs::INT_CONFIG_MAX_FOLLOW_DISTANCE))
+
+                /// If player is more than our min distance, start following player
+                if (l_Distance > sWorldManager->GetIntConfig(World::IntConfigs::INT_CONFIG_MIN_FOLLOW_DISTANCE))
                 {
-                    GetSpline()->Move(l_PositionX + m_RandomDistanceFromPlayerX, l_PositionY + m_RandomDistanceFromPlayerY, 0, 0);
+                    GetSpline()->Move(l_PositionX, l_PositionY, 0, 0);
 
                     /// We want to update the movement, as soon as possible to ensure we are keeping up to the player
                     m_IntervalMoveTimer.SetInterval(m_MoveTimeMax / 2);
                 }
-                else if (l_Distance > sWorldManager->GetIntConfig(World::IntConfigs::INT_CONFIG_MAX_FOLLOW_DISTANCE))
+                /// Check if we are too close to target, if so - move back
+                else if (l_Distance < sWorldManager->GetIntConfig(World::IntConfigs::INT_CONFIG_MIN_FOLLOW_DISTANCE))
                 {
-                    /// If target is far away, cancel the target and continue moving around in the ground
-                    CancelAttack();
-                    break;
+                    float l_Degree = Core::Utils::FloatRandom(0, 360) * M_PI / 180;
+
+                    l_PositionX += std::abs(m_RandomDistanceFromPlayerX) * std::cos(l_Degree);
+                    l_PositionY += std::abs(m_RandomDistanceFromPlayerY) * std::sin(l_Degree);
+
+                    GetSpline()->Move(l_PositionX, l_PositionY, 0, 0);
+
+                    m_IntervalMoveTimer.SetInterval(m_MoveTimeMax);
                 }
-                else if (!IsAttacking())
+
+                /// If we are not attacking, roam around the player
+                if (!IsAttacking())
                 {
                     float l_Degree = Core::Utils::FloatRandom(0, 360) * M_PI / 180;
 
@@ -204,7 +244,7 @@ namespace SteerStone { namespace Game { namespace Entity {
             {
                 if (!HasTarget())
                 {
-                    Entity::Object* l_Player = GetGrid()->FindNearestPlayer(this, sWorldManager->GetIntConfig(World::IntConfigs::INT_CONFIG_FIND_PLAYER_DISTANCE));
+                    Entity::Player* l_Player = GetGrid()->FindNearestPlayer(this, sWorldManager->GetIntConfig(World::IntConfigs::INT_CONFIG_FIND_PLAYER_DISTANCE));
 
                     if (!l_Player)
                         break;
@@ -220,39 +260,64 @@ namespace SteerStone { namespace Game { namespace Entity {
                     m_RandomDistanceFromPlayerY = Core::Utils::Int32Random(-100, 200);
                 }
 
-                Object* l_Target = GetTarget();
+                Player* l_Target = GetTarget()->ToPlayer();
 
                 /// Cancel attack if target does not exist
-                if (!l_Target->ToPlayer())
+                if (!l_Target)
                 {
                     CancelAttack();
                     break;
                 }
+
+                if (GetTaggedPlayer())
+                    LOG_ASSERT(GetTarget()->GetGUID() != GetTaggedPlayer()->GetGUID(), "Mob", "Target and tagged player does not match!");
 
                 float l_PositionX = l_Target->GetSpline()->GetPlannedPositionX();
                 float l_PositionY = l_Target->GetSpline()->GetPlannedPositionY();
                 float l_Distance = Core::Utils::DistanceSquared(GetSpline()->GetPlannedPositionX(), GetSpline()->GetPlannedPositionY(), l_PositionX, l_PositionY);
 
-                /// Clear target if target is jumping or our target is far away
+                /// Clear target if target is jumping
                 if (l_Target->ToPlayer()->IsJumping())
                 {
                     CancelAttack();
                     break;
                 }
-                /// Follow the target if our distance is out of range
-                else if (l_Distance > sWorldManager->GetIntConfig(World::IntConfigs::INT_CONFIG_MIN_FOLLOW_DISTANCE) && l_Distance < sWorldManager->GetIntConfig(World::IntConfigs::INT_CONFIG_MAX_FOLLOW_DISTANCE))
+
+                /// Don't attack player if player is at an event, we only attack player if player has tagged us
+                if (l_Target->GetEvent() == EventType::EVENT_TYPE_PORTAL || l_Target->GetEvent() == EventType::EVENT_TYPE_STATION)
                 {
-                    GetSpline()->Move(l_PositionX + m_RandomDistanceFromPlayerX, l_PositionY + m_RandomDistanceFromPlayerY, 0, 0);
+                    if (!GetTaggedPlayer())
+                    {
+                        CancelAttack();
+                        return;
+                    }
+                }
+
+                /// If the player is targetting us, then only cancel attack if target last time shot us is more than 10 seconds ago
+                if (GetTaggedPlayer())
+                {
+                    if (sServerTimeManager->GetTimeDifference(m_LastTimeAttacked, sServerTimeManager->GetServerTime()) > MAX_LAST_TIME_ATTACKED)
+                    {
+                        CancelAttack();
+                        break;
+                    }
+                }
+                /// else if player is farther than max distance, then cancel attack
+                else if (l_Distance > sWorldManager->GetIntConfig(World::IntConfigs::INT_CONFIG_MAX_FOLLOW_DISTANCE))
+                {
+                    CancelAttack();
+                    break;
+                }
+
+                /// If player is more than our min distance, start following player
+                if (l_Distance > sWorldManager->GetIntConfig(World::IntConfigs::INT_CONFIG_MIN_FOLLOW_DISTANCE))
+                {
+                    GetSpline()->Move(l_PositionX, l_PositionY, 0, 0);
 
                     /// We want to update the movement, as soon as possible to ensure we are keeping up to the player
                     m_IntervalMoveTimer.SetInterval(m_MoveTimeMax / 2);
                 }
-                else if (l_Distance > sWorldManager->GetIntConfig(World::IntConfigs::INT_CONFIG_MAX_FOLLOW_DISTANCE))
-                {
-                    /// If target is far away, cancel the target and continue moving around in the ground
-                    CancelAttack();
-                    break;
-                }
+                /// Check if we are too close to target, if so - move back
                 else if (l_Distance < sWorldManager->GetIntConfig(World::IntConfigs::INT_CONFIG_MIN_FOLLOW_DISTANCE))
                 {
                     float l_Degree = Core::Utils::FloatRandom(0, 360) * M_PI / 180;
@@ -265,7 +330,8 @@ namespace SteerStone { namespace Game { namespace Entity {
                     m_IntervalMoveTimer.SetInterval(m_MoveTimeMax);
                 }
 
-                Attack(l_Target);
+                if (!IsAttacking())
+                    Attack(l_Target);
 
                 return;
             }

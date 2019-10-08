@@ -124,6 +124,9 @@ namespace SteerStone { namespace Game { namespace Server { namespace Packets { n
         case RewardType::REWARD_TYPE_HONOUR:
             l_Type = "HON";
             break;
+        case RewardType::REWARD_TYPE_CARGO:
+            l_Type = "CAR";
+            break;
         }
 
         m_Buffer.AppendChar(l_Type.c_str());

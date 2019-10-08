@@ -27,7 +27,8 @@ namespace SteerStone { namespace Game { namespace Server { namespace Packets { n
         REWARD_TYPE_CREDIT,
         REWARD_TYPE_URIDIUM,
         REWARD_TYPE_HONOUR,
-        REWARD_TYPE_EXPERIENCE
+        REWARD_TYPE_EXPERIENCE,
+        REWARD_TYPE_CARGO,
     };
 
     enum class InfoType

@@ -26,7 +26,7 @@ namespace SteerStone { namespace Game { namespace Entity {
     enum class GUIDType
     {
         Player      = 0x01,
-        NPC         = 0x02,
+        MOB         = 0x02,
         Portal      = 0x05,
         Station     = 0x06,
     };
@@ -133,7 +133,7 @@ namespace SteerStone { namespace Game { namespace Entity {
         {
             switch (p_Type)
             {
-            case GUIDType::NPC:
+            case GUIDType::MOB:
             case GUIDType::Portal:
                 return true;
             default:

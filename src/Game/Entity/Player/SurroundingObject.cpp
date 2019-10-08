@@ -122,7 +122,7 @@ namespace SteerStone { namespace Game { namespace Entity {
             m_Object->GetObjectGUID().GetCounter())
         {
             /// If its a mob, then clear the target of the mob
-            if (m_Object->GetType() == Type::OBJECT_TYPE_NPC)
+            if (m_Object->GetType() == Type::OBJECT_TYPE_MOB)
                 m_Object->ToUnit()->CancelAttack();
 
             /// And reset timer

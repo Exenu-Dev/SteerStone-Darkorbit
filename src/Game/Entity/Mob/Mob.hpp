@@ -23,6 +23,7 @@
 #include "Unit.hpp"
 
 #define DISTANCE_AWAY_FROM_BORDER 100          ///< Distance away from border
+#define MAX_LAST_TIME_ATTACKED 10000
 
 namespace SteerStone { namespace Game { namespace Map {
 
@@ -79,6 +80,10 @@ namespace SteerStone { namespace Game { namespace Entity {
         uint32 GetSeprom()      const { return m_Seprom;        }
         uint32 GetPalladium()   const { return m_Palladium;     }
 
+        Player const* GetTaggedPlayer() const { return m_PlayerTagger; }
+        void SetTaggedPlayer(Player const* p_Player) { m_PlayerTagger = p_Player; }
+        bool IsTaggedByPlayer() const { return m_PlayerTagger != nullptr ? true : false; }
+
         /// Update
         /// @p_Diff : Execution Time
         void Update(uint32 const p_Diff);
@@ -86,6 +91,7 @@ namespace SteerStone { namespace Game { namespace Entity {
         /// Reward Credit/Uridium...
         /// @p_Player : Player is being rewarded
         void RewardKillCredit(Player* p_Player);
+
 
         //////////////////////////////////////////////////////////////////////////
         //////////////////////////////////////////////////////////////////////////
@@ -121,6 +127,8 @@ namespace SteerStone { namespace Game { namespace Entity {
 
         float m_HomePositionX;
         float m_HomePositionY;
+
+        Player const* m_PlayerTagger; ///< Player is targetting us
 
         Core::Diagnostic::IntervalTimer m_IntervalMoveTimer;
         Core::Diagnostic::IntervalTimer m_IntervalRespawnTimer;
