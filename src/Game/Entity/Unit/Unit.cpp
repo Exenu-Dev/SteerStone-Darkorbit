@@ -86,6 +86,7 @@ namespace SteerStone { namespace Game { namespace Entity {
         l_Packet.LaserId    = m_WeaponState == 3 ? m_LaserType : 0;
         GetMap()->SendPacketToNearByGridsIfInSurrounding(l_Packet.Write(), this, true);
 
+        /// If target is mob, then assign mob to attack us if mob is not already tagged
         if (GetTarget()->IsMob())
         {
             if (!GetTarget()->ToMob()->IsTaggedByPlayer())
@@ -116,6 +117,7 @@ namespace SteerStone { namespace Game { namespace Entity {
         if (!m_IntervalAttackUpdate.Passed())
             return;
 
+        /// Cancel attack if target is dead
         if (GetTarget()->ToUnit()->GetDeathState() == DeathState::DEAD)
         {
             CancelAttack();
@@ -130,20 +132,13 @@ namespace SteerStone { namespace Game { namespace Entity {
                 GetTarget()->GetSpline()->GetPositionX(), GetTarget()->GetSpline()->GetPositionY())
             > m_AttackRange)
             {
-                if (GetType() == Type::OBJECT_TYPE_PLAYER)
-                {
-                    Server::Packets::Attack::AttackOutOfRange l_Packet;
-                    ToPlayer()->SendPacket(l_Packet.Write());
-                }
+                if (IsPlayer())
+                    ToPlayer()->SendPacket(Server::Packets::Attack::AttackOutOfRange().Write());
 
-                if (GetTarget()->GetType() == Type::OBJECT_TYPE_PLAYER)
-                {
-                    Server::Packets::Attack::EscapedTheAttack l_Packet;
-                    GetTarget()->ToPlayer()->SendPacket(l_Packet.Write());
-                }
+                if (GetTarget()->IsPlayer())
+                    GetTarget()->ToPlayer()->SendPacket(Server::Packets::Attack::EscapedTheAttack().Write());
 
-                /// The client automatically cancels the shooting lasers
-                /// but the other client doesn't - weird.
+                /// Cancel laser shoot effect
                 Server::Packets::Attack::CancelLaserShoot l_Packet;
                 l_Packet.FromId = GetObjectGUID().GetCounter();
                 l_Packet.ToId   = GetTarget()->GetObjectGUID().GetCounter();
@@ -160,13 +155,14 @@ namespace SteerStone { namespace Game { namespace Entity {
                 if (CalculateHitChance())
                 {
                     /// Now calculate damage
-                    int32 l_Damage = CalculateDamageDone();
+                    int32 l_Damage       = CalculateDamageDone();
                     int32 l_ShieldDamage = 0;
                     CalculateDamageTaken(l_Damage, l_ShieldDamage);
 
                     int32 l_HitPoints = GetTarget()->ToUnit()->GetHitPoints() - l_Damage;
-                    int32 l_Shield = GetTarget()->ToUnit()->GetShield() - l_ShieldDamage;
+                    int32 l_Shield    = GetTarget()->ToUnit()->GetShield() - l_ShieldDamage;
 
+                    /// If Hitpoints is 0 or less, then target is dead
                     if (l_HitPoints <= 0)
                     {
                         Kill(GetTarget()->ToUnit());
@@ -176,10 +172,12 @@ namespace SteerStone { namespace Game { namespace Entity {
                     if (l_Shield < 0)
                         l_Shield = 0;
 
+                    /// Set new hitpoints and shield points
                     GetTarget()->ToUnit()->SetHitPoints(l_HitPoints);
                     GetTarget()->ToUnit()->SetShield(l_Shield);
 
-                    if (GetType() == Type::OBJECT_TYPE_PLAYER)
+                    /// Send damage effect to attacker
+                    if (IsPlayer())
                     {
                         Server::Packets::Attack::MakeDamage l_MakeDamage;
                         l_MakeDamage.UpdateAmmo = false;
@@ -189,7 +187,8 @@ namespace SteerStone { namespace Game { namespace Entity {
                         ToPlayer()->SendPacket(l_MakeDamage.Write());
                     }
 
-                    if (GetTarget()->GetType() == Entity::Type::OBJECT_TYPE_PLAYER)
+                    /// Send recieved damage effect to target
+                    if (GetTarget()->IsPlayer())
                     {
                         Server::Packets::Attack::RecievedDamage l_ReceivedDamagePacket;
                         l_ReceivedDamagePacket.HitPoints = GetTarget()->ToUnit()->GetHitPoints();
@@ -200,17 +199,11 @@ namespace SteerStone { namespace Game { namespace Entity {
                 }
                 else ///< Send Miss Packet
                 {
-                    if (GetType() == Type::OBJECT_TYPE_PLAYER)
-                    {
-                        Server::Packets::Attack::MissSelf l_MissPacket;
-                        ToPlayer()->SendPacket(l_MissPacket.Write());
-                    }
+                    if (IsPlayer())
+                        ToPlayer()->SendPacket(Server::Packets::Attack::MissSelf().Write());
 
-                    if (GetTarget()->GetType() == Type::OBJECT_TYPE_PLAYER)
-                    {
-                        Server::Packets::Attack::MissTarget l_MissPacket;
-                        GetTarget()->ToPlayer()->SendPacket(l_MissPacket.Write());
-                    }
+                    if (GetTarget()->IsPlayer())
+                        GetTarget()->ToPlayer()->SendPacket(Server::Packets::Attack::MissTarget().Write());
                 }
             }
         }
@@ -220,16 +213,8 @@ namespace SteerStone { namespace Game { namespace Entity {
                 GetTarget()->GetSpline()->GetPositionX(), GetTarget()->GetSpline()->GetPositionY())
             <= m_AttackRange)
             {
-                if (GetType() == Type::OBJECT_TYPE_PLAYER)
-                {
-                    Server::Packets::Attack::AttackInRange l_Packet;
-                    ToPlayer()->SendPacket(l_Packet.Write());
-                }
-
-                /// If it's a mob, then reassign mob to attack again
-                if (GetTarget()->GetType() == Type::OBJECT_TYPE_MOB)
-                    if (!GetTarget()->ToMob()->IsAttacking())
-                        GetTarget()->ToUnit()->Attack(this);
+                if (IsPlayer())
+                    ToPlayer()->SendPacket(Server::Packets::Attack::AttackInRange().Write());
 
                 /// Send Attack
                 Server::Packets::Attack::LaserShoot l_Packet;
