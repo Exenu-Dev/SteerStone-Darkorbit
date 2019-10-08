@@ -28,10 +28,13 @@ namespace SteerStone { namespace Core { namespace Diagnostic {
     {
     public:
         /// Constructor
-        IntervalTimer()
-            : m_Current(0), m_Interval(0)
+        /// @p_Interval : Interval Timer
+        IntervalTimer(uint32 p_Interval = 0)
+            : m_Current(0), m_Interval(p_Interval)
         {
         }
+        /// Deconstructor
+        ~IntervalTimer() { }
 
     //////////////////////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////////////////////

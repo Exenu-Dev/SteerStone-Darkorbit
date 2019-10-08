@@ -59,8 +59,6 @@ namespace SteerStone { namespace Game { namespace Map {
         for (uint32 l_X = 0; l_X < GRID_CELLS; l_X++)
             for (uint32 l_Y = 0; l_Y < GRID_CELLS; l_Y++)
                 m_Grids[l_X][l_Y] = new Grid(this, l_X, l_Y);
-
-        m_IntervalJumpPlayer.SetInterval(sWorldManager->GetIntConfig(World::IntConfigs::INT_CONFIG_JUMP_DELAY));
     }
     /// Deconstructor
     Base::~Base()
@@ -309,41 +307,44 @@ namespace SteerStone { namespace Game { namespace Map {
         if (p_ObjectPlayer->ToPlayer()->IsJumping())
             return;
 
-        m_PlayersToJump[p_ObjectPlayer] = p_ObjectPortal;
+        m_PlayersToJump[p_ObjectPlayer] = std::make_pair(Core::Diagnostic::IntervalTimer(sWorldManager->GetIntConfig(World::IntConfigs::INT_CONFIG_JUMP_DELAY)), p_ObjectPortal);
     }
     /// Process Jump Queue
     /// @p_Diff : Execution Time
     void Base::ProcessJumpQueue(uint32 const p_Diff)
     {
-        m_IntervalJumpPlayer.Update(p_Diff);
-        if (!m_IntervalJumpPlayer.Passed())
-            return;
-
-        for (auto l_Itr : m_PlayersToJump)
+        for (auto& l_Itr = m_PlayersToJump.begin(); l_Itr != m_PlayersToJump.end();)
         {
+            l_Itr->second.first.Update(p_Diff);
+            if (!l_Itr->second.first.Passed())
+            {
+                l_Itr++;
+                continue;
+            }
+
             /// Remove player from map
-            sZoneManager->RemoveFromMap(l_Itr.first, true);
-            l_Itr.first->ToPlayer()->ClearTarget();
-            l_Itr.first->ToPlayer()->ClearSurroundings();
+            sZoneManager->RemoveFromMap(l_Itr->first, true);
+            l_Itr->first->ToPlayer()->ClearTarget();
+            l_Itr->first->ToPlayer()->ClearSurroundings();
 
             /// Add to map
-            l_Itr.first->SetMap(sZoneManager->GetMap(l_Itr.second->ToPortal()->GetToMapId()));
+            l_Itr->first->SetMap(sZoneManager->GetMap(l_Itr->second.second->ToPortal()->GetToMapId()));
 
-            l_Itr.first->ToPlayer()->SendDisplayStarSystem();
-            l_Itr.first->GetSpline()->SetPosition(l_Itr.second->ToPortal()->GetToPositionX(), l_Itr.second->ToPortal()->GetToPositionY(),
-                l_Itr.second->ToPortal()->GetToPositionX(), l_Itr.second->ToPortal()->GetToPositionY());
-            l_Itr.first->ToPlayer()->SendInitializeShip();
-            l_Itr.first->ToPlayer()->SendDrones();
-            l_Itr.first->ToPlayer()->SendMapUpdate();
-            l_Itr.first->ToPlayer()->SendAmmoUpdate();
-            l_Itr.first->ToPlayer()->SendAccountRank();
+            l_Itr->first->ToPlayer()->SendDisplayStarSystem();
+            l_Itr->first->GetSpline()->SetPosition(l_Itr->second.second->ToPortal()->GetToPositionX(), l_Itr->second.second->ToPortal()->GetToPositionY(),
+                l_Itr->second.second->ToPortal()->GetToPositionX(), l_Itr->second.second->ToPortal()->GetToPositionY());
+            l_Itr->first->ToPlayer()->SendInitializeShip();
+            l_Itr->first->ToPlayer()->SendDrones();
+            l_Itr->first->ToPlayer()->SendMapUpdate();
+            l_Itr->first->ToPlayer()->SendAmmoUpdate();
+            l_Itr->first->ToPlayer()->SendAccountRank();
 
             /// Must be called after we send initial login packets
-            sZoneManager->AddToMap(l_Itr.first);
-            l_Itr.first->ToPlayer()->SetIsJumping(false);
-        }
+            sZoneManager->AddToMap(l_Itr->first);
+            l_Itr->first->ToPlayer()->SetIsJumping(false);
 
-        m_PlayersToJump.clear();
+            l_Itr = m_PlayersToJump.erase(l_Itr);
+        }
     }
 
     ///////////////////////////////////////////

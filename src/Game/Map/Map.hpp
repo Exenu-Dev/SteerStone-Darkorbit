@@ -19,6 +19,7 @@
 #pragma once
 #include <PCH/Precompiled.hpp>
 #include "PoolManager.hpp"
+#include "Diagnostic/DiaIntervalTimer.hpp"
 #include "GameFlags.hpp"
 #include <mutex>
 
@@ -34,7 +35,7 @@ namespace SteerStone { namespace Game { namespace Map {
 
     class Entity::Object;
 
-    typedef std::unordered_map<Entity::Object*, Entity::Object*> JumpQueueMap;
+    typedef std::unordered_map<Entity::Object*, std::pair<Core::Diagnostic::IntervalTimer, Entity::Object*>> JumpQueueMap;
 
     /// Map
     class Base
@@ -164,8 +165,7 @@ namespace SteerStone { namespace Game { namespace Map {
         Grid* m_Grids[GRID_CELLS][GRID_CELLS];                ///< Grids
         PoolManager m_PoolManager;                            ///< Pool Manager
         std::vector<Entity::Object*> m_ConstantObjects;       ///< Constant Objects
-        JumpQueueMap m_PlayersToJump; ///< Process players to jump
-        Core::Diagnostic::IntervalTimer m_IntervalJumpPlayer; ///< Interval Timer
+        JumpQueueMap m_PlayersToJump;                         ///< Process players to jump
     };
 
 }   ///< namespace Map
