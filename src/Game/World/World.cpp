@@ -105,6 +105,7 @@ namespace SteerStone { namespace Game { namespace World {
         m_IntConfigs[IntConfigs::INT_CONFIG_MAX_ROAMING_DISTANCE]         = sConfigManager->GetInt("MaxRoamingDistance", 200);
         m_IntConfigs[IntConfigs::INT_CONFIG_FIND_PLAYER_DISTANCE]         = sConfigManager->GetInt("FindPlayerDistance", 800);
         m_IntConfigs[IntConfigs::INT_CONFIG_DISTANCE_AWAY_FROM_PLAYER]    = sConfigManager->GetInt("DistanceAwayFromPlayer", 100);
+        m_IntConfigs[IntConfigs::INT_CONFIG_SAVE_PLAYER_TO_DATABASE]      = sConfigManager->GetInt("PlayerSaveInterval", 900000);
     }
     /// Returns bool value
     bool Base::GetBoolConfig(BoolConfigs p_Index)

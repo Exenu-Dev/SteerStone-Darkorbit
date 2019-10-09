@@ -58,6 +58,7 @@ namespace SteerStone { namespace Game { namespace World {
         INT_CONFIG_MAX_ROAMING_DISTANCE,
         INT_CONFIG_FIND_PLAYER_DISTANCE,
         INT_CONFIG_DISTANCE_AWAY_FROM_PLAYER,
+        INT_CONFIG_SAVE_PLAYER_TO_DATABASE,
         INT_CONFIG_MAX,
     };
 

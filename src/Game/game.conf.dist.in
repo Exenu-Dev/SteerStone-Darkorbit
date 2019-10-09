@@ -91,6 +91,11 @@ JumpDelay = 2000
 #	Default: 5000
 DelayRemoval = 5000
 
+## PlayerSaveInterval
+## 	Description: Time (in milliseconds) for player save interval.
+#  	Default:     900000 - (15 min)
+PlayerSaveInterval = 900000
+
 ### MOB SETTINGS ###
 
 ## Attack Range

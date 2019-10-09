@@ -129,9 +129,11 @@ namespace SteerStone { namespace Game { namespace Entity {
         void LoadDrones();
     private:
         /// Save Player details to database
-        void SaveToDB();
+        /// @p_Asynchronous : Use Async connection
+        void SaveToDB(bool p_Asynchronous = false);
         /// Save Ship details to database
-        void SaveShipToDB();
+        /// @p_Asynchronous : Use Async connection
+        void SaveShipToDB(bool p_Asynchronous = false);
     private:
         /// Return Drone Level
         /// @p_Drone : Drone
@@ -292,7 +294,8 @@ namespace SteerStone { namespace Game { namespace Entity {
         EventType m_Event;
         Ammo m_Ammo;
         Inventory m_Inventory;
-        
+        Core::Diagnostic::IntervalTimer m_IntervalNextSave;              ///< Save to database
+
         std::vector<Drone> m_Drones;                                     ///< Ship Drones
         SurroundingMap m_Surroundings;                                   ///< Objects surrounding player
         std::shared_ptr<Server::GameSocket> m_Socket;                    ///< Socket

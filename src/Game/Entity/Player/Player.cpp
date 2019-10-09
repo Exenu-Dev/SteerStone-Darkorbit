@@ -78,6 +78,8 @@ namespace SteerStone { namespace Game { namespace Entity {
         m_LoggingOut            = false;
         m_Event                 = EventType::EVENT_TYPE_NONE;
 
+        m_IntervalNextSave.SetInterval(sWorldManager->GetIntConfig(World::IntConfigs::INT_CONFIG_SAVE_PLAYER_TO_DATABASE));
+
         m_AttackRange           = sWorldManager->GetIntConfig(World::IntConfigs::INT_CONFIG_PLAYER_ATTACK_RANGE);
 
         SetType(Type::OBJECT_TYPE_PLAYER);
@@ -271,7 +273,8 @@ namespace SteerStone { namespace Game { namespace Entity {
         }
     }
     /// Save Player details to database
-    void Player::SaveToDB()
+    /// @p_Asynchronous : Use Async connection
+    void Player::SaveToDB(bool p_Asynchronous)
     {
         Core::Database::PreparedStatement* l_PreparedStatement = GameDatabase.GetPrepareStatement();
         l_PreparedStatement->PrepareStatement("UPDATE accounts INNER JOIN account_settings ON account_settings.id = accounts.id "
@@ -318,12 +321,17 @@ namespace SteerStone { namespace Game { namespace Entity {
         l_PreparedStatement->SetBool(34, m_AutoChangeAmmo);
         l_PreparedStatement->SetBool(35, m_EnableBuyFast);
         l_PreparedStatement->SetUint32(36, m_Id);
-        l_PreparedStatement->ExecuteStatement();
 
-        SaveShipToDB();
+        if (p_Asynchronous)
+            m_OperatorProcessor.AddOperator(GameDatabase.PrepareOperator(l_PreparedStatement));
+        else
+            l_PreparedStatement->ExecuteStatement();
+
+        SaveShipToDB(p_Asynchronous);
     }
     /// Save Ship details to database
-    void Player::SaveShipToDB()
+    /// @p_Asynchronous : Use Async connection
+    void Player::SaveShipToDB(bool p_Asynchronous)
     {
         Core::Database::PreparedStatement* l_PreparedStatement = GameDatabase.GetPrepareStatement();
         l_PreparedStatement->PrepareStatement("UPDATE account_ship SET type = ?, cargo_space = ?, "
@@ -350,7 +358,10 @@ namespace SteerStone { namespace Game { namespace Entity {
         l_PreparedStatement->SetUint32(16, m_Ammo.m_InstantShields);
         l_PreparedStatement->SetUint32(17, m_Id);
 
-        l_PreparedStatement->ExecuteStatement();
+        if (p_Asynchronous)
+            m_OperatorProcessor.AddOperator(GameDatabase.PrepareOperator(l_PreparedStatement));
+        else
+            l_PreparedStatement->ExecuteStatement();
     }
     /// Return Drone Level
     /// @p_Drone : Drone
@@ -395,6 +406,10 @@ namespace SteerStone { namespace Game { namespace Entity {
         UpdateSurroundings(p_Diff);
 
         Unit::Update(p_Diff);
+
+        m_IntervalNextSave.Update(p_Diff);
+        if (m_IntervalNextSave.Passed())
+            SaveToDB(true);
 
         m_OperatorProcessor.ProcessOperators();
 
