@@ -402,22 +402,22 @@ namespace SteerStone { namespace Game { namespace Map {
             if (l_Itr->GetType() == Entity::Type::OBJECT_TYPE_PORTAL)
             {
                 Server::Packets::CreatePortal l_Packet;
-                l_Packet.Id = l_Itr->GetObjectGUID().GetCounter();
-                l_Packet.Type = static_cast<uint16>(l_Itr->ToPortal()->GetType());
-                l_Packet.PositionX = l_Itr->GetSpline()->GetPositionX();
-                l_Packet.PositionY = l_Itr->GetSpline()->GetPositionY();
+                l_Packet.Id         = l_Itr->GetObjectGUID().GetCounter();
+                l_Packet.Type       = static_cast<uint16>(l_Itr->ToPortal()->GetType());
+                l_Packet.PositionX  = l_Itr->GetSpline()->GetPositionX();
+                l_Packet.PositionY  = l_Itr->GetSpline()->GetPositionY();
                 p_Object->ToPlayer()->SendPacket(l_Packet.Write());
             }
             else if (l_Itr->GetType() == Entity::Type::OBJECT_TYPE_STATION)
             {
                 Server::Packets::CreateStation l_Packet;
-                l_Packet.Id = l_Itr->GetObjectGUID().GetCounter();
-                l_Packet.Type = static_cast<uint16>(l_Itr->ToStation()->GetType());
-                l_Packet.Name = l_Itr->GetName();
-                l_Packet.CompanyId = static_cast<uint16>(l_Itr->ToStation()->GetCompany());
-                l_Packet.Peace = l_Itr->ToStation()->IsPeace();
-                l_Packet.PositionX = l_Itr->GetSpline()->GetPositionX();
-                l_Packet.PositionY = l_Itr->GetSpline()->GetPositionY();
+                l_Packet.Id         = l_Itr->GetObjectGUID().GetCounter();
+                l_Packet.Type       = static_cast<uint16>(l_Itr->ToStation()->GetType());
+                l_Packet.Name       = l_Itr->GetName();
+                l_Packet.CompanyId  = static_cast<uint16>(l_Itr->ToStation()->GetCompany());
+                l_Packet.Peace      = l_Itr->ToStation()->IsPeace();
+                l_Packet.PositionX  = l_Itr->GetSpline()->GetPositionX();
+                l_Packet.PositionY  = l_Itr->GetSpline()->GetPositionY();
                 p_Object->ToPlayer()->SendPacket(l_Packet.Write());
             }
         }

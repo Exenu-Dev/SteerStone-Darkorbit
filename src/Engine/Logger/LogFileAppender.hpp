@@ -18,10 +18,10 @@
 */
 
 #pragma once
-#include <Precompiled.hpp>
+#include <PCH/Precompiled.hpp>
 #include <mutex>
 
-#include "Core.hpp"
+#include "Core/Core.hpp"
 #include "LogAppender.hpp"
 
 namespace SteerStone { namespace Core { namespace Logger {
@@ -31,26 +31,32 @@ namespace SteerStone { namespace Core { namespace Logger {
     {
         DISALLOW_COPY_AND_ASSIGN(FileAppender);
 
-        public:
-            /// Constructor
-            /// @p_FileName : Output file name
-            /// @p_HTML     : Should output in HTML syntax
-            FileAppender(const std::string & p_FileName, bool p_HTML = true);
-            /// Destructor
-            ~FileAppender();
+    //////////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////////
 
-            /// On report a message
-            /// @p_Logger   : Logger instance
-            /// @p_Type     : Log type
-            /// @p_System   : Message sender
-            /// @p_Message  : Message to report
-            void OnReport(Base * p_Logger, const std::string & p_Time, LogType p_Type, const std::string & p_System, const std::string & p_Message) override final;
+    public:
+        /// Constructor
+        /// @p_FileName : Output file name
+        /// @p_HTML     : Should output in HTML syntax
+        FileAppender(const std::string & p_FileName, bool p_HTML = true);
+        /// Destructor
+        ~FileAppender();
 
-        private:
-            FILE * m_File;                ///< Output file
-            bool   m_HTML;                ///< Should output in HTML
+        /// On report a message
+        /// @p_Logger   : Logger instance
+        /// @p_Type     : Log type
+        /// @p_System   : Message sender
+        /// @p_Message  : Message to report
+        void OnReport(Base * p_Logger, const std::string & p_Time, LogType p_Type, const std::string & p_System, const std::string & p_Message) override final;
 
-            std::recursive_mutex m_Mutex; ///< File mutex
+    //////////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////////
+
+    private:
+        FILE * m_File;                ///< Output file
+        bool   m_HTML;                ///< Should output in HTML
+
+        std::recursive_mutex m_Mutex; ///< File mutex
     };
 
 }   ///< namespace Logger
