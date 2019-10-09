@@ -51,7 +51,7 @@ namespace SteerStone { namespace Game { namespace Map {
 
             /// Portal and station are not ships but they exist in the grid
             if (l_Itr.second->GetType() == Entity::Type::OBJECT_TYPE_PORTAL || l_Itr.second->GetType() == Entity::Type::OBJECT_TYPE_STATION)
-                return;
+                continue;
 
             if (Core::Utils::IsInCircleRadius(p_Object->GetSpline()->GetPositionX(), p_Object->GetSpline()->GetPositionY(),
                 l_Itr.second->GetSpline()->GetPositionX(), l_Itr.second->GetSpline()->GetPositionY(), PLAYER_RADIUS_SCAN))
