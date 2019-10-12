@@ -53,6 +53,7 @@ enum ClientOpCodes : uint8
     CLIENT_PACKET_ABORT_LASER           = 0X47,
     CLIENT_PACKET_LOG_OUT               = 0x6C,
     CLIENT_PACKET_CANCEL_LOG_OUT        = 0x6F,
+    CLIENT_PACKET_LOOT_CARGO            = 0x78,
     CLIENT_MAX_OPCODE                   = 0x7B
 };
 
@@ -88,11 +89,13 @@ enum ServerOpCodes : uint8
     SERVER_PACKET_ESCAPED_THE_ATTACK    = 0x56,
     SERVER_PACKET_MISC_INFO             = 0x6E,
     SERVER_PACKET_REWARD                = 0x79,
+    SERVER_PACKET_CARGO                 = 0x63,
+    SERVER_PACKET_REMOVE_CARGO          = 0x32,
 
     /// Debug Headless Packets
     SERVER_PACKET_HEADLESS_MOVE         = 0x21,
 
-    SERVER_MAX_OPCODE                   = 0x7B,
+    SERVER_MAX_OPCODE                   = 0x7B
 };
 
 namespace SteerStone { namespace Game { namespace Server {

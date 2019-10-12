@@ -126,6 +126,46 @@ namespace SteerStone { namespace Game { namespace Server { namespace Packets {
         PacketBuffer const* Write();
     };
 
+
+    /// SERVER_PACKET_CARGO packet builder
+    class Cargo final : public ServerPacket
+    {
+    public:
+        /// Constructor 
+        Cargo() : ServerPacket(ServerOpCodes::SERVER_PACKET_CARGO)
+        {
+        }
+
+        //////////////////////////////////////////////////////////////////////////
+        //////////////////////////////////////////////////////////////////////////
+
+        /// Write the packet
+        PacketBuffer const* Write();
+
+        uint32 Id;
+        uint16 Type;
+        int32 PositionX;
+        int32 PositionY;
+    };
+
+    /// SERVER_PACKET_REMOVE_CARGO packet builder
+    class RemoveCargo final : public ServerPacket
+    {
+    public:
+        /// Constructor 
+        RemoveCargo() : ServerPacket(ServerOpCodes::SERVER_PACKET_REMOVE_CARGO)
+        {
+        }
+
+        //////////////////////////////////////////////////////////////////////////
+        //////////////////////////////////////////////////////////////////////////
+
+        /// Write the packet
+        PacketBuffer const* Write();
+
+        uint32 Id;
+    };
+
 }   ///< Packets
 }   ///< Server
 }   ///< Game

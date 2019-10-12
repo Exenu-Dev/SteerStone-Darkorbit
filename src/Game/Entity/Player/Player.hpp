@@ -100,12 +100,8 @@ namespace SteerStone { namespace Game { namespace Entity {
     /// Main entry for session in world
     class Player : public Unit
     {
-    DISALLOW_COPY_AND_ASSIGN(Player);
-
-    friend class Server::GameSocket;
-
-    //////////////////////////////////////////////////////////////////////////
-    //////////////////////////////////////////////////////////////////////////
+    public:
+        friend class Server::GameSocket;
 
     public:
         /// Constructor
@@ -250,12 +246,8 @@ namespace SteerStone { namespace Game { namespace Entity {
         uint32 m_Id;
         ObjectGUID m_GUID;
         std::string m_SessionId;
-        uint32 m_Uridium;
-        uint32 m_Credits;
         uint32 m_Jackpot;
         uint32 m_Level;
-        uint32 m_Experience;
-        uint32 m_Honor;
         uint32 m_MaxCargoSpace;
         uint32 m_MaxBattery;
         uint32 m_MaxRockets;

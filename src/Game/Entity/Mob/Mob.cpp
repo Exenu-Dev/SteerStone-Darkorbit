@@ -30,21 +30,6 @@ namespace SteerStone { namespace Game { namespace Entity {
     Mob::Mob()
     {
         m_Entry         = 0;
-        m_Experience    = 0;
-        m_Behaviour     = Behaviour::BEHAVIOUR_PASSIVE;
-        m_Honor         = 0;
-        m_RespawnTimer  = 0;
-        m_Credits       = 0;
-        m_Uridium       = 0;
-        m_Prometium     = 0;
-        m_Endurium      = 0;
-        m_Terbium       = 0;
-        m_Prometid      = 0;
-        m_Duranium      = 0;
-        m_Promerium     = 0;
-        m_Xenomit       = 0;
-        m_Seprom        = 0;
-        m_Palladium     = 0;
 
         m_HomePositionX = 0.0f;
         m_HomePositionY = 0.0f;
@@ -186,7 +171,7 @@ namespace SteerStone { namespace Game { namespace Entity {
                     }
                 }
 
-                /// If the player is targetting us, then only cancel attack if target last time shot us is more than 10 seconds ago
+                /// If player last time shot is more than 10 seconds ago, then cancel combat
                 if (GetTaggedPlayer())
                 {
                     if (sServerTimeManager->GetTimeDifference(m_LastTimeAttacked, sServerTimeManager->GetServerTime()) > MAX_LAST_TIME_ATTACKED)
@@ -270,7 +255,7 @@ namespace SteerStone { namespace Game { namespace Entity {
                 }
 
                 if (GetTaggedPlayer())
-                    LOG_ASSERT(GetTarget()->GetGUID() != GetTaggedPlayer()->GetGUID(), "Mob", "Target and tagged player does not match!");
+                    LOG_ASSERT(GetTarget()->GetGUID() == GetTaggedPlayer()->GetGUID(), "Mob", "Target and tagged player does not match!");
 
                 float l_PositionX = l_Target->GetSpline()->GetPlannedPositionX();
                 float l_PositionY = l_Target->GetSpline()->GetPlannedPositionY();
@@ -293,7 +278,7 @@ namespace SteerStone { namespace Game { namespace Entity {
                     }
                 }
 
-                /// If the player is targetting us, then only cancel attack if target last time shot us is more than 10 seconds ago
+                /// If player last time shot is more than 10 seconds ago, then cancel combat
                 if (GetTaggedPlayer())
                 {
                     if (sServerTimeManager->GetTimeDifference(m_LastTimeAttacked, sServerTimeManager->GetServerTime()) > MAX_LAST_TIME_ATTACKED)

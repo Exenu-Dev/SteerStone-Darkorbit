@@ -32,30 +32,45 @@ namespace SteerStone { namespace Game { namespace Entity {
     /// Constructor
     Unit::Unit()
     {
-        m_Shield         = 0;
-        m_MaxShield      = 0;
-        m_HitPoints      = 0;
-        m_MinDamage      = 0;
-        m_MaxDamage      = 0;
-        m_MaxHitPoints   = 0;
-        m_GatesAchieved  = 0;
-        m_ClanId         = 0;
+        m_Shield            = 0;
+        m_MaxShield         = 0;
+        m_HitPoints         = 0;
+        m_MinDamage         = 0;
+        m_MaxDamage         = 0;
+        m_MaxHitPoints      = 0;
+        m_GatesAchieved     = 0;
+        m_ClanId            = 0;
         m_ClanName.clear();
-        m_Company        = Company::NOMAD;
-        m_Rank           = 0;
-        m_WeaponState    = 0;
-        m_DeathState     = DeathState::ALIVE;
-        m_LaserType      = 0;
-        m_RocketType     = 0;
-        m_Attacking      = false;
-        m_AttackRange    = 0;
-        m_AttackState    = AttackState::ATTACK_STATE_NONE;
-        m_SelectedLaser  = 1;
-        m_SelectedRocket = 1;
-        m_LastTimeAttacked = 0;
+        m_Company           = Company::NOMAD;
+        m_Rank              = 0;
+        m_WeaponState       = 0;
+        m_DeathState        = DeathState::ALIVE;
+        m_LaserType         = 0;
+        m_RocketType        = 0;
+        m_Attacking         = false;
+        m_AttackRange       = 0;
+        m_AttackState       = AttackState::ATTACK_STATE_NONE;
+        m_SelectedLaser     = 1;
+        m_SelectedRocket    = 1;
+        m_LastTimeAttacked  = 0;
+        m_Experience        = 0;
+        m_Behaviour         = Behaviour::BEHAVIOUR_PASSIVE;
+        m_Honor             = 0;
+        m_RespawnTimer      = 0;
+        m_Credits           = 0;
+        m_Uridium           = 0;
+        m_Prometium         = 0;
+        m_Endurium          = 0;
+        m_Terbium           = 0;
+        m_Prometid          = 0;
+        m_Duranium          = 0;
+        m_Promerium         = 0;
+        m_Xenomit           = 0;
+        m_Seprom            = 0;
+        m_Palladium         = 0;
 
-        m_Target         = nullptr;
-        m_TargetGUID     = 0;
+        m_Target            = nullptr;
+        m_TargetGUID        = 0;
 
         m_IntervalAttackUpdate.SetInterval(ATTACK_UPDATE_INTERVAL);
     }
@@ -328,6 +343,12 @@ namespace SteerStone { namespace Game { namespace Entity {
 
         if (p_Unit->GetType() == Type::OBJECT_TYPE_MOB)
             p_Unit->ToMob()->RewardKillCredit(ToPlayer());
+
+        /// Update position, the reason we do this is because if the unit is a mob, it does not send periodic movement updates,
+        /// so update the current position so cargo box correctly spawns at the position where unit dies
+        p_Unit->GetSpline()->UpdatePosition();
+
+        p_Unit->GetMap()->GetPoolManager()->AddBonuxBox(p_Unit, BonusBoxType::BONUS_BOX_TYPE_CARGO, GetObjectGUID().GetCounter());
 
         p_Unit->m_DeathState = DeathState::JUST_DIED;
         CancelAttack();

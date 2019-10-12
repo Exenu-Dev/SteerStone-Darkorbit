@@ -77,6 +77,8 @@ namespace SteerStone { namespace Game { namespace Map {
     /// @p_Diff : Execution Time
     bool Base::Update(uint32 const p_Diff)
     {
+        m_PoolManager.Update(p_Diff);
+
         ProcessJumpQueue(p_Diff);
 
         for (uint32 l_X = 0; l_X < GRID_CELLS; l_X++)
@@ -174,7 +176,7 @@ namespace SteerStone { namespace Game { namespace Map {
                 p_Grids.push_back(m_Grids[l_GridX][l_GridY]);
         }
 
-        /// Also Push origin grid
+        /// Also Push original grid
         p_Grids.push_back(m_Grids[p_GridX][p_GridY]);
     }
     /// Return Grid
@@ -200,7 +202,7 @@ namespace SteerStone { namespace Game { namespace Map {
     /// @p_Object : Object
     /// @p_PositionX : X Axis
     /// @p_PositionY : Y Axis
-    std::tuple<uint32, uint32> Base::CalculateGridByNewPosition(Entity::Object* p_Object, float const p_PositionX, float const p_PositionY)
+    std::tuple<uint32, uint32> Base::CalculateGridByPosition(float const p_PositionX, float const p_PositionY)
     {
         float l_GridX = std::floor(p_PositionX / m_GridRadiusX);
         float l_GridY = std::floor(p_PositionY / m_GridRadiusY);
@@ -210,6 +212,20 @@ namespace SteerStone { namespace Game { namespace Map {
             LOG_ASSERT(false, "Map", "Grid X or Y is larger than Grid Cells! Grid X: %0, Grid Y: %1", l_GridX, l_GridY);
 
         return std::make_tuple(static_cast<uint32>(l_GridX), static_cast<uint32>(l_GridY));
+    }
+    /// Return Grid by Position
+    /// @p_PositionX : X Axis
+    /// @p_PositionY : Y Axis
+    Grid* Base::GetGridByPosition(float const p_PositionX, float const p_PositionY)
+    {
+        float l_GridX = std::floor(p_PositionX / m_GridRadiusX);
+        float l_GridY = std::floor(p_PositionY / m_GridRadiusY);
+
+        /// Is our grid out of bounds?
+        if (l_GridX > GRID_CELLS - 1 || l_GridY > GRID_CELLS - 1) ///< Grid starts from 0
+            LOG_ASSERT(false, "Map", "Grid X or Y is larger than Grid Cells! Grid X: %0, Grid Y: %1", l_GridX, l_GridY);
+
+        return m_Grids[static_cast<uint32>(p_PositionX)][static_cast<uint32>(p_PositionY)];
     }
     /// This function is only called when object is added to map
     /// Add Object to map
@@ -252,7 +268,7 @@ namespace SteerStone { namespace Game { namespace Map {
     /// @p_Object : Object being moved
     void Base::Move(Entity::Object* p_Object)
     {
-        std::tuple<uint32, uint32> l_GridIndex = CalculateGridByNewPosition(p_Object, p_Object->GetSpline()->GetPositionX(), p_Object->GetSpline()->GetPositionY());
+        std::tuple<uint32, uint32> l_GridIndex = CalculateGridByPosition(p_Object->GetSpline()->GetPositionX(), p_Object->GetSpline()->GetPositionY());
 
         /// If both indexes don't match, we've moved to a new grid
         if (std::get<0>(l_GridIndex) != std::get<0>(p_Object->GetGridIndex()) ||

@@ -20,7 +20,7 @@
 #include "Server/MapPackets.hpp"
 #include "Socket.hpp"
 #include "Portal.hpp"
-#include "Player.hpp"
+#include "BonusBox.hpp"
 #include "ZoneManager.hpp"
 #include "World.hpp"
 #include "GameFlags.hpp"
@@ -147,6 +147,30 @@ namespace SteerStone { namespace Game { namespace Server {
     {
         m_Player->CancelAttack();
     }
+
+    /// Map Handler
+    /// @p_ClientPacket : Packet recieved from client
+    void GameSocket::HandleLootCargo(ClientPacket* p_Packet)
+    {
+        uint32 l_Id = p_Packet->ReadUInt32();
+
+        Entity::Object* l_Object = m_Player->GetGrid()->FindObject(l_Id);
+
+        if (!l_Object)
+        {
+            LOG_WARNING("Socket", "Cannot find object %0!", l_Id);
+            return;
+        }
+
+        if (!l_Object->IsBonusBox())
+        {
+            LOG_WARNING("Socket", "Attempted to loot cargo but object is not a bonus box!");
+            return;
+        }
+
+        l_Object->ToBonusBox()->SetScheduleForDelete(true);
+    }
+
 }   ///< namespace Server
 }   ///< namespace Game
 }   ///< namespace SteerStone

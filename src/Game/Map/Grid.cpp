@@ -21,6 +21,7 @@
 #include "Packets/Server/ShipPackets.hpp"
 #include "Grid.hpp"
 #include "Map.hpp"
+#include "BonusBox/BonusBox.hpp"
 #include "Mob.hpp"
 #include "Portal.hpp"
 #include "Station.hpp"
@@ -198,6 +199,9 @@ namespace SteerStone { namespace Game { namespace Map {
             }
             else if (l_Itr->second->GetType() == Entity::Type::OBJECT_TYPE_MOB)
                 l_Itr->second->ToMob()->Update(p_Diff);
+            else if (l_Itr->second->GetType() == Entity::Type::OBJECT_TYPE_BONUS_BOX)
+                l_Itr->second->ToBonusBox()->Update(p_Diff);
+            
 
             l_Itr = l_Copy.erase(l_Itr);
         }
@@ -248,14 +252,23 @@ namespace SteerStone { namespace Game { namespace Map {
     /// @p_SendPacket : Send Despawn Packet
     void Grid::Remove(Entity::Object* p_Object, bool p_SendPacket)
     {
-        if (p_Object->GetType() == Entity::Type::OBJECT_TYPE_PLAYER)
+        if (p_Object->IsPlayer())
             m_Players.erase(p_Object);
 
         if (p_SendPacket)
         {
-            Server::Packets::Ship::DespawnShip l_Packet;
-            l_Packet.Id = p_Object->GetObjectGUID().GetCounter();
-            p_Object->GetMap()->SendPacketToNearByGridsIfInSurrounding(l_Packet.Write(), p_Object);
+            if (p_Object->IsBonusBox())
+            {
+                Server::Packets::RemoveCargo l_Packet;
+                l_Packet.Id = p_Object->GetObjectGUID().GetCounter();
+                p_Object->GetMap()->SendPacketToNearByGridsIfInSurrounding(l_Packet.Write(), p_Object);
+            }
+            else
+            {
+                Server::Packets::Ship::DespawnShip l_Packet;
+                l_Packet.Id = p_Object->GetObjectGUID().GetCounter();
+                p_Object->GetMap()->SendPacketToNearByGridsIfInSurrounding(l_Packet.Write(), p_Object);
+            }
         }
         
         m_Objects.erase(p_Object->GetGUID());

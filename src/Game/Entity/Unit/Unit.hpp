@@ -45,11 +45,6 @@ namespace SteerStone { namespace Game { namespace Entity {
 
     class Unit : public Object
     {
-        DISALLOW_COPY_AND_ASSIGN(Unit);
-
-    //////////////////////////////////////////////////////////////////////////
-    //////////////////////////////////////////////////////////////////////////
-
     public:
         /// Constructor
         Unit();
@@ -110,30 +105,46 @@ namespace SteerStone { namespace Game { namespace Entity {
         //            GETTERS/SETTERS
         ///////////////////////////////////////////
     public:
-        int32 GetShield()          const { return m_Shield;         }
-        uint32 GetShieldResistance()const { return m_ShieldResistance; }
-        uint32 GetMaxShield()      const { return m_MaxShield;      }
-        int32 GetHitPoints()       const { return m_HitPoints;      }
-        uint32 GetMinDamage()      const { return m_MinDamage;      }    
-        uint32 GetMaxDamage()      const { return m_MaxDamage;      }    
-        uint32 GetHitMaxPoints()   const { return m_MaxHitPoints;   }
-        uint16 GetShipType()       const { return m_ShipType;       }
-        Company GetCompany()       const { return m_Company;        }
-        uint16 GetRank()           const { return m_Rank;           }
-        uint16 GetGatesAchieved()  const { return m_GatesAchieved;  }
-        uint32 GetClanId()         const { return m_ClanId;         }
-        std::string GetClanName()  const { return m_ClanName;       }
-        uint16 GetWeaponState()    const { return m_WeaponState;    }
-        uint16 GetDeathState()     const { return m_DeathState;     }
-        bool IsAttacking()         const { return m_Attacking;      }
-        bool IsDead()              const { return m_DeathState == DeathState::DEAD; }
-        uint16 GetLaserType()      const { return m_LaserType;      }    
+        int32 GetShield()           const { return m_Shield;            }
+        uint32 GetShieldResistance()const { return m_ShieldResistance;  }
+        uint32 GetMaxShield()       const { return m_MaxShield;         }
+        int32 GetHitPoints()        const { return m_HitPoints;         }
+        uint32 GetMinDamage()       const { return m_MinDamage;         }    
+        uint32 GetMaxDamage()       const { return m_MaxDamage;         }    
+        uint32 GetHitMaxPoints()    const { return m_MaxHitPoints;      }
+        uint16 GetShipType()        const { return m_ShipType;          }
+        Company GetCompany()        const { return m_Company;           }
+        uint16 GetRank()            const { return m_Rank;              }
+        uint16 GetGatesAchieved()   const { return m_GatesAchieved;     }
+        uint32 GetClanId()          const { return m_ClanId;            }
+        std::string GetClanName()   const { return m_ClanName;          }
+        uint16 GetWeaponState()     const { return m_WeaponState;       }
+        uint16 GetDeathState()      const { return m_DeathState;        }
+        uint16 GetLaserType()       const { return m_LaserType;         }    
+        uint32 GetExperience()      const { return m_Experience;        }
+        uint16 GetBehaviour()       const { return m_Behaviour;         }
+        uint32 GetRespawnTimer()    const { return m_RespawnTimer;      }
+        uint32 GetHonor()           const { return m_Honor;             }
+        uint32 GetCredits()         const { return m_Credits;           }
+        uint32 GetUridium()         const { return m_Uridium;           }
+        uint32 GetPrometium()       const { return m_Prometium;         }
+        uint32 GetEndurium()        const { return m_Endurium;          }
+        uint32 GetTerbium()         const { return m_Terbium;           }
+        uint32 GetPrometid()        const { return m_Prometid;          }
+        uint32 GetDuranium()        const { return m_Duranium;          }
+        uint32 GetPromerium()       const { return m_Promerium;         }
+        uint32 GetXenomit()         const { return m_Xenomit;           }
+        uint32 GetSeprom()          const { return m_Seprom;            }
+        uint32 GetPalladium()       const { return m_Palladium;         }
 
-        void SetWeaponState(uint16 const p_WeaponState) { m_WeaponState = p_WeaponState; }
-        void SetHitPoints(uint32 const p_HitPoints)   { m_HitPoints = p_HitPoints;   }
-        void SetShield(uint32 const p_Shield)         { m_Shield = p_Shield;         }
-        void SetLaserType(uint16 const p_LaserType)   { m_LaserType = p_LaserType;   }
-        void SetRocketType(uint16 const p_RocketType) { m_RocketType = p_RocketType; }
+        bool IsAttacking()          const { return m_Attacking;                      }
+        bool IsDead()               const { return m_DeathState == DeathState::DEAD; }
+
+        void SetWeaponState(uint16 const p_WeaponState) { m_WeaponState = p_WeaponState;}
+        void SetHitPoints(uint32 const p_HitPoints)     { m_HitPoints = p_HitPoints;    }
+        void SetShield(uint32 const p_Shield)           { m_Shield = p_Shield;          }
+        void SetLaserType(uint16 const p_LaserType)     { m_LaserType = p_LaserType;    }
+        void SetRocketType(uint16 const p_RocketType)   { m_RocketType = p_RocketType;  }
         void SetStats(uint32 const p_MinDamage, uint32 const p_MaxDamage, uint32 const p_Speed, uint32 const p_Shield, uint32 const p_ShieldResistance)
         {
             m_MinDamage         = p_MinDamage;
@@ -169,6 +180,22 @@ namespace SteerStone { namespace Game { namespace Entity {
         uint16 m_AttackState;
         uint32 m_SelectedLaser;
         uint32 m_SelectedRocket;
+        uint32 m_Experience;
+        uint16 m_Behaviour;
+        uint32 m_RespawnTimer;
+        uint32 m_Honor;
+        uint32 m_Credits;
+        uint32 m_Uridium;
+        uint32 m_Prometium;
+        uint32 m_Endurium;
+        uint32 m_Terbium;
+        uint32 m_Prometid;
+        uint32 m_Duranium;
+        uint32 m_Promerium;
+        uint32 m_Xenomit;
+        uint32 m_Seprom;
+        uint32 m_Palladium;
+
         uint32 m_LastTimeAttacked;
         bool m_Attacking;
         Core::Diagnostic::IntervalTimer m_IntervalAttackUpdate;

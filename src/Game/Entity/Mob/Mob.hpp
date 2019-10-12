@@ -61,29 +61,10 @@ namespace SteerStone { namespace Game { namespace Entity {
         //////////////////////////////////////////////////////////////////////////
         //////////////////////////////////////////////////////////////////////////
 
+        ///////////////////////////////////////////
+        //              GENERAL
+        ///////////////////////////////////////////
     public:
-        /// Getters Functions
-        uint32 GetId()          const { return m_Entry;         }
-        uint32 GetExperience()  const { return m_Experience;    }
-        uint16 GetBehaviour()   const { return m_Behaviour;     }
-        uint32 GetRespawnTimer()const { return m_RespawnTimer;  }
-        uint32 GetHonor()       const { return m_Honor;         }
-        uint32 GetCredits()     const { return m_Credits;       }
-        uint32 GetUridium()     const { return m_Uridium;       }
-        uint32 GetPrometium()   const { return m_Prometium;     }
-        uint32 GetEndurium()    const { return m_Endurium;      }
-        uint32 GetTerbium()     const { return m_Terbium;       }
-        uint32 GetPrometid()    const { return m_Prometid;      }
-        uint32 GetDuranium()    const { return m_Duranium;      }
-        uint32 GetPromerium()   const { return m_Promerium;     }
-        uint32 GetXenomit()     const { return m_Xenomit;       }
-        uint32 GetSeprom()      const { return m_Seprom;        }
-        uint32 GetPalladium()   const { return m_Palladium;     }
-
-        Player const* GetTaggedPlayer() const { return m_PlayerTagger; }
-        void SetTaggedPlayer(Player const* p_Player) { m_PlayerTagger = p_Player; }
-        bool IsTaggedByPlayer() const { return m_PlayerTagger != nullptr ? true : false; }
-
         /// Update
         /// @p_Diff : Execution Time
         void Update(uint32 const p_Diff);
@@ -92,32 +73,27 @@ namespace SteerStone { namespace Game { namespace Entity {
         /// @p_Player : Player is being rewarded
         void RewardKillCredit(Player* p_Player);
 
-
-        //////////////////////////////////////////////////////////////////////////
-        //////////////////////////////////////////////////////////////////////////
-
     private:
         /// Update Movement
         /// @p_Diff : Execution Time
         void UpdateMovement(uint32 const p_Diff);
 
+    public:
+        ///////////////////////////////////////////
+        //            GETTERS/SETTERS
+        ///////////////////////////////////////////
+
+        uint32 GetId()          const { return m_Entry;         }
+
+        Player const* GetTaggedPlayer() const { return m_PlayerTagger; }
+        void SetTaggedPlayer(Player const* p_Player) { m_PlayerTagger = p_Player; }
+        bool IsTaggedByPlayer() const { return m_PlayerTagger != nullptr ? true : false; }
+
+        //////////////////////////////////////////////////////////////////////////
+        //////////////////////////////////////////////////////////////////////////
+
     private:
         uint32 m_Entry;
-        uint32 m_Experience;
-        uint16 m_Behaviour;
-        uint32 m_RespawnTimer;
-        uint32 m_Honor;
-        uint32 m_Credits;
-        uint32 m_Uridium;
-        uint32 m_Prometium;
-        uint32 m_Endurium;
-        uint32 m_Terbium;
-        uint32 m_Prometid;
-        uint32 m_Duranium;
-        uint32 m_Promerium;
-        uint32 m_Xenomit;
-        uint32 m_Seprom;
-        uint32 m_Palladium;
 
         uint32 m_MoveTimeMax;
         uint32 m_MoveTimeMin;

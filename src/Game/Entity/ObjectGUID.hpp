@@ -27,8 +27,9 @@ namespace SteerStone { namespace Game { namespace Entity {
     {
         Player      = 0x01,
         MOB         = 0x02,
-        Portal      = 0x05,
-        Station     = 0x06,
+        Portal      = 0x04,
+        Station     = 0x08,
+        BonusBox    = 0x10,
     };
 
     /// Generate Unique Counter

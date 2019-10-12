@@ -90,6 +90,31 @@ namespace SteerStone { namespace Game { namespace Server { namespace Packets {
         return &m_Buffer;
     }
 
+    /// SERVER_PACKET_CARGO
+    PacketBuffer const* Cargo::Write()
+    {
+        m_Buffer.AppendUInt32(Id);
+        m_Buffer.AppendUInt32(Type);
+        m_Buffer.AppendInt32(PositionX);
+        m_Buffer.AppendInt32(PositionY);
+
+        m_Buffer.AppendEndSplitter();
+        m_Buffer.AppendCarriage();
+
+        return &m_Buffer;
+    }
+
+    /// SERVER_PACKET_REMOVE_CARGO
+    PacketBuffer const* RemoveCargo::Write()
+    {
+        m_Buffer.AppendUInt32(Id);
+
+        m_Buffer.AppendEndSplitter();
+        m_Buffer.AppendCarriage();
+
+        return &m_Buffer;
+    }
+
 }   ///< Packets
 }   ///< Server
 }   ///< Game

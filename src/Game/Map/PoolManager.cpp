@@ -18,7 +18,10 @@
 
 #include "PoolManager.hpp"
 #include "ObjectManager.hpp"
+#include "MobPool.hpp"
+#include "BonusBoxPool.hpp"
 #include "Mob/Mob.hpp"
+#include "BonusBox/BonusBox.hpp"
 #include "Map.hpp"
 #include "Utility/UtilRandom.hpp"
 #include "Database/DatabaseTypes.hpp"
@@ -30,11 +33,17 @@ namespace SteerStone { namespace Game { namespace Map {
     PoolManager::PoolManager(Base* p_Map)
     {
         m_Map = p_Map;
+
+        m_Pool[POOL_TYPE_MOB]       = new MobPool();
+        m_Pool[POOL_TYPE_BONUS_BOX] = new BonusBoxPool();
     }
     /// Deconstructor
     PoolManager::~PoolManager()
     {
+        for (auto l_Itr : m_Pool)
+            delete l_Itr.second;
 
+        m_Pool.clear();
     }
 
     //////////////////////////////////////////////////////////////////////////
@@ -45,16 +54,6 @@ namespace SteerStone { namespace Game { namespace Map {
     {
         InitializeMobs();
     }
-
-    /// Update Pool
-    /// @p_Diff : Execution Time
-    void PoolManager::Update(uint32 const p_Diff)
-    {
-    }
-
-    //////////////////////////////////////////////////////////////////////////
-    //////////////////////////////////////////////////////////////////////////
-
     /// Load Mobs into pool
     void PoolManager::InitializeMobs()
     {
@@ -78,8 +77,8 @@ namespace SteerStone { namespace Game { namespace Map {
 
                 float l_PreviousRadiusX = 1.0f;
                 float l_PreviousRadiusY = 1.0f;
-                float l_RadiusX         = (m_Map->GetMapSizeX() / MAX_GRIDS) * GRID_CELLS;
-                float l_RadiusY         = (m_Map->GetMapSizeY() / MAX_GRIDS) * GRID_CELLS;
+                float l_RadiusX = (m_Map->GetMapSizeX() / MAX_GRIDS) * GRID_CELLS;
+                float l_RadiusY = (m_Map->GetMapSizeY() / MAX_GRIDS) * GRID_CELLS;
 
                 for (uint32 l_Y = 1; l_Y < GRID_CELLS + 1; l_Y++)
                 {
@@ -92,33 +91,33 @@ namespace SteerStone { namespace Game { namespace Map {
                         for (uint32 l_I = 0; l_I < Core::Utils::UInt32Random(l_Result[1].GetUInt32(), l_Result[2].GetUInt32()); l_I++)
                         {
                             Entity::Mob* l_Mob = new Entity::Mob();
-                            l_Mob->m_Entry              = l_MobTemplate->Entry;
-                            l_Mob->m_ShipType           = l_MobTemplate->Type;
-                            l_Mob->m_WeaponState        = l_MobTemplate->WeaponState;
-                            l_Mob->m_HitPoints          = l_MobTemplate->HitPoints;
-                            l_Mob->m_MaxHitPoints       = l_MobTemplate->HitPoints;
-                            l_Mob->m_ShieldResistance   = l_MobTemplate->ShieldResistance;
-                            l_Mob->m_Shield             = l_MobTemplate->Shield;
-                            l_Mob->m_MaxShield          = l_MobTemplate->Shield;
-                            l_Mob->m_MinDamage          = l_MobTemplate->MinDamage;
-                            l_Mob->m_MaxDamage          = l_MobTemplate->MaxDamage;
-                            l_Mob->m_Behaviour          = l_MobTemplate->Behaviour;
-                            l_Mob->m_RespawnTimer       = l_MobTemplate->RespawnTimer;
-                            l_Mob->m_Experience         = l_MobTemplate->Experience;
-                            l_Mob->m_Honor              = l_MobTemplate->Honor;
-                            l_Mob->m_Credits            = l_MobTemplate->Credits;
-                            l_Mob->m_Uridium            = l_MobTemplate->Uridium;
-                            l_Mob->m_Prometium          = l_MobTemplate->Prometium;
-                            l_Mob->m_Endurium           = l_MobTemplate->Endurium;
-                            l_Mob->m_Terbium            = l_MobTemplate->Terbium;
-                            l_Mob->m_Prometid           = l_MobTemplate->Prometid;
-                            l_Mob->m_Duranium           = l_MobTemplate->Duranium;
-                            l_Mob->m_Promerium          = l_MobTemplate->Promerium;
-                            l_Mob->m_Xenomit            = l_MobTemplate->Xenomit;
-                            l_Mob->m_Seprom             = l_MobTemplate->Seprom;
-                            l_Mob->m_Palladium          = l_MobTemplate->Palladium;
-                            l_Mob->m_MoveTimeMin        = l_MobTemplate->MinMovementTime;
-                            l_Mob->m_MoveTimeMax        = l_MobTemplate->MaxMovementTime;
+                            l_Mob->m_Entry = l_MobTemplate->Entry;
+                            l_Mob->m_ShipType = l_MobTemplate->Type;
+                            l_Mob->m_WeaponState = l_MobTemplate->WeaponState;
+                            l_Mob->m_HitPoints = l_MobTemplate->HitPoints;
+                            l_Mob->m_MaxHitPoints = l_MobTemplate->HitPoints;
+                            l_Mob->m_ShieldResistance = l_MobTemplate->ShieldResistance;
+                            l_Mob->m_Shield = l_MobTemplate->Shield;
+                            l_Mob->m_MinDamage = l_MobTemplate->MinDamage;
+                            l_Mob->m_MaxShield = l_MobTemplate->Shield;
+                            l_Mob->m_MaxDamage = l_MobTemplate->MaxDamage;
+                            l_Mob->m_Behaviour = l_MobTemplate->Behaviour;
+                            l_Mob->m_RespawnTimer = l_MobTemplate->RespawnTimer;
+                            l_Mob->m_Experience = l_MobTemplate->Experience;
+                            l_Mob->m_Honor = l_MobTemplate->Honor;
+                            l_Mob->m_Credits = l_MobTemplate->Credits;
+                            l_Mob->m_Uridium = l_MobTemplate->Uridium;
+                            l_Mob->m_Prometium = l_MobTemplate->Prometium;
+                            l_Mob->m_Endurium = l_MobTemplate->Endurium;
+                            l_Mob->m_Terbium = l_MobTemplate->Terbium;
+                            l_Mob->m_Prometid = l_MobTemplate->Prometid;
+                            l_Mob->m_Duranium = l_MobTemplate->Duranium;
+                            l_Mob->m_Promerium = l_MobTemplate->Promerium;
+                            l_Mob->m_Xenomit = l_MobTemplate->Xenomit;
+                            l_Mob->m_Seprom = l_MobTemplate->Seprom;
+                            l_Mob->m_Palladium = l_MobTemplate->Palladium;
+                            l_Mob->m_MoveTimeMin = l_MobTemplate->MinMovementTime;
+                            l_Mob->m_MoveTimeMax = l_MobTemplate->MaxMovementTime;
                             l_Mob->GetSpline()->SetSpeed(l_MobTemplate->Speed);
                             l_Mob->SetName(l_MobTemplate->Name);
                             l_Mob->m_IntervalMoveTimer.SetInterval(Core::Utils::FloatRandom(l_Mob->m_MoveTimeMin, l_Mob->m_MoveTimeMin));
@@ -132,12 +131,12 @@ namespace SteerStone { namespace Game { namespace Map {
                             l_Mob->m_HomePositionY = l_PositionY;
 
                             m_Map->Add(l_Mob);
-                            m_MobPool.Add(m_Map->GetGrid(l_Mob), l_Mob);
+                            m_Pool[POOL_TYPE_MOB]->Add(l_Mob);
                         }
 
                         l_PreviousRadiusX = l_MaxX;
                     }
-                    
+
                     l_PreviousRadiusX = 1.0f;
                     l_PreviousRadiusY = l_MaxY;
                 }
@@ -146,6 +145,52 @@ namespace SteerStone { namespace Game { namespace Map {
         }
     }
 
+    /// Update Pool
+    /// @p_Diff : Execution Time
+    void PoolManager::Update(uint32 const p_Diff)
+    {
+        for (auto l_Itr : m_Pool)
+            l_Itr.second->Update(p_Diff);
+    }
+
+    /// Add Bonus box to map
+    /// @p_Object  : Object taking away the resources
+    /// @p_Type    : Type of Bonus Box
+    /// @p_OwnerId : Owner of cargo box
+    void PoolManager::AddBonuxBox(Entity::Object* p_Object, BonusBoxType p_Type, uint32 const p_OwnerId)
+    {
+        /// Note; we do not need to send cargo box packet, this will be sent on next object build update
+        /// so just add cargo box to map and pool
+        
+        Entity::BonusBox* l_BonusBox = new Entity::BonusBox(p_Type);
+
+        l_BonusBox->m_OwnerId   = p_OwnerId;
+        l_BonusBox->m_Duranium  = p_Object->ToUnit()->GetDuranium();
+        l_BonusBox->m_Endurium  = p_Object->ToUnit()->GetEndurium();
+        l_BonusBox->m_Palladium = p_Object->ToUnit()->GetPalladium();
+        l_BonusBox->m_Promerium = p_Object->ToUnit()->GetPromerium();
+        l_BonusBox->m_Prometid  = p_Object->ToUnit()->GetPrometid();
+        l_BonusBox->m_Prometium = p_Object->ToUnit()->GetPrometium();
+        l_BonusBox->m_Seprom    = p_Object->ToUnit()->GetSeprom();
+        l_BonusBox->m_Terbium   = p_Object->ToUnit()->GetTerbium();
+        l_BonusBox->m_Xenomit   = p_Object->ToUnit()->GetXenomit();
+
+        l_BonusBox->SetMap(m_Map);
+        l_BonusBox->GetSpline()->SetPosition(p_Object->GetSpline()->GetPositionX(), p_Object->GetSpline()->GetPositionY());
+        
+        m_Map->Add(l_BonusBox);
+
+        m_Pool[POOL_TYPE_BONUS_BOX]->Add(l_BonusBox);
+    }
+    /// Remove Bonus Box
+    /// @p_Object : Object Bonus Box
+    void PoolManager::RemoveBonusBox(Entity::Object* p_Object)
+    {
+        m_Pool[POOL_TYPE_BONUS_BOX]->Remove(p_Object);
+    }
+
+    //////////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////////
 }   ///< namespace Map
 }   ///< namespace Game
 }   ///< namespace Steerstone

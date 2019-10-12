@@ -269,6 +269,11 @@ enum DroneLevel
     DRONE_LEVEL_6 = 6
 };
 
+enum class BonusBoxType
+{
+    BONUS_BOX_TYPE_CARGO = 0,
+};
+
 namespace LevelExperience
 {
     enum Level : uint64

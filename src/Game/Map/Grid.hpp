@@ -28,6 +28,7 @@ namespace SteerStone { namespace Game { namespace Entity {
     class Object;
     class Player;
     class Portal;
+    class BonusBox;
     class Mob;
     class Unit;
 
@@ -55,6 +56,7 @@ namespace SteerStone { namespace Game { namespace Map {
     class Entity::Object;
     class Entity::Player;
     class Entity::Portal;
+    class Entity::BonusBox;
     class Server::PacketBuffer;
     class Base;
 

@@ -34,12 +34,8 @@ namespace SteerStone { namespace Game { namespace Entity {
     {
         m_Id                    = 0;
         m_SessionId.clear();
-        m_Uridium               = 0;
-        m_Credits               = 0;
         m_Jackpot               = 0;
         m_Level                 = 0;
-        m_Experience            = 0;
-        m_Honor                 = 0;
         m_CargoSpace            = 0;
         m_MaxCargoSpace         = 0;
         m_MaxBattery            = 0;
@@ -562,8 +558,7 @@ namespace SteerStone { namespace Game { namespace Entity {
     {
         m_LoggedIn = true;
 
-        Server::Packets::Login::LoggedIn l_Packet;
-        SendPacket(l_Packet.Write());
+        SendPacket(Server::Packets::Login::LoggedIn().Write());
     }
     /// Send Account Rank
     void Player::SendAccountRank()
@@ -575,15 +570,13 @@ namespace SteerStone { namespace Game { namespace Entity {
             l_Packet.EnableDebugWindow = 1;
             SendPacket(l_Packet.Write());
 
-            Server::Packets::Misc::DisplaySuccDebug l_DisplaySuccDebugPacket;
-            SendPacket(l_DisplaySuccDebugPacket.Write());
+            SendPacket(Server::Packets::Misc::DisplaySuccDebug().Write());
         }
     }
     /// Send Display Star System
     void Player::SendDisplayStarSystem()
     {
-        Server::Packets::DisplayStarSystem l_Packet;
-        SendPacket(l_Packet.Write());
+        SendPacket(Server::Packets::DisplayStarSystem().Write());
     }
     /// Send Map update
     void Player::SendMapUpdate()

@@ -65,6 +65,7 @@ namespace SteerStone { namespace Game { namespace Server {
         StoreClientPacket(ClientOpCodes::CLIENT_PACKET_ABORT_LASER,       "CLIENT_PACKET_ABORT_LASER",        PacketStatus::STATUS_LOGGED_IN,      PacketProcess::PROCESS_MAP_THREAD,    &GameSocket::HandleAbortLaser          );
         StoreClientPacket(ClientOpCodes::CLIENT_PACKET_LOG_OUT,           "CLIENT_PACKET_LOG_OUT",            PacketStatus::STATUS_LOGGED_IN,      PacketProcess::PROCESS_WORLD_THREAD,  &GameSocket::HandleLogout              );
         StoreClientPacket(ClientOpCodes::CLIENT_PACKET_CANCEL_LOG_OUT,    "CLIENT_PACKET_CANCEL_LOG_OUT",     PacketStatus::STATUS_LOGGED_IN,      PacketProcess::PROCESS_WORLD_THREAD,  &GameSocket::HandleCancelLogout        );
+        StoreClientPacket(ClientOpCodes::CLIENT_PACKET_LOOT_CARGO,        "CLIENT_PACKET_LOOT_CARGO",         PacketStatus::STATUS_LOGGED_IN,      PacketProcess::PROCESS_MAP_THREAD,    &GameSocket::HandleLootCargo           );
 
         //////////////////////////////////////////////////////////////////////////
         //////////////////////////////////////////////////////////////////////////
@@ -98,6 +99,8 @@ namespace SteerStone { namespace Game { namespace Server {
         StoreServerPacket(ServerOpCodes::SERVER_PACKET_ESCAPED_THE_ATTACK,  "SERVER_PACKET_ESCAPED_THE_ATTACK",     &GameSocket::HandleServer);
         StoreServerPacket(ServerOpCodes::SERVER_PACKET_MISC_INFO,           "SERVER_PACKET_MISC_INFO",              &GameSocket::HandleServer);
         StoreServerPacket(ServerOpCodes::SERVER_PACKET_REWARD,              "SERVER_PACKET_REWARD",                 &GameSocket::HandleServer);
+        StoreServerPacket(ServerOpCodes::SERVER_PACKET_CARGO,               "SERVER_PACKET_CARGO",                  &GameSocket::HandleServer);
+        StoreServerPacket(ServerOpCodes::SERVER_PACKET_REMOVE_CARGO,        "SERVER_PACKET_REMOVE_CARGO",           &GameSocket::HandleServer);
 
         /// Debug Headless Packets
         StoreServerPacket(ServerOpCodes::SERVER_PACKET_HEADLESS_MOVE,       "SERVER_PACKET_HEADLESS_MOVE",      &GameSocket::HandleServer);

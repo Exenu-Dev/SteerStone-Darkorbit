@@ -18,53 +18,42 @@
 
 #pragma once
 #include <PCH/Precompiled.hpp>
-#include "Core/Core.hpp"
-#include "Unit.hpp"
+#include "PoolUpdater.hpp"
 #include "GameFlags.hpp"
 
-#define PORTAL_RADIUS 500.0f
+namespace SteerStone { namespace Game { namespace Map {
 
-namespace SteerStone { namespace Game { namespace Entity {
-
-    /// Portal
-    class Portal : public Unit
+    /// Mob Pool
+    class MobPool : public PoolUpdater
     {
     public:
-        friend class Map::Base;
+        /// Constructor
+        MobPool();
+        /// Deconstructor
+        ~MobPool();
+
+        //////////////////////////////////////////////////////////////////////////
+        //////////////////////////////////////////////////////////////////////////
 
     public:
-        /// Constructor
-        Portal();
-        /// Deconstructor
-        ~Portal();
+        /// Update the pool
+        /// @p_Diff : Execution Time
+        virtual void Update(uint32 const p_Diff) override;
 
-        //////////////////////////////////////////////////////////////////////////
-        //////////////////////////////////////////////////////////////////////////
-
-        /// Is Object near Portal
-        /// @p_Object : Object being checked
-        bool IsInPortalRadius(Entity::Object* p_Object);
-
-        /// Getters Functions
-        uint32 GetId()         const { return m_Id;          }
-        Company GetCompany()   const { return m_CompanyId;   }
-        PortalType GetType()   const { return m_Type;        }
-        uint32 GetToMapId()    const { return m_ToMapId;     }
-        float GetToPositionX() const { return m_ToPositionX; }
-        float GetToPositionY() const { return m_ToPositionY; }
+        /// Add to pool
+        /// @p_Object : Object being added
+        virtual void Add(Entity::Object* p_Object) override;
+        /// Remove from Pool
+        /// @p_Object : Object being removed
+        virtual void Remove(Entity::Object* p_Object) override;
 
         //////////////////////////////////////////////////////////////////////////
         //////////////////////////////////////////////////////////////////////////
 
     private:
-        uint32 m_Id;
-        Company m_CompanyId;
-        PortalType m_Type;
-        uint32 m_ToMapId;
-        float m_ToPositionX;
-        float m_ToPositionY;
+        std::unordered_map<Grid*, std::unordered_map<uint32, Entity::Mob*>> m_Pool;
     };
 
-}   ///< namespace Entity
+}   ///< namespace Map
 }   ///< namespace Game
 }   ///< namespace Steerstone

@@ -18,12 +18,19 @@
 
 #pragma once
 #include <PCH/Precompiled.hpp>
+#include "PoolUpdater.hpp"
 #include "Core/Core.hpp"
-#include "Pool.hpp"
 
 namespace SteerStone { namespace Game { namespace Map {
 
+    enum PoolType
+    {
+        POOL_TYPE_MOB       = 0,
+        POOL_TYPE_BONUS_BOX = 1
+    };
+
     class Base;
+    enum Type;
 
     /// Pool Manager
     class PoolManager
@@ -46,20 +53,29 @@ namespace SteerStone { namespace Game { namespace Map {
     public:
         /// Initialize Pool for map
         void Initialize();
+    private:
+        /// Load Mobs into pool
+        void InitializeMobs();
 
+    public:
         /// Update Pool
         /// @p_Diff : Execution Time
         void Update(uint32 const p_Diff);
+
+        /// Add Bonus box to map
+        /// @p_Object   : Object taking away the resources
+        /// @p_Type     : Type of Bonus Box
+        /// @p_OwnerId  : Owner of cargo box
+        void AddBonuxBox(Entity::Object* p_Object, BonusBoxType p_Type, uint32 const p_OwnerId);
+        /// Remove Bonus Box
+        /// @p_Object : Object Bonus Box
+        void RemoveBonusBox(Entity::Object* p_Object);
 
         //////////////////////////////////////////////////////////////////////////
         //////////////////////////////////////////////////////////////////////////
     
     private:
-        /// Load Mobs into pool
-        void InitializeMobs();
-
-    private:
-        Pool<Entity::Mob*> m_MobPool;
+        std::map<uint16, PoolUpdater*> m_Pool;
         Base* m_Map;
     };
 

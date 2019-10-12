@@ -16,28 +16,45 @@
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "Object.hpp"
+#include "PoolUpdater.hpp"
+#include "World.hpp"
+#include "MobPool.hpp"
 
-namespace SteerStone { namespace Game { namespace Entity {
-
+namespace SteerStone { namespace Game { namespace Map {
+    
     /// Constructor
-    Object::Object()
-        : m_Spline(this)
+    MobPool::MobPool()
     {
-        m_Type              = Type::OBJECT_TYPE_NON;
-        m_Name.clear();
-        m_GridIndex         = std::make_tuple(0, 0);
-        m_NeedToBeUpdate    = false;
-        m_Map               = nullptr;
     }
     /// Deconstructor
-    Object::~Object()
+    MobPool::~MobPool()
     {
     }
 
     //////////////////////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////////////////////
 
-}   ///< namespace Entity
+    /// Update the pool
+    /// @p_Diff : Execution Time
+    void MobPool::Update(uint32 const p_Diff)
+    {
+    }
+
+    /// Add to pool
+    /// @p_Object : Object being added
+    void MobPool::Add(Entity::Object* p_Object)
+    {
+        m_Pool[p_Object->GetGrid()][p_Object->GetObjectGUID().GetCounter()] = p_Object->ToMob();
+    }
+    /// Remove from Pool
+   /// @p_Object : Object being removed
+    void MobPool::Remove(Entity::Object* p_Object)
+    {
+        auto l_Itr = m_Pool[p_Object->GetGrid()].find(p_Object->GetObjectGUID().GetCounter());
+        if (l_Itr != m_Pool[p_Object->GetGrid()].end())
+            m_Pool[p_Object->GetGrid()].erase(l_Itr);
+    }
+
+}   ///< namespace Map
 }   ///< namespace Game
 }   ///< namespace Steerstone

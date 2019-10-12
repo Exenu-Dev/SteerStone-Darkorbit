@@ -18,30 +18,42 @@
 
 #pragma once
 #include <PCH/Precompiled.hpp>
-#include "Grid.hpp"
 #include "GameFlags.hpp"
+
+#include "Grid.hpp"
 
 namespace SteerStone { namespace Game { namespace Map {
 
-    /// Mob Pool
-    template <typename T> class Pool
+    class PoolUpdater
     {
-        //////////////////////////////////////////////////////////////////////////
-        //////////////////////////////////////////////////////////////////////////
     public:
-        /// Add to pool
-        /// @p_Grid : Grid Target
-        /// @p_Object : Object being added
-        void Add(Grid* p_Grid, T p_Object)
+        /// Constructor
+        PoolUpdater()
         {
-            m_Pool[p_Grid].push_back(p_Object);
+        }
+        /// Deconstructor
+        virtual ~PoolUpdater()
+        {
         }
 
         //////////////////////////////////////////////////////////////////////////
         //////////////////////////////////////////////////////////////////////////
 
-    private:
-        std::map<Grid*, std::vector<T>> m_Pool;
+    public:
+        /// Update the pool
+        /// @p_Diff : Execution Time
+        virtual void Update(uint32 const p_Diff) = 0;
+
+        /// Add to Pool
+        /// @p_Object : Object being added
+        virtual void Add(Entity::Object* p_Object) = 0;
+
+        /// Remove from Pool
+        /// @p_Object : Object being removed
+        virtual void Remove(Entity::Object* p_Object) = 0;
+
+        //////////////////////////////////////////////////////////////////////////
+        //////////////////////////////////////////////////////////////////////////
     };
 
 }   ///< namespace Map

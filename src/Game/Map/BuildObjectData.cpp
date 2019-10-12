@@ -22,6 +22,7 @@
 #include "Packets/Server/MiscPackets.hpp"
 #include "Grid.hpp"
 #include "Mob.hpp"
+#include "BonusBox.hpp"
 #include "Player.hpp"
 #include "Utility/UtilMaths.hpp"
 
@@ -50,21 +51,21 @@ namespace SteerStone { namespace Game { namespace Map {
                 continue;
 
             /// Portal and station are not ships but they exist in the grid
-            if (l_Itr.second->GetType() == Entity::Type::OBJECT_TYPE_PORTAL || l_Itr.second->GetType() == Entity::Type::OBJECT_TYPE_STATION)
+            if (l_Itr.second->IsPortal() || l_Itr.second->IsStation())
                 continue;
 
             if (Core::Utils::IsInCircleRadius(p_Object->GetSpline()->GetPositionX(), p_Object->GetSpline()->GetPositionY(),
                 l_Itr.second->GetSpline()->GetPositionX(), l_Itr.second->GetSpline()->GetPositionY(), PLAYER_RADIUS_SCAN))
             {
-                if (l_Itr.second->GetType() == Entity::Type::OBJECT_TYPE_PLAYER)
+                if (l_Itr.second->IsPlayer())
                 {
-                    if (!l_Itr.second->ToPlayer()->IsInSurrounding(p_Object))
+                    if (!l_Itr.second->ToPlayer()->IsInSurrounding(p_Object) || l_Itr.second->NeedToBeUpdated())
                         BuildObjectSpawnAndSend(p_Object, l_Itr.second);
                     else
                         l_Itr.second->ToPlayer()->RemoveScheduleDespawn(p_Object);
                 }
 
-                if (!p_Object->ToPlayer()->IsInSurrounding(l_Itr.second))
+                if (!p_Object->ToPlayer()->IsInSurrounding(l_Itr.second) || l_Itr.second->NeedToBeUpdated())
                     BuildObjectSpawnAndSend(l_Itr.second, p_Object);
                 else
                     p_Object->ToPlayer()->RemoveScheduleDespawn(l_Itr.second);
@@ -79,10 +80,26 @@ namespace SteerStone { namespace Game { namespace Map {
         /// This must be at the top or else we will enter a infinite recursive function
         p_Object->ToPlayer()->AddToSurrounding(p_ObjectBuilt);
 
-        Server::Packets::Ship::SpawnShip l_Packet;
-
-        if (p_ObjectBuilt->GetType() == Entity::Type::OBJECT_TYPE_PLAYER)
+        if (p_ObjectBuilt->IsBonusBox())
         {
+            if (p_ObjectBuilt->ToBonusBox()->GetBoxType() == BonusBoxType::BONUS_BOX_TYPE_CARGO)
+            {
+                /// TODO; Find packet which updates from friendly to non friendly cargo, currently it visually bugs out when sending Cargo packet again to update
+                Server::Packets::Cargo l_Packet;
+                l_Packet.Id         = p_ObjectBuilt->GetObjectGUID().GetCounter();
+                l_Packet.Type       = p_ObjectBuilt->ToBonusBox()->GetOwnerId() != p_Object->GetObjectGUID().GetCounter() ? !p_ObjectBuilt->ToBonusBox()->IsFriendlyCargo() : 1;
+                l_Packet.PositionX  = p_ObjectBuilt->GetSpline()->GetPositionX();
+                l_Packet.PositionY  = p_ObjectBuilt->GetSpline()->GetPositionY();
+                p_Object->ToPlayer()->SendPacket(l_Packet.Write());
+
+                p_ObjectBuilt->SetNeedToBeUpdated(false);
+
+                return;
+            }
+        }
+        else if (p_ObjectBuilt->IsPlayer())
+        {
+            Server::Packets::Ship::SpawnShip l_Packet;
             l_Packet.UserId                 = p_ObjectBuilt->GetObjectGUID().GetCounter();
             l_Packet.ShipId                 = p_ObjectBuilt->ToUnit()->GetShipType();
             l_Packet.WeaponState            = p_ObjectBuilt->ToPlayer()->GetWeaponState();
@@ -103,8 +120,9 @@ namespace SteerStone { namespace Game { namespace Map {
             if (p_ObjectBuilt->ToPlayer()->HasDrones())
                 p_Object->ToPlayer()->SendPacket(&p_ObjectBuilt->ToPlayer()->BuildDronePacket());
         }
-        else if (p_ObjectBuilt->GetType() == Entity::Type::OBJECT_TYPE_MOB)
+        else if (p_ObjectBuilt->IsMob())
         {
+            Server::Packets::Ship::SpawnShip l_Packet;
             l_Packet.UserId                 = p_ObjectBuilt->GetObjectGUID().GetCounter();
             l_Packet.ShipId                 = p_ObjectBuilt->ToUnit()->GetShipType();
             l_Packet.WeaponState            = p_ObjectBuilt->ToMob()->GetWeaponState();
@@ -122,9 +140,9 @@ namespace SteerStone { namespace Game { namespace Map {
             p_Object->ToPlayer()->SendPacket(l_Packet.Write());
         }
 
-        if (p_ObjectBuilt->ToUnit()->IsAttacking())
+        if ((p_ObjectBuilt->IsMob() || p_ObjectBuilt->IsPlayer()) && p_ObjectBuilt->ToUnit()->IsAttacking())
         {
-            if (p_ObjectBuilt->GetType() == Entity::Type::OBJECT_TYPE_PLAYER && p_ObjectBuilt->ToUnit()->GetTarget())
+            if (p_ObjectBuilt->IsPlayer() && p_ObjectBuilt->ToUnit()->GetTarget())
                 p_Object->ToPlayer()->SendPacket(Server::Packets::Misc::Info().Write(Server::Packets::Misc::InfoType::INFO_TYPE_GREY_OPPONENT, { p_ObjectBuilt->ToUnit()->GetTarget()->GetObjectGUID().GetCounter(), p_ObjectBuilt->GetObjectGUID().GetCounter() }));
 
             /// Send Attack
@@ -138,11 +156,13 @@ namespace SteerStone { namespace Game { namespace Map {
         /// When spawning the ship, we need to spend movement packet otherwise client will incorrectly set position of object
         /// no idea why it does this
         Server::Packets::Ship::ObjectMove l_ObjectMovePacket;
-        l_ObjectMovePacket.Id = p_ObjectBuilt->GetObjectGUID().GetCounter();
+        l_ObjectMovePacket.Id        = p_ObjectBuilt->GetObjectGUID().GetCounter();
         l_ObjectMovePacket.PositionX = p_ObjectBuilt->GetSpline()->GetPositionX();
         l_ObjectMovePacket.PositionY = p_ObjectBuilt->GetSpline()->GetPositionY();
-        l_ObjectMovePacket.Time = 0;
+        l_ObjectMovePacket.Time      = 0;
         p_Object->ToPlayer()->SendPacket(l_ObjectMovePacket.Write());
+
+        p_ObjectBuilt->SetNeedToBeUpdated(false);
     }
     /// Build Object Despawn Packet
     /// @p_Object : Object being built
@@ -152,7 +172,7 @@ namespace SteerStone { namespace Game { namespace Map {
         {
             if (l_Itr.second->GetGUID() != p_Object->GetGUID())
             {
-                if (l_Itr.second->GetType() == Entity::Type::OBJECT_TYPE_PLAYER)
+                if (l_Itr.second->IsPlayer())
                 {
                     Server::Packets::Ship::DespawnShip l_Packet;
                     l_Packet.Id = p_Object->GetObjectGUID().GetCounter();

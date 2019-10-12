@@ -86,11 +86,14 @@ namespace SteerStone { namespace Game { namespace Map {
         /// Calculate Grid By Object Position
         /// @p_Object : Object
         std::tuple<uint32, uint32> CalculateGridByPosition(Entity::Object* p_Object);
-        /// Calculate Grid By Object Position
-        /// @p_Object : Object
+        /// Calculate Grid By Position
         /// @p_PositionX : X Axis
         /// @p_PositionY : Y Axis
-        std::tuple<uint32, uint32> CalculateGridByNewPosition(Entity::Object* p_Object, float const p_PositionX, float const p_PositionY);
+        std::tuple<uint32, uint32> CalculateGridByPosition(float const p_PositionX, float const p_PositionY);
+        /// Return Grid by Position
+        /// @p_PositionX : X Axis
+        /// @p_PositionY : Y Axis
+        Grid* GetGridByPosition(float const p_PositionX, float const p_PositionY);
         /// This function is only called when object is added to map
         /// Add Object to map
         /// @p_Object       : Object being added to map
@@ -145,12 +148,14 @@ namespace SteerStone { namespace Game { namespace Map {
         //            GETTERS/SETTERS
         ///////////////////////////////////////////
     public:
-        uint32 GetId()          const { return m_Id; }
-        MapType GetMapType()    const { return m_MapType; }
-        uint32 GetGridRadiusX() const { return m_GridRadiusX; }
-        uint32 GetGridRadiusY() const { return m_GridRadiusY; }
-        uint32 GetMapSizeX()   const { return m_MapSizeX; }
-        uint32 GetMapSizeY()   const { return m_MapSizeY; }
+        uint32 GetId()          const { return m_Id;            }
+        MapType GetMapType()    const { return m_MapType;       }
+        uint32 GetGridRadiusX() const { return m_GridRadiusX;   }
+        uint32 GetGridRadiusY() const { return m_GridRadiusY;   }
+        uint32 GetMapSizeX()    const { return m_MapSizeX;      }
+        uint32 GetMapSizeY()    const { return m_MapSizeY;      }
+
+        PoolManager* GetPoolManager() { return &m_PoolManager;  }
 
         //////////////////////////////////////////////////////////////////////////
         //////////////////////////////////////////////////////////////////////////
