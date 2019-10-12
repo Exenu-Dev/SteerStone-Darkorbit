@@ -51,7 +51,7 @@ namespace SteerStone { namespace Game { namespace Entity {
             return false;
 
         /// If unit is dead, remove from client
-        if (m_Object->ToUnit()->GetDeathState() == Entity::DeathState::DEAD)
+        if (!m_Object->IsBonusBox() && m_Object->ToUnit()->GetDeathState() == Entity::DeathState::DEAD)
         {
             Despawn();
             return false;
@@ -117,23 +117,32 @@ namespace SteerStone { namespace Game { namespace Entity {
     /// Despawn Object
     bool SurroundingObject::Despawn()
     {
-        /// If we are still targetting the object, keep it in client
-        if (m_PlayerObject->ToUnit()->GetTarget() && m_PlayerObject->ToUnit()->GetTarget()->GetObjectGUID().GetCounter() ==
-            m_Object->GetObjectGUID().GetCounter())
+        if (!m_Object->IsBonusBox())
         {
-            /// If its a mob, then clear the target of the mob
-            if (m_Object->GetType() == Type::OBJECT_TYPE_MOB)
-                m_Object->ToUnit()->CancelAttack();
+            /// If we are still targetting the object, keep it in client
+            if (m_PlayerObject->ToUnit()->GetTarget() && m_PlayerObject->ToUnit()->GetTarget()->GetObjectGUID().GetCounter() ==
+                m_Object->GetObjectGUID().GetCounter())
+            {
+                /// If its a mob, then clear the target of the mob
+                if (m_Object->GetType() == Type::OBJECT_TYPE_MOB)
+                    m_Object->ToUnit()->CancelAttack();
 
-            /// And reset timer
-            m_IntervalDelayRemoval.ResetCurrent();
+                /// And reset timer
+                m_IntervalDelayRemoval.ResetCurrent();
 
-            return false;
+                return false;
+            }
+
+            Server::Packets::Ship::DespawnShip l_Packet;
+            l_Packet.Id = m_Object->GetObjectGUID().GetCounter();
+            m_PlayerObject->ToPlayer()->SendPacket(l_Packet.Write());
         }
-
-        Server::Packets::Ship::DespawnShip l_Packet;
-        l_Packet.Id = m_Object->GetObjectGUID().GetCounter();
-        m_PlayerObject->ToPlayer()->SendPacket(l_Packet.Write());
+        else ///< Is Bonus Box
+        {
+            Server::Packets::RemoveCargo l_Packet;
+            l_Packet.Id = m_Object->GetObjectGUID().GetCounter();
+            m_PlayerObject->ToPlayer()->SendPacket(l_Packet.Write());
+        }
 
         return true;
     }
