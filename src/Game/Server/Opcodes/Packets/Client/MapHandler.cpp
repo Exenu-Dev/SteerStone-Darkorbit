@@ -18,6 +18,7 @@
 
 #include "Server/MiscPackets.hpp"
 #include "Server/MapPackets.hpp"
+#include "Server/ShipPackets.hpp"
 #include "Socket.hpp"
 #include "Portal.hpp"
 #include "BonusBox.hpp"
@@ -154,6 +155,12 @@ namespace SteerStone { namespace Game { namespace Server {
     {
         uint32 l_Id = p_Packet->ReadUInt32();
 
+        if (m_Player->GetCargoSpace() == m_Player->GetMaxCargoSpace())
+        {
+            m_Player->SendPacket(Server::Packets::Ship::CargoFull().Write());
+            return;
+        }
+
         Entity::Object* l_Object = m_Player->GetGrid()->FindObject(l_Id);
 
         if (!l_Object)
@@ -168,7 +175,7 @@ namespace SteerStone { namespace Game { namespace Server {
             return;
         }
 
-        l_Object->ToBonusBox()->SetScheduleForDelete(true);
+        l_Object->ToBonusBox()->RewardCredit(m_Player);
     }
 
 }   ///< namespace Server

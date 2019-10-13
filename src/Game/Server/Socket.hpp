@@ -73,6 +73,12 @@ namespace SteerStone { namespace Game { namespace Server {
             /// Login Handler
             /// @p_ClientPacket : Packet recieved from client
             void HandleLogin(ClientPacket* p_Packet);
+            /// Login Handler
+            /// @p_ClientPacket : Packet recieved from client
+            void HandleLogout(ClientPacket* p_Packet);
+            /// Login Handler
+            /// @p_ClientPacket : Packet recieved from client
+            void HandleCancelLogout(ClientPacket* p_Packet);
             /// Ping Handler
             /// @p_ClientPacket : Packet recieved from client
             void HandlePingPacket(ClientPacket* p_Packet);
@@ -93,6 +99,18 @@ namespace SteerStone { namespace Game { namespace Server {
             /// Map Handler
             /// @p_ClientPacket : Packet recieved from client
             void HandlePortalJump(ClientPacket* p_Packet);
+            /// Map Handler
+            /// @p_ClientPacket : Packet recieved from client
+            void HandleSelectTarget(ClientPacket* p_Packet);
+            /// Map Handler
+            /// @p_ClientPacket : Packet recieved from client
+            void HandleLaserShoot(ClientPacket* p_Packet);
+            /// Map Handler
+            /// @p_ClientPacket : Packet recieved from client
+            void HandleAbortLaser(ClientPacket* p_Packet);
+            /// Map Handler
+            /// @p_ClientPacket : Packet recieved from client
+            void HandleLootCargo(ClientPacket* p_Packet);
 
             /// Debug Handler
             /// @p_ClientPacket : Packet recieved from client

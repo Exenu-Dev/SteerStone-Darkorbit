@@ -28,7 +28,7 @@ namespace SteerStone { namespace Game { namespace Map {
     {
     public:
         /// Constructor
-        BonusBoxPool();
+        BonusBoxPool(); 
         /// Deconstructor
         ~BonusBoxPool();
 

@@ -202,6 +202,27 @@ namespace SteerStone { namespace Game { namespace Server { namespace Packets { n
         uint32 Id;
     };
 
+    /// SERVER_PACKET_TARGET_HEALTH packet builder
+    class TargetHealth final : public ServerPacket
+    {
+    public:
+        /// Constructor 
+        TargetHealth() : ServerPacket(ServerOpCodes::SERVER_PACKET_TARGET_HEALTH)
+        {
+        }
+
+        //////////////////////////////////////////////////////////////////////////
+        //////////////////////////////////////////////////////////////////////////
+
+        /// Write the packet
+        PacketBuffer const* Write();
+
+        int32 Shield;
+        uint32 MaxShield;
+        int32 HitPoints;
+        uint32 MaxHitPoints;
+    };
+
 }   ///< namespace Attack
 }   ///< namespace Packets
 }   ///< namespace Server

@@ -112,7 +112,7 @@ namespace SteerStone { namespace Game { namespace Map {
     {
         for (auto& l_Itr : m_Zones)
         {
-            if (Map::Base* l_Map = l_Itr.second->GetMap(p_Id))
+            if (Map::Base* l_Map = l_Itr.second->GetMap(p_Id))  
                 return l_Map;
         }
 

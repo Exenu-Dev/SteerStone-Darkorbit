@@ -197,7 +197,7 @@ namespace SteerStone { namespace Game { namespace Entity {
         /// Send Packet
         /// @p_PacketBuffer : Packet Buffer
         void SendPacket(Server::PacketBuffer const* p_PacketBuffer);
-        /// Kick Player from world
+        /// Kick Player
         void KickPlayer();
 
         ///////////////////////////////////////////
@@ -212,7 +212,7 @@ namespace SteerStone { namespace Game { namespace Entity {
         uint32 GetJackPot()        const     { return m_Jackpot;          }
         uint32 GetLevel()          const     { return m_Level;            }
         uint32 GetExperience()     const     { return m_Experience;       }
-        uint32 GetHonor()          const     { return m_Honor;            }
+        int32 GetHonor()          const      { return m_Honor;            }
         bool IsPremium()           const     { return m_Premium;          }
         bool IsLoggingOut()        const     { return m_LoggingOut;       }
         bool IsLoggedIn()          const     { return m_LoggedIn;         }
@@ -235,7 +235,7 @@ namespace SteerStone { namespace Game { namespace Entity {
         void UpdateUridium(uint32 const p_Uridium)       { m_Uridium += p_Uridium;        }
         void UpdateExperience(uint32 const p_Experience);
         void UpdateHonor(uint32 const p_Honour)          { m_Honor += p_Honour;           }
-
+        void SetCargoSpace(uint32 const p_CargoSpace)    { m_CargoSpace = p_CargoSpace;   }
         Core::Diagnostic::IntervalTimer IntervalLogout;
 
     //////////////////////////////////////////////////////////////////////////

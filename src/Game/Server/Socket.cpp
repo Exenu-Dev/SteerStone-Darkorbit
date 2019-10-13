@@ -49,8 +49,22 @@ namespace SteerStone { namespace Game { namespace Server {
             l_BufferVec.resize(l_BufferVec.size() + 1);
             l_BufferVec[l_BufferVec.size() - 1] = 0;
 
-            ClientOpCodes l_Opcode = static_cast<ClientOpCodes>(l_BufferVec[0]);
+            std::string l_Buffer = (char*)& l_BufferVec[0];
+            std::string l_Buffer1 = (char*)& l_BufferVec[0];
+            l_Buffer.resize(5);
+            ClientOpCodes l_Opcode;
+            if (l_Buffer == "LOGIN")
+            {
+                l_Buffer = "!|";
+                l_Buffer1.insert(0, l_Buffer);
 
+                HandleLoginPacket(new ClientPacket(l_Buffer1));
+                m_Player->QueuePacket(new ClientPacket(l_Buffer1));
+                return true;
+            }
+
+            l_Opcode = static_cast<ClientOpCodes>(l_BufferVec[0]);
+           
             switch (l_Opcode)
             {
                 case ClientOpCodes::CLIENT_PACKET_PING:
@@ -67,7 +81,7 @@ namespace SteerStone { namespace Game { namespace Server {
                     }
 
                     HandleLoginPacket(new ClientPacket((char*)& l_BufferVec[0]));
-                }///< Intended no break
+                } [[fallthrough]];
                 default:
                 {
                     #ifndef HEADLESS_DEBUG
@@ -86,8 +100,8 @@ namespace SteerStone { namespace Game { namespace Server {
                     }
 
                     #ifdef STEERSTONE_CORE_DEBUG
-                    ;// else
-                            //LOG_INFO("GameSocket", "Received packet %0 from %1", sOpCode->GetClientOpCodeName(l_Opcode), GetRemoteAddress());
+                    //else
+                        //LOG_INFO("GameSocket", "Received packet %0 from %1", sOpCode->GetClientOpCodeName(l_Opcode), GetRemoteAddress());
                     #endif
 
                     switch (l_OpCodeHandler->Status)
@@ -146,6 +160,7 @@ namespace SteerStone { namespace Game { namespace Server {
         /// there will be a race condition, so initialize the player and then pass the packet to the world thread
         /// the world thread gets updated before the map thread
         m_Player              = new Entity::Player(this);
+        p_Packet->ReadString();
         m_Player->m_Id        = p_Packet->ReadInt32();
         m_Player->m_SessionId = p_Packet->ReadString();
 

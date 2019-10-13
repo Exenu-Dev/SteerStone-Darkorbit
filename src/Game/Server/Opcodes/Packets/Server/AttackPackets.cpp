@@ -133,6 +133,22 @@ namespace SteerStone { namespace Game { namespace Server { namespace Packets { n
         return &m_Buffer;
     }
 
+    /// SERVER_PACKET_TARGET_HEALTH
+    PacketBuffer const* TargetHealth::Write()
+    {
+        m_Buffer.AppendChar("0");   ///< Unused by client
+        m_Buffer.AppendChar("0");   ///< Unused by client
+        m_Buffer.AppendInt32(Shield);
+        m_Buffer.AppendInt32(MaxShield);
+        m_Buffer.AppendInt32(HitPoints);
+        m_Buffer.AppendInt32(MaxHitPoints);
+
+        m_Buffer.AppendEndSplitter();
+        m_Buffer.AppendCarriage();
+
+        return &m_Buffer;
+    }
+
 }   ///< namespace Attack
 }   ///< namespace Packets
 }   ///< namespace Server

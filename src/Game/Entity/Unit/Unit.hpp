@@ -23,7 +23,8 @@
 
 #include "Diagnostic/DiaIntervalTimer.hpp"
 
-#define ATTACK_UPDATE_INTERVAL 1000
+#define ATTACK_UPDATE_INTERVAL 1000ul
+#define MAX_RESOURCE_COUNTER 9ul
 
 namespace SteerStone { namespace Game { namespace Entity {
 
@@ -41,6 +42,19 @@ namespace SteerStone { namespace Game { namespace Entity {
         ATTACK_STATE_NONE           = 0,
         ATTACK_STATE_IN_RANGE       = 1,
         ATTACK_STATE_OUT_OF_RANGE   = 2,
+    };
+
+    enum Resource
+    {
+        RESOURCE_PROMETIUM  = 0,
+        RESOURCE_ENDURIUM   = 1,
+        RESOURCE_TERBIUM    = 2,
+        RESOURCE_XENOMIT    = 3,
+        RESOURCE_PROMETID   = 4,
+        RESOURCE_DURANIUM   = 5,
+        RESOURCE_PROMERIUM  = 6,
+        RESOURCE_PALLADIUM  = 7,
+        RESOURCE_SEPROM     = 8
     };
 
     class Unit : public Object
@@ -61,10 +75,6 @@ namespace SteerStone { namespace Game { namespace Entity {
         /// Update
         /// @p_Diff : Execution Time
         void Update(uint32 const p_Diff);
-
-        /// Kill
-        /// @p_Unit : Unit being killed
-        void Kill(Unit* p_Unit);
 
         ///////////////////////////////////////////
         //             ATTACK SYSTEM
@@ -89,6 +99,9 @@ namespace SteerStone { namespace Game { namespace Entity {
         /// Returns whether unit is attacking us
         /// @p_Unit : Unit attacking us
         bool IsAttackingMe(Unit* p_Unit) const;
+        /// Kill
+        /// @p_Unit : Unit being killed
+        void Kill(Unit* p_Unit);
 
         ///////////////////////////////////////////
         //                TARGET
@@ -127,19 +140,18 @@ namespace SteerStone { namespace Game { namespace Entity {
         uint32 GetHonor()           const { return m_Honor;             }
         uint32 GetCredits()         const { return m_Credits;           }
         uint32 GetUridium()         const { return m_Uridium;           }
-        uint32 GetPrometium()       const { return m_Prometium;         }
-        uint32 GetEndurium()        const { return m_Endurium;          }
-        uint32 GetTerbium()         const { return m_Terbium;           }
-        uint32 GetPrometid()        const { return m_Prometid;          }
-        uint32 GetDuranium()        const { return m_Duranium;          }
-        uint32 GetPromerium()       const { return m_Promerium;         }
-        uint32 GetXenomit()         const { return m_Xenomit;           }
-        uint32 GetSeprom()          const { return m_Seprom;            }
-        uint32 GetPalladium()       const { return m_Palladium;         }
+        uint32 GetResource(uint32 const p_Index) const 
+        {
+            if (p_Index > MAX_RESOURCE_COUNTER)
+                LOG_ASSERT(false, "Unit", "Attempted to get resource but index is unknown! Index: %0", p_Index);
+
+            return m_Resources[p_Index];
+        }
 
         bool IsAttacking()          const { return m_Attacking;                      }
         bool IsDead()               const { return m_DeathState == DeathState::DEAD; }
 
+        void SetHonor(int32 const p_Honor)              { m_Honor = p_Honor;            }
         void SetWeaponState(uint16 const p_WeaponState) { m_WeaponState = p_WeaponState;}
         void SetHitPoints(uint32 const p_HitPoints)     { m_HitPoints = p_HitPoints;    }
         void SetShield(uint32 const p_Shield)           { m_Shield = p_Shield;          }
@@ -154,6 +166,7 @@ namespace SteerStone { namespace Game { namespace Entity {
             m_Shield            = m_MaxShield;
             m_ShieldResistance  = p_ShieldResistance;
         }
+        void SetResource(uint32 const p_Index, uint32 const p_Resource);
 
     //////////////////////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////////////////////
@@ -183,18 +196,11 @@ namespace SteerStone { namespace Game { namespace Entity {
         uint32 m_Experience;
         uint16 m_Behaviour;
         uint32 m_RespawnTimer;
-        uint32 m_Honor;
+        int32 m_Honor;
+        uint32 m_Respawn;
         uint32 m_Credits;
         uint32 m_Uridium;
-        uint32 m_Prometium;
-        uint32 m_Endurium;
-        uint32 m_Terbium;
-        uint32 m_Prometid;
-        uint32 m_Duranium;
-        uint32 m_Promerium;
-        uint32 m_Xenomit;
-        uint32 m_Seprom;
-        uint32 m_Palladium;
+        uint32 m_Resources[9];
 
         uint32 m_LastTimeAttacked;
         bool m_Attacking;

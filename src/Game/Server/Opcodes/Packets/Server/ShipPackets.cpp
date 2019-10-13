@@ -123,6 +123,15 @@ namespace SteerStone { namespace Game { namespace Server { namespace Packets { n
         return &m_Buffer;
     }
 
+    /// SERVER_PACKET_CARGO_BAY_FULL
+    PacketBuffer const* CargoFull::Write()
+    {
+        m_Buffer.AppendEndSplitter();
+        m_Buffer.AppendCarriage();
+
+        return &m_Buffer;
+    }
+
 }   ///< namespace Ship
 }   ///< namespace Packets
 }   ///< namespace Server

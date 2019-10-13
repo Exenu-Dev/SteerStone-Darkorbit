@@ -101,7 +101,7 @@ namespace SteerStone { namespace Game { namespace Entity {
     /// @p_PacketBuffer : Packet being sent
     void SurroundingObject::SendPacket(Server::PacketBuffer const* p_PacketBuffer)
     {
-        if (m_Object->GetType() == Entity::Type::OBJECT_TYPE_PLAYER)
+        if (m_Object->IsPlayer())
         {
             if (m_Object->ToPlayer()->IsInSurrounding(m_PlayerObject))
                 m_Object->ToPlayer()->SendPacket(p_PacketBuffer);

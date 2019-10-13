@@ -61,7 +61,7 @@ namespace SteerStone { namespace Game { namespace Map {
     class Base;
 
     typedef std::unordered_map<uint32, Entity::Object*> ObjectMap;
-    typedef std::unordered_set<Entity::Object*> PlayerMap;
+    typedef std::unordered_set<Entity::Player*> PlayerMap;
 
     /// Grid
     class Grid
@@ -117,12 +117,12 @@ namespace SteerStone { namespace Game { namespace Map {
         /// Unload objects from map
         void Unload();
         /// Build surrounding objects near player
-        /// @p_Object       : Player
-        void BuildSurroundingObjects(Entity::Object* p_Object);
+        /// @p_Player       : Player
+        void BuildSurroundingObjects(Entity::Player* p_Player);
         /// Build Player Spawn Packet
         /// @p_ObjectBuilt : Object being built
-        /// @p_Object      : Object
-        void BuildObjectSpawnAndSend(Entity::Object* p_ObjectBuilt, Entity::Object* p_Object);
+        /// @p_Player      : Player
+        void BuildObjectSpawnAndSend(Entity::Object* p_ObjectBuilt, Entity::Player* p_Player);
         /// Build Object Despawn Packet
         /// @p_Object : Object being built
         void BuildObjectDespawnAndSend(Entity::Object* p_Object);

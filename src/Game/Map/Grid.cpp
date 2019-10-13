@@ -239,7 +239,7 @@ namespace SteerStone { namespace Game { namespace Map {
         /// If a player is joining then set grid to active
         if (p_Object->GetType() == Entity::Type::OBJECT_TYPE_PLAYER)
         {
-            m_Players.insert(p_Object);
+            m_Players.insert(p_Object->ToPlayer());
 
             if (m_State == State::Idle)
                 m_State = State::Active;
@@ -253,7 +253,7 @@ namespace SteerStone { namespace Game { namespace Map {
     void Grid::Remove(Entity::Object* p_Object, bool p_SendPacket)
     {
         if (p_Object->IsPlayer())
-            m_Players.erase(p_Object);
+            m_Players.erase(p_Object->ToPlayer());
 
         if (p_SendPacket)
         {

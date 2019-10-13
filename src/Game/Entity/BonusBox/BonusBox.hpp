@@ -24,11 +24,12 @@
 #include "Diagnostic/DiaIntervalTimer.hpp"
 
 #define FRIENDLY_CARGO_TIMER 8000ul
+#define FRIENDLY_HONOR_TAKE_AWAY 500ul
 
 namespace SteerStone { namespace Game { namespace Entity {
 
     /// Bonus Box
-    class BonusBox : public Object
+    class BonusBox : public Unit
     {
     public:
         friend class Map::PoolManager;
@@ -54,12 +55,17 @@ namespace SteerStone { namespace Game { namespace Entity {
         /// @p_Diff : Execution Time
         void Update(uint32 const p_Diff);
 
+        /// Reward Credit on kill
+        /// @p_Player : Player being rewarded
+        void RewardCredit(Entity::Player* p_Player);
+
         ///////////////////////////////////////////
         //            GETTERS/SETTERS
         ///////////////////////////////////////////
     public:
         bool IsFriendlyCargo()      const { return m_IsFriendlyCargo;   }
         bool IsScheduledForDelete() const { return m_ScheduleForDelete; }
+        bool IsLooted()             const { return m_Looted;            }  
         BonusBoxType GetBoxType()   const { return m_BoxType;           }
         int32 GetOwnerId()          const { return m_OwnerId;           }
 
@@ -73,6 +79,7 @@ namespace SteerStone { namespace Game { namespace Entity {
         uint32 GetSeprom()          const { return m_Seprom;            }
         uint32 GetPalladium()       const { return m_Palladium;         }
 
+        void SetLooted() { m_Looted = true; }
         void SetScheduleForDelete(bool const p_Schedule) { m_ScheduleForDelete = p_Schedule; }
         void SetOwnerId(int32 const p_OwnerId) { m_OwnerId = p_OwnerId; }
 
@@ -82,17 +89,7 @@ namespace SteerStone { namespace Game { namespace Entity {
     private:
         int32 m_OwnerId;        ///< Owner of bonus box
         BonusBoxType m_BoxType;
-
-        uint32 m_Prometium;
-        uint32 m_Endurium;
-        uint32 m_Terbium;
-        uint32 m_Prometid;
-        uint32 m_Duranium;
-        uint32 m_Promerium;
-        uint32 m_Xenomit;
-        uint32 m_Seprom;
-        uint32 m_Palladium;
-
+        bool m_Looted;
         bool m_ScheduleForDelete;
         bool m_IsFriendlyCargo;
         Core::Diagnostic::IntervalTimer m_IntervalFriendlyCargo;

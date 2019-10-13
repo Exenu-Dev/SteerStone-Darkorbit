@@ -18,8 +18,16 @@
 
 #pragma once
 #include "Socket.hpp"
+#include <variant>
 
 namespace SteerStone { namespace Game { namespace Server { namespace Packets { namespace Login {
+
+    enum class InfoType
+    {
+        INFO_TYPE_SET_SETTINGS,
+        INFO_TYPE_SET_ADMIN,
+        INFO_TYPE_SET_CARGO_SPACE,
+    };
 
     /// SERVER_PACKET_PLAYER_INFO packet builder
     class PlayerInfo final : public ServerPacket
@@ -34,35 +42,7 @@ namespace SteerStone { namespace Game { namespace Server { namespace Packets { n
             //////////////////////////////////////////////////////////////////////////
 
             /// Write the packet
-            PacketBuffer const* Write();
-            
-            std::string Type;
-            bool DisplayBoost;
-            bool DisplayDamage;
-            bool DisplayAllLas;
-            bool DisplayExploration;
-            bool DisplayName;
-            bool DisplayFirmIcon;
-            bool DisplayAlphaBG;
-            bool IgnoreRes;
-            bool IgnoreBox;
-            bool ConvertGates;
-            bool ConvertOppo;
-            bool SoundOff;
-            bool BackgroundMusicOff;
-            bool DisplayStatus;
-            bool DisplayBubble;
-            uint32 SelectedLaser;
-            uint32 SelectedRocket;
-            bool DisplayDigits;
-            bool DisplayChat;
-            bool DisplayDrones;
-            bool ShowStarSystem;
-            bool IgnoreCargo;
-            bool IgnoreHostileCargo;
-            bool AutoChangeAmmo;
-            bool EnableBuyFast;
-            bool EnableDebugWindow;
+            PacketBuffer const* Write(InfoType p_InfoType, std::initializer_list<std::variant<uint32, bool>> p_Storage);
     };
 
     /// SERVER_PACKET_INITIALIZE_SHIP packet builder
@@ -100,7 +80,7 @@ namespace SteerStone { namespace Game { namespace Server { namespace Packets { n
         uint16 WeaponState;
         bool IsPremium;
         uint32 Experience;
-        uint32 Honour;
+        int32 Honour;
         uint16 Level;
         uint32 Credits;
         uint32 Uridium;

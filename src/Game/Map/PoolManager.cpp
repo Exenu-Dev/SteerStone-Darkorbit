@@ -21,6 +21,7 @@
 #include "MobPool.hpp"
 #include "BonusBoxPool.hpp"
 #include "Mob/Mob.hpp"
+#include "Player.hpp"
 #include "BonusBox/BonusBox.hpp"
 #include "Map.hpp"
 #include "Utility/UtilRandom.hpp"
@@ -90,34 +91,34 @@ namespace SteerStone { namespace Game { namespace Map {
 
                         for (uint32 l_I = 0; l_I < Core::Utils::UInt32Random(l_Result[1].GetUInt32(), l_Result[2].GetUInt32()); l_I++)
                         {
-                            Entity::Mob* l_Mob = new Entity::Mob();
-                            l_Mob->m_Entry = l_MobTemplate->Entry;
-                            l_Mob->m_ShipType = l_MobTemplate->Type;
-                            l_Mob->m_WeaponState = l_MobTemplate->WeaponState;
-                            l_Mob->m_HitPoints = l_MobTemplate->HitPoints;
-                            l_Mob->m_MaxHitPoints = l_MobTemplate->HitPoints;
-                            l_Mob->m_ShieldResistance = l_MobTemplate->ShieldResistance;
-                            l_Mob->m_Shield = l_MobTemplate->Shield;
-                            l_Mob->m_MinDamage = l_MobTemplate->MinDamage;
-                            l_Mob->m_MaxShield = l_MobTemplate->Shield;
-                            l_Mob->m_MaxDamage = l_MobTemplate->MaxDamage;
-                            l_Mob->m_Behaviour = l_MobTemplate->Behaviour;
-                            l_Mob->m_RespawnTimer = l_MobTemplate->RespawnTimer;
-                            l_Mob->m_Experience = l_MobTemplate->Experience;
-                            l_Mob->m_Honor = l_MobTemplate->Honor;
-                            l_Mob->m_Credits = l_MobTemplate->Credits;
-                            l_Mob->m_Uridium = l_MobTemplate->Uridium;
-                            l_Mob->m_Prometium = l_MobTemplate->Prometium;
-                            l_Mob->m_Endurium = l_MobTemplate->Endurium;
-                            l_Mob->m_Terbium = l_MobTemplate->Terbium;
-                            l_Mob->m_Prometid = l_MobTemplate->Prometid;
-                            l_Mob->m_Duranium = l_MobTemplate->Duranium;
-                            l_Mob->m_Promerium = l_MobTemplate->Promerium;
-                            l_Mob->m_Xenomit = l_MobTemplate->Xenomit;
-                            l_Mob->m_Seprom = l_MobTemplate->Seprom;
-                            l_Mob->m_Palladium = l_MobTemplate->Palladium;
-                            l_Mob->m_MoveTimeMin = l_MobTemplate->MinMovementTime;
-                            l_Mob->m_MoveTimeMax = l_MobTemplate->MaxMovementTime;
+                            Entity::Mob* l_Mob          = new Entity::Mob();
+                            l_Mob->m_Entry              = l_MobTemplate->Entry;
+                            l_Mob->m_ShipType           = l_MobTemplate->Type;
+                            l_Mob->m_WeaponState        = l_MobTemplate->WeaponState;
+                            l_Mob->m_HitPoints          = l_MobTemplate->HitPoints;
+                            l_Mob->m_MaxHitPoints       = l_MobTemplate->HitPoints;
+                            l_Mob->m_ShieldResistance   = l_MobTemplate->ShieldResistance;
+                            l_Mob->m_Shield             = l_MobTemplate->Shield;
+                            l_Mob->m_MinDamage          = l_MobTemplate->MinDamage;
+                            l_Mob->m_MaxShield          = l_MobTemplate->Shield;
+                            l_Mob->m_MaxDamage          = l_MobTemplate->MaxDamage;
+                            l_Mob->m_Behaviour          = l_MobTemplate->Behaviour;
+                            l_Mob->m_RespawnTimer       = l_MobTemplate->RespawnTimer;
+                            l_Mob->m_Experience         = l_MobTemplate->Experience;
+                            l_Mob->m_Honor              = l_MobTemplate->Honor;
+                            l_Mob->m_Credits            = l_MobTemplate->Credits;
+                            l_Mob->m_Uridium            = l_MobTemplate->Uridium;
+                            l_Mob->m_Resources[Entity::Resource::RESOURCE_PROMETIUM] = l_MobTemplate->Prometium;
+                            l_Mob->m_Resources[Entity::Resource::RESOURCE_ENDURIUM]  = l_MobTemplate->Endurium;
+                            l_Mob->m_Resources[Entity::Resource::RESOURCE_TERBIUM]   = l_MobTemplate->Terbium;
+                            l_Mob->m_Resources[Entity::Resource::RESOURCE_XENOMIT]   = l_MobTemplate->Xenomit;
+                            l_Mob->m_Resources[Entity::Resource::RESOURCE_PROMETID]  = l_MobTemplate->Prometid;
+                            l_Mob->m_Resources[Entity::Resource::RESOURCE_DURANIUM]  = l_MobTemplate->Duranium;
+                            l_Mob->m_Resources[Entity::Resource::RESOURCE_PROMETIUM] = l_MobTemplate->Prometium;
+                            l_Mob->m_Resources[Entity::Resource::RESOURCE_PALLADIUM] = l_MobTemplate->Palladium;
+                            l_Mob->m_Resources[Entity::Resource::RESOURCE_SEPROM]    = l_MobTemplate->Seprom;
+                            l_Mob->m_MoveTimeMin        = l_MobTemplate->MinMovementTime;
+                            l_Mob->m_MoveTimeMax        = l_MobTemplate->MaxMovementTime;
                             l_Mob->GetSpline()->SetSpeed(l_MobTemplate->Speed);
                             l_Mob->SetName(l_MobTemplate->Name);
                             l_Mob->m_IntervalMoveTimer.SetInterval(Core::Utils::FloatRandom(l_Mob->m_MoveTimeMin, l_Mob->m_MoveTimeMin));
@@ -154,29 +155,30 @@ namespace SteerStone { namespace Game { namespace Map {
     }
 
     /// Add Bonus box to map
-    /// @p_Object  : Object taking away the resources
+    /// @p_Unit    : Unit taking away the resources
     /// @p_Type    : Type of Bonus Box
     /// @p_OwnerId : Owner of cargo box
-    void PoolManager::AddBonuxBox(Entity::Object* p_Object, BonusBoxType p_Type, uint32 const p_OwnerId)
+    void PoolManager::AddBonuxBox(Entity::Unit* p_Unit, BonusBoxType p_Type, uint32 const p_OwnerId)
     {
         /// Note; we do not need to send cargo box packet, this will be sent on next object build update
         /// so just add cargo box to map and pool
         
         Entity::BonusBox* l_BonusBox = new Entity::BonusBox(p_Type);
 
+        /// TODO; Player does not give all their cargo, only some of it, right now it gives all of it and doesn't take away
         l_BonusBox->m_OwnerId   = p_OwnerId;
-        l_BonusBox->m_Duranium  = p_Object->ToUnit()->GetDuranium();
-        l_BonusBox->m_Endurium  = p_Object->ToUnit()->GetEndurium();
-        l_BonusBox->m_Palladium = p_Object->ToUnit()->GetPalladium();
-        l_BonusBox->m_Promerium = p_Object->ToUnit()->GetPromerium();
-        l_BonusBox->m_Prometid  = p_Object->ToUnit()->GetPrometid();
-        l_BonusBox->m_Prometium = p_Object->ToUnit()->GetPrometium();
-        l_BonusBox->m_Seprom    = p_Object->ToUnit()->GetSeprom();
-        l_BonusBox->m_Terbium   = p_Object->ToUnit()->GetTerbium();
-        l_BonusBox->m_Xenomit   = p_Object->ToUnit()->GetXenomit();
+        l_BonusBox->m_Prometium = p_Unit->GetResource(Entity::Resource::RESOURCE_PROMETIUM);
+        l_BonusBox->m_Endurium  = p_Unit->GetResource(Entity::Resource::RESOURCE_ENDURIUM);
+        l_BonusBox->m_Terbium   = p_Unit->GetResource(Entity::Resource::RESOURCE_TERBIUM);
+        l_BonusBox->m_Xenomit   = p_Unit->GetResource(Entity::Resource::RESOURCE_XENOMIT);
+        l_BonusBox->m_Prometid  = p_Unit->GetResource(Entity::Resource::RESOURCE_PROMETID);
+        l_BonusBox->m_Duranium  = p_Unit->GetResource(Entity::Resource::RESOURCE_DURANIUM);
+        l_BonusBox->m_Promerium = p_Unit->GetResource(Entity::Resource::RESOURCE_PROMERIUM);
+        l_BonusBox->m_Palladium = p_Unit->GetResource(Entity::Resource::RESOURCE_PALLADIUM);
+        l_BonusBox->m_Seprom    = p_Unit->GetResource(Entity::Resource::RESOURCE_SEPROM);
 
         l_BonusBox->SetMap(m_Map);
-        l_BonusBox->GetSpline()->SetPosition(p_Object->GetSpline()->GetPositionX(), p_Object->GetSpline()->GetPositionY());
+        l_BonusBox->GetSpline()->SetPosition(p_Unit->GetSpline()->GetPositionX(), p_Unit->GetSpline()->GetPositionY());
         
         m_Map->Add(l_BonusBox);
 

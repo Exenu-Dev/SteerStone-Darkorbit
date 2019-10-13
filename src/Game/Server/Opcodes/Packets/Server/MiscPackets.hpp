@@ -112,7 +112,7 @@ namespace SteerStone { namespace Game { namespace Server { namespace Packets { n
         /// Write the packet
         /// @p_Storage : Storage of UInt32
         /// @p_RewardType : Type of Reward
-        PacketBuffer const* Write(RewardType p_RewardType, std::initializer_list<uint32> p_Storage);
+        PacketBuffer const* Write(RewardType p_RewardType, std::initializer_list<std::variant<uint32, int32>> p_Storage);
     };
 
 }   ///< namespace Misc

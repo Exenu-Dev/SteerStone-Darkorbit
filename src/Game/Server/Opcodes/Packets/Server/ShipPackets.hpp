@@ -175,6 +175,22 @@ namespace SteerStone { namespace Game { namespace Server { namespace Packets { n
         uint16 ShipType;
     };
 
+    /// SERVER_PACKET_CARGO_BAY_FULL packet builder
+    class CargoFull final : public ServerPacket
+    {
+    public:
+        /// Constructor 
+        CargoFull() : ServerPacket(ServerOpCodes::SERVER_PACKET_CARGO_BAY_FULL)
+        {
+        }
+
+        //////////////////////////////////////////////////////////////////////////
+        //////////////////////////////////////////////////////////////////////////
+
+        /// Write the packet
+        PacketBuffer const* Write();
+    };
+
 }   ///< namespace Ship
 }   ///< namespace Packets
 }   ///< namespace Server

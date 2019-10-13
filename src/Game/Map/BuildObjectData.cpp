@@ -33,8 +33,8 @@ namespace SteerStone { namespace Game { namespace Map {
     ///////////////////////////////////////////
 
     /// Build surrounding objects near player
-    /// @p_Object : Player
-    void Grid::BuildSurroundingObjects(Entity::Object* p_Object)
+    /// @p_Player : Player
+    void Grid::BuildSurroundingObjects(Entity::Player* p_Player)
     {
         /// NOTE;
         /// When adding an object to the client, for some reason the position gets desync,
@@ -43,7 +43,7 @@ namespace SteerStone { namespace Game { namespace Map {
         for (auto l_Itr : m_Objects)
         {
             /// Don't send packet to self because the initialize packet handles creation of ship for player
-            if (l_Itr.second->GetGUID() == p_Object->GetGUID())
+            if (l_Itr.second->GetGUID() == p_Player->GetGUID())
                 continue;
 
             /// Don't add unit if they're dead
@@ -54,45 +54,51 @@ namespace SteerStone { namespace Game { namespace Map {
             if (l_Itr.second->IsPortal() || l_Itr.second->IsStation())
                 continue;
 
-            if (Core::Utils::IsInCircleRadius(p_Object->GetSpline()->GetPositionX(), p_Object->GetSpline()->GetPositionY(),
+            if (Core::Utils::IsInCircleRadius(p_Player->GetSpline()->GetPositionX(), l_Itr.second->GetSpline()->GetPositionY(),
                 l_Itr.second->GetSpline()->GetPositionX(), l_Itr.second->GetSpline()->GetPositionY(), PLAYER_RADIUS_SCAN))
             {
                 if (l_Itr.second->IsPlayer())
                 {
-                    if (!l_Itr.second->ToPlayer()->IsInSurrounding(p_Object) || l_Itr.second->NeedToBeUpdated())
-                        BuildObjectSpawnAndSend(p_Object, l_Itr.second);
+                    if (!l_Itr.second->ToPlayer()->IsInSurrounding(p_Player) || l_Itr.second->NeedToBeUpdated())
+                        BuildObjectSpawnAndSend(l_Itr.second, p_Player);
                     else
-                        l_Itr.second->ToPlayer()->RemoveScheduleDespawn(p_Object);
+                        l_Itr.second->ToPlayer()->RemoveScheduleDespawn(p_Player);
                 }
 
-                if (!p_Object->ToPlayer()->IsInSurrounding(l_Itr.second) || l_Itr.second->NeedToBeUpdated())
-                    BuildObjectSpawnAndSend(l_Itr.second, p_Object);
+                if (!p_Player->IsInSurrounding(l_Itr.second) || l_Itr.second->NeedToBeUpdated())
+                    BuildObjectSpawnAndSend(l_Itr.second, p_Player);
                 else
-                    p_Object->ToPlayer()->RemoveScheduleDespawn(l_Itr.second);
+                    p_Player->ToPlayer()->RemoveScheduleDespawn(l_Itr.second);
             }
         }
     }
     /// Build Player Spawn Packet
     /// @p_ObjectBuilt : Object being built
-    /// @p_Object      : Object
-    void Grid::BuildObjectSpawnAndSend(Entity::Object* p_ObjectBuilt, Entity::Object* p_Object)
+    /// @p_Player      : Player
+    void Grid::BuildObjectSpawnAndSend(Entity::Object* p_ObjectBuilt, Entity::Player* p_Player)
     {
         /// This must be at the top or else we will enter a infinite recursive function
-        p_Object->ToPlayer()->AddToSurrounding(p_ObjectBuilt);
+        p_Player->AddToSurrounding(p_ObjectBuilt);
 
         if (p_ObjectBuilt->IsBonusBox())
         {
             if (p_ObjectBuilt->ToBonusBox()->GetBoxType() == BonusBoxType::BONUS_BOX_TYPE_CARGO)
             {
+                /// We do this because we want to change the friendly cargo to non friendly, only way I can find
+                if (p_ObjectBuilt->ToBonusBox()->NeedToBeUpdated())
+                {
+                    Server::Packets::RemoveCargo l_Packet;
+                    l_Packet.Id = p_ObjectBuilt->GetObjectGUID().GetCounter();
+                    p_Player->SendPacket(l_Packet.Write());
+                }
+
                 /// TODO; Find packet which updates from friendly to non friendly cargo, currently it visually bugs out when sending Cargo packet again to update
                 Server::Packets::Cargo l_Packet;
                 l_Packet.Id         = p_ObjectBuilt->GetObjectGUID().GetCounter();
-                l_Packet.Type       = p_ObjectBuilt->ToBonusBox()->GetOwnerId() != p_Object->GetObjectGUID().GetCounter() ? !p_ObjectBuilt->ToBonusBox()->IsFriendlyCargo() : 1;
+                l_Packet.Type       = p_ObjectBuilt->ToBonusBox()->GetOwnerId() != p_Player->GetObjectGUID().GetCounter() ? !p_ObjectBuilt->ToBonusBox()->IsFriendlyCargo() : 1;
                 l_Packet.PositionX  = p_ObjectBuilt->GetSpline()->GetPositionX();
                 l_Packet.PositionY  = p_ObjectBuilt->GetSpline()->GetPositionY();
-                p_Object->ToPlayer()->SendPacket(l_Packet.Write());
-
-                p_ObjectBuilt->SetNeedToBeUpdated(false);
+                p_Player->SendPacket(l_Packet.Write());
 
                 return;
             }
@@ -111,14 +117,14 @@ namespace SteerStone { namespace Game { namespace Map {
             l_Packet.ClanId                 = p_ObjectBuilt->ToPlayer()->GetClanId();
             l_Packet.Rank                   = p_ObjectBuilt->ToPlayer()->GetRank();
             l_Packet.ClanDiplomat           = 0;
-            l_Packet.ShowRedSquareOnMiniMap = p_ObjectBuilt->ToPlayer()->GetCompany() != p_Object->ToPlayer()->GetCompany();
+            l_Packet.ShowRedSquareOnMiniMap = p_ObjectBuilt->ToPlayer()->GetCompany() != p_Player->GetCompany();
             l_Packet.GalaxyGatesAchieved    = p_ObjectBuilt->ToPlayer()->GetGatesAchieved();
             l_Packet.UseBigFont             = false; ///< TODO; For big ships only?
-            p_Object->ToPlayer()->SendPacket(l_Packet.Write());
+            p_Player->SendPacket(l_Packet.Write());
 
             /// Also Send drone info
             if (p_ObjectBuilt->ToPlayer()->HasDrones())
-                p_Object->ToPlayer()->SendPacket(&p_ObjectBuilt->ToPlayer()->BuildDronePacket());
+                p_Player->SendPacket(&p_ObjectBuilt->ToPlayer()->BuildDronePacket());
         }
         else if (p_ObjectBuilt->IsMob())
         {
@@ -137,32 +143,29 @@ namespace SteerStone { namespace Game { namespace Map {
             l_Packet.ShowRedSquareOnMiniMap = false;
             l_Packet.GalaxyGatesAchieved    = p_ObjectBuilt->ToMob()->GetGatesAchieved();
             l_Packet.UseBigFont             = false; ///< TODO; For big ships only?
-            p_Object->ToPlayer()->SendPacket(l_Packet.Write());
+            p_Player->SendPacket(l_Packet.Write());
         }
 
         if ((p_ObjectBuilt->IsMob() || p_ObjectBuilt->IsPlayer()) && p_ObjectBuilt->ToUnit()->IsAttacking())
         {
             if (p_ObjectBuilt->IsPlayer() && p_ObjectBuilt->ToUnit()->GetTarget())
-                p_Object->ToPlayer()->SendPacket(Server::Packets::Misc::Info().Write(Server::Packets::Misc::InfoType::INFO_TYPE_GREY_OPPONENT, { p_ObjectBuilt->ToUnit()->GetTarget()->GetObjectGUID().GetCounter(), p_ObjectBuilt->GetObjectGUID().GetCounter() }));
+                p_Player->SendPacket(Server::Packets::Misc::Info().Write(Server::Packets::Misc::InfoType::INFO_TYPE_GREY_OPPONENT, { p_ObjectBuilt->ToUnit()->GetTarget()->GetObjectGUID().GetCounter(), p_ObjectBuilt->GetObjectGUID().GetCounter() }));
 
             /// Send Attack
             Server::Packets::Attack::LaserShoot l_Packet;
             l_Packet.FromId     = p_ObjectBuilt->GetObjectGUID().GetCounter();
             l_Packet.ToId       = p_ObjectBuilt->ToUnit()->GetTarget()->GetObjectGUID().GetCounter();
             l_Packet.LaserId    = p_ObjectBuilt->ToUnit()->GetLaserType();
-            p_Object->ToPlayer()->SendPacket(l_Packet.Write());
+            p_Player->SendPacket(l_Packet.Write());
         }
 
-        /// When spawning the ship, we need to spend movement packet otherwise client will incorrectly set position of object
-        /// no idea why it does this
         Server::Packets::Ship::ObjectMove l_ObjectMovePacket;
+        p_ObjectBuilt->GetSpline()->UpdatePosition();
         l_ObjectMovePacket.Id        = p_ObjectBuilt->GetObjectGUID().GetCounter();
-        l_ObjectMovePacket.PositionX = p_ObjectBuilt->GetSpline()->GetPositionX();
-        l_ObjectMovePacket.PositionY = p_ObjectBuilt->GetSpline()->GetPositionY();
-        l_ObjectMovePacket.Time      = 0;
-        p_Object->ToPlayer()->SendPacket(l_ObjectMovePacket.Write());
-
-        p_ObjectBuilt->SetNeedToBeUpdated(false);
+        l_ObjectMovePacket.PositionX = p_ObjectBuilt->GetSpline()->GetPlannedPositionX();
+        l_ObjectMovePacket.PositionY = p_ObjectBuilt->GetSpline()->GetPlannedPositionY();
+        l_ObjectMovePacket.Time      = p_ObjectBuilt->GetSpline()->CalculateDestinationTime();
+        p_Player->SendPacket(l_ObjectMovePacket.Write());
     }
     /// Build Object Despawn Packet
     /// @p_Object : Object being built

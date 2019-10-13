@@ -146,9 +146,12 @@ namespace SteerStone { namespace Game { namespace World {
         auto l_Itr = m_Players.find(p_Player->GetId());
         if (l_Itr != m_Players.end())
         {
-            m_Players.erase(l_Itr);
+            p_Player->KickPlayer();
+
             delete p_Player;
             p_Player = nullptr;
+
+            m_Players.erase(l_Itr);
             return;
         }
 

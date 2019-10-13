@@ -59,16 +59,10 @@ namespace SteerStone { namespace Game { namespace Entity {
         m_RespawnTimer      = 0;
         m_Credits           = 0;
         m_Uridium           = 0;
-        m_Prometium         = 0;
-        m_Endurium          = 0;
-        m_Terbium           = 0;
-        m_Prometid          = 0;
-        m_Duranium          = 0;
-        m_Promerium         = 0;
-        m_Xenomit           = 0;
-        m_Seprom            = 0;
-        m_Palladium         = 0;
-
+        
+        for (uint32 l_I = 0; l_I < MAX_RESOURCE_COUNTER; l_I++)
+            m_Resources[l_I] = 0;
+   
         m_Target            = nullptr;
         m_TargetGUID        = 0;
 
@@ -86,6 +80,21 @@ namespace SteerStone { namespace Game { namespace Entity {
     //                GENERAL
     ///////////////////////////////////////////
 
+    /// Update
+    /// @p_Diff : Execution Time
+    void Unit::Update(uint32 const p_Diff)
+    {
+        if (GetSpline()->IsMoving())
+            if (GetSpline()->GetLastTimeCalled() > 2000)
+                GetSpline()->SetIsMoving(false);
+
+        AttackerStateUpdate(p_Diff);
+    }
+
+    ///////////////////////////////////////////
+    //             ATTACK SYSTEM
+    ///////////////////////////////////////////
+
     /// Attack
     /// @p_Victim : Victim we are attacking
     void Unit::Attack(Unit* p_Victim)
@@ -96,9 +105,9 @@ namespace SteerStone { namespace Game { namespace Entity {
 
         /// Send Attack
         Server::Packets::Attack::LaserShoot l_Packet;
-        l_Packet.FromId     = GetObjectGUID().GetCounter();
-        l_Packet.ToId       = GetTarget()->GetObjectGUID().GetCounter();
-        l_Packet.LaserId    = m_WeaponState == 3 ? m_LaserType : 0;
+        l_Packet.FromId = GetObjectGUID().GetCounter();
+        l_Packet.ToId = GetTarget()->GetObjectGUID().GetCounter();
+        l_Packet.LaserId = m_WeaponState == 3 ? m_LaserType : 0;
         GetMap()->SendPacketToNearByGridsIfInSurrounding(l_Packet.Write(), this, true);
 
         /// If target is mob, then assign mob to attack us if mob is not already tagged
@@ -119,7 +128,6 @@ namespace SteerStone { namespace Game { namespace Entity {
         m_Attacking = true;
         m_AttackState = AttackState::ATTACK_STATE_IN_RANGE;
     }
-
     /// Update Attack
     /// @p_Diff : Execution Time
     void Unit::AttackerStateUpdate(uint32 const p_Diff)
@@ -200,6 +208,13 @@ namespace SteerStone { namespace Game { namespace Entity {
                         l_MakeDamage.Shield     = GetTarget()->ToUnit()->GetShield();
                         l_MakeDamage.Damage     = l_ShieldDamage + l_Damage; ///< Total Damage
                         ToPlayer()->SendPacket(l_MakeDamage.Write());
+
+                        Server::Packets::Attack::TargetHealth l_TargetHealthPacket;
+                        l_TargetHealthPacket.Shield       = GetTarget()->GetShield();
+                        l_TargetHealthPacket.MaxShield    = GetTarget()->GetMaxShield();
+                        l_TargetHealthPacket.HitPoints    = GetTarget()->GetHitPoints();
+                        l_TargetHealthPacket.MaxHitPoints = GetTarget()->GetHitMaxPoints();
+                        ToPlayer()->SendPacket(l_TargetHealthPacket.Write());
                     }
 
                     /// Send recieved damage effect to target
@@ -242,7 +257,7 @@ namespace SteerStone { namespace Game { namespace Entity {
             }
         }
     }
-
+    /// Cancel Attack
     void Unit::CancelAttack()
     {
         if (!m_Attacking || m_AttackState == AttackState::ATTACK_STATE_NONE)
@@ -270,14 +285,12 @@ namespace SteerStone { namespace Game { namespace Entity {
         m_AttackState   = AttackState::ATTACK_STATE_NONE;
         ClearTarget();
     }
-
     /// Calculate Hit chance whether we can hit target
     bool Unit::CalculateHitChance()
     {
         /// 80% chance we will hit target
         return Core::Utils::RollChanceInterger32(80);
     }
-
     /// Calculate Damage done for target
     uint32 Unit::CalculateDamageDone()
     {
@@ -316,18 +329,6 @@ namespace SteerStone { namespace Game { namespace Entity {
 
         return false;
     }
-
-    /// Update
-    /// @p_Diff : Execution Time
-    void Unit::Update(uint32 const p_Diff)
-    {
-        if (GetSpline()->IsMoving())
-            if (GetSpline()->GetLastTimeCalled() > 2000)
-                GetSpline()->SetIsMoving(false);
-
-        AttackerStateUpdate(p_Diff);
-    }
-
     /// Kill
     /// @p_Unit : Unit being killed
     void Unit::Kill(Unit* p_Unit)
@@ -352,6 +353,24 @@ namespace SteerStone { namespace Game { namespace Entity {
 
         p_Unit->m_DeathState = DeathState::JUST_DIED;
         CancelAttack();
+    }
+
+    ///////////////////////////////////////////
+    //            GETTERS/SETTERS
+    ///////////////////////////////////////////
+
+    void SteerStone::Game::Entity::Unit::SetResource(uint32 const p_Index, uint32 const p_Resource)
+    {
+        if (p_Index > MAX_RESOURCE_COUNTER)
+            LOG_ASSERT(false, "Player", "Attempted to add resource but index is unknown! Index: %0", p_Index);
+
+        if (p_Resource == 0)
+            m_Resources[p_Index] = 0;
+        else
+            m_Resources[p_Index] += p_Resource;
+        
+        if (IsPlayer())
+            ToPlayer()->SetCargoSpace(ToPlayer()->GetCargoSpace() + p_Resource);
     }
 
 }   ///< namespace Entity

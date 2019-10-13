@@ -106,7 +106,7 @@ namespace SteerStone { namespace Game { namespace Server { namespace Packets { n
     /// SERVER_PACKET_REWARD
     /// @p_Storage : Storage of UInt32
     /// @p_RewardType : Type of Reward
-    PacketBuffer const* Reward::Write(RewardType p_RewardType, std::initializer_list<uint32> p_Storage)
+    PacketBuffer const* Reward::Write(RewardType p_RewardType, std::initializer_list<std::variant<uint32, int32>> p_Storage)
     {
         std::string l_Type;
 
@@ -132,7 +132,12 @@ namespace SteerStone { namespace Game { namespace Server { namespace Packets { n
         m_Buffer.AppendChar(l_Type.c_str());
         
         for (auto& l_Itr : p_Storage)
-            m_Buffer.AppendUInt32(l_Itr);
+        {
+            if (auto l_Value = std::get_if<uint32>(&l_Itr))
+                m_Buffer.AppendUInt32(*l_Value);
+            else if (auto l_Value = std::get_if<int32>(&l_Itr))
+                m_Buffer.AppendInt32(*l_Value);
+        }
 
         m_Buffer.AppendEndSplitter();
         m_Buffer.AppendCarriage();

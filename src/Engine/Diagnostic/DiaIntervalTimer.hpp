@@ -30,7 +30,7 @@ namespace SteerStone { namespace Core { namespace Diagnostic {
         /// Constructor
         /// @p_Interval : Interval Timer
         IntervalTimer(uint32 p_Interval = 0)
-            : m_Current(0), m_Interval(p_Interval)
+            : m_Current(0), m_Interval(p_Interval), m_Pause(false)
         {
         }
         /// Deconstructor
@@ -47,10 +47,17 @@ namespace SteerStone { namespace Core { namespace Diagnostic {
         }
 
         /// Has Time passed
-        bool Passed()
+        /// @p_Pause : Activate Pause Timer
+        bool Passed(bool p_Pause = false)
         {
+            if (m_Pause)
+                return false;
+
             if (m_Current >= m_Interval)
             {
+                if (p_Pause)
+                    m_Pause = p_Pause;
+
                 m_Current = 0;
                 return true;
             }
@@ -88,6 +95,7 @@ namespace SteerStone { namespace Core { namespace Diagnostic {
     private:
         int32 m_Current;       ///< Diff
         int32 m_Interval;      ///< Interval
+        bool m_Pause;          ///< Pause Timer
     };
 
 }   ///< namespace Diagnostic

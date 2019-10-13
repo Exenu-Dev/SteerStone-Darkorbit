@@ -21,42 +21,31 @@
 namespace SteerStone { namespace Game { namespace Server { namespace Packets { namespace Login {
 
     /// SERVER_PACKET_LOGIN
-    PacketBuffer const* PlayerInfo::Write()
+    PacketBuffer const* PlayerInfo::Write(InfoType p_InfoType, std::initializer_list<std::variant<uint32, bool>> p_Storage)
     {
-        if (Type == "SET")
+        std::string l_Type;
+
+        switch (p_InfoType)
         {
-            m_Buffer.AppendChar(Type.c_str());
-            m_Buffer.AppendBool(DisplayBoost);
-            m_Buffer.AppendBool(DisplayDamage);
-            m_Buffer.AppendBool(DisplayAllLas);
-            m_Buffer.AppendBool(DisplayExploration);
-            m_Buffer.AppendBool(DisplayName);
-            m_Buffer.AppendBool(DisplayFirmIcon);
-            m_Buffer.AppendBool(DisplayAlphaBG);
-            m_Buffer.AppendBool(IgnoreRes);
-            m_Buffer.AppendBool(IgnoreBox);
-            m_Buffer.AppendBool(ConvertGates);
-            m_Buffer.AppendBool(ConvertOppo);
-            m_Buffer.AppendBool(SoundOff);
-            m_Buffer.AppendBool(BackgroundMusicOff);
-            m_Buffer.AppendBool(DisplayStatus);
-            m_Buffer.AppendBool(DisplayBubble);
-            m_Buffer.AppendUInt32(SelectedLaser);
-            m_Buffer.AppendUInt32(SelectedRocket);
-            m_Buffer.AppendBool(DisplayDigits);
-            m_Buffer.AppendBool(DisplayChat);
-            m_Buffer.AppendBool(DisplayDrones);
-            m_Buffer.AppendBool(ShowStarSystem);
-            m_Buffer.AppendBool(IgnoreCargo);
-            m_Buffer.AppendBool(IgnoreHostileCargo);
-            m_Buffer.AppendBool(AutoChangeAmmo);
-            m_Buffer.AppendBool(EnableBuyFast);
+        case InfoType::INFO_TYPE_SET_ADMIN:
+            l_Type = "ADM|CLI";
+            break;
+        case InfoType::INFO_TYPE_SET_CARGO_SPACE:
+            l_Type = "c";
+            break;
+        case InfoType::INFO_TYPE_SET_SETTINGS:
+            l_Type = "SET";
+            break;
         }
-        else if (Type == "ADM")
+
+        m_Buffer.AppendChar(l_Type.c_str());
+
+        for (auto& l_Itr : p_Storage)
         {
-            m_Buffer.AppendChar(Type.c_str());
-            m_Buffer.AppendChar("CLI");
-            m_Buffer.AppendBool(EnableDebugWindow);
+            if (auto l_Value = std::get_if<bool>(&l_Itr))
+                m_Buffer.AppendBool(*l_Value);
+            else if (auto l_Value = std::get_if<uint32>(&l_Itr))
+                m_Buffer.AppendUInt32(*l_Value);
         }
 
         m_Buffer.AppendEndSplitter();
@@ -76,8 +65,8 @@ namespace SteerStone { namespace Game { namespace Server { namespace Packets { n
         m_Buffer.AppendUInt32(MaxShield);
         m_Buffer.AppendInt32(HitPoints);
         m_Buffer.AppendUInt32(MaxHitPoints);
-        m_Buffer.AppendUInt32(CargoSpace);
         m_Buffer.AppendUInt32(MaxCargoSpace);
+        m_Buffer.AppendUInt32(CargoSpace);
         m_Buffer.AppendFloat(PositionX);
         m_Buffer.AppendFloat(PositionY);
         m_Buffer.AppendUInt32(MapId);
@@ -88,7 +77,7 @@ namespace SteerStone { namespace Game { namespace Server { namespace Packets { n
         m_Buffer.AppendUInt16(WeaponState);
         m_Buffer.AppendBool(IsPremium);
         m_Buffer.AppendUInt32(Experience);
-        m_Buffer.AppendUInt32(Honour);
+        m_Buffer.AppendInt32(Honour);
         m_Buffer.AppendUInt32(Level);
         m_Buffer.AppendUInt32(Credits);
         m_Buffer.AppendUInt32(Uridium);

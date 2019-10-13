@@ -63,10 +63,10 @@ namespace SteerStone { namespace Game { namespace Map {
         void Update(uint32 const p_Diff);
 
         /// Add Bonus box to map
-        /// @p_Object   : Object taking away the resources
+        /// @p_Unit     : Unit taking away the resources
         /// @p_Type     : Type of Bonus Box
         /// @p_OwnerId  : Owner of cargo box
-        void AddBonuxBox(Entity::Object* p_Object, BonusBoxType p_Type, uint32 const p_OwnerId);
+        void AddBonuxBox(Entity::Unit* p_Unit, BonusBoxType p_Type, uint32 const p_OwnerId);
         /// Remove Bonus Box
         /// @p_Object : Object Bonus Box
         void RemoveBonusBox(Entity::Object* p_Object);

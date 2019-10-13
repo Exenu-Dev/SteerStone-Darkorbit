@@ -91,6 +91,8 @@ enum ServerOpCodes : uint8
     SERVER_PACKET_REWARD                = 0x79,
     SERVER_PACKET_CARGO                 = 0x63,
     SERVER_PACKET_REMOVE_CARGO          = 0x32,
+    SERVER_PACKET_TARGET_HEALTH         = 0x4E,
+    SERVER_PACKET_CARGO_BAY_FULL        = 0x66,
 
     /// Debug Headless Packets
     SERVER_PACKET_HEADLESS_MOVE         = 0x21,

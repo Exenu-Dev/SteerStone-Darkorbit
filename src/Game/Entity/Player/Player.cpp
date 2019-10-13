@@ -131,7 +131,7 @@ namespace SteerStone { namespace Game { namespace Entity {
             m_Credits                   = l_Result[2].GetUInt32();
             m_Jackpot                   = l_Result[3].GetUInt32();
             m_Experience                = l_Result[4].GetUInt32();
-            m_Honor                     = l_Result[5].GetUInt32();
+            m_Honor                     = l_Result[5].GetInt32();
             m_GatesAchieved             = l_Result[6].GetUInt16();
             m_ClanId                    = l_Result[7].GetUInt32();
             m_ClanName                  = l_Result[8].GetString();
@@ -194,6 +194,7 @@ namespace SteerStone { namespace Game { namespace Entity {
         Core::Database::PreparedStatement* l_PreparedStatement = GameDatabase.GetPrepareStatement();
         l_PreparedStatement->PrepareStatement("SELECT type, speed, shield, max_shield, hit_points, max_hit_points, cargo_space, cargo_space_max, "
             "position_x, position_y, map_id, max_battery, max_rockets, use_system_font,"
+            " prometium, endurium, terbium, xenomit, prometid, duranium, promerium, palladium, seprom,"
             " battery_lcb_10, battery_mcb_25, battery_mcb_50, battery_ucb_100, battery_sab_50, rocket_r310, rocket_plt_2026, rocket_plt_2021, mines, smart_bombs, instant_shields FROM account_ship WHERE id = ?");
         l_PreparedStatement->SetUint32(0, m_Id);
         std::unique_ptr<Core::Database::PreparedResultSet> l_PreparedResultSet = l_PreparedStatement->ExecuteStatement();
@@ -219,19 +220,29 @@ namespace SteerStone { namespace Game { namespace Entity {
             m_MaxRockets                = l_Result[12].GetUInt32();
             m_UseSystemFont             = l_Result[13].GetBool();
 
-            m_Ammo.m_BatteryLCB10       = l_Result[14].GetInt32();
-            m_Ammo.m_BatteryMCB25       = l_Result[15].GetInt32();
-            m_Ammo.m_BatteryMCB50       = l_Result[16].GetInt32();
-            m_Ammo.m_BatteryUCB100      = l_Result[17].GetInt32();
-            m_Ammo.m_BatterySAB50       = l_Result[18].GetInt32();
+            m_Resources[0]              = l_Result[14].GetUInt32();
+            m_Resources[1]              = l_Result[15].GetUInt32();
+            m_Resources[2]              = l_Result[16].GetUInt32();
+            m_Resources[3]              = l_Result[17].GetUInt32();
+            m_Resources[4]              = l_Result[18].GetUInt32();
+            m_Resources[5]              = l_Result[19].GetUInt32();
+            m_Resources[6]              = l_Result[20].GetUInt32();
+            m_Resources[7]              = l_Result[21].GetUInt32();
+            m_Resources[8]              = l_Result[22].GetUInt32();
 
-            m_Ammo.m_RocketR310         = l_Result[19].GetInt32();
-            m_Ammo.m_RocketPLT2026      = l_Result[20].GetInt32();
-            m_Ammo.m_RocketPLT2021      = l_Result[21].GetInt32();
+            m_Ammo.m_BatteryLCB10       = l_Result[23].GetInt32();
+            m_Ammo.m_BatteryMCB25       = l_Result[24].GetInt32();
+            m_Ammo.m_BatteryMCB50       = l_Result[25].GetInt32();
+            m_Ammo.m_BatteryUCB100      = l_Result[26].GetInt32();
+            m_Ammo.m_BatterySAB50       = l_Result[27].GetInt32();
 
-            m_Ammo.m_Mines              = l_Result[22].GetInt32();
-            m_Ammo.m_SmartBombs         = l_Result[23].GetInt32();
-            m_Ammo.m_InstantShields     = l_Result[24].GetInt32();
+            m_Ammo.m_RocketR310         = l_Result[28].GetInt32();
+            m_Ammo.m_RocketPLT2026      = l_Result[29].GetInt32();
+            m_Ammo.m_RocketPLT2021      = l_Result[30].GetInt32();
+
+            m_Ammo.m_Mines              = l_Result[31].GetInt32();
+            m_Ammo.m_SmartBombs         = l_Result[32].GetInt32();
+            m_Ammo.m_InstantShields     = l_Result[33].GetInt32();
         }
         else
             LOG_ASSERT(false, "Player", "Failed to load ship data for player %0", m_Id);
@@ -284,12 +295,12 @@ namespace SteerStone { namespace Game { namespace Entity {
         l_PreparedStatement->SetUint32(1, m_Credits);
         l_PreparedStatement->SetUint32(2, m_Jackpot);
         l_PreparedStatement->SetUint32(3, m_Experience);
-        l_PreparedStatement->SetUint32(4, m_Honor);
+        l_PreparedStatement->SetInt32(4, m_Honor);
         l_PreparedStatement->SetUint32(5, m_GatesAchieved);
         l_PreparedStatement->SetUint32(6, m_ClanId);
         l_PreparedStatement->SetString(7, m_ClanName);
         l_PreparedStatement->SetUint16(8, static_cast<uint16>(m_Company));
-        l_PreparedStatement->SetUint16(9, m_Rank);
+        l_PreparedStatement->SetUint16(9, m_Rank);  
         l_PreparedStatement->SetBool(10, m_Premium);
         l_PreparedStatement->SetBool(11, m_DisplayBoost);
         l_PreparedStatement->SetBool(12, m_DisplayDamage);
@@ -332,27 +343,37 @@ namespace SteerStone { namespace Game { namespace Entity {
         Core::Database::PreparedStatement* l_PreparedStatement = GameDatabase.GetPrepareStatement();
         l_PreparedStatement->PrepareStatement("UPDATE account_ship SET type = ?, cargo_space = ?, "
             "position_x = ?, position_y = ?, map_id = ?, use_system_font = ?, "
+            "prometium = ?, endurium = ?, terbium = ?, xenomit = ?, prometid = ?, duranium = ?, promerium = ?, palladium = ?, seprom = ?, "
             "battery_lcb_10 = ?, battery_mcb_25 = ?, battery_mcb_50 = ?, battery_ucb_100 = ?, battery_sab_50 = ?, rocket_r310 = ?, " 
             "rocket_plt_2026 = ?, rocket_plt_2021 = ?, mines = ?, smart_bombs = ?, instant_shields = ? WHERE id = ?");
 
-        l_PreparedStatement->SetUint16(0,  m_ShipType);
-        l_PreparedStatement->SetUint32(1,  m_CargoSpace);
-        l_PreparedStatement->SetFloat(2,   GetSpline()->GetPositionX());
-        l_PreparedStatement->SetFloat(3,   GetSpline()->GetPositionY());
-        l_PreparedStatement->SetUint32(4,  GetMap()->GetId());
+        l_PreparedStatement->SetUint16(0, m_ShipType);
+        l_PreparedStatement->SetUint32(1, m_CargoSpace);
+        l_PreparedStatement->SetFloat(2,  GetSpline()->GetPositionX());
+        l_PreparedStatement->SetFloat(3,  GetSpline()->GetPositionY());
+        l_PreparedStatement->SetUint32(4, GetMap()->GetId());
         l_PreparedStatement->SetBool(5,    m_UseSystemFont);
-        l_PreparedStatement->SetUint32(6,  m_Ammo.m_BatteryLCB10);
-        l_PreparedStatement->SetUint32(7,  m_Ammo.m_BatteryMCB25);
-        l_PreparedStatement->SetUint32(8,  m_Ammo.m_BatteryMCB50);
-        l_PreparedStatement->SetUint32(9, m_Ammo.m_BatteryUCB100);
-        l_PreparedStatement->SetUint32(10, m_Ammo.m_BatterySAB50);
-        l_PreparedStatement->SetUint32(11, m_Ammo.m_RocketR310);
-        l_PreparedStatement->SetUint32(12, m_Ammo.m_RocketPLT2026);
-        l_PreparedStatement->SetUint32(13, m_Ammo.m_RocketPLT2021);
-        l_PreparedStatement->SetUint32(14, m_Ammo.m_Mines);
-        l_PreparedStatement->SetUint32(15, m_Ammo.m_SmartBombs);
-        l_PreparedStatement->SetUint32(16, m_Ammo.m_InstantShields);
-        l_PreparedStatement->SetUint32(17, m_Id);
+        l_PreparedStatement->SetUint32(6,  m_Resources[0]);
+        l_PreparedStatement->SetUint32(7,  m_Resources[1]);
+        l_PreparedStatement->SetUint32(8,  m_Resources[2]);
+        l_PreparedStatement->SetUint32(9,  m_Resources[3]);
+        l_PreparedStatement->SetUint32(10, m_Resources[4]);
+        l_PreparedStatement->SetUint32(11, m_Resources[5]);
+        l_PreparedStatement->SetUint32(12, m_Resources[6]);
+        l_PreparedStatement->SetUint32(13, m_Resources[7]);
+        l_PreparedStatement->SetUint32(14, m_Resources[8]);
+        l_PreparedStatement->SetUint32(15, m_Ammo.m_BatteryLCB10);
+        l_PreparedStatement->SetUint32(16, m_Ammo.m_BatteryMCB25);
+        l_PreparedStatement->SetUint32(17, m_Ammo.m_BatteryMCB50);
+        l_PreparedStatement->SetUint32(18, m_Ammo.m_BatteryUCB100);
+        l_PreparedStatement->SetUint32(19, m_Ammo.m_BatterySAB50);
+        l_PreparedStatement->SetUint32(20, m_Ammo.m_RocketR310);
+        l_PreparedStatement->SetUint32(21, m_Ammo.m_RocketPLT2026);
+        l_PreparedStatement->SetUint32(22, m_Ammo.m_RocketPLT2021);
+        l_PreparedStatement->SetUint32(23, m_Ammo.m_Mines);
+        l_PreparedStatement->SetUint32(24, m_Ammo.m_SmartBombs);
+        l_PreparedStatement->SetUint32(25, m_Ammo.m_InstantShields);
+        l_PreparedStatement->SetUint32(26, m_Id);
 
         if (p_Asynchronous)
             m_OperatorProcessor.AddOperator(GameDatabase.PrepareOperator(l_PreparedStatement));
@@ -491,33 +512,33 @@ namespace SteerStone { namespace Game { namespace Entity {
     void Player::SendClientSettings()
     {
         Server::Packets::Login::PlayerInfo l_Packet;
-        l_Packet.Type                    = "SET";
-        l_Packet.DisplayBoost            = m_DisplayBoost;
-        l_Packet.DisplayDamage           = m_DisplayDamage;
-        l_Packet.DisplayAllLas           = m_DisplayAllLas;
-        l_Packet.DisplayExploration      = m_DisplayExploration;
-        l_Packet.DisplayName             = m_DisplayName;
-        l_Packet.DisplayFirmIcon         = m_DisplayFirmIcon;
-        l_Packet.DisplayAlphaBG          = m_DisplayAlphaBG;
-        l_Packet.IgnoreRes               = m_IgnoreRes;
-        l_Packet.IgnoreBox               = m_IgnoreBox;
-        l_Packet.ConvertGates            = m_ConvertGates;
-        l_Packet.ConvertOppo             = m_ConvertOppo;
-        l_Packet.SoundOff                = m_SoundOff;
-        l_Packet.BackgroundMusicOff      = m_BackgroundMusicOff;
-        l_Packet.DisplayStatus           = m_DisplayStatus;
-        l_Packet.DisplayBubble           = m_DisplayBubble;
-        l_Packet.SelectedLaser           = m_SelectedLaser;
-        l_Packet.SelectedRocket          = m_SelectedRocket;
-        l_Packet.DisplayDigits           = m_DisplayDigits;
-        l_Packet.DisplayChat             = m_DisplayChat;
-        l_Packet.DisplayDrones           = m_DisplayDrones;
-        l_Packet.ShowStarSystem          = m_ShowStarSystem;
-        l_Packet.IgnoreCargo             = m_IgnoreCargo;
-        l_Packet.IgnoreHostileCargo      = m_IgnoreHostileCargo;
-        l_Packet.AutoChangeAmmo          = m_AutoChangeAmmo;
-        l_Packet.EnableBuyFast           = m_EnableBuyFast;
-        SendPacket(l_Packet.Write());
+        SendPacket(Server::Packets::Login::PlayerInfo().Write(Server::Packets::Login::InfoType::INFO_TYPE_SET_SETTINGS,
+            { m_DisplayBoost,
+            m_DisplayDamage,
+            m_DisplayAllLas,
+            m_DisplayExploration,
+            m_DisplayName,
+            m_DisplayFirmIcon,
+            m_DisplayAlphaBG,
+            m_IgnoreRes,
+            m_IgnoreBox,
+            m_ConvertGates,
+            m_ConvertOppo,
+            m_SoundOff,
+            m_BackgroundMusicOff,
+            m_DisplayStatus,
+            m_DisplayBubble,
+            m_SelectedLaser,
+            m_SelectedRocket,
+            m_DisplayDigits,
+            m_DisplayChat,
+            m_DisplayDrones,
+            m_ShowStarSystem,
+            m_IgnoreCargo,
+            m_IgnoreHostileCargo,
+            m_AutoChangeAmmo,
+            m_EnableBuyFast,
+            }));
     }
     /// Send ship details
     void Player::SendInitializeShip()
@@ -565,11 +586,7 @@ namespace SteerStone { namespace Game { namespace Entity {
     {
         if (GetRank() == Rank::ADMIN)
         {
-            Server::Packets::Login::PlayerInfo l_Packet;
-            l_Packet.Type = "ADM";
-            l_Packet.EnableDebugWindow = 1;
-            SendPacket(l_Packet.Write());
-
+            SendPacket(Server::Packets::Login::PlayerInfo().Write(Server::Packets::Login::InfoType::INFO_TYPE_SET_ADMIN, { (bool)1 }));
             SendPacket(Server::Packets::Misc::DisplaySuccDebug().Write());
         }
     }
@@ -972,6 +989,13 @@ namespace SteerStone { namespace Game { namespace Entity {
         while (m_RecievedQueue.Next(l_ClientPacket, p_PacketFilter))
         {
             Server::OpcodeHandler const* l_OpCodeHandler = sOpCode->GetClientPacket(static_cast<ClientOpCodes>(l_ClientPacket->GetHeader()));
+            
+            if (l_OpCodeHandler->Status == PacketStatus::STATUS_UNHANDLED)
+            {
+                delete l_ClientPacket;
+                continue;
+            }
+            
             m_Socket->ExecutePacket(l_OpCodeHandler, l_ClientPacket);
             delete l_ClientPacket;
         }
@@ -995,11 +1019,15 @@ namespace SteerStone { namespace Game { namespace Entity {
 
         m_Socket->SendPacket(p_PacketBuffer);
     }
-    /// Kick Player from world
+    /// Kick Player
     void Player::KickPlayer()
     {
-        if (m_Socket)
-            m_Socket->CloseSocket();
+        Server::PacketBuffer l_Buffer;
+        l_Buffer.AppendChar("0");
+        l_Buffer.AppendChar("KIK");
+        l_Buffer.AppendEndSplitter();
+        l_Buffer.AppendCarriage();
+        SendPacket(&l_Buffer);
     }
 
     void Player::UpdateExperience(uint32 const p_Experience)
