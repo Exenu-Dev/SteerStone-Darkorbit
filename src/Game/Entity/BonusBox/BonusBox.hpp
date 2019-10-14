@@ -19,7 +19,7 @@
 #pragma once
 #include <PCH/Precompiled.hpp>
 #include "Core/Core.hpp"
-#include "Object.hpp"
+#include "Unit.hpp"
 #include "GameFlags.hpp"
 #include "Diagnostic/DiaIntervalTimer.hpp"
 
@@ -68,16 +68,6 @@ namespace SteerStone { namespace Game { namespace Entity {
         bool IsLooted()             const { return m_Looted;            }  
         BonusBoxType GetBoxType()   const { return m_BoxType;           }
         int32 GetOwnerId()          const { return m_OwnerId;           }
-
-        uint32 GetPrometium()       const { return m_Prometium;         }
-        uint32 GetEndurium()        const { return m_Endurium;          }
-        uint32 GetTerbium()         const { return m_Terbium;           }
-        uint32 GetPrometid()        const { return m_Prometid;          }
-        uint32 GetDuranium()        const { return m_Duranium;          }
-        uint32 GetPromerium()       const { return m_Promerium;         }
-        uint32 GetXenomit()         const { return m_Xenomit;           }
-        uint32 GetSeprom()          const { return m_Seprom;            }
-        uint32 GetPalladium()       const { return m_Palladium;         }
 
         void SetLooted() { m_Looted = true; }
         void SetScheduleForDelete(bool const p_Schedule) { m_ScheduleForDelete = p_Schedule; }

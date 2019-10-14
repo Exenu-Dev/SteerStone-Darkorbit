@@ -17,15 +17,14 @@
 */
 
 #include "PoolManager.hpp"
-#include "ObjectManager.hpp"
-#include "MobPool.hpp"
-#include "BonusBoxPool.hpp"
-#include "Mob/Mob.hpp"
-#include "Player.hpp"
-#include "BonusBox/BonusBox.hpp"
-#include "Map.hpp"
-#include "Utility/UtilRandom.hpp"
 #include "Database/DatabaseTypes.hpp"
+#include "ObjectManager.hpp"
+#include "Map.hpp"
+#include "BonusBoxPool.hpp"
+#include "MobPool.hpp"
+#include "Mob.hpp"
+#include "BonusBox.hpp"
+#include "Utility/UtilRandom.hpp"
 
 namespace SteerStone { namespace Game { namespace Map {
 
@@ -167,15 +166,15 @@ namespace SteerStone { namespace Game { namespace Map {
 
         /// TODO; Player does not give all their cargo, only some of it, right now it gives all of it and doesn't take away
         l_BonusBox->m_OwnerId   = p_OwnerId;
-        l_BonusBox->m_Prometium = p_Unit->GetResource(Entity::Resource::RESOURCE_PROMETIUM);
-        l_BonusBox->m_Endurium  = p_Unit->GetResource(Entity::Resource::RESOURCE_ENDURIUM);
-        l_BonusBox->m_Terbium   = p_Unit->GetResource(Entity::Resource::RESOURCE_TERBIUM);
-        l_BonusBox->m_Xenomit   = p_Unit->GetResource(Entity::Resource::RESOURCE_XENOMIT);
-        l_BonusBox->m_Prometid  = p_Unit->GetResource(Entity::Resource::RESOURCE_PROMETID);
-        l_BonusBox->m_Duranium  = p_Unit->GetResource(Entity::Resource::RESOURCE_DURANIUM);
-        l_BonusBox->m_Promerium = p_Unit->GetResource(Entity::Resource::RESOURCE_PROMERIUM);
-        l_BonusBox->m_Palladium = p_Unit->GetResource(Entity::Resource::RESOURCE_PALLADIUM);
-        l_BonusBox->m_Seprom    = p_Unit->GetResource(Entity::Resource::RESOURCE_SEPROM);
+        l_BonusBox->SetResource(Entity::Resource::RESOURCE_PROMETIUM, p_Unit->GetResource(Entity::Resource::RESOURCE_PROMETIUM));
+        l_BonusBox->SetResource(Entity::Resource::RESOURCE_ENDURIUM, p_Unit->GetResource(Entity::Resource::RESOURCE_ENDURIUM));
+        l_BonusBox->SetResource(Entity::Resource::RESOURCE_TERBIUM, p_Unit->GetResource(Entity::Resource::RESOURCE_TERBIUM));
+        l_BonusBox->SetResource(Entity::Resource::RESOURCE_XENOMIT, p_Unit->GetResource(Entity::Resource::RESOURCE_XENOMIT));
+        l_BonusBox->SetResource(Entity::Resource::RESOURCE_PROMETID, p_Unit->GetResource(Entity::Resource::RESOURCE_PROMETID));
+        l_BonusBox->SetResource(Entity::Resource::RESOURCE_DURANIUM, p_Unit->GetResource(Entity::Resource::RESOURCE_DURANIUM));
+        l_BonusBox->SetResource(Entity::Resource::RESOURCE_PROMERIUM, p_Unit->GetResource(Entity::Resource::RESOURCE_PROMERIUM));
+        l_BonusBox->SetResource(Entity::Resource::RESOURCE_PALLADIUM, p_Unit->GetResource(Entity::Resource::RESOURCE_PALLADIUM));
+        l_BonusBox->SetResource(Entity::Resource::RESOURCE_SEPROM, p_Unit->GetResource(Entity::Resource::RESOURCE_SEPROM));
 
         l_BonusBox->SetMap(m_Map);
         l_BonusBox->GetSpline()->SetPosition(p_Unit->GetSpline()->GetPositionX(), p_Unit->GetSpline()->GetPositionY());
