@@ -81,7 +81,7 @@ namespace SteerStone { namespace Core { namespace Database {
         {
             std::unique_ptr<PreparedResultSet> l_PreparedResultSet = std::make_unique<PreparedResultSet>(this, l_Result, l_FieldCount, p_FreeStatementAutomatically);
 
-            if (l_PreparedResultSet && l_PreparedResultSet->GetRowCount())
+            if (l_PreparedResultSet && l_PreparedResultSet->GetRowCount() || !p_FreeStatementAutomatically)
                 return std::move(l_PreparedResultSet);
         }
 
