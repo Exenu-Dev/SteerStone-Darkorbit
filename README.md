@@ -1,6 +1,38 @@
 # SteerStone-Darkorbit
 A C++ Emulator which emulates 2009 version of Darkorbit (before the UI make over).
 
+## Info
+
+The Daemon Emulator is coded in C++17. Using the following libraries:  
+- MYSQL C v5.6  
+- Boost v6.6  
+- OpenSSL v1.1  
+- SFMT v1 (Customised)  
+
+#### Networking
+Using Boost ASIO with the capability of asynchronous operations.
+
+#### Database
+Using MYSQL C - Using own wrapper class which supports synchronous/asynchronous queries.
+
+#### Logger
+- Using own Logger class which supports the standard logging configurations: INFO, WARNING, ERROR, VERBOSE, ASSERT.
+- Logs to terminal console or/and file.
+- Thread Safe.
+
+#### Configuration File
+- Using own configuration.
+- Thread Safe
+
+#### Thread Pooling
+- Using own Thread Pooling class.
+- Optimises existing running threads and their tasks; pushes/pops tasks to other threads depending on performance on said thread.
+- Thread Pooling launches x amount of threads as default depending on your machine specifications (can be changed through configuration).
+- Threads are split into types:
+*Inclusive: Runs multiple tasks.
+*Exclusive: Only runs one task.
+*Critical: Launch new task on new thread ignoring hardware concurrency.
+
 ## Requirements
 
 In order to boot the emulator, you require the following tools/libaries below.
