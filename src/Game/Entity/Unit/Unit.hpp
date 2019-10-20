@@ -92,10 +92,16 @@ namespace SteerStone { namespace Game { namespace Entity {
         bool CalculateHitChance();
         /// Calculate Damage done for target
         uint32 CalculateDamageDone();
+        /// Deal Damage to target
+        /// @p_Target : Target
+        /// @p_Damage : Damage
+        /// @p_CleanDamage : Deal damage neglecting shield
+        void DealDamage(Unit* p_Target, int32 p_Damage, bool p_CleanDamage);
         /// Calculate Damage takem for target
+        /// @p_Target : Target
         /// @p_Damage : Damage taken
         /// @p_ShieldDamage : Shield Damage taken
-        void CalculateDamageTaken(int32& p_Damage, int32& p_ShieldDamage);
+        void CalculateDamageTaken(Unit* p_Target, int32& p_Damage, int32& p_ShieldDamage);
         /// Returns whether unit is attacking us
         /// @p_Unit : Unit attacking us
         bool IsAttackingMe(Unit* p_Unit) const;

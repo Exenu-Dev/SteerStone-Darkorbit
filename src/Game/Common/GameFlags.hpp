@@ -244,7 +244,8 @@ enum class EventType
 {
     EVENT_TYPE_NONE    = 0,
     EVENT_TYPE_PORTAL  = 1,
-    EVENT_TYPE_STATION = 2
+    EVENT_TYPE_STATION = 2,
+    EVENT_TYPE_RADIATION_ZONE = 3
 };
 
 enum class MapType

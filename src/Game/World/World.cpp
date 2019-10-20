@@ -211,7 +211,7 @@ namespace SteerStone { namespace Game { namespace World {
             /// Check if player cancelled logout
             if (!l_Player->ToPlayer()->IsLoggingOut())
             {
-                l_Player->ToPlayer()->IntervalLogout.ResetCurrent();
+                l_Player->ToPlayer()->IntervalLogout.Reset();
                 l_Itr = m_PlayerRemovalQueue.erase(l_Itr);
                 continue;
             }

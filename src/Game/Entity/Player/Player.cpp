@@ -23,6 +23,7 @@
 #include "World.hpp"
 #include "ZoneManager.hpp"
 #include "Diagnostic/DiaStopWatch.hpp"
+#include "Utility/UtilMaths.hpp"
 
 namespace SteerStone { namespace Game { namespace Entity {
 
@@ -72,9 +73,11 @@ namespace SteerStone { namespace Game { namespace Entity {
         m_LoggedIn              = false;
         m_Jumping               = false;
         m_LoggingOut            = false;
+        m_InRadiationZone       = false;
         m_Event                 = EventType::EVENT_TYPE_NONE;
 
         m_IntervalNextSave.SetInterval(sWorldManager->GetIntConfig(World::IntConfigs::INT_CONFIG_SAVE_PLAYER_TO_DATABASE));
+        m_IntervalRadiation.SetInterval(RADIATION_TIMER);
 
         m_AttackRange           = sWorldManager->GetIntConfig(World::IntConfigs::INT_CONFIG_PLAYER_ATTACK_RANGE);
 
@@ -412,6 +415,50 @@ namespace SteerStone { namespace Game { namespace Entity {
 
         return l_Level;
     }
+    /// Check whether player is in radiation zone
+    /// p_Diff : Execution Time
+    void Player::UpdateRadiationZone(uint32 const p_Diff)
+    {
+        m_IntervalRadiation.Update(p_Diff);
+        if (!m_IntervalRadiation.Passed())
+            return;
+
+        /// Set we are in radiation zone
+        if (IsInRadiationZone() && GetEvent() != EventType::EVENT_TYPE_RADIATION_ZONE)
+        {
+            Server::Packets::Event l_Packet;
+            l_Packet.PositionX           = GetSpline()->GetPositionX();
+            l_Packet.PositionY           = GetSpline()->GetPositionY();
+            l_Packet.InDemolitionZone    = false;
+            l_Packet.InRadiationZone     = true;
+            l_Packet.PlayRepairAnimation = false;
+            l_Packet.InTradeZone         = false;
+            l_Packet.InJumpZone          = false;
+            l_Packet.Repair              = false;
+            SendPacket(l_Packet.Write());
+
+            SetEventType(EventType::EVENT_TYPE_RADIATION_ZONE);
+        }
+        /// Set we are not in radiation zone
+        else if (!IsInRadiationZone() && GetEvent() == EventType::EVENT_TYPE_RADIATION_ZONE)
+        {
+            SetEventType(EventType::EVENT_TYPE_NONE);
+
+            Server::Packets::Event l_Packet;
+            l_Packet.PositionX           = GetSpline()->GetPositionX();
+            l_Packet.PositionY           = GetSpline()->GetPositionY();
+            l_Packet.InDemolitionZone    = false;
+            l_Packet.InRadiationZone     = false;
+            l_Packet.PlayRepairAnimation = false;
+            l_Packet.InTradeZone         = false;
+            l_Packet.InJumpZone          = false;
+            l_Packet.Repair              = false;
+            SendPacket(l_Packet.Write());
+        }
+        /// In Radiation Zone
+        else if (GetEvent() == EventType::EVENT_TYPE_RADIATION_ZONE)
+            DealDamage(this, Core::Utils::CalculatePercentage(m_IntervalRadiation.GetTick() > 5 ? 5 : m_IntervalRadiation.GetTick(), GetHitMaxPoints()), false);
+    }
 
     /// Update Player
     /// @p_Diff : Execution Time
@@ -420,9 +467,64 @@ namespace SteerStone { namespace Game { namespace Entity {
         Core::Diagnostic::StopWatch l_StopWatch;
         l_StopWatch.Start();
 
-        UpdateSurroundings(p_Diff);
+        switch (m_DeathState)
+        {
+            case DeathState::ALIVE:
+            {
+                UpdateRadiationZone(p_Diff);
 
-        Unit::Update(p_Diff);
+                UpdateSurroundings(p_Diff);
+
+                Unit::Update(p_Diff);
+            }
+            break;
+            case DeathState::JUST_DIED:
+            {
+                //m_DeathState = DeathState::DEAD;
+
+                CancelAttack();
+
+                /// It's easier if we just remove mob from map, so we don't need to do extra
+                /// checks whether object is dead etc...
+                sZoneManager->RemoveFromMap(this);
+
+                uint32 l_RespawnMapId = 0;
+                switch (m_Company)
+                {
+                    case Company::MMO:
+                    {
+                        l_RespawnMapId = 1;
+                    }
+                    break;
+                    case Company::EARTH:
+                    {
+                        l_RespawnMapId = 5;
+                    }
+                    break;
+                    case Company::VRU:
+                    {
+                        l_RespawnMapId = 9;
+                    }
+                    break;
+                }
+
+               /* SetMap(sZoneManager->GetMap(l_RespawnMapId));
+                GetSpline()->SetPosition(0.0f, 0.0f);
+
+                SendClientSettings();
+                GetInventory()->CalculateStats();
+                SendInitializeShip();
+                SendDrones();
+                SendMapUpdate();
+                SendAmmoUpdate();
+                SendAccountRank();
+                SendLoggedIn();
+                sZoneManager->AddToMap(this);
+
+                m_DeathState = DeathState::ALIVE;*/
+            }
+            break;
+        }
 
         m_IntervalNextSave.Update(p_Diff);
         if (m_IntervalNextSave.Passed())

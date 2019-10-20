@@ -91,7 +91,7 @@ namespace SteerStone { namespace Game { namespace Entity {
         BonusBox* ToBonusBox()              { if (GetType() == Type::OBJECT_TYPE_BONUS_BOX) return reinterpret_cast<BonusBox*>(this);           return nullptr; }
         BonusBox const* ToBonusBox()const   { if (GetType() == Type::OBJECT_TYPE_BONUS_BOX) return reinterpret_cast<BonusBox const*>(this);     return nullptr; }
 
-        void SetGridIndex(std::tuple<uint32, uint32> const p_GridIndex) { m_GridIndex = p_GridIndex;   }
+        void SetGridIndex(std::tuple<int32, int32> const p_GridIndex)   { m_GridIndex = p_GridIndex;   }
         void SetName(std::string const p_Name)                          { m_Name = p_Name;             }
         void SetType(Type const p_Type)                                 { m_Type = p_Type;             }
         void SetGUID(ObjectGUID const& p_ObjectGUID)                    { m_ObjectGUID = p_ObjectGUID; }
@@ -108,7 +108,7 @@ namespace SteerStone { namespace Game { namespace Entity {
         bool m_NeedToBeUpdate;
         Spline m_Spline;
         Map::Base* m_Map;
-        std::tuple<uint32, uint32> m_GridIndex;
+        std::tuple<int32, int32> m_GridIndex;
     };
 
 }   ///< namespace Entity

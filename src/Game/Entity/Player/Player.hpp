@@ -25,6 +25,8 @@
 #include "Database/DatabaseTypes.hpp"
 #include "Inventory.hpp"
 
+#define RADIATION_TIMER 1000
+
 namespace SteerStone { namespace Game { namespace Entity {
 
     class Server::ClientPacket;
@@ -136,6 +138,9 @@ namespace SteerStone { namespace Game { namespace Entity {
         uint16 GetDroneLevel(Drone& p_Drone);
         /// Returns Level
         uint32 CalculateLevel();
+        /// Check whether player is in radiation zone
+        /// p_Diff : Execution Time
+        void UpdateRadiationZone(uint32 const p_Diff);
     public:
         /// Update Player
         /// @p_Diff : Execution Time
@@ -212,11 +217,12 @@ namespace SteerStone { namespace Game { namespace Entity {
         uint32 GetJackPot()        const     { return m_Jackpot;          }
         uint32 GetLevel()          const     { return m_Level;            }
         uint32 GetExperience()     const     { return m_Experience;       }
-        int32 GetHonor()          const      { return m_Honor;            }
+        int32 GetHonor()           const     { return m_Honor;            }
         bool IsPremium()           const     { return m_Premium;          }
         bool IsLoggingOut()        const     { return m_LoggingOut;       }
         bool IsLoggedIn()          const     { return m_LoggedIn;         }
         bool IsJumping()           const     { return m_Jumping;          }
+        bool IsInRadiationZone()   const     { return m_InRadiationZone;  }
         uint32 GetCargoSpace()     const     { return m_CargoSpace;       }
         uint32 GetMaxCargoSpace()  const     { return m_MaxCargoSpace;    }
         uint32 GetMaxBattery()     const     { return m_MaxBattery;       }
@@ -228,14 +234,15 @@ namespace SteerStone { namespace Game { namespace Entity {
         std::shared_ptr<Server::GameSocket> ToSocket() { return m_Socket; }
 
         /// Setters Function
-        void SetEventType(EventType const p_EventType)   { m_Event = p_EventType;         }
-        void SetIsJumping(bool const p_Jumping)          { m_Jumping = p_Jumping;         }
-        void SetLogout(bool const p_LoggedOut)           { m_LoggingOut = p_LoggedOut;    }
-        void UpdateCredits(uint32 const p_Credits)       { m_Credits += p_Credits;        }
-        void UpdateUridium(uint32 const p_Uridium)       { m_Uridium += p_Uridium;        }
+        void SetEventType(EventType const p_EventType)    { m_Event = p_EventType;         }
+        void SetIsJumping(bool const p_Jumping)           { m_Jumping = p_Jumping;         }
+        void SetLogout(bool const p_LoggedOut)            { m_LoggingOut = p_LoggedOut;    }
+        void UpdateCredits(uint32 const p_Credits)        { m_Credits += p_Credits;        }
+        void UpdateUridium(uint32 const p_Uridium)        { m_Uridium += p_Uridium;        }
         void UpdateExperience(uint32 const p_Experience);
-        void UpdateHonor(uint32 const p_Honour)          { m_Honor += p_Honour;           }
-        void SetCargoSpace(uint32 const p_CargoSpace)    { m_CargoSpace = p_CargoSpace;   }
+        void UpdateHonor(uint32 const p_Honour)           { m_Honor += p_Honour;           }
+        void SetCargoSpace(uint32 const p_CargoSpace)     { m_CargoSpace = p_CargoSpace;   }
+        void SetInRadiationZone(bool const p_InRadiation) { m_InRadiationZone = p_InRadiation; }
         Core::Diagnostic::IntervalTimer IntervalLogout;
 
     //////////////////////////////////////////////////////////////////////////
@@ -283,10 +290,12 @@ namespace SteerStone { namespace Game { namespace Entity {
         bool m_LoggedIn;
         bool m_Jumping;
         bool m_LoggingOut;
+        bool m_InRadiationZone;
         EventType m_Event;
         Ammo m_Ammo;
         Inventory m_Inventory;
         Core::Diagnostic::IntervalTimer m_IntervalNextSave;              ///< Save to database
+        Core::Diagnostic::IntervalTimer m_IntervalRadiation;             ///< Save to database
 
         std::vector<Drone> m_Drones;                                     ///< Ship Drones
         SurroundingMap m_Surroundings;                                   ///< Objects surrounding player

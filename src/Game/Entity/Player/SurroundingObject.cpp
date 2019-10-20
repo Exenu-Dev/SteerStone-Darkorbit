@@ -94,7 +94,7 @@ namespace SteerStone { namespace Game { namespace Entity {
     void SurroundingObject::RemoveScheduleFromDespawn()
     {
         m_ScheduleForDespawn = false;
-        m_IntervalDelayRemoval.ResetCurrent();
+        m_IntervalDelayRemoval.Reset();
     }
 
     /// Send Packet
@@ -128,7 +128,7 @@ namespace SteerStone { namespace Game { namespace Entity {
                     m_Object->ToUnit()->CancelAttack();
 
                 /// And reset timer
-                m_IntervalDelayRemoval.ResetCurrent();
+                m_IntervalDelayRemoval.Reset();
 
                 return false;
             }

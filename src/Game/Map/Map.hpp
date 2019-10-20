@@ -85,11 +85,11 @@ namespace SteerStone { namespace Game { namespace Map {
         Grid* GetGrid(Entity::Object const* p_Object);
         /// Calculate Grid By Object Position
         /// @p_Object : Object
-        std::tuple<uint32, uint32> CalculateGridByPosition(Entity::Object* p_Object);
+        std::tuple<int32, int32> CalculateGridByPosition(Entity::Object* p_Object);
         /// Calculate Grid By Position
         /// @p_PositionX : X Axis
         /// @p_PositionY : Y Axis
-        std::tuple<uint32, uint32> CalculateGridByPosition(float const p_PositionX, float const p_PositionY);
+        std::tuple<int32, int32> CalculateGridByPosition(float const p_PositionX, float const p_PositionY);
         /// Return Grid by Position
         /// @p_PositionX : X Axis
         /// @p_PositionY : Y Axis
@@ -168,6 +168,7 @@ namespace SteerStone { namespace Game { namespace Map {
         uint32 m_MapSizeX;                                    ///< Map Size X
         uint32 m_MapSizeY;                                    ///< Map Size Y
         Grid* m_Grids[GRID_CELLS][GRID_CELLS];                ///< Grids
+        Grid* m_RadiationGrid;                                ///< Radiation Grid
         PoolManager m_PoolManager;                            ///< Pool Manager
         std::vector<Entity::Object*> m_ConstantObjects;       ///< Constant Objects
         JumpQueueMap m_PlayersToJump;                         ///< Process players to jump

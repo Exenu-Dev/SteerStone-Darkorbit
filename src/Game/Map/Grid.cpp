@@ -34,10 +34,11 @@ namespace SteerStone { namespace Game { namespace Map {
 
     /// Constructor
     /// @p_Map   : Map who owns the grid
+    /// @p_Type  : Type of grid
     /// @p_GridX : Grid X
     /// @p_GridY : Grid Y
-    Grid::Grid(Base* p_Map, uint32 const p_GridX, uint32 const p_GridY)
-        : m_Map(p_Map),m_GridX(p_GridX), m_GridY(p_GridY)
+    Grid::Grid(Base* p_Map, GridType p_Type, uint32 const p_GridX, uint32 const p_GridY)
+        : m_Map(p_Map), m_Type(p_Type), m_GridX(p_GridX), m_GridY(p_GridY)
     {
         /// Grids are active on creation
         m_State = State::Active;
@@ -65,6 +66,8 @@ namespace SteerStone { namespace Game { namespace Map {
         if (!m_IntervalInteractiveEvents.Passed())
             return;
 
+        /// Note; Radiation Event is handled in Player::UpdateRadiationZone because it needs to be handled every 1 second
+
         /// TODO; Optimize this code
         for (auto l_Itr : m_Players)
         {
@@ -72,7 +75,8 @@ namespace SteerStone { namespace Game { namespace Map {
             {
                 if (l_SecondItr.second->GetType() != Entity::Type::OBJECT_TYPE_PORTAL && l_SecondItr.second->GetType() != Entity::Type::OBJECT_TYPE_STATION)
                 {
-                    if (l_Itr->ToPlayer()->GetEvent() == EventType::EVENT_TYPE_NONE)
+                    /// Radiation is handled elsewhere
+                    if (l_Itr->ToPlayer()->GetEvent() == EventType::EVENT_TYPE_NONE || l_Itr->ToPlayer()->GetEvent() == EventType::EVENT_TYPE_RADIATION_ZONE)
                         continue;
 
                     Server::Packets::Event l_Packet;

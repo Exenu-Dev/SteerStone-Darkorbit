@@ -180,7 +180,7 @@ namespace SteerStone { namespace Game { namespace Entity {
                     /// Now calculate damage
                     int32 l_Damage       = CalculateDamageDone();
                     int32 l_ShieldDamage = 0;
-                    CalculateDamageTaken(l_Damage, l_ShieldDamage);
+                    CalculateDamageTaken(GetTarget(), l_Damage, l_ShieldDamage);
 
                     int32 l_HitPoints = GetTarget()->ToUnit()->GetHitPoints() - l_Damage;
                     int32 l_Shield    = GetTarget()->ToUnit()->GetShield() - l_ShieldDamage;
@@ -311,11 +311,52 @@ namespace SteerStone { namespace Game { namespace Entity {
 
         return Core::Utils::UInt32Random(l_MinDamage, l_MaxDamage);
     }
-    /// Calculate Damage takem for target
-    void Unit::CalculateDamageTaken(int32& p_Damage, int32& p_ShieldDamage)
+    /// Deal Damage to target
+    /// @p_Target : Target
+    /// @p_Damage : Damage
+    /// @p_CleanDamage : Deal damage neglecting shield
+    void Unit::DealDamage(Unit* p_Target, int32 p_Damage, bool p_CleanDamage)
     {
-        if (GetTarget()->ToUnit()->GetShield() != 0)
-            p_ShieldDamage = Core::Utils::CalculatePercentage(p_Damage, GetTarget()->ToUnit()->GetShieldResistance());
+        int32 l_ShieldDamage = 0;
+
+        if (!p_CleanDamage)
+            CalculateDamageTaken(p_Target, p_Damage, l_ShieldDamage);
+
+        int32 l_HitPoints = p_Target->GetHitPoints() - p_Damage;
+        int32 l_Shield = p_Target->GetShield() - l_ShieldDamage;
+
+        /// If Hitpoints is 0 or less, then target is dead
+        if (l_HitPoints <= 0)
+        {
+            Kill(p_Target);
+            return;
+        }
+
+        if (l_Shield < 0)
+            l_Shield = 0;
+
+        /// Set new hitpoints and shield points
+        p_Target->SetHitPoints(l_HitPoints);
+        p_Target->SetShield(l_Shield);
+
+        /// Send recieved damage effect to target
+        if (p_Target->IsPlayer())
+        {
+            Server::Packets::Attack::RecievedDamage l_ReceivedDamagePacket;
+            l_ReceivedDamagePacket.HitPoints = p_Target->GetHitPoints();
+            l_ReceivedDamagePacket.Shield    = p_Target->GetShield();
+            l_ReceivedDamagePacket.Damage    = l_ShieldDamage + p_Damage; ///< Total Damage
+            p_Target->ToPlayer()->SendPacket(l_ReceivedDamagePacket.Write());
+        }
+    }
+    /// Calculate Damage takem for target
+    /// @p_Target : Target
+    /// @p_Damage : Damage taken
+    /// @p_ShieldDamage : Shield Damage taken
+    void Unit::CalculateDamageTaken(Unit* p_Target, int32& p_Damage, int32& p_ShieldDamage)
+    {
+        if (p_Target->GetShield() != 0)
+            p_ShieldDamage = Core::Utils::CalculatePercentage(p_Damage, p_Target->GetShieldResistance());
 
         p_Damage = p_Damage - p_ShieldDamage;
     }
@@ -336,11 +377,6 @@ namespace SteerStone { namespace Game { namespace Entity {
         Server::Packets::Attack::Kill l_Packet;
         l_Packet.Id = p_Unit->GetObjectGUID().GetCounter();
         GetMap()->SendPacketToNearByGridsIfInSurrounding(l_Packet.Write(), p_Unit, true);
-
-        Server::Packets::Attack::CancelLaserShoot l_CancelLaserPacket;
-        l_CancelLaserPacket.FromId  = GetObjectGUID().GetCounter();
-        l_CancelLaserPacket.ToId    = GetTarget()->GetObjectGUID().GetCounter();
-        GetMap()->SendPacketToNearByGridsIfInSurrounding(l_Packet.Write(), this);
 
         if (p_Unit->GetType() == Type::OBJECT_TYPE_MOB)
             p_Unit->ToMob()->RewardKillCredit(ToPlayer());

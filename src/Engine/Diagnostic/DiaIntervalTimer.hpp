@@ -30,7 +30,7 @@ namespace SteerStone { namespace Core { namespace Diagnostic {
         /// Constructor
         /// @p_Interval : Interval Timer
         IntervalTimer(uint32 p_Interval = 0)
-            : m_Current(0), m_Interval(p_Interval), m_Pause(false)
+            : m_Current(0), m_Interval(p_Interval), m_Tick(0), m_Pause(false)
         {
         }
         /// Deconstructor
@@ -59,6 +59,7 @@ namespace SteerStone { namespace Core { namespace Diagnostic {
                     m_Pause = p_Pause;
 
                 m_Current = 0;
+                m_Tick++;
                 return true;
             }
 
@@ -72,10 +73,11 @@ namespace SteerStone { namespace Core { namespace Diagnostic {
             m_Interval = p_Interval;
         }
 
-        /// Reset current time back to 0
-        void ResetCurrent()
+        /// Reset Current and Tick
+        void Reset()
         {
             m_Current = 0;
+            m_Tick = 0;
         }
 
         /// Get Interval
@@ -88,6 +90,11 @@ namespace SteerStone { namespace Core { namespace Diagnostic {
         {
             return m_Current;
         }
+        /// Get Tick
+        uint32 GetTick() const
+        {
+            return m_Tick;
+        }
 
     //////////////////////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////////////////////
@@ -95,6 +102,7 @@ namespace SteerStone { namespace Core { namespace Diagnostic {
     private:
         int32 m_Current;       ///< Diff
         int32 m_Interval;      ///< Interval
+        uint32 m_Tick;         ///< Ticks
         bool m_Pause;          ///< Pause Timer
     };
 

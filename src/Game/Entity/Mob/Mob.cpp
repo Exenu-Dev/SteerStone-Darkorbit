@@ -163,9 +163,10 @@ namespace SteerStone { namespace Game { namespace Entity {
                 float l_Distance = Core::Utils::DistanceSquared(GetSpline()->GetPlannedPositionX(), GetSpline()->GetPlannedPositionY(), l_PositionX, l_PositionY);
 
                 /// Don't follow player if player is at an event, we only attack player if player has tagged us
-                if (l_Target->GetEvent() == EventType::EVENT_TYPE_PORTAL || l_Target->GetEvent() == EventType::EVENT_TYPE_STATION)
+                if (l_Target->GetEvent() == EventType::EVENT_TYPE_PORTAL || l_Target->GetEvent() == EventType::EVENT_TYPE_STATION 
+                    || l_Target->GetEvent() == EventType::EVENT_TYPE_RADIATION_ZONE)
                 {
-                    if (!GetTaggedPlayer())
+                    if (l_Target->GetEvent() == EventType::EVENT_TYPE_RADIATION_ZONE || !GetTaggedPlayer())
                     {
                         CancelAttack();
                         return;
@@ -269,10 +270,11 @@ namespace SteerStone { namespace Game { namespace Entity {
                     break;
                 }
 
-                /// Don't attack player if player is at an event, we only attack player if player has tagged us
-                if (l_Target->GetEvent() == EventType::EVENT_TYPE_PORTAL || l_Target->GetEvent() == EventType::EVENT_TYPE_STATION)
+                /// Don't follow player if player is at an event, we only attack player if player has tagged us
+                if (l_Target->GetEvent() == EventType::EVENT_TYPE_PORTAL || l_Target->GetEvent() == EventType::EVENT_TYPE_STATION
+                    || l_Target->GetEvent() == EventType::EVENT_TYPE_RADIATION_ZONE)
                 {
-                    if (!GetTaggedPlayer())
+                    if (l_Target->GetEvent() == EventType::EVENT_TYPE_RADIATION_ZONE || !GetTaggedPlayer())
                     {
                         CancelAttack();
                         return;

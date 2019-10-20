@@ -53,6 +53,12 @@ namespace SteerStone { namespace Game { namespace Map {
         InActive    ///< Grid is turned off regardless if there's players
     };
 
+    enum class GridType
+    {
+        GRID_TYPE_NORMAL,
+        GRID_TYPE_RADIATION,
+    };
+
     class Entity::Object;
     class Entity::Player;
     class Entity::Portal;
@@ -73,9 +79,10 @@ namespace SteerStone { namespace Game { namespace Map {
     public:
         /// Constructor
         /// @p_Map   : Map who owns the grid
+        /// @p_Type  : Type of grid
         /// @p_GridX : Grid X
         /// @p_GridY : Grid Y
-        Grid(Base* p_Map, uint32 const p_GridX, uint32 const p_GridY);
+        Grid(Base* p_Map, GridType p_Type, uint32 const p_GridX, uint32 const p_GridY);
         /// Deconstructor
         ~Grid();
 
@@ -163,6 +170,7 @@ namespace SteerStone { namespace Game { namespace Map {
         ///////////////////////////////////////////
     public:
         State GetState() const { return m_State; }
+        GridType GetGridType() const { return m_Type; }
 
         //////////////////////////////////////////////////////////////////////////
         //////////////////////////////////////////////////////////////////////////
@@ -172,6 +180,7 @@ namespace SteerStone { namespace Game { namespace Map {
         PlayerMap m_Players;                                         ///< Players in Grid
         Base* m_Map;                                                 ///< Map
         State m_State;                                               ///< Grid State
+        GridType m_Type;                                                 ///< Grid Type
         uint32 m_GridX;                                              ///< Grid Index X
         uint32 m_GridY;                                              ///< Grid Index Y
         Core::Diagnostic::IntervalTimer m_IntervalCheckPlayer;       ///< Interval Timer

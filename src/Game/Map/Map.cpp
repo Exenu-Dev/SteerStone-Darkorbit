@@ -58,7 +58,12 @@ namespace SteerStone { namespace Game { namespace Map {
         /// Load Grids
         for (uint32 l_X = 0; l_X < GRID_CELLS; l_X++)
             for (uint32 l_Y = 0; l_Y < GRID_CELLS; l_Y++)
-                m_Grids[l_X][l_Y] = new Grid(this, l_X, l_Y);
+                m_Grids[l_X][l_Y] = new Grid(this, GridType::GRID_TYPE_NORMAL, l_X, l_Y);
+
+        /// Note; We only need 1 grid for radiation, as the mini map does not cover outside of the grid,
+        /// so we just send the packet around in a radius
+
+        m_RadiationGrid = new Grid(this, GridType::GRID_TYPE_RADIATION, 0, 0);
     }
     /// Deconstructor
     Base::~Base()
@@ -94,6 +99,8 @@ namespace SteerStone { namespace Game { namespace Map {
                 l_Grid->Update(p_Diff);
             }
         }
+
+        m_RadiationGrid->Update(p_Diff);
 
         return true;
     }
@@ -183,35 +190,31 @@ namespace SteerStone { namespace Game { namespace Map {
     /// @p_Object : Object we are getting grid from
     Grid* Base::GetGrid(Entity::Object const* p_Object)
     {
+        if ((std::get<0>(p_Object->GetGridIndex()) > GRID_CELLS || std::get<0>(p_Object->GetGridIndex()) < 0) ||
+            (std::get<1>(p_Object->GetGridIndex()) > GRID_CELLS || std::get<1>(p_Object->GetGridIndex()) < 0))
+            return m_RadiationGrid;
+
         return m_Grids[std::get<0>(p_Object->GetGridIndex())][std::get<1>(p_Object->GetGridIndex())];
     }
     /// Calculate Grid By Object Position
     /// @p_Object : Object
-    std::tuple<uint32, uint32> Base::CalculateGridByPosition(Entity::Object* p_Object)
+    std::tuple<int32, int32> Base::CalculateGridByPosition(Entity::Object* p_Object)
     {
         float l_GridX = std::floor(p_Object->GetSpline()->GetPositionX() / m_GridRadiusX);
         float l_GridY = std::floor(p_Object->GetSpline()->GetPositionY() / m_GridRadiusY);
 
-        /// Is our grid out of bounds?
-        if (l_GridX > GRID_CELLS - 1 || l_GridY > GRID_CELLS - 1) ///< Grid starts from 0
-            LOG_ASSERT(false, "Map", "Grid X or Y is larger than Grid Cells! Grid X: %0, Grid Y: %1", l_GridX, l_GridY);
-
-        return std::make_tuple(static_cast<uint32>(l_GridX), static_cast<uint32>(l_GridY));
+        return std::make_tuple(static_cast<int32>(l_GridX), static_cast<int32>(l_GridY));
     }
     /// Calculate Grid By Object Position
     /// @p_Object : Object
     /// @p_PositionX : X Axis
     /// @p_PositionY : Y Axis
-    std::tuple<uint32, uint32> Base::CalculateGridByPosition(float const p_PositionX, float const p_PositionY)
+    std::tuple<int32, int32> Base::CalculateGridByPosition(float const p_PositionX, float const p_PositionY)
     {
         float l_GridX = std::floor(p_PositionX / m_GridRadiusX);
         float l_GridY = std::floor(p_PositionY / m_GridRadiusY);
 
-        /// Is our grid out of bounds?
-        if (l_GridX > GRID_CELLS - 1 || l_GridY > GRID_CELLS - 1) ///< Grid starts from 0
-            LOG_ASSERT(false, "Map", "Grid X or Y is larger than Grid Cells! Grid X: %0, Grid Y: %1", l_GridX, l_GridY);
-
-        return std::make_tuple(static_cast<uint32>(l_GridX), static_cast<uint32>(l_GridY));
+        return std::make_tuple(static_cast<int32>(l_GridX), static_cast<int32>(l_GridY));
     }
     /// Return Grid by Position
     /// @p_PositionX : X Axis
@@ -234,7 +237,12 @@ namespace SteerStone { namespace Game { namespace Map {
     void Base::Add(Entity::Object* p_Object, bool p_SendMovement)
     {
         p_Object->SetGridIndex(CalculateGridByPosition(p_Object));
-        m_Grids[std::get<0>(p_Object->GetGridIndex())][std::get<1>(p_Object->GetGridIndex())]->Add(p_Object);
+
+        if ((std::get<0>(p_Object->GetGridIndex()) > GRID_CELLS || std::get<0>(p_Object->GetGridIndex()) < 0)
+            || std::get<1>(p_Object->GetGridIndex()) > GRID_CELLS || std::get<1>(p_Object->GetGridIndex()) < 0)
+            m_RadiationGrid->Add(p_Object);
+        else
+            m_Grids[std::get<0>(p_Object->GetGridIndex())][std::get<1>(p_Object->GetGridIndex())]->Add(p_Object);
 
         /// This must be called after we add object to the grid
         SendConstantObjects(p_Object);
@@ -244,6 +252,13 @@ namespace SteerStone { namespace Game { namespace Map {
     /// @p_SendPacket : Send Despawn Packet
     void Base::Remove(Entity::Object* p_Object, bool p_SendPacket)
     {
+        if ((std::get<0>(p_Object->GetGridIndex()) > GRID_CELLS || std::get<0>(p_Object->GetGridIndex()) < 0)
+            || std::get<1>(p_Object->GetGridIndex()) > GRID_CELLS || std::get<1>(p_Object->GetGridIndex()) < 0)
+        {
+            m_RadiationGrid->Remove(p_Object, p_SendPacket);
+            return;
+        }
+
         m_Grids[std::get<0>(p_Object->GetGridIndex())][std::get<1>(p_Object->GetGridIndex())]->Remove(p_Object, p_SendPacket);
     }
     /// Find Object in map
@@ -268,21 +283,55 @@ namespace SteerStone { namespace Game { namespace Map {
     /// @p_Object : Object being moved
     void Base::Move(Entity::Object* p_Object)
     {
-        std::tuple<uint32, uint32> l_GridIndex = CalculateGridByPosition(p_Object->GetSpline()->GetPositionX(), p_Object->GetSpline()->GetPositionY());
+        std::tuple<int32, int32> l_GridIndex = CalculateGridByPosition(p_Object->GetSpline()->GetPositionX(), p_Object->GetSpline()->GetPositionY());
 
-        /// If both indexes don't match, we've moved to a new grid
-        if (std::get<0>(l_GridIndex) != std::get<0>(p_Object->GetGridIndex()) ||
-            std::get<1>(l_GridIndex) != std::get<1>(p_Object->GetGridIndex()))
+        /// If we are out of bounds, then we have entered the radiation zone
+        if (std::get<0>(l_GridIndex) >= GRID_CELLS || std::get<1>(l_GridIndex) < 0)
         {
-            /// Remove old grid
-            m_Grids[std::get<0>(p_Object->GetGridIndex())][std::get<1>(p_Object->GetGridIndex())]->Remove(p_Object);
+            if (p_Object->IsPlayer() && !p_Object->ToPlayer()->IsInRadiationZone())
+            {
+                /// Remove old grid
+                m_Grids[std::get<0>(p_Object->GetGridIndex())][std::get<1>(p_Object->GetGridIndex())]->Remove(p_Object);
 
-            /// Add new grid
-            p_Object->SetGridIndex(l_GridIndex);
-            m_Grids[std::get<0>(p_Object->GetGridIndex())][std::get<1>(p_Object->GetGridIndex())]->Add(p_Object, true);
+                /// Add to radiation zone
+                p_Object->ToPlayer()->SetInRadiationZone(true);
+                m_RadiationGrid->Add(p_Object);
+            }
+
+            /// It doesn't matter if we update the grid or not, but lets do it anyway
+            if (std::get<0>(l_GridIndex) != std::get<0>(p_Object->GetGridIndex()) ||
+                std::get<1>(l_GridIndex) != std::get<1>(p_Object->GetGridIndex()))
+                p_Object->SetGridIndex(l_GridIndex);
+
+            m_RadiationGrid->Move(p_Object);
         }
+        else
+        {
+            /// If both indexes don't match, we've moved to a new grid
+            if (std::get<0>(l_GridIndex) != std::get<0>(p_Object->GetGridIndex()) ||
+                std::get<1>(l_GridIndex) != std::get<1>(p_Object->GetGridIndex()))
+            {
+                /// Remove old grid
+                if (p_Object->IsPlayer())
+                {
+                    if (p_Object->ToPlayer()->IsInRadiationZone())
+                    {
+                        m_RadiationGrid->Remove(p_Object);
+                        p_Object->ToPlayer()->SetInRadiationZone(false);
+                    }
+                    else
+                        m_Grids[std::get<0>(p_Object->GetGridIndex())][std::get<1>(p_Object->GetGridIndex())]->Remove(p_Object);
+                }
+                else
+                    m_Grids[std::get<0>(p_Object->GetGridIndex())][std::get<1>(p_Object->GetGridIndex())]->Remove(p_Object);
+   
+                /// Add new grid
+                p_Object->SetGridIndex(l_GridIndex);
+                m_Grids[std::get<0>(p_Object->GetGridIndex())][std::get<1>(p_Object->GetGridIndex())]->Add(p_Object, true);
+            }
 
-        m_Grids[std::get<0>(p_Object->GetGridIndex())][std::get<1>(p_Object->GetGridIndex())]->Move(p_Object);
+            m_Grids[std::get<0>(p_Object->GetGridIndex())][std::get<1>(p_Object->GetGridIndex())]->Move(p_Object);
+        }
     }
     /// Unload Grids
     void Base::UnloadAll()
@@ -340,6 +389,7 @@ namespace SteerStone { namespace Game { namespace Map {
 
             /// Remove player from map
             sZoneManager->RemoveFromMap(l_Itr->first, true);
+
             l_Itr->first->ToPlayer()->ClearTarget();
             l_Itr->first->ToPlayer()->ClearSurroundings();
 
@@ -380,6 +430,16 @@ namespace SteerStone { namespace Game { namespace Map {
     /// @p_SendToSelf : Send Packet to self
     void Base::SendPacketToNearByGridsIfInSurrounding(Server::PacketBuffer const* p_PacketBuffer, Entity::Object* p_Object, bool p_SendToSelf)
     {
+        /// If we are in radiation zone, we don't send packet to other grids
+        if (p_Object->IsPlayer())
+        {
+            if (p_Object->ToPlayer()->IsInRadiationZone())
+            {
+                p_Object->ToPlayer()->GetGrid()->SendPacketIfInSurrounding(p_PacketBuffer, p_Object, true);
+                return;
+            }
+        }
+
         static const int32 l_X[] = { -1, -1, -1,  1, 1, 1,  0, 0 };
         static const int32 l_Y[] = { -1,  0,  1, -1, 0, 1, -1, 1 };
 
