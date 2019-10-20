@@ -390,7 +390,11 @@ namespace SteerStone { namespace Game { namespace Map {
             /// Remove player from map
             sZoneManager->RemoveFromMap(l_Itr->first, true);
 
-            l_Itr->first->ToPlayer()->ClearTarget();
+            /// Clear target also
+            if (l_Itr->first->ToPlayer()->GetTarget())
+                l_Itr->first->ToPlayer()->GetTarget()->CancelAttack();
+
+            l_Itr->first->ToPlayer()->CancelAttack();
             l_Itr->first->ToPlayer()->ClearSurroundings();
 
             /// Add to map
