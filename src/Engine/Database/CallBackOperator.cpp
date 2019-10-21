@@ -47,9 +47,6 @@ namespace SteerStone { namespace Core { namespace Database {
         {
             std::unique_ptr<PreparedResultSet> l_PreparedResultSet = m_PreparedFuture.get();
 
-            /// Now allow to free the statement on deconstruction
-            l_PreparedResultSet->AllowToFreeStatement();
-
             /// If there's a function, then execute the function with our result set
             if (m_OperatorFunction)
                 m_OperatorFunction(std::move(l_PreparedResultSet));

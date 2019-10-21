@@ -45,9 +45,7 @@ namespace SteerStone { namespace Core { namespace Database {
     /// Execute Query
     bool PrepareStatementOperator::Execute()
     {
-        std::unique_ptr<PreparedResultSet> l_PreparedResultSet = m_PreparedStatementHolder->ExecuteStatement(false);
-
-        m_PromiseResultSet->set_value(std::move(l_PreparedResultSet));
+        m_PromiseResultSet->set_value(m_PreparedStatementHolder->ExecuteStatement(true));
 
         return true;
     }

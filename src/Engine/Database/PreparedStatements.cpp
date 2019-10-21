@@ -89,11 +89,7 @@ namespace SteerStone { namespace Core { namespace Database {
     /// Release Prepare statement to be used again
     void PreparedStatements::Free(PreparedStatement* p_PrepareStatement)
     {
-        /// Statement must be locked - if not something went wrong and we must investigate
-        LOG_ASSERT(!p_PrepareStatement->TryLockMutex(), "PreparedStatements", "Attempted to free a statement but it's already locked!");
-
-        if (!p_PrepareStatement->TryLockMutex())
-            p_PrepareStatement->UnlockMutex();
+        p_PrepareStatement->UnlockMutex();
     }
 
 }   ///< namespace Database

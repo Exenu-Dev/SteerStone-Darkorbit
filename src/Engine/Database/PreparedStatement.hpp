@@ -54,11 +54,10 @@ namespace SteerStone { namespace Core { namespace Database {
         /// ExecuteStatement
         /// Execute the statement
         /// @p_FreeStatementAutomatically : Free the prepared statement when PreparedResultSet deconstructors
-        std::unique_ptr<PreparedResultSet> ExecuteStatement(bool p_FreeStatementAutomatically = true);
+        std::unique_ptr<PreparedResultSet> ExecuteStatement(bool p_FreeStatementAutomatically = false);
         
         /// Clear Prepared Statements
-        /// @p_FreePrepareStatement : Free the prepare statement
-        void Clear(bool p_FreePrepareStatment);
+        void Clear();
 
         /// Return statement
         MYSQL_STMT* GetStatement();

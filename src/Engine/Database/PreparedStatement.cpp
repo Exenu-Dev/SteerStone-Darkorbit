@@ -81,7 +81,7 @@ namespace SteerStone { namespace Core { namespace Database {
         {
             std::unique_ptr<PreparedResultSet> l_PreparedResultSet = std::make_unique<PreparedResultSet>(this, l_Result, l_FieldCount, p_FreeStatementAutomatically);
 
-            if (l_PreparedResultSet && l_PreparedResultSet->GetRowCount() || !p_FreeStatementAutomatically)
+            if (l_PreparedResultSet && l_PreparedResultSet->GetRowCount() || p_FreeStatementAutomatically)
                 return std::move(l_PreparedResultSet);
         }
 
@@ -89,8 +89,7 @@ namespace SteerStone { namespace Core { namespace Database {
     }
 
     /// Clear Prepare Statement
-    /// @p_FreePrepareStatement : Free the prepare statement
-    void PreparedStatement::Clear(bool p_FreePrepareStatment)
+    void PreparedStatement::Clear()
     {
         if (m_Stmt->bind_result_done)
         {
@@ -103,8 +102,7 @@ namespace SteerStone { namespace Core { namespace Database {
         m_Prepared = false;
 
         /// Free the statement
-        if (p_FreePrepareStatment)
-            m_MYSQLPreparedStatement->GetDatabase()->FreePrepareStatement(this);
+        m_MYSQLPreparedStatement->GetDatabase()->FreePrepareStatement(this);
     }
 
     MYSQL_STMT* PreparedStatement::GetStatement()

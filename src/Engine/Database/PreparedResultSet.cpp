@@ -29,9 +29,8 @@ namespace SteerStone { namespace Core { namespace Database {
     /// @p_Result : Result
     /// @p_FieldCount : Field count
     /// @p_FreeAutomatically : Free the preparedstatement on PreparedResultSet deconstructor
-    PreparedResultSet::PreparedResultSet(PreparedStatement* p_Statement, MYSQL_RES* p_Result, uint32 p_FieldCount, bool p_FreeAutomatically)
-        : m_PreparedStatement(p_Statement), m_Result(p_Result), m_Fields(nullptr), m_Bind(nullptr), m_RowCount(0), m_FieldCount(p_FieldCount), m_RowPosition(0),
-        m_FreeAutomatically(p_FreeAutomatically)
+    PreparedResultSet::PreparedResultSet(PreparedStatement* p_Statement, MYSQL_RES* p_Result, uint32 p_FieldCount)
+        : m_PreparedStatement(p_Statement), m_Result(p_Result), m_Fields(nullptr), m_Bind(nullptr), m_RowCount(0), m_FieldCount(p_FieldCount), m_RowPosition(0)
     {
         if (!m_Result)
             return;
@@ -194,7 +193,7 @@ namespace SteerStone { namespace Core { namespace Database {
             m_Bind = nullptr;
         }
         
-        m_PreparedStatement->Clear(m_FreeAutomatically);
+        m_PreparedStatement->Clear();
     }
     /// Get Next Row
     bool PreparedResultSet::NextRow()

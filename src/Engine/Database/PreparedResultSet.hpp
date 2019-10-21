@@ -38,8 +38,7 @@ namespace SteerStone { namespace Core { namespace Database {
         /// @p_Statement : Prepare Statement
         /// @p_Result : Result
         /// @p_FieldCount : Field count
-        /// @p_FreeAutomatically : Free the preparedstatement on PreparedResultSet deconstructor
-        PreparedResultSet(PreparedStatement* p_Statement, MYSQL_RES* p_Result, uint32 p_FieldCount, bool p_FreeAutomatically);
+        PreparedResultSet(PreparedStatement* p_Statement, MYSQL_RES* p_Result, uint32 p_FieldCount);
         /// Deconstructor
         ~PreparedResultSet();
 
@@ -54,8 +53,6 @@ namespace SteerStone { namespace Core { namespace Database {
         /// Get Total Row Count
         uint64 GetRowCount() const { return m_RowCount; }
 
-        /// Allow the statement to be freed automatically
-        void AllowToFreeStatement() { m_FreeAutomatically = true; }
         /// Get Prepare Statement
         PreparedStatement* GetPreparedStatement() { return m_PreparedStatement; }
         /// [] Operator
