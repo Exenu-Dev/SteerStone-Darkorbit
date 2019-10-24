@@ -59,7 +59,7 @@ namespace SteerStone { namespace Policy { namespace Server {
 
         private:
             /// Handle incoming data
-            virtual bool ProcessIncomingData() override;
+            virtual Core::Network::ProcessState ProcessIncomingData() override;
 
             /// Handle Client Packet Handler
             /// @p_OpCodeHandler : Handler of Client Packet

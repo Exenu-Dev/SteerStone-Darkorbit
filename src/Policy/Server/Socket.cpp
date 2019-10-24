@@ -32,7 +32,7 @@ namespace SteerStone { namespace Policy { namespace Server {
     //////////////////////////////////////////////////////////////////////////
 
     /// Handle incoming data
-    bool PolicySocket::ProcessIncomingData()
+    Core::Network::ProcessState PolicySocket::ProcessIncomingData()
     {
         std::vector<uint8> l_BufferVec;
         l_BufferVec.resize(ReadLengthRemaining());
@@ -45,16 +45,14 @@ namespace SteerStone { namespace Policy { namespace Server {
             l_BufferVec[l_BufferVec.size() - 1] = 0;
 
             /// Form packet and execute handler
-            ClientPacket* l_ClientPacket        = new ClientPacket((char*)& l_BufferVec[0]);
-            OpcodeHandler const l_OpcodeHandler = sOpCode->GetClientPacket(l_ClientPacket->GetHeader());
-            ExecutePacket(&l_OpcodeHandler, l_ClientPacket);
+            ClientPacket l_ClientPacket((char*)& l_BufferVec[0]);
+            OpcodeHandler const l_OpcodeHandler = sOpCode->GetClientPacket(l_ClientPacket.GetHeader());
+            ExecutePacket(&l_OpcodeHandler, &l_ClientPacket);
 
-            return true;
+            return Core::Network::ProcessState::Successful;
         }
 
-        LOG_WARNING("PolicySocket", "Failed to read incoming buffer!");
-
-        return false;
+        return Core::Network::ProcessState::Error;
     }
 
     /// Handle Client Packet Handler
