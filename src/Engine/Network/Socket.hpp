@@ -41,6 +41,14 @@ namespace SteerStone { namespace Core { namespace Network {
         Reading                     ///< In progress of reading packet
     };
 
+    /// Process States
+    enum class ProcessState
+    {
+        Successful,                 ///< Data read sucessful
+        Skip,                       ///< Skip Data
+        Error                       ///< Error in data, close down socket
+    };
+
     class Socket : public std::enable_shared_from_this<Socket>, private Utils::LockableReadWrite
     {
         /// Allow access to lock / unlock methods
@@ -101,7 +109,7 @@ namespace SteerStone { namespace Core { namespace Network {
 
         protected:
             /// Virtual Function which passes into our derived class Socket
-            virtual bool ProcessIncomingData() = 0;
+            virtual ProcessState ProcessIncomingData() = 0;
 
             /// Get the current read position
             uint8 const* InPeak();

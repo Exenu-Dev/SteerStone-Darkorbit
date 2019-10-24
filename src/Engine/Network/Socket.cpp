@@ -217,29 +217,27 @@ namespace SteerStone { namespace Core { namespace Network {
             return;
         }
 
-        if (!ProcessIncomingData())
+        ProcessState l_ProcessState = ProcessIncomingData();
+
+        if (l_ProcessState != ProcessState::Successful)
         {
-            /// This errno is set when there is not enough buffer data available to either complete a header, or the packet length
-            /// specified in the header goes past what we've read.  in this case, we will reset the buffer with the remaining data
-            if (errno == EBADMSG)
+            if (l_ProcessState == ProcessState::Skip)
             {
-                const std::size_t l_BytesRemaining = m_InBuffer->m_WritePosition - m_InBuffer->m_ReadPosition;
-
-                ::memmove(&m_InBuffer->m_Buffer[0], &m_InBuffer->m_Buffer[m_InBuffer->m_ReadPosition], l_BytesRemaining);
-
+                /// Reset buffer
+                m_InBuffer->m_WritePosition = 0;
                 m_InBuffer->m_ReadPosition = 0;
-                m_InBuffer->m_WritePosition = l_BytesRemaining;
 
                 StartAsyncRead();
             }
             else
+            {
+                /// Bad data read - close down socket
                 if (!IsClosed())
                     CloseSocket();
-
-            return;
+            }
         }
 
-        /// Reset to read next packet
+        /// Reset buffer
         m_InBuffer->m_WritePosition = 0;
         m_InBuffer->m_ReadPosition = 0;
 

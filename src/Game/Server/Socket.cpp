@@ -28,6 +28,7 @@ namespace SteerStone { namespace Game { namespace Server {
     GameSocket::GameSocket(boost::asio::io_service& p_Service, std::function<void(Socket*)> p_CloseHandler)
         : Socket(p_Service, std::move(p_CloseHandler))
     {
+        m_AuthenticateState = Authenticated::NotAuthenticated;
         m_Player = nullptr;
 
         m_PingStopWatch.Start();
@@ -37,7 +38,7 @@ namespace SteerStone { namespace Game { namespace Server {
     //////////////////////////////////////////////////////////////////////////
 
     /// Handle incoming data
-    bool GameSocket::ProcessIncomingData()
+    Core::Network::ProcessState GameSocket::ProcessIncomingData()
     {
         std::vector<uint8> l_BufferVec;
         l_BufferVec.resize(ReadLengthRemaining());
@@ -49,59 +50,48 @@ namespace SteerStone { namespace Game { namespace Server {
             l_BufferVec.resize(l_BufferVec.size() + 1);
             l_BufferVec[l_BufferVec.size() - 1] = 0;
 
-            std::string l_Buffer = (char*)& l_BufferVec[0];
-            std::string l_Buffer1 = (char*)& l_BufferVec[0];
-            l_Buffer.resize(5);
-            ClientOpCodes l_Opcode;
-            if (l_Buffer == "LOGIN")
+            /// Note; Since we handle packet headers as 1 byte, the client sends LOGIN as the packet header, so we need to handle
+            /// it differently
+            if (m_AuthenticateState == Authenticated::NotAuthenticated)
             {
-                l_Buffer = "!|";
-                l_Buffer1.insert(0, l_Buffer);
+                std::string l_Buffer = (char*)& l_BufferVec[0];
+                l_Buffer.resize(5);
 
-                HandleLoginPacket(new ClientPacket(l_Buffer1));
-                m_Player->QueuePacket(new ClientPacket(l_Buffer1));
-                return true;
+                if (l_Buffer == "LOGIN")
+                {
+                    HandleLoginPacket(new ClientPacket((char*)& l_BufferVec[0]));
+
+                    /// The "!" is the 'fake' packet header, see HandleLoginPacket function which explains why I am doing this
+                    m_Player->QueuePacket(new ClientPacket("!|" + (std::string)(char*)& l_BufferVec[0]));
+
+                    m_AuthenticateState = Authenticated::Authenticed;
+
+                    return Core::Network::ProcessState::Successful;
+                }
+                
+                return Core::Network::ProcessState::Error;
             }
 
-            l_Opcode = static_cast<ClientOpCodes>(l_BufferVec[0]);
+            ClientOpCodes l_Opcode = static_cast<ClientOpCodes>(l_BufferVec[0]);
            
             switch (l_Opcode)
             {
                 case ClientOpCodes::CLIENT_PACKET_PING:
-                {
-                    HandlePingPacket(new ClientPacket((char*)& l_BufferVec[0]));
-                }
-                break;
-                case ClientOpCodes::CLIENT_PACKET_LOGIN:
-                {
-                    if (m_Player)
-                    {
-                        LOG_WARNING("GameSocket", "Tried to process packet CLIENT_PACKET_LOGIN but player is already logged in!");
-                        return false;
-                    }
-
-                    HandleLoginPacket(new ClientPacket((char*)& l_BufferVec[0]));
-                } [[fallthrough]];
+                    HandlePingPacket(new ClientPacket((char*)& l_BufferVec[0]));       
+                    break;
                 default:
                 {
-                    #ifndef HEADLESS_DEBUG
-                        if (l_Opcode > ClientOpCodes::CLIENT_MAX_OPCODE)
-                        {
-                            LOG_WARNING("GameSocket", "Recieved opcode %0 which is larger than max opcode! closing socket!", l_Opcode);
-                            return false;
-                        }
-                    #endif
-
                     OpcodeHandler const* l_OpCodeHandler = sOpCode->GetClientPacket(l_Opcode);
+
                     if (!l_OpCodeHandler)
                     {
                         LOG_ERROR("GameSocket", "No defined handler for opcode %0 sent by %1", sOpCode->GetClientOpCodeName(l_Opcode), GetRemoteAddress());
-                        return false;
+                        return Core::Network::ProcessState::Skip;
                     }
 
                     #ifdef STEERSTONE_CORE_DEBUG
-                    //else
-                        //LOG_INFO("GameSocket", "Received packet %0 from %1", sOpCode->GetClientOpCodeName(l_Opcode), GetRemoteAddress());
+                    else
+                        LOG_INFO("GameSocket", "Received packet %0 from %1", sOpCode->GetClientOpCodeName(l_Opcode), GetRemoteAddress());
                     #endif
 
                     switch (l_OpCodeHandler->Status)
@@ -111,7 +101,7 @@ namespace SteerStone { namespace Game { namespace Server {
                             if (!m_Player || m_Player->IsLoggedIn())
                             {
                                 LOG_WARNING("GameSocket", "Recieved opcode %0 from player %1 but player is already in world!", sOpCode->GetClientOpCodeName(l_Opcode), m_Player->GetName());
-                                return true;
+                                return Core::Network::ProcessState::Skip;
                             }
                         }
                         break;
@@ -120,7 +110,7 @@ namespace SteerStone { namespace Game { namespace Server {
                             if (!m_Player || !m_Player->IsLoggedIn())
                             {
                                 LOG_WARNING("GameSocket", "Recieved opcode %0 from player %1 but player is not in world!", sOpCode->GetClientOpCodeName(l_Opcode), m_Player->GetName());
-                                return true;
+                                return Core::Network::ProcessState::Skip;
                             }
                         }
                         break;
@@ -131,20 +121,19 @@ namespace SteerStone { namespace Game { namespace Server {
                         break;
                     }
 
+                    /// Note; Player thread is the network thread
                     if (l_OpCodeHandler->Process == PacketProcess::PROCESS_PLAYER_THREAD)
-                        ExecutePacket(l_OpCodeHandler, new ClientPacket((char*)& l_BufferVec[0]));
+                        ExecutePacket(l_OpCodeHandler, new ClientPacket((char*)&l_BufferVec[0]));
                     else
-                        m_Player->QueuePacket(new ClientPacket((char*)& l_BufferVec[0]));
+                        m_Player->QueuePacket(new ClientPacket((char*)&l_BufferVec[0]));
                 }
                 break;
             }
 
-            return true;
+            return Core::Network::ProcessState::Successful;
         }
 
-        LOG_WARNING("GameSocket", "Failed to read incoming buffer!");
-
-        return false;
+        return Core::Network::ProcessState::Error;
     }
 
     /// Handle Initial part of logging into game server
@@ -160,7 +149,6 @@ namespace SteerStone { namespace Game { namespace Server {
         /// there will be a race condition, so initialize the player and then pass the packet to the world thread
         /// the world thread gets updated before the map thread
         m_Player              = new Entity::Player(this);
-        p_Packet->ReadString();
         m_Player->m_Id        = p_Packet->ReadInt32();
         m_Player->m_SessionId = p_Packet->ReadString();
 

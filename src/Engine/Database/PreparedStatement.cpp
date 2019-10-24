@@ -79,7 +79,7 @@ namespace SteerStone { namespace Core { namespace Database {
 
         if (m_MYSQLPreparedStatement->Execute(m_Stmt, &l_Result, &l_FieldCount))
         {
-            std::unique_ptr<PreparedResultSet> l_PreparedResultSet = std::make_unique<PreparedResultSet>(this, l_Result, l_FieldCount, p_FreeStatementAutomatically);
+            std::unique_ptr<PreparedResultSet> l_PreparedResultSet = std::make_unique<PreparedResultSet>(this, l_Result, l_FieldCount);
 
             if (l_PreparedResultSet && l_PreparedResultSet->GetRowCount() || p_FreeStatementAutomatically)
                 return std::move(l_PreparedResultSet);

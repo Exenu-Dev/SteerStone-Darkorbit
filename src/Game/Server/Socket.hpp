@@ -33,6 +33,12 @@ namespace SteerStone { namespace Game { namespace Entity {
 
 namespace SteerStone { namespace Game { namespace Server {
 
+    enum class Authenticated
+    {
+        Authenticed,            ///< Authenticated from server
+        NotAuthenticated,       ///< Is not authenticated yet from server
+    };
+
     class Entity::Player;
 
     class GameSocket : public Core::Network::Socket
@@ -127,9 +133,10 @@ namespace SteerStone { namespace Game { namespace Server {
 
         private:
             /// Handle incoming data
-            virtual bool ProcessIncomingData() override;
+            virtual Core::Network::ProcessState ProcessIncomingData() override;
 
         private:
+            Authenticated m_AuthenticateState;
             Entity::Player* m_Player;                       ///< Player of socket
             Core::Diagnostic::StopWatch m_PingStopWatch;    ///< Stop Watch for Ping
     };

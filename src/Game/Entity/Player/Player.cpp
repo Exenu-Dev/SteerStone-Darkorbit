@@ -173,18 +173,18 @@ namespace SteerStone { namespace Game { namespace Entity {
                 IntervalLogout.SetInterval(sWorldManager->GetIntConfig(World::IntConfigs::INT_CONFIG_PREMIUM_LOG_OUT_TIMER));
             else
                 IntervalLogout.SetInterval(sWorldManager->GetIntConfig(World::IntConfigs::INT_CONFIG_LOG_OUT_TIMER));
-
-            #ifdef  HEADLESS_DEBUG
-                if (m_Id == 4)
-                {
-                    static uint32 l_Counter = 4;
-                    m_Id = l_Counter++;
-                }
-            #endif
                 
             LoadShipFromDB();
             LoadDrones();
             m_Inventory.LoadInventory();
+
+#ifdef  HEADLESS_DEBUG
+            if (m_Id == 4)
+            {
+                static uint32 l_Counter = 4;
+                m_Id = l_Counter++;
+            }
+#endif
 
             return true;
         }
@@ -1090,15 +1090,7 @@ namespace SteerStone { namespace Game { namespace Entity {
         Server::ClientPacket* l_ClientPacket = nullptr;
         while (m_RecievedQueue.Next(l_ClientPacket, p_PacketFilter))
         {
-            Server::OpcodeHandler const* l_OpCodeHandler = sOpCode->GetClientPacket(static_cast<ClientOpCodes>(l_ClientPacket->GetHeader()));
-            
-            if (l_OpCodeHandler->Status == PacketStatus::STATUS_UNHANDLED)
-            {
-                delete l_ClientPacket;
-                continue;
-            }
-            
-            m_Socket->ExecutePacket(l_OpCodeHandler, l_ClientPacket);
+            m_Socket->ExecutePacket(sOpCode->GetClientPacket(static_cast<ClientOpCodes>(l_ClientPacket->GetHeader())), l_ClientPacket);
             delete l_ClientPacket;
         }
 
