@@ -105,9 +105,9 @@ namespace SteerStone { namespace Game { namespace Entity {
 
         /// Send Attack
         Server::Packets::Attack::LaserShoot l_Packet;
-        l_Packet.FromId = GetObjectGUID().GetCounter();
-        l_Packet.ToId = GetTarget()->GetObjectGUID().GetCounter();
-        l_Packet.LaserId = m_WeaponState == 3 ? m_LaserType : 0;
+        l_Packet.FromId  = GetObjectGUID().GetCounter();
+        l_Packet.ToId    = GetTarget()->GetObjectGUID().GetCounter();
+        l_Packet.LaserId = m_WeaponState == WeaponState::WEAPON_STATE_FULLY_EQUIPPED ? m_LaserType : WeaponState::WEAPON_STATE_NOT_EQUIPPED;
         GetMap()->SendPacketToNearByGridsIfInSurrounding(l_Packet.Write(), this, true);
 
         /// If target is mob, then assign mob to attack us if mob is not already tagged
@@ -117,27 +117,24 @@ namespace SteerStone { namespace Game { namespace Entity {
             {
                 GetTarget()->ToMob()->SetTaggedPlayer(ToPlayer());
                 GetTarget()->ToMob()->Attack(this);
+
+                GetGrid()->SendPacketIfInSurrounding(Server::Packets::Misc::Info().Write(Server::Packets::Misc::InfoType::INFO_TYPE_GREY_OPPONENT, { GetTarget()->GetObjectGUID().GetCounter(), GetObjectGUID().GetCounter() }), this, false);
             }
         }
 
-        /// Grey Opponent
-        /// We only want the player to tag, if mob tag player, then player will have grey name
-        if (IsPlayer() && (GetTarget()->IsMob() && GetTarget()->ToMob()->GetTaggedPlayer() == this))
-            GetGrid()->SendPacketIfInSurrounding(Server::Packets::Misc::Info().Write(Server::Packets::Misc::InfoType::INFO_TYPE_GREY_OPPONENT, { GetTarget()->GetObjectGUID().GetCounter(), GetObjectGUID().GetCounter() }), this, false);
-
-        m_Attacking = true;
+        m_Attacking   = true;
         m_AttackState = AttackState::ATTACK_STATE_IN_RANGE;
     }
     /// Update Attack
     /// @p_Diff : Execution Time
     void Unit::AttackerStateUpdate(uint32 const p_Diff)
     {
-        /// If we are not attacking, then don't update
-        if (!m_Attacking || !GetTargetGUID())
-            return;
-
         m_IntervalAttackUpdate.Update(p_Diff);
         if (!m_IntervalAttackUpdate.Passed())
+            return;
+
+        /// If we are not attacking, then don't update
+        if (!m_Attacking || !GetTargetGUID())
             return;
 
         /// Cancel attack if target is dead
