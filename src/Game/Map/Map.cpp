@@ -286,7 +286,8 @@ namespace SteerStone { namespace Game { namespace Map {
         std::tuple<int32, int32> l_GridIndex = CalculateGridByPosition(p_Object->GetSpline()->GetPositionX(), p_Object->GetSpline()->GetPositionY());
 
         /// If we are out of bounds, then we have entered the radiation zone
-        if (std::get<0>(l_GridIndex) >= GRID_CELLS || std::get<1>(l_GridIndex) < 0)
+        if ((std::get<0>(l_GridIndex) >= GRID_CELLS || std::get<0>(l_GridIndex) < 0) || 
+            (std::get<1>(l_GridIndex) >= GRID_CELLS || std::get<1>(l_GridIndex) < 0))
         {
             if (p_Object->IsPlayer() && !p_Object->ToPlayer()->IsInRadiationZone())
             {
