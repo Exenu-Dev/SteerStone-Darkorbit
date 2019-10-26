@@ -99,6 +99,17 @@ namespace SteerStone { namespace Game { namespace Entity {
     /// @p_Victim : Victim we are attacking
     void Unit::Attack(Unit* p_Victim)
     {
+        /// Cannot attack player if player is in a company map and is near a portal or station
+        if (p_Victim->IsPlayer() && p_Victim->GetMap()->IsInCompanyMap(p_Victim) && IsPlayer())
+        {
+            if ((p_Victim->ToPlayer()->GetEvent() == EventType::EVENT_TYPE_PORTAL || p_Victim->ToPlayer()->GetEvent() == EventType::EVENT_TYPE_STATION)
+                && !p_Victim->IsAttacking())
+            {
+                ToPlayer()->SendPacket(Server::Packets::Misc::Update().Write(Server::Packets::Misc::InfoUpdate::INFO_UPDATE_MESSAGE, { "Target is in Demolition Zone!" }));
+                return;
+            }
+        }
+
         /// Set target if not set
         if (GetTargetGUID() != p_Victim->GetGUID())
             SetTarget(p_Victim);

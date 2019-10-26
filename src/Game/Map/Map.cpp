@@ -160,6 +160,68 @@ namespace SteerStone { namespace Game { namespace Map {
         m_PoolManager.Initialize();
     }
 
+    /// Is in company map
+    /// @p_Target : Target checking against
+    bool Base::IsInCompanyMap(Entity::Unit* p_Target) const
+    {
+        Company l_Company = p_Target->GetCompany();
+        uint32 l_MapId = p_Target->GetMap()->GetId();
+
+        switch (l_Company)
+        {
+            case Company::EARTH:
+            {
+                switch (l_MapId)
+                {
+                case 5: ///< 2-1
+                case 6: ///< 2-2
+                case 7: ///< 2-3
+                case 8: ///< 2-4 
+                case 21: ///< 2-5
+                case 22: ///< 2-6
+                case 23: ///< 2-7
+                case 24: ///< 2-8
+                    return true;
+                }
+            }
+            break;
+            case Company::MMO:
+            {
+                switch (l_MapId)
+                {
+                case 1: ///< 1-1
+                case 2: ///< 1-2
+                case 3: ///< 1-3
+                case 4: ///< 1-4 
+                case 17: ///< 1-5
+                case 18: ///< 1-6
+                case 19: ///< 1-7
+                case 20: ///< 1-8
+                    return true;
+                }
+            }
+            break;
+            case Company::VRU:
+            {
+                switch (l_MapId)
+                {
+                case 9: ///< 3-1
+                case 10: ///< 3-2
+                case 11: ///< 3-3
+                case 12: ///< 3-4 
+                case 25: ///< 3-5
+                case 26: ///< 3-6
+                case 27: ///< 3-7
+                case 28: ///< 3-8
+                    return true;
+                }
+            }
+            break;
+        }
+
+        return false;
+    }
+
     ///////////////////////////////////////////
     //            GRID SYSTEM
     ///////////////////////////////////////////

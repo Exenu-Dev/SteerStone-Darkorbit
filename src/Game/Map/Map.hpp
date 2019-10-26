@@ -71,6 +71,10 @@ namespace SteerStone { namespace Game { namespace Map {
         /// Load Mobs to map
         void LoadMobs();
 
+        /// Is in company map
+        /// @p_Target : Target checking against
+        bool IsInCompanyMap(Entity::Unit* p_Target) const;
+
         ///////////////////////////////////////////
         //            GRID SYSTEM
         ///////////////////////////////////////////
@@ -154,6 +158,22 @@ namespace SteerStone { namespace Game { namespace Map {
         uint32 GetGridRadiusY() const { return m_GridRadiusY;   }
         uint32 GetMapSizeX()    const { return m_MapSizeX;      }
         uint32 GetMapSizeY()    const { return m_MapSizeY;      }
+
+        bool IsBattleZoneMap() const
+        {
+            switch (m_Id)
+            {
+                case 13: ///< 4-1
+                case 14: ///< 4-2
+                case 15: ///< 4-3
+                case 16: ///< 4-4
+                    return true;
+                    break;
+                default:
+                    return false;
+                    break;
+            }
+        }
 
         PoolManager* GetPoolManager() { return &m_PoolManager;  }
 
