@@ -71,35 +71,18 @@ namespace SteerStone { namespace Game { namespace Map {
         /// TODO; Optimize this code
         for (auto l_Itr : m_Players)
         {
+            bool l_FoundEvent = false;
             for (auto l_SecondItr : m_Objects)
             {
-                if (l_SecondItr.second->GetType() != Entity::Type::OBJECT_TYPE_PORTAL && l_SecondItr.second->GetType() != Entity::Type::OBJECT_TYPE_STATION)
-                {
-                    /// Radiation is handled elsewhere
-                    if (l_Itr->ToPlayer()->GetEvent() == EventType::EVENT_TYPE_NONE || l_Itr->ToPlayer()->GetEvent() == EventType::EVENT_TYPE_RADIATION_ZONE)
-                        continue;
-
-                    Server::Packets::Event l_Packet;
-                    l_Packet.PositionX           = l_Itr->GetSpline()->GetPositionX();
-                    l_Packet.PositionY           = l_Itr->GetSpline()->GetPositionY();
-                    l_Packet.InDemolitionZone    = false;
-                    l_Packet.InRadiationZone     = false;
-                    l_Packet.PlayRepairAnimation = false;
-                    l_Packet.InTradeZone         = false;
-                    l_Packet.InJumpZone          = false;
-                    l_Packet.Repair              = false;
-                    l_Itr->ToPlayer()->SendPacket(l_Packet.Write());
-
-                    l_Itr->ToPlayer()->SetEventType(EventType::EVENT_TYPE_NONE);
-                    break;
-                }
-
                 if (l_SecondItr.second->GetType() == Entity::Type::OBJECT_TYPE_PORTAL)
                 {
                     if (l_SecondItr.second->ToPortal()->IsInPortalRadius(l_Itr))
                     {
                         if (l_Itr->ToPlayer()->GetEvent() == EventType::EVENT_TYPE_PORTAL)
-                            break;
+                        {
+                            l_FoundEvent = true;
+                            continue;
+                        }
 
                         Server::Packets::Event l_Packet;
                         l_Packet.PositionX           = l_Itr->GetSpline()->GetPositionX();
@@ -113,7 +96,8 @@ namespace SteerStone { namespace Game { namespace Map {
                         l_Itr->ToPlayer()->SendPacket(l_Packet.Write());
 
                         l_Itr->ToPlayer()->SetEventType(EventType::EVENT_TYPE_PORTAL);
-                        break;
+                        l_FoundEvent = true;
+
                     }
                 }
                 else if (l_SecondItr.second->GetType() == Entity::Type::OBJECT_TYPE_STATION)
@@ -121,7 +105,10 @@ namespace SteerStone { namespace Game { namespace Map {
                     if (l_SecondItr.second->ToStation()->IsInStationRadius(l_Itr))
                     {
                         if (l_Itr->ToPlayer()->GetEvent() == EventType::EVENT_TYPE_STATION)
-                            break;
+                        {
+                            l_FoundEvent = true;
+                            continue;
+                        }
 
                         Server::Packets::Event l_Packet;
                         l_Packet.PositionX           = l_Itr->GetSpline()->GetPositionX();
@@ -135,9 +122,25 @@ namespace SteerStone { namespace Game { namespace Map {
                         l_Itr->ToPlayer()->SendPacket(l_Packet.Write());
 
                         l_Itr->ToPlayer()->SetEventType(EventType::EVENT_TYPE_STATION);
-                        break;
+                        l_FoundEvent = true;
                     }
                 }
+            }
+
+            if (!l_FoundEvent && !l_Itr->IsInRadiationZone())
+            {
+                Server::Packets::Event l_Packet;
+                l_Packet.PositionX           = l_Itr->GetSpline()->GetPositionX();
+                l_Packet.PositionY           = l_Itr->GetSpline()->GetPositionY();
+                l_Packet.InDemolitionZone    = false;
+                l_Packet.InRadiationZone     = false;
+                l_Packet.PlayRepairAnimation = false;
+                l_Packet.InTradeZone         = false;
+                l_Packet.InJumpZone          = false;
+                l_Packet.Repair              = false;
+                l_Itr->ToPlayer()->SendPacket(l_Packet.Write());
+
+                l_Itr->ToPlayer()->SetEventType(EventType::EVENT_TYPE_NONE);
             }
         }
     }
@@ -249,7 +252,7 @@ namespace SteerStone { namespace Game { namespace Map {
                 m_State = State::Active;
         }
 
-        LOG_INFO("Grid", "Added GUID: %0 to Grid: X %1 Y %2", p_Object->GetGUID(), m_GridX, m_GridY);
+        //LOG_INFO("Grid", "Added GUID: %0 to Grid: X %1 Y %2", p_Object->GetGUID(), m_GridX, m_GridY);
     }
     /// Remove Object from Grid
     /// @p_Object : Object being removed
@@ -277,7 +280,7 @@ namespace SteerStone { namespace Game { namespace Map {
         
         m_Objects.erase(p_Object->GetGUID());
 
-        LOG_INFO("Grid", "Removed GUID: %0 from Grid: X %1 Y %2", p_Object->GetGUID(), m_GridX, m_GridY);
+        //LOG_INFO("Grid", "Removed GUID: %0 from Grid: X %1 Y %2", p_Object->GetGUID(), m_GridX, m_GridY);
     }
     /// Unload objects from map
     void Grid::Unload()
