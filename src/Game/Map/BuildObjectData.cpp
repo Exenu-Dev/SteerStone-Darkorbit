@@ -95,7 +95,7 @@ namespace SteerStone { namespace Game { namespace Map {
                 /// TODO; Find packet which updates from friendly to non friendly cargo, currently it visually bugs out when sending Cargo packet again to update
                 Server::Packets::Cargo l_Packet;
                 l_Packet.Id         = p_ObjectBuilt->GetObjectGUID().GetCounter();
-                l_Packet.Type       = p_ObjectBuilt->ToBonusBox()->GetOwnerId() != p_Player->GetObjectGUID().GetCounter() ? !p_ObjectBuilt->ToBonusBox()->IsFriendlyCargo() : 1;
+                l_Packet.Type       = (p_ObjectBuilt->ToBonusBox()->GetOwnerId() != p_Player->GetObjectGUID().GetCounter() && p_ObjectBuilt->ToUnit()->GetCompany() == p_Player->GetCompany()) ? !p_ObjectBuilt->ToBonusBox()->IsFriendlyCargo() : 1;
                 l_Packet.PositionX  = p_ObjectBuilt->GetSpline()->GetPositionX();
                 l_Packet.PositionY  = p_ObjectBuilt->GetSpline()->GetPositionY();
                 p_Player->SendPacket(l_Packet.Write());

@@ -393,7 +393,7 @@ namespace SteerStone { namespace Game { namespace Entity {
         /// so update the current position so cargo box correctly spawns at the position where unit dies
         p_Unit->GetSpline()->UpdatePosition();
 
-        p_Unit->GetMap()->GetPoolManager()->AddBonuxBox(p_Unit, BonusBoxType::BONUS_BOX_TYPE_CARGO, GetObjectGUID().GetCounter());
+        p_Unit->GetMap()->GetPoolManager()->AddBonuxBox(p_Unit, BonusBoxType::BONUS_BOX_TYPE_CARGO, this);
 
         p_Unit->m_DeathState = DeathState::JUST_DIED;
         CancelAttack();

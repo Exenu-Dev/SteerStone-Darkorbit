@@ -154,10 +154,9 @@ namespace SteerStone { namespace Game { namespace Map {
     }
 
     /// Add Bonus box to map
-    /// @p_Unit    : Unit taking away the resources
-    /// @p_Type    : Type of Bonus Box
-    /// @p_OwnerId : Owner of cargo box
-    void PoolManager::AddBonuxBox(Entity::Unit* p_Unit, BonusBoxType p_Type, uint32 const p_OwnerId)
+    /// @p_Victim   : Victim
+    /// @p_Owner    : Owner of cargo box
+    void PoolManager::AddBonuxBox(Entity::Unit* p_Victim, BonusBoxType p_Type, Entity::Unit* p_Owner)
     {
         /// Note; we do not need to send cargo box packet, this will be sent on next object build update
         /// so just add cargo box to map and pool
@@ -165,19 +164,20 @@ namespace SteerStone { namespace Game { namespace Map {
         Entity::BonusBox* l_BonusBox = new Entity::BonusBox(p_Type);
 
         /// TODO; Player does not give all their cargo, only some of it, right now it gives all of it and doesn't take away
-        l_BonusBox->m_OwnerId   = p_OwnerId;
-        l_BonusBox->SetResource(Entity::Resource::RESOURCE_PROMETIUM, p_Unit->GetResource(Entity::Resource::RESOURCE_PROMETIUM));
-        l_BonusBox->SetResource(Entity::Resource::RESOURCE_ENDURIUM, p_Unit->GetResource(Entity::Resource::RESOURCE_ENDURIUM));
-        l_BonusBox->SetResource(Entity::Resource::RESOURCE_TERBIUM, p_Unit->GetResource(Entity::Resource::RESOURCE_TERBIUM));
-        l_BonusBox->SetResource(Entity::Resource::RESOURCE_XENOMIT, p_Unit->GetResource(Entity::Resource::RESOURCE_XENOMIT));
-        l_BonusBox->SetResource(Entity::Resource::RESOURCE_PROMETID, p_Unit->GetResource(Entity::Resource::RESOURCE_PROMETID));
-        l_BonusBox->SetResource(Entity::Resource::RESOURCE_DURANIUM, p_Unit->GetResource(Entity::Resource::RESOURCE_DURANIUM));
-        l_BonusBox->SetResource(Entity::Resource::RESOURCE_PROMERIUM, p_Unit->GetResource(Entity::Resource::RESOURCE_PROMERIUM));
-        l_BonusBox->SetResource(Entity::Resource::RESOURCE_PALLADIUM, p_Unit->GetResource(Entity::Resource::RESOURCE_PALLADIUM));
-        l_BonusBox->SetResource(Entity::Resource::RESOURCE_SEPROM, p_Unit->GetResource(Entity::Resource::RESOURCE_SEPROM));
+        l_BonusBox->m_OwnerId = p_Owner->GetObjectGUID().GetCounter();
+        l_BonusBox->m_Company = p_Owner->GetCompany();
+        l_BonusBox->SetResource(Entity::Resource::RESOURCE_PROMETIUM, p_Victim->GetResource(Entity::Resource::RESOURCE_PROMETIUM));
+        l_BonusBox->SetResource(Entity::Resource::RESOURCE_ENDURIUM,  p_Victim->GetResource(Entity::Resource::RESOURCE_ENDURIUM));
+        l_BonusBox->SetResource(Entity::Resource::RESOURCE_TERBIUM,   p_Victim->GetResource(Entity::Resource::RESOURCE_TERBIUM));
+        l_BonusBox->SetResource(Entity::Resource::RESOURCE_XENOMIT,   p_Victim->GetResource(Entity::Resource::RESOURCE_XENOMIT));
+        l_BonusBox->SetResource(Entity::Resource::RESOURCE_PROMETID,  p_Victim->GetResource(Entity::Resource::RESOURCE_PROMETID));
+        l_BonusBox->SetResource(Entity::Resource::RESOURCE_DURANIUM,  p_Victim->GetResource(Entity::Resource::RESOURCE_DURANIUM));
+        l_BonusBox->SetResource(Entity::Resource::RESOURCE_PROMERIUM, p_Victim->GetResource(Entity::Resource::RESOURCE_PROMERIUM));
+        l_BonusBox->SetResource(Entity::Resource::RESOURCE_PALLADIUM, p_Victim->GetResource(Entity::Resource::RESOURCE_PALLADIUM));
+        l_BonusBox->SetResource(Entity::Resource::RESOURCE_SEPROM,    p_Victim->GetResource(Entity::Resource::RESOURCE_SEPROM));
 
         l_BonusBox->SetMap(m_Map);
-        l_BonusBox->GetSpline()->SetPosition(p_Unit->GetSpline()->GetPositionX(), p_Unit->GetSpline()->GetPositionY());
+        l_BonusBox->GetSpline()->SetPosition(p_Victim->GetSpline()->GetPositionX(), p_Victim->GetSpline()->GetPositionY());
         
         m_Map->Add(l_BonusBox);
 
