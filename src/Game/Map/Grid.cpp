@@ -59,8 +59,9 @@ namespace SteerStone { namespace Game { namespace Map {
     ///////////////////////////////////////////
 
     /// Check if Player is near any interactive events
+    /// @p_Objects : Portal and stations
     /// @p_Diff : Execution Time
-    void Grid::UpdateInteractiveEvents(uint32 const p_Diff)
+    void Grid::UpdateInteractiveEvents(std::vector<Entity::Object*>& p_Objects, uint32 const p_Diff)
     {
         m_IntervalInteractiveEvents.Update(p_Diff);
         if (!m_IntervalInteractiveEvents.Passed())
@@ -72,11 +73,11 @@ namespace SteerStone { namespace Game { namespace Map {
         for (auto l_Itr : m_Players)
         {
             bool l_FoundEvent = false;
-            for (auto l_SecondItr : m_Objects)
+            for (auto l_SecondItr : p_Objects)
             {
-                if (l_SecondItr.second->GetType() == Entity::Type::OBJECT_TYPE_PORTAL)
+                if (l_SecondItr->GetType() == Entity::Type::OBJECT_TYPE_PORTAL)
                 {
-                    if (l_SecondItr.second->ToPortal()->IsInPortalRadius(l_Itr))
+                    if (l_SecondItr->ToPortal()->IsInPortalRadius(l_Itr))
                     {
                         if (l_Itr->ToPlayer()->GetEvent() == EventType::EVENT_TYPE_PORTAL)
                         {
@@ -100,9 +101,9 @@ namespace SteerStone { namespace Game { namespace Map {
 
                     }
                 }
-                else if (l_SecondItr.second->GetType() == Entity::Type::OBJECT_TYPE_STATION)
+                else if (l_SecondItr->GetType() == Entity::Type::OBJECT_TYPE_STATION)
                 {
-                    if (l_SecondItr.second->ToStation()->IsInStationRadius(l_Itr))
+                    if (l_SecondItr->ToStation()->IsInStationRadius(l_Itr))
                     {
                         if (l_Itr->ToPlayer()->GetEvent() == EventType::EVENT_TYPE_STATION)
                         {
@@ -189,7 +190,6 @@ namespace SteerStone { namespace Game { namespace Map {
     bool Grid::Update(uint32 const p_Diff)
     {
         //CheckForPlayer(p_Diff);
-        UpdateInteractiveEvents(p_Diff);
         UpdateSurroundingObjects();
 
         /// TODO; This isn't really ideal, because the mobs can move to different grids
@@ -274,7 +274,7 @@ namespace SteerStone { namespace Game { namespace Map {
             {
                 Server::Packets::Ship::DespawnShip l_Packet;
                 l_Packet.Id = p_Object->GetObjectGUID().GetCounter();
-                p_Object->GetMap()->SendPacketToNearByGridsIfInSurrounding(l_Packet.Write(), p_Object);
+                p_Object->GetMap()->SendPacketToNearByGridsIfInSurrounding(l_Packet.Write(), p_Object, true);
             }
         }
         

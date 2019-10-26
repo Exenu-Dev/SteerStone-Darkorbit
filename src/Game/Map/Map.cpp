@@ -97,6 +97,7 @@ namespace SteerStone { namespace Game { namespace Map {
                     continue;
 
                 l_Grid->Update(p_Diff);
+                l_Grid->UpdateInteractiveEvents(m_ConstantObjects, p_Diff);
             }
         }
 
@@ -525,7 +526,7 @@ namespace SteerStone { namespace Game { namespace Map {
         /// Push object grid into storage
         l_Grids.push_back(m_Grids[std::get<0>(p_Object->GetGridIndex())][std::get<1>(p_Object->GetGridIndex())]);
         
-        if (p_SendToSelf && p_Object->GetType() == Entity::Type::OBJECT_TYPE_PLAYER)
+        if (p_SendToSelf && p_Object->IsPlayer())
             p_Object->ToPlayer()->SendPacket(p_PacketBuffer);
 
         /// Now send packet to players if object is in their surroundings

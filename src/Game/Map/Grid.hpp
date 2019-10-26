@@ -94,8 +94,9 @@ namespace SteerStone { namespace Game { namespace Map {
         ///////////////////////////////////////////
     public:
         /// Check if Player is near any interactive events
+        /// @p_Objects : Portal and stations
         /// @p_Diff : Execution Time
-        void UpdateInteractiveEvents(uint32 const p_Diff);
+        void UpdateInteractiveEvents(std::vector<Entity::Object*>& p_Objects, uint32 const p_Diff);
         /// Update Surrounding objects for players
         void UpdateSurroundingObjects();
         /// Check if a Player is inside the grid
