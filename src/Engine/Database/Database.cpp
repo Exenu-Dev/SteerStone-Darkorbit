@@ -48,8 +48,6 @@ namespace SteerStone { namespace Core { namespace Database {
             p_PoolSize = MIN_CONNECTION_POOL_SIZE;
         else if (p_PoolSize > MAX_CONNECTION_POOL_SIZE)
             p_PoolSize = MAX_CONNECTION_POOL_SIZE;
-        else
-            p_PoolSize = p_PoolSize;
 
         std::string l_Username;
         std::string l_Password;
