@@ -147,6 +147,14 @@ namespace SteerStone { namespace Game { namespace Entity {
         bool Update(uint32 p_Diff);
 
         ///////////////////////////////////////////
+        //              LOG BOOK
+        ///////////////////////////////////////////
+    public:
+        /// Update Log Book (used for website)
+        /// @p_Log : Log text
+        void UpdateLogBook(std::string p_Log);
+
+        ///////////////////////////////////////////
         //        SURROUNDING SYSTEM
         ///////////////////////////////////////////
     public:

@@ -540,6 +540,21 @@ namespace SteerStone { namespace Game { namespace Entity {
     }
 
     ///////////////////////////////////////////
+    //              LOG BOOK
+    ///////////////////////////////////////////
+
+    /// Update Log Book (used for website)
+    /// @p_Log : Log text
+    void Player::UpdateLogBook(std::string p_Log)
+    {
+        Core::Database::PreparedStatement* l_PreparedStatement = GameDatabase.GetPrepareStatement();
+        l_PreparedStatement->PrepareStatement("INSERT INTO log_book (id, text, date) VALUES (?, ?, NOW())");
+        l_PreparedStatement->SetUint32(0, m_Id);
+        l_PreparedStatement->SetString(1, p_Log);
+        l_PreparedStatement->ExecuteStatement();
+    }
+
+    ///////////////////////////////////////////
     //        SURROUNDING SYSTEM
     ///////////////////////////////////////////
 
