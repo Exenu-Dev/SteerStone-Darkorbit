@@ -99,16 +99,8 @@ namespace SteerStone { namespace Game { namespace Entity {
     /// @p_Victim : Victim we are attacking
     void Unit::Attack(Unit* p_Victim)
     {
-        /// Cannot attack player if player is in a company map and is near a portal or station
-        if (p_Victim->IsPlayer() && p_Victim->GetMap()->IsInCompanyMap(p_Victim) && IsPlayer())
-        {
-            if ((p_Victim->ToPlayer()->GetEvent() == EventType::EVENT_TYPE_PORTAL || p_Victim->ToPlayer()->GetEvent() == EventType::EVENT_TYPE_STATION)
-                && !p_Victim->IsAttacking())
-            {
-                ToPlayer()->SendPacket(Server::Packets::Misc::Update().Write(Server::Packets::Misc::InfoUpdate::INFO_UPDATE_MESSAGE, { "Target is in Demolition Zone!" }));
-                return;
-            }
-        }
+        if (!CanAttackTarget(p_Victim))
+            return;
 
         /// Set target if not set
         if (GetTargetGUID() != p_Victim->GetGUID())
@@ -118,7 +110,7 @@ namespace SteerStone { namespace Game { namespace Entity {
         Server::Packets::Attack::LaserShoot l_Packet;
         l_Packet.FromId  = GetObjectGUID().GetCounter();
         l_Packet.ToId    = GetTarget()->GetObjectGUID().GetCounter();
-        l_Packet.LaserId = m_WeaponState == WeaponState::WEAPON_STATE_FULLY_EQUIPPED ? m_LaserType : WeaponState::WEAPON_STATE_NOT_EQUIPPED;
+        l_Packet.LaserId = m_WeaponState >= WeaponState::WEAPON_STATE_FULLY_EQUIPPED ? m_LaserType : WeaponState::WEAPON_STATE_NOT_EQUIPPED;
         GetMap()->SendPacketToNearByGridsIfInSurrounding(l_Packet.Write(), this, true);
 
         /// If target is mob, then assign mob to attack us if mob is not already tagged
@@ -135,6 +127,38 @@ namespace SteerStone { namespace Game { namespace Entity {
 
         m_Attacking   = true;
         m_AttackState = AttackState::ATTACK_STATE_IN_RANGE;
+    }
+    /// Can Attack Target
+    /// @p_Victim : Victim
+    bool Unit::CanAttackTarget(Unit* p_Victim)
+    {
+        /// Cannot attack player if player is in a company map and is near a portal or station
+        if (p_Victim->IsPlayer() && p_Victim->GetMap()->IsInCompanyMap(p_Victim) && IsPlayer())
+        {
+            if ((p_Victim->ToPlayer()->GetEvent() == EventType::EVENT_TYPE_PORTAL || p_Victim->ToPlayer()->GetEvent() == EventType::EVENT_TYPE_STATION)
+                && !p_Victim->IsAttacking())
+            {
+                ToPlayer()->SendPacket(Server::Packets::Misc::Update().Write(Server::Packets::Misc::InfoUpdate::INFO_UPDATE_MESSAGE, { "Target is in Demolition Zone!" }));
+                return false;
+            }
+        }
+
+        /// Can't attack target if target is dead
+        if (p_Victim->GetDeathState() == DeathState::DEAD)
+        {
+            CancelAttack();
+            return false;
+        }
+
+        return true;
+    }
+    /// Is In Combat
+    bool Entity::Unit::IsInCombat()
+    {
+        if (sServerTimeManager->GetTimeDifference(m_LastTimeAttacked, sServerTimeManager->GetServerTime()) > MAX_LAST_TIME_ATTACKED)
+            return false;
+
+        return true;
     }
     /// Update Attack
     /// @p_Diff : Execution Time

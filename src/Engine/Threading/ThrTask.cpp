@@ -1,5 +1,6 @@
 /*
 * Liam Ashdown
+* HardCPP (Merydwin)
 * Copyright (C) 2019
 *
 * This program is free software: you can redistribute it and/or modify
@@ -103,18 +104,18 @@ namespace SteerStone { namespace Core { namespace Threading {
         m_TaskStopWatch.Reset();
         bool l_Result = true;
 
-        try
-        {
+      //  try
+        //{
             l_Result = TaskExecute();
-        }
-        catch (std::exception p_Exception)
-        {
-            LOG_ERROR("TheTask", R"LOG(Exception in task "%0", details : \n%1)LOG", m_TaskName, p_Exception.what());
-        }
-        catch (...)
-        {
-            LOG_ERROR("TheTask", R"LOG(UNKWNOWN Exception in task "%0")LOG", m_TaskName);
-        }
+       // }
+        //catch (std::exception p_Exception)
+       // {
+       //     LOG_ERROR("TheTask", R"LOG(Exception in task "%0", details : \n%1)LOG", m_TaskName, p_Exception.what());
+       // }
+       // catch (...)
+       // {
+       //     LOG_ERROR("TheTask", R"LOG(UNKWNOWN Exception in task "%0")LOG", m_TaskName);
+      //  }
 
         m_TaskTotalRunTime += m_TaskStopWatch.GetElapsed();
         m_TaskTotalRunCount++;

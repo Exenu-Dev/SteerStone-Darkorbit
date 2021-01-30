@@ -151,6 +151,14 @@ namespace SteerStone { namespace Game { namespace Server {
 
     /// Map Handler
     /// @p_ClientPacket : Packet recieved from client
+    void GameSocket::HandleShootRocket(ClientPacket* p_Packet)
+    {
+
+
+    }
+
+    /// Map Handler
+    /// @p_ClientPacket : Packet recieved from client
     void GameSocket::HandleLootCargo(ClientPacket* p_Packet)
     {
         uint32 l_Id = p_Packet->ReadUInt32();
@@ -176,6 +184,16 @@ namespace SteerStone { namespace Game { namespace Server {
         }
 
         l_Object->ToBonusBox()->RewardCredit(m_Player);
+    }
+
+    /// Map Handler
+    /// @p_ClientPacket : Packet recieved from client
+    void GameSocket::HandleUpdateSettings(ClientPacket* p_Packet)
+    {
+        if (p_Packet->ReadString() == "SET")
+        {
+            m_Player->UpdateClientSettings(p_Packet);
+        }
     }
 
 }   ///< namespace Server

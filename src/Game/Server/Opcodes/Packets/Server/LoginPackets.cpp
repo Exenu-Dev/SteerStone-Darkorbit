@@ -65,8 +65,8 @@ namespace SteerStone { namespace Game { namespace Server { namespace Packets { n
         m_Buffer.AppendUInt32(MaxShield);
         m_Buffer.AppendInt32(HitPoints);
         m_Buffer.AppendUInt32(MaxHitPoints);
-        m_Buffer.AppendUInt32(MaxCargoSpace);
         m_Buffer.AppendUInt32(CargoSpace);
+        m_Buffer.AppendUInt32(MaxCargoSpace);
         m_Buffer.AppendFloat(PositionX);
         m_Buffer.AppendFloat(PositionY);
         m_Buffer.AppendUInt32(MapId);

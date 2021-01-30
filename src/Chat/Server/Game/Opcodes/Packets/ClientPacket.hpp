@@ -24,7 +24,7 @@
 #endif /* _SERVER_STRING_BUFFER_HPP_ */
 
 
-namespace SteerStone { namespace Game { namespace Server {
+namespace SteerStone { namespace Policy { namespace Server {
 
     class ClientPacket
     {
@@ -55,21 +55,6 @@ namespace SteerStone { namespace Game { namespace Server {
             //////////////////////////////////////////////////////////////////////////
             //////////////////////////////////////////////////////////////////////////
 
-            /// String to UInt8
-            const uint8 ReadUInt8()
-            {
-                return static_cast<uint8>(std::stoul(m_Payload[m_ReadPosition++]));
-            }
-            /// String to UInt16
-            const uint16 ReadUInt16()
-            {
-                return static_cast<uint16>(std::stoul(m_Payload[m_ReadPosition++]));
-            }
-            /// String to Int16
-            const int16 ReadInt16()
-            {
-                return static_cast<int16>(std::stoi(m_Payload[m_ReadPosition++]));
-            }
             /// String to UInt32
             const uint32 ReadUInt32()
             {
@@ -123,7 +108,7 @@ namespace SteerStone { namespace Game { namespace Server {
         private:
             uint8 m_Header;                     ///< Header
             std::vector<std::string> m_Payload; ///< Payload
-            std::size_t m_ReadPosition;         ///< Read Position
+            uint32 m_ReadPosition;              ///< Read Position
     };
 }   ///< namespace Server
 }   ///< namespace Game

@@ -83,6 +83,11 @@ namespace SteerStone { namespace Game { namespace Entity {
         /// Attack
         /// @p_Victim : Victim we are attacking
         void Attack(Unit* p_Victim);
+        /// Can Attack Target
+        /// @p_Victim : Victim
+        bool CanAttackTarget(Unit* p_Victim);
+        /// Is In Combat
+        bool IsInCombat();
         /// Update Attack
         /// @p_Diff : Execution Time
         void AttackerStateUpdate(uint32 const p_Diff);

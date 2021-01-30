@@ -36,3 +36,7 @@ function getPlanetIntitial(company_id)
       return "n";
    }
 }
+
+## Ores
+var allOreNames = new Array(_root.resource.ore_prometium,_root.resource.ore_endurium,_root.resource.ore_terbium,
+	_root.resource.ore_xenomit,_root.resource.ore_prometid,_root.resource.ore_duranium,_root.resource.ore_promerium);

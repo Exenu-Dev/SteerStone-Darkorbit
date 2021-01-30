@@ -34,6 +34,7 @@ namespace SteerStone { namespace Core { namespace Database {
     //////////////////////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////////////////////
 
+    /// Connect to Database
     /// @p_Username : Name of user
     /// @p_Password : Password of user
     /// @p_Port     : Port we are connecting to

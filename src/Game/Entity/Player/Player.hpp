@@ -185,6 +185,8 @@ namespace SteerStone { namespace Game { namespace Entity {
     public:
         /// Send Client In-game settings
         void SendClientSettings();
+        /// Update Client settings
+        void UpdateClientSettings(Server::ClientPacket* p_Packet);
         /// Send ship details
         void SendInitializeShip();
         /// Send Logged In

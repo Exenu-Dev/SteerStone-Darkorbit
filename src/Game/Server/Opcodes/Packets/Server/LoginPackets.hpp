@@ -34,7 +34,7 @@ namespace SteerStone { namespace Game { namespace Server { namespace Packets { n
     {
         public:
             /// Constructor 
-            PlayerInfo() : ServerPacket(ServerOpCodes::SERVER_PACKET_PLAYER_INFO)
+            PlayerInfo() : ServerPacket(ServerOpCodes::SERVER_PACKET_MISC_UPDATE)
             {
             }
 

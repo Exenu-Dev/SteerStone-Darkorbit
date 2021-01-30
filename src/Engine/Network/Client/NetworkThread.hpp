@@ -43,19 +43,19 @@ namespace SteerStone { namespace Core { namespace Network {
 
         public:
             /// Constructor
-            /// @p_WorkerThread : Worker thread number spawned
-            NetworkThread(uint8 const& p_WorkerThread) 
-                : m_Worker(new boost::asio::io_service::work(m_Service))
+            /// @p_Address  : IP Address
+            /// @p_Port     : Port
+            NetworkThread(std::string const p_Address, string const p_Port) 
             {
+                boost::asio::ip::tcp::resolver l_Resolver(m_Service);
+                auto l_EndPoint = l_Resolver.resolve(p_Address, p_Port);
+
                 std::function<bool()> l_Service = [this]() -> bool {
-                    #ifdef STEERSTONE_CORE_DEBUG
-                        LOG_INFO("NetworkThread", "IO Service Online!");
-                    #endif
                     this->m_Service.run();
                     return true;
                 };
 
-                 l_Task = sThreadManager->PushTask(Utils::StringBuilder("NETWORK_WORKER_THREAD_%0", p_WorkerThread), Threading::TaskType::Moderate, -1, l_Service);
+                 l_Task = sThreadManager->PushTask(Utils::StringBuilder("NETWORK_SERVER_WORKER_THREAD_%0", p_WorkerThread), Threading::TaskType::Moderate, -1, l_Service);
             }
             /// Deconstructor
             ~NetworkThread()
@@ -103,7 +103,6 @@ namespace SteerStone { namespace Core { namespace Network {
 
         private:
             boost::asio::io_service m_Service;                          ///< IO Service
-            std::unique_ptr<boost::asio::io_service::work> m_Worker;    ///< Worker of IO Service
             std::unordered_set<std::shared_ptr<T>> m_Sockets;           ///< Storage of socket classes
             Threading::Task::Ptr l_Task;                                ///< Worker task
     };

@@ -50,34 +50,36 @@ namespace SteerStone { namespace Game { namespace Server {
             l_BufferVec.resize(l_BufferVec.size() + 1);
             l_BufferVec[l_BufferVec.size() - 1] = 0;
 
-            /// Note; Since we handle packet headers as 1 byte, the client sends LOGIN as the packet header, so we need to handle
-            /// it differently
-            if (m_AuthenticateState == Authenticated::NotAuthenticated)
+            for (auto l_Itr : Core::Utils::SplitAll((char*)& l_BufferVec[0], "\n", false))
             {
-                std::string l_Buffer = (char*)& l_BufferVec[0];
-                l_Buffer.resize(5);
-
-                if (l_Buffer == "LOGIN")
+                /// Note; Since we handle packet headers as 1 byte, the client sends LOGIN as the packet header, so we need to handle
+                /// it differently
+                if (m_AuthenticateState == Authenticated::NotAuthenticated)
                 {
-                    HandleLoginPacket(new ClientPacket((char*)& l_BufferVec[0]));
+                    std::string l_Buffer = (char*)& l_BufferVec[0];
+                    l_Buffer.resize(5);
 
-                    /// The "!" is the 'fake' packet header, see HandleLoginPacket function which explains why I am doing this
-                    m_Player->QueuePacket(new ClientPacket("!|" + (std::string)(char*)& l_BufferVec[0]));
+                    if (l_Buffer == "LOGIN")
+                    {
+                        HandleLoginPacket(new ClientPacket((char*)& l_BufferVec[0]));
 
-                    m_AuthenticateState = Authenticated::Authenticed;
+                        /// The "!" is the 'fake' packet header, see HandleLoginPacket function which explains why I am doing this
+                        m_Player->QueuePacket(new ClientPacket("!|" + (std::string)(char*) & l_BufferVec[0]));
 
-                    return Core::Network::ProcessState::Successful;
+                        m_AuthenticateState = Authenticated::Authenticed;
+
+                        return Core::Network::ProcessState::Successful;
+                    }
+
+                    return Core::Network::ProcessState::Error;
                 }
-                
-                return Core::Network::ProcessState::Error;
-            }
 
-            ClientOpCodes l_Opcode = static_cast<ClientOpCodes>(l_BufferVec[0]);
-           
-            switch (l_Opcode)
-            {
+                ClientOpCodes l_Opcode = static_cast<ClientOpCodes>(l_BufferVec[0]);
+
+                switch (l_Opcode)
+                {
                 case ClientOpCodes::CLIENT_PACKET_PING:
-                    HandlePingPacket(new ClientPacket((char*)& l_BufferVec[0]));       
+                    HandlePingPacket(new ClientPacket((char*)& l_BufferVec[0]));
                     break;
                 default:
                 {
@@ -89,51 +91,52 @@ namespace SteerStone { namespace Game { namespace Server {
                         return Core::Network::ProcessState::Skip;
                     }
 
-                    #ifdef STEERSTONE_CORE_DEBUG
+                #ifdef STEERSTONE_CORE_DEBUG
                     else
                         LOG_INFO("GameSocket", "Received packet %0 from %1", sOpCode->GetClientOpCodeName(l_Opcode), GetRemoteAddress());
-                    #endif
+                #endif
 
                     switch (l_OpCodeHandler->Status)
                     {
-                        case PacketStatus::STATUS_AUTHENTICATION:
+                    case PacketStatus::STATUS_AUTHENTICATION:
+                    {
+                        if (!m_Player || m_Player->IsLoggedIn())
                         {
-                            if (!m_Player || m_Player->IsLoggedIn())
-                            {
-                                LOG_WARNING("GameSocket", "Recieved opcode %0 from player %1 but player is already in world!", sOpCode->GetClientOpCodeName(l_Opcode), m_Player->GetName());
-                                return Core::Network::ProcessState::Skip;
-                            }
+                            LOG_WARNING("GameSocket", "Recieved opcode %0 from player %1 but player is already in world!", sOpCode->GetClientOpCodeName(l_Opcode), m_Player->GetName());
+                            return Core::Network::ProcessState::Skip;
                         }
-                        break;
-                        case PacketStatus::STATUS_LOGGED_IN:
+                    }
+                    break;
+                    case PacketStatus::STATUS_LOGGED_IN:
+                    {
+                        if (!m_Player || !m_Player->IsLoggedIn())
                         {
-                            if (!m_Player || !m_Player->IsLoggedIn())
-                            {
-                                LOG_WARNING("GameSocket", "Recieved opcode %0 from player %1 but player is not in world!", sOpCode->GetClientOpCodeName(l_Opcode), m_Player->GetName());
-                                return Core::Network::ProcessState::Skip;
-                            }
+                            LOG_WARNING("GameSocket", "Recieved opcode %0 from player %1 but player is not in world!", sOpCode->GetClientOpCodeName(l_Opcode), m_Player->GetName());
+                            return Core::Network::ProcessState::Skip;
                         }
-                        break;
-                        case PacketStatus::STATUS_UNHANDLED:
-                        {
-                            ;///< TODO; What should we put here
-                        }
-                        break;
+                    }
+                    break;
+                    case PacketStatus::STATUS_UNHANDLED:
+                    {
+                        ;///< TODO; What should we put here
+                    }
+                    break;
                     }
 
                     /// Note; Player thread is the network thread
                     if (l_OpCodeHandler->Process == PacketProcess::PROCESS_PLAYER_THREAD)
-                        ExecutePacket(l_OpCodeHandler, new ClientPacket((char*)&l_BufferVec[0]));
+                        ExecutePacket(l_OpCodeHandler, new ClientPacket((char*)& l_BufferVec[0]));
                     else
-                        m_Player->QueuePacket(new ClientPacket((char*)&l_BufferVec[0]));
+                        m_Player->QueuePacket(new ClientPacket((char*)& l_BufferVec[0]));
                 }
                 break;
-            }
+                }
 
-            return Core::Network::ProcessState::Successful;
+                return Core::Network::ProcessState::Successful;
+            }
         }
 
-        return Core::Network::ProcessState::Error;
+        return Core::Network::ProcessState::Successful;
     }
 
     /// Handle Initial part of logging into game server

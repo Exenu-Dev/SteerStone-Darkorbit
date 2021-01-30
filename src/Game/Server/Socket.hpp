@@ -116,11 +116,17 @@ namespace SteerStone { namespace Game { namespace Server {
             void HandleAbortLaser(ClientPacket* p_Packet);
             /// Map Handler
             /// @p_ClientPacket : Packet recieved from client
+            void HandleShootRocket(ClientPacket* p_Packet);
+            /// Map Handler
+            /// @p_ClientPacket : Packet recieved from client
             void HandleLootCargo(ClientPacket* p_Packet);
+            /// Map Handler
+            /// @p_ClientPacket : Packet recieved from client
+            void HandleUpdateSettings(ClientPacket* p_Packet);
 
             /// Debug Handler
             /// @p_ClientPacket : Packet recieved from client
-            void HandleDebugInitializePlayer(ClientPacket* p_Packet);
+            void HandleDebugInitializePlayer(ClientPacket* p_Packet);   
 
             /// Pointer to Player
             Entity::Player* ToPlayer();

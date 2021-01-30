@@ -20,7 +20,7 @@
 #include <PCH/Precompiled.hpp>
 #include "Core/Core.hpp"
 
-#define PLAYER_RADIUS_SCAN 1500.0f
+#define PLAYER_RADIUS_SCAN 1000.0f
 
 enum PlayerShips
 {
@@ -273,6 +273,13 @@ enum DroneLevel
 enum class BonusBoxType
 {
     BONUS_BOX_TYPE_CARGO = 0,
+};
+
+enum WeaponState
+{
+    WEAPON_STATE_NOT_EQUIPPED   = 0,
+    WEAPON_STATE_SEMI_EQUIPPED  = 1,
+    WEAPON_STATE_FULLY_EQUIPPED = 2
 };
 
 namespace LevelExperience

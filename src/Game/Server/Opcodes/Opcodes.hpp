@@ -54,12 +54,12 @@ enum ClientOpCodes : uint8
     CLIENT_PACKET_LOG_OUT               = 0x6C,
     CLIENT_PACKET_CANCEL_LOG_OUT        = 0x6F,
     CLIENT_PACKET_LOOT_CARGO            = 0x78,
+    CLIENT_PACKET_UPDATE_SETTINGS       = 0x41,
     CLIENT_MAX_OPCODE                   = 0x7B
 };
 
 enum ServerOpCodes : uint8
 {
-    SERVER_PACKET_PLAYER_INFO           = 0x41,
     SERVER_PACKET_INITIALIZE_SHIP       = 0x49,
     SERVER_PACKET_MAP_UPDATE            = 0x69,
     SERVER_PACKET_MINI_MAP_UPDATE       = 0x6D,
@@ -93,6 +93,7 @@ enum ServerOpCodes : uint8
     SERVER_PACKET_REMOVE_CARGO          = 0x32,
     SERVER_PACKET_TARGET_HEALTH         = 0x4E,
     SERVER_PACKET_CARGO_BAY_FULL        = 0x66,
+    SERVER_PACKET_SHOOT_ROCKET          = 0x77,
 
     /// Debug Headless Packets
     SERVER_PACKET_HEADLESS_MOVE         = 0x21,

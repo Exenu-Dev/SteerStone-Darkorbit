@@ -105,6 +105,9 @@ namespace SteerStone { namespace Game { namespace Entity {
         p_Player->UpdateUridium(m_Uridium);
         p_Player->UpdateExperience(m_Experience);
         p_Player->UpdateHonor(m_Honor);
+        p_Player->UpdateLogBook("<span style=\"padding-left: 15px;\">You have destroyed " + GetName() + "</span><br>" +
+            "<span style=\"padding-left: 15px;\">You received " + std::to_string(m_Credits) + " credits" + "</span><br>" +
+            "<span style=\"padding-left: 15px;\">You received " + std::to_string(m_Uridium) + " uridium" + "</span><br>");
 
         p_Player->ToPlayer()->SendPacket(Server::Packets::Misc::Reward().Write(Server::Packets::Misc::RewardType::REWARD_TYPE_CREDIT,     { m_Credits,    p_Player->GetCredits()                          }));
         p_Player->ToPlayer()->SendPacket(Server::Packets::Misc::Reward().Write(Server::Packets::Misc::RewardType::REWARD_TYPE_URIDIUM,    { m_Uridium,    p_Player->GetUridium()                          }));
@@ -176,7 +179,7 @@ namespace SteerStone { namespace Game { namespace Entity {
                 /// If player last time shot is more than 10 seconds ago, then cancel combat
                 if (GetTaggedPlayer())
                 {
-                    if (sServerTimeManager->GetTimeDifference(m_LastTimeAttacked, sServerTimeManager->GetServerTime()) > MAX_LAST_TIME_ATTACKED)
+                    if (!IsInCombat())
                     {
                         CancelAttack();
                         break;
@@ -284,7 +287,7 @@ namespace SteerStone { namespace Game { namespace Entity {
                 /// If player last time shot is more than 10 seconds ago, then cancel combat
                 if (GetTaggedPlayer())
                 {
-                    if (sServerTimeManager->GetTimeDifference(m_LastTimeAttacked, sServerTimeManager->GetServerTime()) > MAX_LAST_TIME_ATTACKED)
+                    if (!IsInCombat())
                     {
                         CancelAttack();
                         break;
@@ -333,8 +336,8 @@ namespace SteerStone { namespace Game { namespace Entity {
         float l_MaxPositionX = l_GridX == 0 ? GetMap()->GetGridRadiusX() : l_GridX * GetMap()->GetGridRadiusX();
         float l_MaxPositionY = l_GridY == 0 ? GetMap()->GetGridRadiusY() : l_GridY * GetMap()->GetGridRadiusY();
 
-        float l_MinPositionX = l_MaxPositionX - DISTANCE_AWAY_FROM_BORDER;
-        float l_MinPositionY = l_MaxPositionY - DISTANCE_AWAY_FROM_BORDER;
+        float l_MinPositionX = l_MaxPositionX;
+        float l_MinPositionY = l_MaxPositionY;
         
         l_MinPositionX = (l_MinPositionX + sWorldManager->GetIntConfig(World::IntConfigs::INT_CONFIG_MAX_ROAMING_DISTANCE) - l_MinPositionX);
         l_MinPositionY = (l_MinPositionY + sWorldManager->GetIntConfig(World::IntConfigs::INT_CONFIG_MAX_ROAMING_DISTANCE) - l_MinPositionY);
@@ -345,8 +348,8 @@ namespace SteerStone { namespace Game { namespace Entity {
         if (l_GridY > 1)
             l_MinPositionY = (l_GridY - 1) * GetMap()->GetGridRadiusY();
 
-        float l_NewPositionX = Core::Utils::FloatRandom(l_MinPositionX, l_MaxPositionX - DISTANCE_AWAY_FROM_BORDER);
-        float l_NewPositionY = Core::Utils::FloatRandom(l_MinPositionY, l_MaxPositionY - DISTANCE_AWAY_FROM_BORDER);
+        float l_NewPositionX = Core::Utils::FloatRandom(l_MinPositionX, l_MaxPositionX);
+        float l_NewPositionY = Core::Utils::FloatRandom(l_MinPositionY, l_MaxPositionY);
 
         GetSpline()->Move(l_NewPositionX, l_NewPositionY, 0, 0);
 

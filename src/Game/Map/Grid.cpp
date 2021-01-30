@@ -169,27 +169,14 @@ namespace SteerStone { namespace Game { namespace Map {
         if (!m_IntervalCheckPlayer.Passed())
             return;
 
-        if (!m_Players.empty())
-        {
-        #ifdef STEERSTONE_CORE_DEBUG
-            LOG_INFO("Grid", "Player found in Grid %0 %1 - Keeping grid active!", m_GridX, m_GridY);
-        #endif
-        }
-        else
-        {
-            /// We have not found a player, turn the grid to idle
+        if (m_Players.empty())
             m_State = State::Idle;
-
-        #ifdef STEERSTONE_CORE_DEBUG
-            LOG_INFO("Grid", "Player not found in Grid %0 %1 - Grid is now idle!", m_GridX, m_GridY);
-        #endif
-        }
     }
     /// Update Grid
     /// @p_Diff : Execution Time
     bool Grid::Update(uint32 const p_Diff)
     {
-        //CheckForPlayer(p_Diff);
+        CheckForPlayer(p_Diff);
         UpdateSurroundingObjects();
 
         /// TODO; This isn't really ideal, because the mobs can move to different grids

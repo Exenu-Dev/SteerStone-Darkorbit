@@ -657,6 +657,37 @@ namespace SteerStone { namespace Game { namespace Entity {
             m_EnableBuyFast,
             }));
     }
+    /// Update Client settings
+    void Player::UpdateClientSettings(Server::ClientPacket* p_Packet)
+    {
+        m_DisplayBoost          = p_Packet->ReadUInt8();
+        m_DisplayDamage         = p_Packet->ReadUInt8();
+        m_DisplayAllLas         = p_Packet->ReadUInt8();
+        m_DisplayExploration    = p_Packet->ReadUInt8();
+        m_DisplayName           = p_Packet->ReadUInt8();
+        m_DisplayFirmIcon       = p_Packet->ReadUInt8();
+        m_DisplayAlphaBG        = p_Packet->ReadUInt8();
+        m_IgnoreRes             = p_Packet->ReadUInt8();
+        m_IgnoreBox             = p_Packet->ReadUInt8();
+        m_ConvertGates          = p_Packet->ReadUInt8();
+        m_ConvertOppo           = p_Packet->ReadUInt8();
+        m_SoundOff              = p_Packet->ReadUInt8();
+        m_BackgroundMusicOff    = p_Packet->ReadUInt8();
+        m_DisplayStatus         = p_Packet->ReadUInt8();
+        m_DisplayBubble         = p_Packet->ReadUInt8();
+        m_SelectedLaser         = p_Packet->ReadUInt8();
+        m_SelectedRocket        = p_Packet->ReadUInt8();
+        m_DisplayDigits         = p_Packet->ReadUInt8();
+        m_DisplayChat           = p_Packet->ReadUInt8();
+        m_DisplayDrones         = p_Packet->ReadUInt8();
+        m_ShowStarSystem        = p_Packet->ReadUInt8();
+        m_IgnoreCargo           = p_Packet->ReadUInt8();
+        m_IgnoreHostileCargo    = p_Packet->ReadUInt8();
+        m_AutoChangeAmmo        = p_Packet->ReadUInt8();
+        m_EnableBuyFast         = p_Packet->ReadUInt8();
+
+        SendClientSettings();
+    }
     /// Send ship details
     void Player::SendInitializeShip()
     {
