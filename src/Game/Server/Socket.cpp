@@ -184,6 +184,10 @@ namespace SteerStone { namespace Game { namespace Server {
         if (IsClosed())
             return;
 
+        #ifdef STEERSTONE_CORE_DEBUG
+            LOG_INFO("GameSocket", "Sent packet %0 to %1", sOpCode->GetServerOpCodeName(static_cast<ServerOpCodes>(p_PacketBuffer->GetHeader())), GetRemoteAddress());
+        #endif
+
         Write((const char*)p_PacketBuffer->GetContents(), p_PacketBuffer->GetSize());
     }
     /// For Non-Implemented packets

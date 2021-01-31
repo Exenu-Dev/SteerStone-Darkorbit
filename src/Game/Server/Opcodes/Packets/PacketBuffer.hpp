@@ -190,6 +190,11 @@ namespace SteerStone { namespace Game { namespace Server {
         {
             return &m_Storage[0];
         }
+        /// Get Header
+        uint8 const GetHeader() const
+        {
+            return m_Storage[2];
+        }
 
         /// Clear Storage
         void Clear()
