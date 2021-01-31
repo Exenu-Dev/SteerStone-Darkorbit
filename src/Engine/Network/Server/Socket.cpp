@@ -108,7 +108,8 @@ namespace SteerStone { namespace Core { namespace Network {
     /// Write the data to be sent
     /// @p_Buffer : Buffer which holds the data
     /// @p_Length : The length of the data
-    void Socket::Write(const char* p_Buffer, std::size_t const& p_Length)
+    /// @p_ForceSendAndClose : Send the Data instantly and close socket once sent data
+    void Socket::Write(const char* p_Buffer, std::size_t const& p_Length, bool p_ForceSendAndClose)
     {
         Utils::ObjectGuard l_Guard(this);
 
@@ -123,7 +124,12 @@ namespace SteerStone { namespace Core { namespace Network {
 
         /// Flush data if need
         if (m_WriteState == WriteState::Idle)
-            StartWriteFlushTimer();
+        {
+            if (!p_ForceSendAndClose)
+                StartWriteFlushTimer();
+            else
+                ForceSendAndClose();
+        }
     }
     /// Get the total read length of the packet
     std::size_t const Socket::ReadLength()
@@ -167,6 +173,14 @@ namespace SteerStone { namespace Core { namespace Network {
     void Socket::ForceFlushOut()
     {
         m_OutBufferFlushTimer.cancel();
+    }
+    /// Send Data in our buffer and close socket
+    void Socket::ForceSendAndClose()
+    {
+        std::shared_ptr<Socket> l_Ptr = Shared<Socket>();
+        m_Socket.async_write_some(boost::asio::buffer(m_OutBuffer->m_Buffer, m_OutBuffer->m_WritePosition),
+            make_custom_alloc_handler(m_allocator,
+                [l_Ptr](boost::system::error_code const& p_ErrorCode, std::size_t const& p_Length) { l_Ptr->CloseSocket(); }));
     }
 
     //////////////////////////////////////////////////////////////////////////

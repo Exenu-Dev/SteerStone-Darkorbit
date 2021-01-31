@@ -86,7 +86,8 @@ namespace SteerStone { namespace Core { namespace Network {
             /// Write the data to be sent
             /// @p_Buffer : Buffer which holds the data
             /// @p_Length : The length of the data
-            void Write(const char* p_Buffer, std::size_t const& p_Length);
+            /// @p_ForceSendAndClose : Send the Data instantly and close socket once sent data
+            void Write(const char* p_Buffer, std::size_t const& p_Length, bool p_ForceSendAndClose = false);
             /// Get the total read length of the packet
             std::size_t const ReadLength();
             /// Get the length remaining to read
@@ -116,6 +117,9 @@ namespace SteerStone { namespace Core { namespace Network {
 
             /// Send our current data in our buffer
             void ForceFlushOut();
+
+            /// Send Data in our buffer and close socket
+            void ForceSendAndClose();
 
         //////////////////////////////////////////////////////////////////////////
         //////////////////////////////////////////////////////////////////////////

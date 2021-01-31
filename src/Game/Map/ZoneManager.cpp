@@ -61,7 +61,7 @@ namespace SteerStone { namespace Game { namespace Map {
         static int16 l_Remainder        = l_Maps % l_WorkerCount;
         static const int16 l_MapCount   = l_Remainder == 0 ? l_Maps : ((l_Maps - l_Remainder) / l_WorkerCount);
         static uint32 l_Increment       = l_MapCount;
-        static uint32 l_Counter         = 0;
+        static uint32 l_Counter         = 1;
 
         for (auto& l_Itr : m_Zones)
         {

@@ -17,7 +17,7 @@
 */
 
 #pragma once
-#include "Network/Listener.hpp"
+#include "Network/Server/Listener.hpp"
 #include "ServerPacket.hpp"
 #include "Opcodes/Opcodes.hpp"
 

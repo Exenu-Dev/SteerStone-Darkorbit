@@ -17,7 +17,7 @@
 */
 
 #pragma once
-#include "Network/Listener.hpp"
+#include "Network/Server/Listener.hpp"
 #include "Diagnostic/DiaStopWatch.hpp"
 #include "Opcodes/Opcodes.hpp"
 #include "ServerPacket.hpp"

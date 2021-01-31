@@ -94,7 +94,7 @@ namespace SteerStone { namespace Policy { namespace Server {
             LOG_INFO("PolicySocket", "Sending Packet <%0> to %1", sOpCode->GetServerPacket(p_PacketBuffer->GetContents()[0]).Name, GetRemoteAddress());
         #endif
 
-        Write((const char*)p_PacketBuffer->GetContents(), p_PacketBuffer->GetSize());
+        Write((const char*)p_PacketBuffer->GetContents(), p_PacketBuffer->GetSize(), true);
     }
 
     /// For Non-Implemented packets
