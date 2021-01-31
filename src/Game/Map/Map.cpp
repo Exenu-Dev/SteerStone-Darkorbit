@@ -256,8 +256,8 @@ namespace SteerStone { namespace Game { namespace Map {
     /// @p_Object : Object we are getting grid from
     Grid* Base::GetGrid(Entity::Object const* p_Object)
     {
-        if ((std::get<0>(p_Object->GetGridIndex()) > GRID_CELLS || std::get<0>(p_Object->GetGridIndex()) < 0) ||
-            (std::get<1>(p_Object->GetGridIndex()) > GRID_CELLS || std::get<1>(p_Object->GetGridIndex()) < 0))
+        if ((std::get<0>(p_Object->GetGridIndex()) > GRID_CELLS - 1 || std::get<0>(p_Object->GetGridIndex()) < 0) ||
+            (std::get<1>(p_Object->GetGridIndex()) > GRID_CELLS - 1 || std::get<1>(p_Object->GetGridIndex()) < 0))
             return m_RadiationGrid;
 
         return m_Grids[std::get<0>(p_Object->GetGridIndex())][std::get<1>(p_Object->GetGridIndex())];
@@ -304,8 +304,8 @@ namespace SteerStone { namespace Game { namespace Map {
     {
         p_Object->SetGridIndex(CalculateGridByPosition(p_Object));
 
-        if ((std::get<0>(p_Object->GetGridIndex()) > GRID_CELLS || std::get<0>(p_Object->GetGridIndex()) < 0)
-            || std::get<1>(p_Object->GetGridIndex()) > GRID_CELLS || std::get<1>(p_Object->GetGridIndex()) < 0)
+        if ((std::get<0>(p_Object->GetGridIndex()) > GRID_CELLS - 1 || std::get<0>(p_Object->GetGridIndex()) < 0)
+            || std::get<1>(p_Object->GetGridIndex()) > GRID_CELLS - 1 || std::get<1>(p_Object->GetGridIndex()) < 0)
             m_RadiationGrid->Add(p_Object);
         else
             m_Grids[std::get<0>(p_Object->GetGridIndex())][std::get<1>(p_Object->GetGridIndex())]->Add(p_Object);
@@ -318,8 +318,8 @@ namespace SteerStone { namespace Game { namespace Map {
     /// @p_SendPacket : Send Despawn Packet
     void Base::Remove(Entity::Object* p_Object, bool p_SendPacket)
     {
-        if ((std::get<0>(p_Object->GetGridIndex()) > GRID_CELLS || std::get<0>(p_Object->GetGridIndex()) < 0)
-            || std::get<1>(p_Object->GetGridIndex()) > GRID_CELLS || std::get<1>(p_Object->GetGridIndex()) < 0)
+        if ((std::get<0>(p_Object->GetGridIndex()) > GRID_CELLS - 1 || std::get<0>(p_Object->GetGridIndex()) < 0)
+            || std::get<1>(p_Object->GetGridIndex()) > GRID_CELLS - 1 || std::get<1>(p_Object->GetGridIndex()) < 0)
         {
             m_RadiationGrid->Remove(p_Object, p_SendPacket);
             return;
@@ -352,8 +352,8 @@ namespace SteerStone { namespace Game { namespace Map {
         std::tuple<int32, int32> l_GridIndex = CalculateGridByPosition(p_Object->GetSpline()->GetPositionX(), p_Object->GetSpline()->GetPositionY());
 
         /// If we are out of bounds, then we have entered the radiation zone
-        if ((std::get<0>(l_GridIndex) >= GRID_CELLS || std::get<0>(l_GridIndex) < 0) || 
-            (std::get<1>(l_GridIndex) >= GRID_CELLS || std::get<1>(l_GridIndex) < 0))
+        if ((std::get<0>(l_GridIndex) > GRID_CELLS - 1 || std::get<0>(l_GridIndex) < 0) || 
+            (std::get<1>(l_GridIndex) > GRID_CELLS - 1 || std::get<1>(l_GridIndex) < 0))
         {
             if (p_Object->IsPlayer() && !p_Object->ToPlayer()->IsInRadiationZone())
             {

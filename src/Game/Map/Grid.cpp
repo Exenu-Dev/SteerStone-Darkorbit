@@ -239,7 +239,9 @@ namespace SteerStone { namespace Game { namespace Map {
                 m_State = State::Active;
         }
 
-        //LOG_INFO("Grid", "Added GUID: %0 to Grid: X %1 Y %2", p_Object->GetGUID(), m_GridX, m_GridY);
+        #ifdef STEERSTONE_CORE_DEBUG
+            //LOG_INFO("Grid", "Added GUID: %0 to Grid: X %1 Y %2", p_Object->GetGUID(), m_GridX, m_GridY);
+        #endif
     }
     /// Remove Object from Grid
     /// @p_Object : Object being removed
