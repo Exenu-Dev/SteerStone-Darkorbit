@@ -85,6 +85,7 @@ namespace SteerStone { namespace Game { namespace Server { namespace Packets {
     /// SERVER_PACKET_JUMP_PORTAL
     PacketBuffer const* DisplayStarSystem::Write()
     {
+        m_Buffer.AppendEndSplitter();
         m_Buffer.AppendCarriage();
 
         return &m_Buffer;
