@@ -99,7 +99,7 @@ __C.__ Rename `Policy.conf.dist` to `Policy.conf` do the same for Game aswell.
 
 # Contact
 
-You can contact me on discord (Exenu#2872) or open an issue.
+You can contact me on discord (Quadral#6999) or open an issue.
 
 <!-- Markdown link & img dfn's -->
 [MySQL C 5.6.44]: https://dev.mysql.com/downloads/mysql/5.6.html
