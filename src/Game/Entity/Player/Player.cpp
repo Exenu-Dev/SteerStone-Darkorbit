@@ -453,11 +453,12 @@ namespace SteerStone { namespace Game { namespace Entity {
             l_Packet.InJumpZone          = false;
             l_Packet.Repair              = false;
             SendPacket(l_Packet.Write());
+
+            m_IntervalRadiation.Reset();
         }
         /// In Radiation Zone
         else if (GetEvent() == EventType::EVENT_TYPE_RADIATION_ZONE)
-            DealDamage(this, Core::Utils::CalculatePercentage((m_IntervalRadiation.GetInterval() / RADIATION_TIMER) > 5 ? 5 
-                : (m_IntervalRadiation.GetInterval() / RADIATION_TIMER), GetHitMaxPoints()), false);
+            DealDamage(this, Core::Utils::CalculatePercentage(m_IntervalRadiation.GetTick() > 5 ? 5 : m_IntervalRadiation.GetTick(), GetHitMaxPoints()), false);
     }
 
     /// Update Player

@@ -19,6 +19,7 @@
 #include "Server/MiscPackets.hpp"
 #include "Server/MapPackets.hpp"
 #include "Server/ShipPackets.hpp"
+#include "Server/AttackPackets.hpp"
 #include "Socket.hpp"
 #include "Portal.hpp"
 #include "BonusBox.hpp"
@@ -112,6 +113,13 @@ namespace SteerStone { namespace Game { namespace Server {
         }
 
         m_Player->SetTarget(l_Object->ToUnit());
+
+        Server::Packets::Attack::TargetHealth l_TargetHealthPacket;
+        l_TargetHealthPacket.Shield = m_Player->GetTarget()->GetShield();
+        l_TargetHealthPacket.MaxShield = m_Player->GetTarget()->GetMaxShield();
+        l_TargetHealthPacket.HitPoints = m_Player->GetTarget()->GetHitPoints();
+        l_TargetHealthPacket.MaxHitPoints = m_Player->GetTarget()->GetHitMaxPoints();
+        m_Player->SendPacket(l_TargetHealthPacket.Write());
     }
 
     /// Map Handler
