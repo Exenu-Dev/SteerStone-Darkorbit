@@ -199,7 +199,7 @@ namespace SteerStone { namespace Game { namespace Global {
                 l_ItemTemplate->Id              = l_Result[0].GetUInt32();
                 l_ItemTemplate->Name            = l_Result[1].GetString();
                 l_ItemTemplate->Type            = l_Result[2].GetUInt32();
-                l_ItemTemplate->GFX             = l_Result[3].GetUInt16();
+                l_ItemTemplate->GFX             = l_Result[3].GetUInt32();
                 l_ItemTemplate->Value           = l_Result[4].GetUInt32();
                 l_ItemTemplate->ValuePercentage = l_Result[5].GetUInt32();
                 l_ItemTemplate->Credits         = l_Result[6].GetUInt32();
