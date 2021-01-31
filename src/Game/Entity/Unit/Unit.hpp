@@ -151,6 +151,7 @@ namespace SteerStone { namespace Game { namespace Entity {
         uint32 GetHonor()           const { return m_Honor;             }
         uint32 GetCredits()         const { return m_Credits;           }
         uint32 GetUridium()         const { return m_Uridium;           }
+        bool IsInRadiationZone()    const { return m_InRadiationZone;   }
         uint32 GetResource(uint32 const p_Index) const 
         {
             if (p_Index > MAX_RESOURCE_COUNTER)
@@ -178,6 +179,7 @@ namespace SteerStone { namespace Game { namespace Entity {
             m_ShieldResistance  = p_ShieldResistance;
         }
         void SetResource(uint32 const p_Index, uint32 const p_Resource);
+        void SetInRadiationZone(bool const p_InRadiation) { m_InRadiationZone = p_InRadiation; }
 
     //////////////////////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////////////////////
@@ -212,9 +214,10 @@ namespace SteerStone { namespace Game { namespace Entity {
         uint32 m_Credits;
         uint32 m_Uridium;
         uint32 m_Resources[9];
-
         uint32 m_LastTimeAttacked;
+
         bool m_Attacking;
+        bool m_InRadiationZone;
         Core::Diagnostic::IntervalTimer m_IntervalAttackUpdate;
 
         Unit* m_Target;

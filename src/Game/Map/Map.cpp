@@ -306,7 +306,10 @@ namespace SteerStone { namespace Game { namespace Map {
 
         if ((std::get<0>(p_Object->GetGridIndex()) > GRID_CELLS - 1 || std::get<0>(p_Object->GetGridIndex()) < 0)
             || std::get<1>(p_Object->GetGridIndex()) > GRID_CELLS - 1 || std::get<1>(p_Object->GetGridIndex()) < 0)
+        {
+            p_Object->ToUnit()->SetInRadiationZone(true);
             m_RadiationGrid->Add(p_Object);
+        }
         else
             m_Grids[std::get<0>(p_Object->GetGridIndex())][std::get<1>(p_Object->GetGridIndex())]->Add(p_Object);
 
@@ -355,17 +358,15 @@ namespace SteerStone { namespace Game { namespace Map {
         if ((std::get<0>(l_GridIndex) > GRID_CELLS - 1 || std::get<0>(l_GridIndex) < 0) || 
             (std::get<1>(l_GridIndex) > GRID_CELLS - 1 || std::get<1>(l_GridIndex) < 0))
         {
-            if (p_Object->IsPlayer() && !p_Object->ToPlayer()->IsInRadiationZone())
+            if (!p_Object->ToUnit()->IsInRadiationZone())
             {
                 /// Remove old grid
                 m_Grids[std::get<0>(p_Object->GetGridIndex())][std::get<1>(p_Object->GetGridIndex())]->Remove(p_Object);
 
-                /// Add to radiation zone
-                p_Object->ToPlayer()->SetInRadiationZone(true);
                 m_RadiationGrid->Add(p_Object);
+                p_Object->ToUnit()->SetInRadiationZone(true);
             }
 
-            /// It doesn't matter if we update the grid or not, but lets do it anyway
             if (std::get<0>(l_GridIndex) != std::get<0>(p_Object->GetGridIndex()) ||
                 std::get<1>(l_GridIndex) != std::get<1>(p_Object->GetGridIndex()))
                 p_Object->SetGridIndex(l_GridIndex);
@@ -379,19 +380,14 @@ namespace SteerStone { namespace Game { namespace Map {
                 std::get<1>(l_GridIndex) != std::get<1>(p_Object->GetGridIndex()))
             {
                 /// Remove old grid
-                if (p_Object->IsPlayer())
+                if (p_Object->ToUnit()->IsInRadiationZone())
                 {
-                    if (p_Object->ToPlayer()->IsInRadiationZone())
-                    {
-                        m_RadiationGrid->Remove(p_Object);
-                        p_Object->ToPlayer()->SetInRadiationZone(false);
-                    }
-                    else
-                        m_Grids[std::get<0>(p_Object->GetGridIndex())][std::get<1>(p_Object->GetGridIndex())]->Remove(p_Object);
+                    m_RadiationGrid->Remove(p_Object);
+                    p_Object->ToUnit()->SetInRadiationZone(false);
                 }
                 else
                     m_Grids[std::get<0>(p_Object->GetGridIndex())][std::get<1>(p_Object->GetGridIndex())]->Remove(p_Object);
-   
+                
                 /// Add new grid
                 p_Object->SetGridIndex(l_GridIndex);
                 m_Grids[std::get<0>(p_Object->GetGridIndex())][std::get<1>(p_Object->GetGridIndex())]->Add(p_Object, true);

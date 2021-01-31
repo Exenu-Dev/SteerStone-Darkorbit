@@ -232,7 +232,6 @@ namespace SteerStone { namespace Game { namespace Entity {
         bool IsLoggingOut()        const     { return m_LoggingOut;       }
         bool IsLoggedIn()          const     { return m_LoggedIn;         }
         bool IsJumping()           const     { return m_Jumping;          }
-        bool IsInRadiationZone()   const     { return m_InRadiationZone;  }
         uint32 GetCargoSpace()     const     { return m_CargoSpace;       }
         uint32 GetMaxCargoSpace()  const     { return m_MaxCargoSpace;    }
         uint32 GetMaxBattery()     const     { return m_MaxBattery;       }
@@ -252,7 +251,6 @@ namespace SteerStone { namespace Game { namespace Entity {
         void UpdateExperience(uint32 const p_Experience);
         void UpdateHonor(uint32 const p_Honour)           { m_Honor += p_Honour;           }
         void SetCargoSpace(uint32 const p_CargoSpace)     { m_CargoSpace = p_CargoSpace;   }
-        void SetInRadiationZone(bool const p_InRadiation) { m_InRadiationZone = p_InRadiation; }
         Core::Diagnostic::IntervalTimer IntervalLogout;
 
     //////////////////////////////////////////////////////////////////////////
@@ -300,7 +298,6 @@ namespace SteerStone { namespace Game { namespace Entity {
         bool m_LoggedIn;
         bool m_Jumping;
         bool m_LoggingOut;
-        bool m_InRadiationZone;
         EventType m_Event;
         Ammo m_Ammo;
         Inventory m_Inventory;

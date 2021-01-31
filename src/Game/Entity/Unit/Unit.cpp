@@ -59,6 +59,7 @@ namespace SteerStone { namespace Game { namespace Entity {
         m_RespawnTimer      = 0;
         m_Credits           = 0;
         m_Uridium           = 0;
+        m_InRadiationZone   = false;
         
         for (uint32 l_I = 0; l_I < MAX_RESOURCE_COUNTER; l_I++)
             m_Resources[l_I] = 0;

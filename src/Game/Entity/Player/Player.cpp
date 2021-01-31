@@ -73,7 +73,6 @@ namespace SteerStone { namespace Game { namespace Entity {
         m_LoggedIn              = false;
         m_Jumping               = false;
         m_LoggingOut            = false;
-        m_InRadiationZone       = false;
         m_Event                 = EventType::EVENT_TYPE_NONE;
 
         m_IntervalNextSave.SetInterval(sWorldManager->GetIntConfig(World::IntConfigs::INT_CONFIG_SAVE_PLAYER_TO_DATABASE));
