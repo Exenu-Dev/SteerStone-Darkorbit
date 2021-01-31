@@ -94,6 +94,7 @@ enum ServerOpCodes : uint8
     SERVER_PACKET_TARGET_HEALTH         = 0x4E,
     SERVER_PACKET_CARGO_BAY_FULL        = 0x66,
     SERVER_PACKET_SHOOT_ROCKET          = 0x77,
+    SERVER_PACKET_CROSS_HAIR            = 0x36,
 
     /// Debug Headless Packets
     SERVER_PACKET_HEADLESS_MOVE         = 0x21,

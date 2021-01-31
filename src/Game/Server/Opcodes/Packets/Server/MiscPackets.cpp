@@ -145,6 +145,15 @@ namespace SteerStone { namespace Game { namespace Server { namespace Packets { n
         return &m_Buffer;
     }
 
+    /// SERVER_PACKET_CROSS_HAIR
+    PacketBuffer const* CrossHair::Write()
+    {
+        m_Buffer.AppendEndSplitter();
+        m_Buffer.AppendCarriage();
+
+        return &m_Buffer;
+    }
+
 }   ///< namespace Misc
 }   ///< namespace Packets
 }   ///< namespace Server

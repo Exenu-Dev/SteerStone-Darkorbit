@@ -115,6 +115,22 @@ namespace SteerStone { namespace Game { namespace Server { namespace Packets { n
         PacketBuffer const* Write(RewardType p_RewardType, std::initializer_list<std::variant<uint32, int32>> p_Storage);
     };
 
+    /// SERVER_PACKET_CROSS_HAIR packet builder
+    class CrossHair final : public ServerPacket
+    {
+    public:
+        /// Constructor 
+        CrossHair() : ServerPacket(ServerOpCodes::SERVER_PACKET_CROSS_HAIR)
+        {
+        }
+
+        //////////////////////////////////////////////////////////////////////////
+        //////////////////////////////////////////////////////////////////////////
+
+        /// Write the packet
+        PacketBuffer const* Write();
+    };
+
 }   ///< namespace Misc
 }   ///< namespace Packets
 }   ///< namespace Server

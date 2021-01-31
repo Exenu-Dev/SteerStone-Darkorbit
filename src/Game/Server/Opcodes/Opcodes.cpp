@@ -101,6 +101,7 @@ namespace SteerStone { namespace Game { namespace Server {
         StoreServerPacket(ServerOpCodes::SERVER_PACKET_REWARD,              "SERVER_PACKET_REWARD",                 &GameSocket::HandleServer);
         StoreServerPacket(ServerOpCodes::SERVER_PACKET_CARGO,               "SERVER_PACKET_CARGO",                  &GameSocket::HandleServer);
         StoreServerPacket(ServerOpCodes::SERVER_PACKET_REMOVE_CARGO,        "SERVER_PACKET_REMOVE_CARGO",           &GameSocket::HandleServer);
+        StoreServerPacket(ServerOpCodes::SERVER_PACKET_CROSS_HAIR,          "SERVER_PACKET_CROSS_HAIR",             &GameSocket::HandleServer);
 
         /// Debug Headless Packets
         StoreServerPacket(ServerOpCodes::SERVER_PACKET_HEADLESS_MOVE,       "SERVER_PACKET_HEADLESS_MOVE",      &GameSocket::HandleServer);
