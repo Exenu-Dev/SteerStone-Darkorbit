@@ -480,6 +480,9 @@ namespace SteerStone { namespace Game { namespace Map {
             sZoneManager->AddToMap(l_Itr->first);
             l_Itr->first->ToPlayer()->SetIsJumping(false);
 
+            // Save Player Stats to Database
+            l_Itr->first->ToPlayer()->SaveToDB(true);
+
             l_Itr = m_PlayersToJump.erase(l_Itr);
         }
     }

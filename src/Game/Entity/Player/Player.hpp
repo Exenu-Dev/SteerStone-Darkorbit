@@ -125,7 +125,7 @@ namespace SteerStone { namespace Game { namespace Entity {
         void LoadShipFromDB();
         /// Load Drone Info from database
         void LoadDrones();
-    private:
+    public:
         /// Save Player details to database
         /// @p_Asynchronous : Use Async connection
         void SaveToDB(bool p_Asynchronous = false);

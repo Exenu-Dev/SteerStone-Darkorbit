@@ -1155,8 +1155,6 @@ namespace SteerStone { namespace Game { namespace Entity {
         if (!m_Socket || !p_PacketBuffer)
             return;
 
-        LOG_INFO("Packet", "%0", (char*)&p_PacketBuffer->GetContents()[0]);
-
         m_Socket->SendPacket(p_PacketBuffer);
     }
     /// Kick Player
