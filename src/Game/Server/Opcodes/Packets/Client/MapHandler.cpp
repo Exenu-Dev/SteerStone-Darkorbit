@@ -46,7 +46,7 @@ namespace SteerStone { namespace Game { namespace Server {
         float l_PrevPositionX = static_cast<float>(p_Packet->ReadUInt32());
         float l_PrevPositionY = static_cast<float>(p_Packet->ReadUInt32());
 
-        m_Player->GetSpline()->Move(l_NewPositionX, l_NewPositionY, 0, 0);
+        m_Player->GetSpline()->Move(l_NewPositionX, l_NewPositionY);
     }
     /// Map Handler
     /// @p_ClientPacket : Packet recieved from client

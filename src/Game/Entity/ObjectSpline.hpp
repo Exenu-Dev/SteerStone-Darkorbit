@@ -44,7 +44,8 @@ namespace SteerStone { namespace Game { namespace Entity {
         ///////////////////////////////////////////
         //                GENERAL
         ///////////////////////////////////////////
-         /// Update Position
+        /// Update Position
+        /// @p_IgnoreTimeCheck : Ignore Time Check
         void UpdatePosition();
 
         /// Return Time in milliseconds to reach destination
@@ -53,9 +54,8 @@ namespace SteerStone { namespace Game { namespace Entity {
         /// Move Object
         /// @p_PlannedPositionX : Planned X Axis
         /// @p_PlannedPositionY : Planned Y Axis
-        /// @p_CurrentPositionX : Current X Axis
-        /// @p_CurrentPositionY : Current Y Axis
-        void Move(float const p_PlannedPositionX, float const p_PlannedPositionY, float const p_CurrentPositionX, float const p_CurrentPositionY);
+        /// @p_IgnoreTimeCheck  : Ignore Time Check
+        void Move(float const p_PlannedPositionX = 0.0f, float const p_PlannedPositionY = 0.0f);
 
         ///////////////////////////////////////////
         //            GETTERS/SETTERS

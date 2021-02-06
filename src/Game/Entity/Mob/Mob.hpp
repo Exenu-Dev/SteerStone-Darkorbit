@@ -23,6 +23,7 @@
 #include "Unit.hpp"
 
 #define DISTANCE_AWAY_FROM_BORDER 100          ///< Distance away from border
+#define MOVEMENT_INTERVAL 1000
 #define MAX_LAST_TIME_ATTACKED 10000
 
 namespace SteerStone { namespace Game { namespace Map {
@@ -83,20 +84,22 @@ namespace SteerStone { namespace Game { namespace Entity {
         //            GETTERS/SETTERS
         ///////////////////////////////////////////
 
-        uint32 GetId()          const { return m_Entry;         }
+        uint32 GetId()                                  const { return m_Entry;                                  }
 
-        Player const* GetTaggedPlayer() const { return m_PlayerTagger; }
-        void SetTaggedPlayer(Player const* p_Player) { m_PlayerTagger = p_Player; }
-        bool IsTaggedByPlayer() const { return m_PlayerTagger != nullptr ? true : false; }
+        Player const* GetTaggedPlayer()                 const { return m_PlayerTagger;                           }
+        void SetTaggedPlayer(Player const* p_Player)          { m_PlayerTagger = p_Player;                       }
+        bool IsTaggedByPlayer()                         const { return m_PlayerTagger != nullptr ? true : false; }
+        bool IsFleeing()                                const { return m_Fleeing;                                }
+
+        /// Set Is Fleeing
+        /// @p_Fleeing : Fleeing
+        void SetIsFleeing(bool p_Fleeing);
 
         //////////////////////////////////////////////////////////////////////////
         //////////////////////////////////////////////////////////////////////////
 
     private:
         uint32 m_Entry;
-
-        uint32 m_MoveTimeMax;
-        uint32 m_MoveTimeMin;
 
         int32 m_RandomDistanceFromPlayerX;
         int32 m_RandomDistanceFromPlayerY;
@@ -105,6 +108,8 @@ namespace SteerStone { namespace Game { namespace Entity {
         float m_HomePositionY;
 
         Player const* m_PlayerTagger; ///< Player is targetting us
+
+        bool m_Fleeing; ///< Mob is fleeing away from player
 
         Core::Diagnostic::IntervalTimer m_IntervalMoveTimer;
         Core::Diagnostic::IntervalTimer m_IntervalRespawnTimer;

@@ -98,16 +98,18 @@ namespace SteerStone { namespace Game { namespace Entity {
     /// Move Object
     /// @p_PlannedPositionX : Planned X Axis
     /// @p_PlannedPositionY : Planned Y Axis
-    /// @p_CurrentPositionX : Current X Axis
-    /// @p_CurrentPositionY : Current Y Axis
-    void Spline::Move(float const p_PlannedPositionX, float const p_PlannedPositionY, float const p_CurrentPositionX, float const p_CurrentPositionY)
+    void Spline::Move(float const p_PlannedPositionX, float const p_PlannedPositionY)
     {
         LOG_ASSERT(m_Object->GetMap(), "Object", "Object %0 attempted to move, but object is not in a map!", m_Object->GetGUID());
 
         UpdatePosition();
 
-        m_PlannedPositionX   = p_PlannedPositionX;
-        m_PlannedPositionY   = p_PlannedPositionY;
+        if (p_PlannedPositionX || p_PlannedPositionY)
+        {
+            m_PlannedPositionX   = p_PlannedPositionX;
+            m_PlannedPositionY   = p_PlannedPositionY;
+        }
+
         m_TimeForDestination = CalculateDestinationTime();
         m_LastCalled         = sServerTimeManager->GetServerTime();
         m_Moving             = true;

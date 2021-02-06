@@ -116,11 +116,9 @@ namespace SteerStone { namespace Game { namespace Map {
                             l_Mob->m_Resources[Entity::Resource::RESOURCE_PROMETIUM] = l_MobTemplate->Prometium;
                             l_Mob->m_Resources[Entity::Resource::RESOURCE_PALLADIUM] = l_MobTemplate->Palladium;
                             l_Mob->m_Resources[Entity::Resource::RESOURCE_SEPROM]    = l_MobTemplate->Seprom;
-                            l_Mob->m_MoveTimeMin        = l_MobTemplate->MinMovementTime;
-                            l_Mob->m_MoveTimeMax        = l_MobTemplate->MaxMovementTime;
                             l_Mob->GetSpline()->SetSpeed(l_MobTemplate->Speed);
                             l_Mob->SetName(l_MobTemplate->Name);
-                            l_Mob->m_IntervalMoveTimer.SetInterval(Core::Utils::FloatRandom(l_Mob->m_MoveTimeMin, l_Mob->m_MoveTimeMin));
+                            l_Mob->m_IntervalMoveTimer.SetInterval(MOVEMENT_INTERVAL);
                             l_Mob->m_IntervalRespawnTimer.SetInterval(l_MobTemplate->RespawnTimer);
                             l_Mob->SetMap(m_Map);
 
@@ -129,6 +127,7 @@ namespace SteerStone { namespace Game { namespace Map {
                             l_Mob->GetSpline()->SetPosition(l_PositionX, l_PositionY, l_PositionX, l_PositionY);
                             l_Mob->m_HomePositionX = l_PositionX;
                             l_Mob->m_HomePositionY = l_PositionY;
+                            l_Mob->m_Fleeing       = false;
 
                             m_Map->Add(l_Mob);
                             m_Pool[POOL_TYPE_MOB]->Add(l_Mob);

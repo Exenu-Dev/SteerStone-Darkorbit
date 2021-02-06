@@ -126,8 +126,9 @@ namespace SteerStone { namespace Game { namespace Entity {
             }
         }
 
-        m_Attacking   = true;
-        m_AttackState = AttackState::ATTACK_STATE_IN_RANGE;
+        m_LastTimeAttacked  = sServerTimeManager->GetServerTime();
+        m_Attacking         = true;
+        m_AttackState       = AttackState::ATTACK_STATE_IN_RANGE;
     }
     /// Can Attack Target
     /// @p_Victim : Victim
@@ -213,6 +214,7 @@ namespace SteerStone { namespace Game { namespace Entity {
                     /// Now calculate damage
                     int32 l_Damage       = CalculateDamageDone();
                     int32 l_ShieldDamage = 0;
+                    l_Damage = 10;
                     CalculateDamageTaken(GetTarget(), l_Damage, l_ShieldDamage);
 
                     int32 l_HitPoints = GetTarget()->ToUnit()->GetHitPoints() - l_Damage;
@@ -258,7 +260,12 @@ namespace SteerStone { namespace Game { namespace Entity {
                         l_ReceivedDamagePacket.Shield    = GetTarget()->ToUnit()->GetShield();
                         l_ReceivedDamagePacket.Damage    = l_ShieldDamage + l_Damage; ///< Total Damage
                         GetTarget()->ToPlayer()->SendPacket(l_ReceivedDamagePacket.Write());
-                    }       
+                    }
+                    else if (GetTarget()->IsMob())
+                    {
+                        if (GetTarget()->GetHitPoints() <= Core::Utils::CalculatePercentage(GetTarget()->GetHitMaxPoints(), 15) && !GetTarget()->ToMob()->IsFleeing())
+                            GetTarget()->ToMob()->SetIsFleeing(true);
+                    }
                 }
                 else ///< Send Miss Packet
                 {

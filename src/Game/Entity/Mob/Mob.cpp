@@ -37,11 +37,10 @@ namespace SteerStone { namespace Game { namespace Entity {
 
         m_PlayerTagger = nullptr;
 
-        m_MoveTimeMax   = 0;
-        m_MoveTimeMin   = 0;
-
         m_RandomDistanceFromPlayerX = 0;
         m_RandomDistanceFromPlayerY = 0;
+
+        m_Fleeing = false;
 
         m_AttackRange = sWorldManager->GetIntConfig(World::IntConfigs::INT_CONFIG_MOB_ATTACK_RANGE);
 
@@ -65,7 +64,6 @@ namespace SteerStone { namespace Game { namespace Entity {
             case DeathState::ALIVE:
             {
                 UpdateMovement(p_Diff);
-
                 Unit::Update(p_Diff);
             }
             break;
@@ -192,14 +190,20 @@ namespace SteerStone { namespace Game { namespace Entity {
                     break;
                 }
 
+                if (IsFleeing())
+                {
+                    GetSpline()->Move();
+                    break;
+                } ///< If unit is 15% health or below, then move to nearest corner of the map
+                else if (GetHitPoints() <= Core::Utils::CalculatePercentage(GetHitMaxPoints(), 15))
+                {
+                    SetIsFleeing(true);
+                    break;
+                }
+
                 /// If player is more than our min distance, start following player
                 if (l_Distance > sWorldManager->GetIntConfig(World::IntConfigs::INT_CONFIG_MIN_FOLLOW_DISTANCE))
-                {
-                    GetSpline()->Move(l_PositionX, l_PositionY, 0, 0);
-
-                    /// We want to update the movement, as soon as possible to ensure we are keeping up to the player
-                    m_IntervalMoveTimer.SetInterval(m_MoveTimeMax / 2);
-                }
+                    GetSpline()->Move(l_PositionX, l_PositionY);
                 /// Check if we are too close to target, if so - move back
                 else if (l_Distance < sWorldManager->GetIntConfig(World::IntConfigs::INT_CONFIG_MIN_FOLLOW_DISTANCE))
                 {
@@ -208,9 +212,7 @@ namespace SteerStone { namespace Game { namespace Entity {
                     l_PositionX += std::abs(m_RandomDistanceFromPlayerX) * std::cos(l_Degree);
                     l_PositionY += std::abs(m_RandomDistanceFromPlayerY) * std::sin(l_Degree);
 
-                    GetSpline()->Move(l_PositionX, l_PositionY, 0, 0);
-
-                    m_IntervalMoveTimer.SetInterval(m_MoveTimeMax);
+                    GetSpline()->Move(l_PositionX, l_PositionY);
                 }
 
                 /// If we are not attacking, roam around the player
@@ -221,12 +223,8 @@ namespace SteerStone { namespace Game { namespace Entity {
                     l_PositionX += std::abs(m_RandomDistanceFromPlayerX) * std::cos(l_Degree);
                     l_PositionY += std::abs(m_RandomDistanceFromPlayerY) * std::sin(l_Degree);
 
-                    GetSpline()->Move(l_PositionX, l_PositionY, 0, 0);
-
-                    m_IntervalMoveTimer.SetInterval(m_MoveTimeMax);
+                    GetSpline()->Move(l_PositionX, l_PositionY);
                 }
-                
-                return;
             }
             break;
             /// Find closest player, and move to player
@@ -300,14 +298,23 @@ namespace SteerStone { namespace Game { namespace Entity {
                     break;
                 }
 
+                if (!IsAttacking())
+                    Attack(l_Target);
+
+                if (IsFleeing())
+                {
+                    GetSpline()->Move();
+                    break;
+                } ///< If unit is 15% health or below, then move to nearest corner of the map
+                else if (GetHitPoints() <= Core::Utils::CalculatePercentage(GetHitMaxPoints(), 15))
+                {
+                    SetIsFleeing(true);
+                    break;
+                }
+
                 /// If player is more than our min distance, start following player
                 if (l_Distance > sWorldManager->GetIntConfig(World::IntConfigs::INT_CONFIG_MIN_FOLLOW_DISTANCE))
-                {
-                    GetSpline()->Move(l_PositionX, l_PositionY, 0, 0);
-
-                    /// We want to update the movement, as soon as possible to ensure we are keeping up to the player
-                    m_IntervalMoveTimer.SetInterval(m_MoveTimeMax / 2);
-                }
+                    GetSpline()->Move(l_PositionX, l_PositionY);
                 /// Check if we are too close to target, if so - move back
                 else if (l_Distance < sWorldManager->GetIntConfig(World::IntConfigs::INT_CONFIG_MIN_FOLLOW_DISTANCE))
                 {
@@ -316,44 +323,36 @@ namespace SteerStone { namespace Game { namespace Entity {
                     l_PositionX += std::abs(m_RandomDistanceFromPlayerX) * std::cos(l_Degree);
                     l_PositionY += std::abs(m_RandomDistanceFromPlayerY) * std::sin(l_Degree);
 
-                    GetSpline()->Move(l_PositionX, l_PositionY, 0, 0);
-
-                    m_IntervalMoveTimer.SetInterval(m_MoveTimeMax);
+                    GetSpline()->Move(l_PositionX, l_PositionY);
                 }
-
-                if (!IsAttacking())
-                    Attack(l_Target);
-
-                return;
             }
             break;
         }
+    }
 
-        /// Move around in our grid
-        float l_GridX = std::get<0>(GetGridIndex()) + 1;
-        float l_GridY = std::get<1>(GetGridIndex()) + 1;
+    /// Set Is Fleeing
+    /// @p_Fleeing : Fleeing
+    void Mob::SetIsFleeing(bool p_Fleeing)
+    {
+        if (p_Fleeing)
+        {
+            uint32 l_PositionX = GetSpline()->GetPositionX();
+            uint32 l_PositionY = GetSpline()->GetPositionY();
 
-        float l_MaxPositionX = l_GridX == 0 ? GetMap()->GetGridRadiusX() : l_GridX * GetMap()->GetGridRadiusX();
-        float l_MaxPositionY = l_GridY == 0 ? GetMap()->GetGridRadiusY() : l_GridY * GetMap()->GetGridRadiusY();
+            uint32 l_MapDividedSizeX = GetMap()->GetMapSizeX() / 2;
+            uint32 l_MapDividedSizeY = GetMap()->GetMapSizeY() / 2;
 
-        float l_MinPositionX = l_MaxPositionX;
-        float l_MinPositionY = l_MaxPositionY;
-        
-        l_MinPositionX = (l_MinPositionX + sWorldManager->GetIntConfig(World::IntConfigs::INT_CONFIG_MAX_ROAMING_DISTANCE) - l_MinPositionX);
-        l_MinPositionY = (l_MinPositionY + sWorldManager->GetIntConfig(World::IntConfigs::INT_CONFIG_MAX_ROAMING_DISTANCE) - l_MinPositionY);
+            if (l_PositionX >= l_MapDividedSizeX && l_PositionY >= l_MapDividedSizeY)
+                GetSpline()->Move(GetMap()->GetMapSizeX() - 100, GetMap()->GetMapSizeY() - 100);
+            else if (l_PositionX <= l_MapDividedSizeX && l_PositionY <= l_MapDividedSizeY)
+                GetSpline()->Move(100, 100);
+            else if (l_PositionX >= l_MapDividedSizeX && l_PositionY <= l_MapDividedSizeY)
+                GetSpline()->Move(GetMap()->GetMapSizeX() - 100, 100);
+            else
+                GetSpline()->Move(0, GetMap()->GetMapSizeY() - 100);
+        }
 
-        if (l_GridX > 1)
-            l_MinPositionX = (l_GridX - 1) * GetMap()->GetGridRadiusX();
-
-        if (l_GridY > 1)
-            l_MinPositionY = (l_GridY - 1) * GetMap()->GetGridRadiusY();
-
-        float l_NewPositionX = Core::Utils::FloatRandom(l_MinPositionX, l_MaxPositionX);
-        float l_NewPositionY = Core::Utils::FloatRandom(l_MinPositionY, l_MaxPositionY);
-
-        GetSpline()->Move(l_NewPositionX, l_NewPositionY, 0, 0);
-
-        m_IntervalMoveTimer.SetInterval(Core::Utils::FloatRandom(m_MoveTimeMin, m_MoveTimeMax));
+        m_Fleeing = p_Fleeing;
     }
 
 }   ///< namespace Entity
