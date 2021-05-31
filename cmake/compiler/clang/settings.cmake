@@ -24,6 +24,8 @@ message(STATUS "Clang: Enabled c++14 support")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 message(STATUS "Clang: Enabled c++11 support")
 
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
+
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=gnu99")
 message(STATUS "Clang: Enabled C99 support")
 
