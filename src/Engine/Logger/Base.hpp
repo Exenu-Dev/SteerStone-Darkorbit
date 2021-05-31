@@ -41,7 +41,7 @@ namespace SteerStone { namespace Core { namespace Logger {
         /// @p_FunctionLine : Function line of caller
         /// @p_Message      : Message to report
         /// @p_Args...      : Message arguments
-        template<class... Args> void Report(LogType p_Type, const std::string& p_System, std::string_view const p_Function, int32 const p_FunctionLine, const std::string& p_Message, Args ...p_Args)
+        template<class... Args> void Report(LogType p_Type, const std::string& p_System, std::string const p_Function, int32 const p_FunctionLine, const std::string& p_Message, Args ...p_Args)
         {
             Report(p_Type, p_System, p_Function, p_FunctionLine, Utils::StringBuilder(p_Message, p_Args...));
         }
@@ -51,13 +51,13 @@ namespace SteerStone { namespace Core { namespace Logger {
         /// @p_Function     : Function name of caller
         /// @p_FunctionLine : Function line of caller
         /// @p_Message      : Message to report
-        void Report(LogType p_LogType, std::string const& p_System, std::string_view const p_Function, int32 const p_FunctionLine, std::string const& p_Message);
+        void Report(LogType p_LogType, std::string const& p_System, std::string const p_Function, int32 const p_FunctionLine, std::string const& p_Message);
         /// Report assert message
         /// @p_System       : Message sender
         /// @p_Function     : Function name of caller
         /// @p_FunctionLine : Function line of caller
         /// @p_Message      : Message to report
-        void ReportAssert(std::string const& p_System, std::string_view const p_Function, int32 const p_FunctionLine, std::string const& p_Message);
+        void ReportAssert(std::string const& p_System, std::string const p_Function, int32 const p_FunctionLine, std::string const& p_Message);
 
         /// Output Server Banner
         /// @p_ExtraInfo : Extra info to output

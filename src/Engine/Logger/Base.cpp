@@ -66,7 +66,7 @@ namespace SteerStone  { namespace Core { namespace Logger {
     /// @p_Function     : Function name of caller
     /// @p_FunctionLine : Function line of caller
     /// @p_Message      : Message to report
-    void Base::Report(LogType p_LogType, std::string const& p_System, std::string_view const p_Function, int32 const p_FunctionLine, std::string const& p_Message)
+    void Base::Report(LogType p_LogType, std::string const& p_System, std::string const p_Function, int32 const p_FunctionLine, std::string const& p_Message)
     {
         if (p_LogType > m_LogLevel)
             return;
@@ -114,7 +114,7 @@ namespace SteerStone  { namespace Core { namespace Logger {
     /// @p_Function     : Function name of caller
     /// @p_FunctionLine : Function line of caller
     /// @p_Message      : Message to report
-    void Base::ReportAssert(std::string const& p_System, std::string_view const p_Function, int32 const p_FunctionLine, std::string const& p_Message)
+    void Base::ReportAssert(std::string const& p_System, std::string const p_Function, int32 const p_FunctionLine, std::string const& p_Message)
     {
         /// Constant always true variables
         const std::string l_Time = GetServerTime();

@@ -35,6 +35,5 @@
 #include <iostream>
 #include <mutex>
 #include <functional>
-#include <string_view>
 #include <cstring>
 #include <cmath>
