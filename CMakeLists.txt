@@ -20,6 +20,10 @@ cmake_minimum_required (VERSION 3.1)
 # C++ Standard
 set (CMAKE_CXX_STANDARD 17)
 
+# Add this options before PROJECT keyword
+set(CMAKE_DISABLE_SOURCE_CHANGES ON)
+set(CMAKE_DISABLE_IN_SOURCE_BUILD ON)
+
 # Set projectname (must be done AFTER setting configurationtypes)
 project(SteerStone)
 
@@ -61,7 +65,7 @@ include(CheckPlatform)
 
 find_package(OpenSSL REQUIRED)
 find_package(MySQL REQUIRED)
-find_package(Boost COMPONENTS system program_options thread regex)
+find_package(Boost COMPONENTS system program_options thread regex REQUIRED)
 
 # Print out the results before continuing
 include(cmake/showoptions.cmake)
