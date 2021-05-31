@@ -15,6 +15,7 @@ addons:
       - sourceline: 'ppa:kzemek/boost'
     packages:
       - g++-6
+      - libc++
       - libboost1.58-dev
       - libboost-filesystem1.58-dev
       - libboost-iostreams1.58-dev
