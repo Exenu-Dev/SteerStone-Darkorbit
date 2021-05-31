@@ -19,6 +19,7 @@
 cmake_minimum_required (VERSION 3.1)
 # C++ Standard
 set (CMAKE_CXX_STANDARD 17)
+set( CMAKE_CXX_FLAGS " -pthread " )
 
 # Add this options before PROJECT keyword
 set(CMAKE_DISABLE_SOURCE_CHANGES ON)

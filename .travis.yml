@@ -33,13 +33,10 @@ before_install:
   - git tag -a -m "Travis build" init
 
 install:
-  - mkdir bin
-  - cd bin
   - cmake ../ -DCMAKE_BUILD_TYPE=Debug
 
 script:
   - export CC=gcc-7
   - export CXX=g++-7
   - $CXX --version
-  - cd bin
   - make -j 14 -k
