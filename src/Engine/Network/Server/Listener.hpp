@@ -41,7 +41,7 @@ namespace SteerStone { namespace Core { namespace Network {
             /// @p_WorkerThreads : Amount of services to spawn
             Listener(std::string const& p_Address, const uint16& p_Port, const uint8& p_WorkerThreads) 
                 : m_Service(new boost::asio::io_service()),
-                  m_Acceptor(new boost::asio::ip::tcp::acceptor(*m_Service, boost::asio::ip::tcp::endpoint(boost::asio::ip::address::from_string(p_Address), p_Port)))
+                    m_Acceptor(new boost::asio::ip::tcp::acceptor(*m_Service, boost::asio::ip::tcp::endpoint(boost::asio::ip::address::from_string(p_Address), p_Port)))
             {
                 for (uint8 l_I = 0; l_I < p_WorkerThreads; l_I++)
                     m_NetworkThreads.push_back(std::unique_ptr<NetworkThread<T>>(new NetworkThread<T>(l_I)));
@@ -89,7 +89,7 @@ namespace SteerStone { namespace Core { namespace Network {
                 return m_NetworkThreads[l_Index].get();
             }
             /// Accept incoming connections
-            void Listener<T>::BeginAccept()
+            void BeginAccept()
             {
                 auto l_Worker = SelectWorker();
                 auto l_Socket = l_Worker->CreateSocket();
@@ -101,7 +101,7 @@ namespace SteerStone { namespace Core { namespace Network {
                     });
             }
             /// Accept new connection and create socket
-            void Listener<T>::OnAccept(NetworkThread<T>* p_Worker, std::shared_ptr<T> const& p_Socket, const boost::system::error_code& p_ErrorCode)
+            void OnAccept(NetworkThread<T>* p_Worker, std::shared_ptr<T> const& p_Socket, const boost::system::error_code& p_ErrorCode)
             {
                 if (p_ErrorCode)
                     p_Worker->RemoveSocket(p_Socket.get());

@@ -20,6 +20,7 @@
 #include "Database/SQLCommon.hpp"
 
 #include <assert.h>
+#include <cstring>
 
 namespace SteerStone { namespace Core { namespace Database {
 
@@ -36,7 +37,7 @@ namespace SteerStone { namespace Core { namespace Database {
             return;
 
         /// IsNull and mLength is deleted at end of constructor when buffer is loaded into our storage
-        m_IsNull = new my_bool[m_FieldCount];
+        m_IsNull = new bool[m_FieldCount];
         m_Length = new unsigned long[m_FieldCount];
         m_Bind = new MYSQL_BIND[m_FieldCount];
 

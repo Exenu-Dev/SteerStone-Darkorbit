@@ -54,16 +54,9 @@
 #endif
 
 /// Useful Macros
-#define DISALLOW_COPY(TypeName) \
-    TypeName(const TypeName &); \
-    TypeName(const TypeName &&)
-
-#define DISALLOW_ASSIGN(TypeName) \
-    void operator=(const TypeName &)
-
 #define DISALLOW_COPY_AND_ASSIGN(TypeName) \
-    DISALLOW_COPY(TypeName);               \
-    DISALLOW_ASSIGN(TypeName)
+    TypeName(const TypeName&) = delete;      \
+    void operator=(const TypeName&) = delete
 
 #define DEFAULT_CONSTRUCTOR(TypeName) \
     TypeName() {} \

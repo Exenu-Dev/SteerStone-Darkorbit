@@ -57,7 +57,7 @@ namespace SteerStone { namespace Core { namespace Database {
 
         std::vector<std::string> l_Tokens = Utils::SplitAll(p_InfoString, ";", false);
 
-        auto& l_Itr = l_Tokens.begin();
+        auto l_Itr = l_Tokens.begin();
 
         if (l_Itr != l_Tokens.end())
             l_Host = *l_Itr++;
@@ -84,7 +84,7 @@ namespace SteerStone { namespace Core { namespace Database {
     /// Returns a Prepare Statement from Pool
     PreparedStatement* Base::GetPrepareStatement()
     {
-       return Prepare();
+        return Prepare();
     }
     /// @p_PreparedStatement : Connection we are freeing
     void Base::FreePrepareStatement(PreparedStatement* p_PreparedStatement)

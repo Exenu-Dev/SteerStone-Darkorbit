@@ -81,7 +81,7 @@ namespace SteerStone { namespace Core { namespace Network {
             }
 
             /// Create socket
-            std::shared_ptr<T> NetworkThread<T>::CreateSocket()
+            std::shared_ptr<T> CreateSocket()
             {
                 Utils::ObjectGuard l_Guard(this);
 

@@ -35,8 +35,6 @@ namespace SteerStone { namespace Game { namespace Entity {
 
 namespace SteerStone { namespace Game { namespace World {
 
-    class Entity::Player;
-
     enum BoolConfigs
     {
         BOOL_CONFIG_MAX = 1

@@ -30,7 +30,6 @@ namespace SteerStone { namespace Game { namespace Map {
     };
 
     class Base;
-    enum Type;
 
     /// Pool Manager
     class PoolManager

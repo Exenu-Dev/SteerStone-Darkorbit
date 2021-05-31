@@ -776,7 +776,7 @@ namespace SteerStone { namespace Game { namespace Entity {
         SendPacket(l_BatteryAmmoPacket.Write());
     }
     /// Send Drone Info
-    Server::PacketBuffer const Player::BuildDronePacket()
+    Server::PacketBuffer const* Player::BuildDronePacket()
     {
         /// TODO; Clean this code, I don't understand how drones are meant to be parsed,
         /// current implementation is a hack fix and only works for 8 drones
@@ -947,7 +947,7 @@ namespace SteerStone { namespace Game { namespace Entity {
 
         l_Drones.pop_back();
 
-        return *Server::Packets::Misc::Info().Write(Server::Packets::Misc::InfoType::INFO_TYPE_DRONES, { GetObjectGUID().GetCounter(), l_Drones});
+        return Server::Packets::Misc::Info().Write(Server::Packets::Misc::InfoType::INFO_TYPE_DRONES, { GetObjectGUID().GetCounter(), l_Drones});
     }
     /// Send Drone Info
     void Player::SendDrones()

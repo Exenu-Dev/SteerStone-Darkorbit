@@ -36,8 +36,6 @@ namespace SteerStone { namespace Game { namespace Entity {
 
 namespace SteerStone { namespace Game { namespace Map {
 
-    class Entity::Object;
-
     /// Zone
     class Zone
     {

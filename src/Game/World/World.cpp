@@ -22,6 +22,7 @@
 #include "ZoneManager.hpp"
 #include "ObjectManager.hpp"
 #include "Config/Config.hpp"
+#include "PacketFilter.hpp"
 
 namespace SteerStone { namespace Game { namespace World {
 
@@ -197,7 +198,7 @@ namespace SteerStone { namespace Game { namespace World {
     /// @p_Diff : Execution Time
     void Base::ProcessRemovalPlayer(uint32 const p_Diff)
     {
-        for (auto& l_Itr = m_PlayerRemovalQueue.begin(); l_Itr != m_PlayerRemovalQueue.end();)
+        for (auto l_Itr = m_PlayerRemovalQueue.begin(); l_Itr != m_PlayerRemovalQueue.end();)
         {
             Entity::Object* l_Player = (*l_Itr);
 

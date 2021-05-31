@@ -33,8 +33,6 @@ namespace SteerStone { namespace Game { namespace Entity {
 
 namespace SteerStone { namespace Game { namespace Map {
 
-    class Entity::Object;
-
     typedef std::unordered_map<Entity::Object*, std::pair<Core::Diagnostic::IntervalTimer, Entity::Object*>> JumpQueueMap;
 
     /// Map

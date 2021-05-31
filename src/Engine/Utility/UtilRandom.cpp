@@ -45,16 +45,18 @@ namespace SteerStone { namespace Core { namespace Utils {
 
     static SFMTRand* GetRng()
     {
-        static boost::thread_specific_ptr<SFMTRand> l_SfmtRand;
-        SFMTRand* l_Random = l_SfmtRand.get();
+        // static boost::thread_specific_ptr<SFMTRand> l_SfmtRand;
+        // SFMTRand* l_Random = l_SfmtRand.get();
 
-        if (!l_Random)
-        {
-            l_Random = new SFMTRand();
-            l_SfmtRand.reset(l_Random);
-        }
+        // if (!l_Random)
+        // {
+        //     l_Random = new SFMTRand();
+        //     l_SfmtRand.reset(l_Random);
+        // }
 
-        return l_Random;
+        // return l_Random;
+
+        return 0;
     }
 
     /// Return a random number in the range min..max.

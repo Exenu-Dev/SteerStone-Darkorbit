@@ -437,7 +437,7 @@ namespace SteerStone { namespace Game { namespace Map {
     /// @p_Diff : Execution Time
     void Base::ProcessJumpQueue(uint32 const p_Diff)
     {
-        for (auto& l_Itr = m_PlayersToJump.begin(); l_Itr != m_PlayersToJump.end();)
+        for (auto l_Itr = m_PlayersToJump.begin(); l_Itr != m_PlayersToJump.end();)
         {
             l_Itr->second.first.Update(p_Diff);
             if (!l_Itr->second.first.Passed())

@@ -27,9 +27,16 @@
 
 #define RADIATION_TIMER 1000
 
+namespace SteerStone { namespace Game { namespace Server {
+    class ClientPacket;
+    class GameSocket;
+    class PacketFilter;
+}
+}
+}
+
 namespace SteerStone { namespace Game { namespace Entity {
 
-    class Server::ClientPacket;
     class Player;
 
     typedef std::unordered_map<uint64, std::unique_ptr<SurroundingObject>> SurroundingMap;
@@ -200,7 +207,7 @@ namespace SteerStone { namespace Game { namespace Entity {
         /// Send Battery, Rocket and mine update
         void SendAmmoUpdate();
         /// Send Drone Info
-        Server::PacketBuffer const BuildDronePacket();
+        Server::PacketBuffer const* BuildDronePacket();
         /// Send Drone Info
         void SendDrones();
         /// Process Packets

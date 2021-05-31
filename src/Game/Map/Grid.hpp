@@ -59,11 +59,6 @@ namespace SteerStone { namespace Game { namespace Map {
         GRID_TYPE_RADIATION,
     };
 
-    class Entity::Object;
-    class Entity::Player;
-    class Entity::Portal;
-    class Entity::BonusBox;
-    class Server::PacketBuffer;
     class Base;
 
     typedef std::unordered_map<uint32, Entity::Object*> ObjectMap;

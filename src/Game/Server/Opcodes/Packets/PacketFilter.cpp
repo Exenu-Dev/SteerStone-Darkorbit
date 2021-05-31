@@ -17,6 +17,7 @@
 */
 
 #include "Player/Player.hpp"
+#include "Opcodes.hpp"
 
 namespace SteerStone { namespace Game { namespace Server {
 

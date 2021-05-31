@@ -39,8 +39,6 @@ namespace SteerStone { namespace Game { namespace Server {
         NotAuthenticated,       ///< Is not authenticated yet from server
     };
 
-    class Entity::Player;
-
     class GameSocket : public Core::Network::Socket
     {
         DISALLOW_COPY_AND_ASSIGN(GameSocket);

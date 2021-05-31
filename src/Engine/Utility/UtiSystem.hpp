@@ -18,7 +18,9 @@
 
 #pragma once
 #include <PCH/Precompiled.hpp>
-#include <Windows.h>
+#ifdef _WIN32
+    #include <Windows.h>
+#endif
 
 #include "Core/Core.hpp"
 
@@ -30,9 +32,7 @@ namespace SteerStone { namespace Core { namespace Utils {
     #ifdef _WIN32
         return GetCurrentThreadId();
     #elif  defined(__linux__)
-        long tid;
-        syscall(SYS_thr_self, &tid);
-        return static_cast<unsigned int>(tid);
+        return pthread_self();
     #endif
     }
 }
