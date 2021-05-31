@@ -62,10 +62,6 @@ namespace SteerStone { namespace Core { namespace Configuration {
 
         std::ifstream l_Stream(m_FileName, std::ifstream::in);
 
-         char result[ PATH_MAX ];
-        ssize_t count = readlink( "/proc/self/exe", result, PATH_MAX );
-        std::string test = std::string( result, (count > 0) ? count : 0 );
-        
         if (l_Stream.fail())
         {
             LOG_ERROR("Configuration", "Failed to load file %0: %1", m_FileName, strerror(errno));
