@@ -14,7 +14,7 @@ addons:
       - ubuntu-toolchain-r-test
       - sourceline: 'ppa:kzemek/boost'
     packages:
-      - g++-8.4.0
+      - g++-10
       - libboost1.58-dev
       - libboost-filesystem1.58-dev
       - libboost-iostreams1.58-dev
@@ -27,9 +27,6 @@ addons:
       - libreadline6-dev
       - zlib1g-dev
       - libbz2-dev
-
-services:
-  - mysql
 
 before_install:
   - git config user.email "travis@build.bot" && git config user.name "Travis CI"
