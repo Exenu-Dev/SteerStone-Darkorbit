@@ -74,7 +74,7 @@ namespace SteerStone { namespace Core { namespace Database {
         uint64 m_RowCount;                      ///< Row count
         uint32 m_FieldCount;                    ///< Field count
 
-        bool* m_IsNull;                      ///< Bind Null
+        char* m_IsNull;                      ///< Bind Null
         unsigned long* m_Length;                ///< Bind Length
         MYSQL_BIND* m_Bind;                     ///< Bind
 

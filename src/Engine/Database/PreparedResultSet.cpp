@@ -36,11 +36,11 @@ namespace SteerStone { namespace Core { namespace Database {
             return;
 
         /// IsNull and mLength is deleted at end of constructor when buffer is loaded into our storage
-        m_IsNull = new bool[m_FieldCount];
+        m_IsNull = new char[m_FieldCount];
         m_Length = new unsigned long[m_FieldCount];
         m_Bind = new MYSQL_BIND[m_FieldCount];
 
-        memset(m_IsNull, 0, sizeof(bool) * m_FieldCount);
+        memset(m_IsNull, 0, sizeof(char) * m_FieldCount);
         memset(m_Length, 0, sizeof(unsigned long) * m_FieldCount);
         memset(m_Bind, 0, sizeof(MYSQL_BIND) * m_FieldCount);
 
