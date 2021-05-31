@@ -40,7 +40,7 @@ namespace SteerStone { namespace Core { namespace Database {
         m_Length = new unsigned long[m_FieldCount];
         m_Bind = new MYSQL_BIND[m_FieldCount];
 
-        memset(m_IsNull, 0, sizeof(char) * m_FieldCount);
+        memset(m_IsNull, 0, sizeof(bool) * m_FieldCount);
         memset(m_Length, 0, sizeof(unsigned long) * m_FieldCount);
         memset(m_Bind, 0, sizeof(MYSQL_BIND) * m_FieldCount);
 
