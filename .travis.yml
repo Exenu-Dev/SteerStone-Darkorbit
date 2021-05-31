@@ -35,11 +35,14 @@ before_install:
 install:
   - mkdir bin
   - cd bin
-  - cmake ../ -DCMAKE_BUILD_TYPE=Debug
+  - cmake ../ -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=check_install
+  - cd ..
 
 script:
   - export CC=gcc-7
   - export CXX=g++-7
   - $CXX --version
   - cd bin
+  - pwd
   - make -j 14 -k
+  - cd check_install/bin
