@@ -22,7 +22,7 @@ jobs:
     - uses: actions/checkout@v2
 
     - name: Boost
-      run: sudo apt-get update && sudo apt-get install -yq libboost1.65-dev
+      run: sudo apt-get update && sudo apt-get install -yq libboost-all-dev
 
     - name: Configure CMake
       # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
