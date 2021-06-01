@@ -6,6 +6,10 @@ on:
   pull_request:
     branches: [ linux ]
 
+strategy:
+  matrix:
+    compiler: [gcc, clang]
+
 env:
   # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
   BUILD_TYPE: Release
