@@ -214,7 +214,6 @@ namespace SteerStone { namespace Game { namespace Entity {
                     /// Now calculate damage
                     int32 l_Damage       = CalculateDamageDone();
                     int32 l_ShieldDamage = 0;
-                    l_Damage = 10;
                     CalculateDamageTaken(GetTarget(), l_Damage, l_ShieldDamage);
 
                     int32 l_HitPoints = GetTarget()->ToUnit()->GetHitPoints() - l_Damage;
