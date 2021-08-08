@@ -12,8 +12,8 @@ PolicyPort = 843
 
 ## BindIP
 #	Description: Bind server to Ip/Host Name
-#	Default: "127.0.0.1" - (Bind to all IPs on the system)
-BindIP = "127.0.0.1"
+#	Default: "0.0.0.0" - (Bind to all IPs on the system)
+BindIP = "0.0.0.0"
 
 ## Child Listeners
 #	Description: Amount of Child Listeners to spawn
