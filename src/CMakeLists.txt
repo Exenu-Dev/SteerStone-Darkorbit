@@ -17,6 +17,5 @@
 
 # Engine must be included first
 add_subdirectory(Engine)
-add_subdirectory(Chat)
 add_subdirectory(Policy)
 add_subdirectory(Game)
