@@ -1,6 +1,6 @@
 /*
 * Liam Ashdown
-* Copyright (C) 2019
+* Copyright (C) 2021
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -16,6 +16,9 @@
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include <boost/algorithm/string.hpp>
+
+#include "Config/Config.hpp"
 #include "Socket.hpp"
 #include "World.hpp"
 #include "Player.hpp"
@@ -57,19 +60,25 @@ namespace SteerStone { namespace Game { namespace Server {
                 if (m_AuthenticateState == Authenticated::NotAuthenticated)
                 {
                     std::string l_Buffer = (char*)& l_BufferVec[0];
-                    l_Buffer.resize(5);
 
-                    if (l_Buffer == "LOGIN")
+                    if (!CheckForWebPacket(l_Buffer))
                     {
-                        HandleLoginPacket(new ClientPacket((char*)& l_BufferVec[0]));
+                        l_Buffer.resize(5);
 
-                        /// The "!" is the 'fake' packet header, see HandleLoginPacket function which explains why I am doing this
-                        m_Player->QueuePacket(new ClientPacket("!|" + (std::string)(char*) & l_BufferVec[0]));
+                        if (l_Buffer == "LOGIN")
+                        {
+                            HandleLoginPacket(new ClientPacket((char*)&l_BufferVec[0]));
 
-                        m_AuthenticateState = Authenticated::Authenticed;
+                            /// The "!" is the 'fake' packet header, see HandleLoginPacket function which explains why I am doing this
+                            m_Player->QueuePacket(new ClientPacket("!|" + (std::string)(char*)&l_BufferVec[0]));
 
-                        return Core::Network::ProcessState::Successful;
+                            m_AuthenticateState = Authenticated::Authenticed;
+
+                            return Core::Network::ProcessState::Successful;
+                        }
                     }
+                    else
+                        return Core::Network::ProcessState::Successful;
 
                     return Core::Network::ProcessState::Error;
                 }
@@ -137,6 +146,43 @@ namespace SteerStone { namespace Game { namespace Server {
         }
 
         return Core::Network::ProcessState::Successful;
+    }
+
+    /// Check for Web Packet
+    /// @p_Buffer : Buffer of packet
+    bool GameSocket::CheckForWebPacket(std::string p_Buffer)
+    {
+        /// Check If Web interaction is enabled
+        static const bool l_WebRequestEnabled = sConfigManager->GetBool("WebEnabled", false);
+
+        if (!l_WebRequestEnabled)
+            return false;
+
+        /// Secret Key
+        static const std::string l_SecretKey = sConfigManager->GetString("WebSecretKey").c_str();
+
+        bool l_Result = boost::algorithm::contains(p_Buffer, l_SecretKey);
+
+        /// It is a web packet, lets handle it
+        if (l_Result)
+        {
+            /// First we need to strip the secret key
+            std::string l_Buffer = SteerStone::Core::Utils::String::ReplaceAll(p_Buffer, l_SecretKey + '|', "");
+
+            std::string dwasdas = l_Buffer.substr(0, 2);
+
+            int l_Header = std::stoi(l_Buffer.substr(0, 2));
+
+            ClientOpCodes l_Opcode = static_cast<ClientOpCodes>(*(char*)&l_Header);
+
+            OpcodeHandler const* l_OpCodeHandler = sOpCode->GetClientPacket(l_Opcode);
+
+            ExecutePacket(l_OpCodeHandler, new ClientPacket(l_Buffer));
+
+            return true;
+        }
+
+        return false;
     }
 
     /// Handle Initial part of logging into game server

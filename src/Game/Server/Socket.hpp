@@ -1,6 +1,6 @@
 /*
 * Liam Ashdown
-* Copyright (C) 2019
+* Copyright (C) 2021
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -128,6 +128,10 @@ namespace SteerStone { namespace Game { namespace Server {
             /// @p_ClientPacket : Packet recieved from client
             void HandleDebugInitializePlayer(ClientPacket* p_Packet);   
 
+            /// Web Handler
+            /// @p_ClientPacket : Packet recieved from Web
+            void HandleCheckOnline(ClientPacket* p_Packet);
+
             /// Pointer to Player
             Entity::Player* ToPlayer();
             /// Delete Player
@@ -140,6 +144,10 @@ namespace SteerStone { namespace Game { namespace Server {
         private:
             /// Handle incoming data
             virtual Core::Network::ProcessState ProcessIncomingData() override;
+
+            /// Check for Web Packet
+            /// @p_Buffer : Buffer of packet
+            bool CheckForWebPacket(std::string p_Buffer);
 
         private:
             Authenticated m_AuthenticateState;

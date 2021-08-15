@@ -1,6 +1,6 @@
 /*
 * Liam Ashdown
-* Copyright (C) 2019
+* Copyright (C) 2021
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -28,6 +28,7 @@ enum class PacketStatus
 {
     STATUS_UNHANDLED,           ///< Packet not handled
     STATUS_AUTHENTICATION,      ///< Player has not been created yet
+    STATUS_WEB,                 ///< Packet has came through the web
     STATUS_LOGGED_IN            ///< Player is created and in world        
 };
 
@@ -35,11 +36,13 @@ enum class PacketProcess
 {  
     PROCESS_WORLD_THREAD,       ///< Process Packet in Player::Update           (Thread Unsafe)
     PROCESS_MAP_THREAD,         ///< Process Packet in Map::Update              (Thread Safe)
-    PROCESS_PLAYER_THREAD       ///< Process Packet in Socket::ReadIncomingData (For non implemented packets)
+    PROCESS_PLAYER_THREAD       ///< Process Packet in Socket::ReadIncomingData (For non implemented packets) 
+                                ///< TODO; Call this network thread? Because the CMS uses this to send packets
 };
 
 enum ClientOpCodes : uint8
 {
+    /// Client
     CLIENT_PACKET_LOGIN                 = 0x21,
     CLIENT_PACKET_CHANGE_LASER          = 0x75,
     CLIENT_PACKET_CHANGE_ROCKET         = 0x64,
@@ -55,6 +58,10 @@ enum ClientOpCodes : uint8
     CLIENT_PACKET_CANCEL_LOG_OUT        = 0x6F,
     CLIENT_PACKET_LOOT_CARGO            = 0x78,
     CLIENT_PACKET_UPDATE_SETTINGS       = 0x41,
+
+    /// Web
+    WEB_PACKET_CHECK_ONLINE             = 0x22,
+
     CLIENT_MAX_OPCODE                   = 0x7B
 };
 
@@ -95,6 +102,9 @@ enum ServerOpCodes : uint8
     SERVER_PACKET_CARGO_BAY_FULL        = 0x66,
     SERVER_PACKET_SHOOT_ROCKET          = 0x77,
     SERVER_PACKET_CROSS_HAIR            = 0x36,
+
+    /// Web Packets
+    SERVER_PACKET_CHECK_ONLINE          = 0x22,
 
     /// Debug Headless Packets
     SERVER_PACKET_HEADLESS_MOVE         = 0x21,
@@ -161,6 +171,7 @@ namespace SteerStone { namespace Game { namespace Server {
         private:
             static OpcodeHandler const m_EmptyHandler;      ///< Empty handler if client packet has not been given a handler yet
             OpCodeMap m_ClientOpCodes;                      ///< Holds client packets
+            OpCodeMap m_WebOpCodes;                         ///< Holds web packets
             OpCodeMap m_ServerOpCodes;                      ///< Holds server packets
     };
 

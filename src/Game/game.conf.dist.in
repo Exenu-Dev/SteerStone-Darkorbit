@@ -3,6 +3,7 @@
 ### SECTION INDEX ###
 #   SERVER SETTINGS
 #   MYSQL SETTINGS
+# 	WEB SETTINGS
 #   PLAYER SETTINGS
 # 	MAP SETTINGS
 # 	MOB SETTINGS
@@ -41,6 +42,19 @@ GameWorkerThreads = 1
 #	Description: Amount of MySQL instances to spawn
 #   Default:     5 (max 5)
 MySQLInstances = 5
+
+### WEB SETTINGS ###
+
+## Enable CMS -> Server Communication
+#	Description: Enable CMS and Server to communicate with each other
+#   Default:     1 - Enabled
+#				 0 - Disabled
+WebEnabled = 1
+
+## Web Secret Key
+#	Description: The secret key the Web sends to verifiy the Web request is valid (prevents a random person sending unauthorized web requests).
+#   Default:     "RANDOM_SECRET_KEY"
+WebSecretKey = "RANDOM_SECRET_KEY"
 
 ### PLAYER SETTINGS ###
 

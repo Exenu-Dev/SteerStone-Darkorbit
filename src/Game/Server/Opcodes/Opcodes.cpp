@@ -1,6 +1,6 @@
 /*
 * Liam Ashdown
-* Copyright (C) 2019
+* Copyright (C) 2021
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -71,6 +71,11 @@ namespace SteerStone { namespace Game { namespace Server {
         //////////////////////////////////////////////////////////////////////////
         //////////////////////////////////////////////////////////////////////////
 
+        StoreClientPacket(ClientOpCodes::WEB_PACKET_CHECK_ONLINE,          "WEB_PACKET_CHECK_ONLINE",         PacketStatus::STATUS_WEB,           PacketProcess::PROCESS_PLAYER_THREAD, &GameSocket::HandleCheckOnline          );
+
+        //////////////////////////////////////////////////////////////////////////
+        //////////////////////////////////////////////////////////////////////////
+
         StoreServerPacket(ServerOpCodes::SERVER_PACKET_INITIALIZE_SHIP,     "SERVER_PACKET_INITIALIZE_SHIP",        &GameSocket::HandleServer);
         StoreServerPacket(ServerOpCodes::SERVER_PACKET_MAP_UPDATE,          "SERVER_PACKET_MAP_UPDATE",             &GameSocket::HandleServer);
         StoreServerPacket(ServerOpCodes::SERVER_PACKET_MINI_MAP_UPDATE,     "SERVER_PACKET_MINI_MAP_UPDATE",        &GameSocket::HandleServer);
@@ -103,6 +108,9 @@ namespace SteerStone { namespace Game { namespace Server {
         StoreServerPacket(ServerOpCodes::SERVER_PACKET_REMOVE_CARGO,        "SERVER_PACKET_REMOVE_CARGO",           &GameSocket::HandleServer);
         StoreServerPacket(ServerOpCodes::SERVER_PACKET_CROSS_HAIR,          "SERVER_PACKET_CROSS_HAIR",             &GameSocket::HandleServer);
         StoreServerPacket(ServerOpCodes::SERVER_PACKET_TARGET_HEALTH,       "SERVER_PACKET_TARGET_HEALTH",          &GameSocket::HandleServer);
+
+        /// Web Packets
+        StoreServerPacket(ServerOpCodes::SERVER_PACKET_CHECK_ONLINE,        "SERVER_PACKET_CHECK_ONLINE",           &GameSocket::HandleServer);
 
         /// Debug Headless Packets
         StoreServerPacket(ServerOpCodes::SERVER_PACKET_HEADLESS_MOVE,       "SERVER_PACKET_HEADLESS_MOVE",      &GameSocket::HandleServer);
