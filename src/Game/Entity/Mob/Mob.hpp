@@ -23,7 +23,6 @@
 #include "Unit.hpp"
 
 #define DISTANCE_AWAY_FROM_BORDER 100          ///< Distance away from border
-#define MOVEMENT_INTERVAL 1000
 #define MAX_LAST_TIME_ATTACKED 10000
 
 namespace SteerStone { namespace Game { namespace Map {
@@ -78,6 +77,12 @@ namespace SteerStone { namespace Game { namespace Entity {
         /// Update Movement
         /// @p_Diff : Execution Time
         void UpdateMovement(uint32 const p_Diff);
+        /// Handle Roaming
+        /// @p_Distance : Distance from target
+        /// @p_PositionX : Position X
+        /// @p_PositionY : Position Y
+        /// @p_Diff : Execution Time
+        void HandleRoaming(const float p_Distance, float p_PositionX, float p_PositionY, uint32 const p_Diff);
 
     public:
         ///////////////////////////////////////////

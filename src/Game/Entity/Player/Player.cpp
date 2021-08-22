@@ -282,8 +282,7 @@ namespace SteerStone { namespace Game { namespace Entity {
         }
     }
     /// Save Player details to database
-    /// @p_Asynchronous : Use Async connection
-    void Player::SaveToDB(bool p_Asynchronous)
+    void Player::SaveToDB()
     {
         Core::Database::PreparedStatement* l_PreparedStatement = GameDatabase.GetPrepareStatement();
         l_PreparedStatement->PrepareStatement("UPDATE users INNER JOIN user_settings ON user_settings.user_id = users.id "
@@ -329,17 +328,13 @@ namespace SteerStone { namespace Game { namespace Entity {
         l_PreparedStatement->SetBool(33, m_AutoChangeAmmo);
         l_PreparedStatement->SetBool(34, m_EnableBuyFast);
         l_PreparedStatement->SetUint32(35, m_Id);
+        l_PreparedStatement->ExecuteStatement();
 
-        if (p_Asynchronous)
-            m_OperatorProcessor.AddOperator(GameDatabase.PrepareOperator(l_PreparedStatement));
-        else
-            l_PreparedStatement->ExecuteStatement();
-
-        SaveShipToDB(p_Asynchronous);
+        SaveShipToDB();
     }
     /// Save Ship details to database
     /// @p_Asynchronous : Use Async connection
-    void Player::SaveShipToDB(bool p_Asynchronous)
+    void Player::SaveShipToDB()
     {
         Core::Database::PreparedStatement* l_PreparedStatement = GameDatabase.GetPrepareStatement();
         l_PreparedStatement->PrepareStatement("UPDATE user_ships SET type = ?, cargo_space = ?, "
@@ -348,11 +343,11 @@ namespace SteerStone { namespace Game { namespace Entity {
             "battery_lcb_10 = ?, battery_mcb_25 = ?, battery_mcb_50 = ?, battery_ucb_100 = ?, battery_sab_50 = ?, rocket_r310 = ?, " 
             "rocket_plt_2026 = ?, rocket_plt_2021 = ?, mines = ?, smart_bombs = ?, instant_shields = ? WHERE user_id = ?");
 
-        l_PreparedStatement->SetUint16(0, m_ShipType);
-        l_PreparedStatement->SetUint32(1, m_CargoSpace);
-        l_PreparedStatement->SetFloat(2,  GetSpline()->GetPositionX());
-        l_PreparedStatement->SetFloat(3,  GetSpline()->GetPositionY());
-        l_PreparedStatement->SetUint32(4, GetMap()->GetId());
+        l_PreparedStatement->SetUint16(0,  m_ShipType);
+        l_PreparedStatement->SetUint32(1,  m_CargoSpace);
+        l_PreparedStatement->SetFloat(2,   GetSpline()->GetPositionX());
+        l_PreparedStatement->SetFloat(3,   GetSpline()->GetPositionY());
+        l_PreparedStatement->SetUint32(4,  GetMap()->GetId());
         l_PreparedStatement->SetBool(5,    m_UseSystemFont);
         l_PreparedStatement->SetUint32(6,  m_Resources[0]);
         l_PreparedStatement->SetUint32(7,  m_Resources[1]);
@@ -375,11 +370,7 @@ namespace SteerStone { namespace Game { namespace Entity {
         l_PreparedStatement->SetUint32(24, m_Ammo.m_SmartBombs);
         l_PreparedStatement->SetUint32(25, m_Ammo.m_InstantShields);
         l_PreparedStatement->SetUint32(26, m_Id);
-
-        if (p_Asynchronous)
-            m_OperatorProcessor.AddOperator(GameDatabase.PrepareOperator(l_PreparedStatement));
-        else
-            l_PreparedStatement->ExecuteStatement();
+        l_PreparedStatement->ExecuteStatement();
     }
     /// Return Drone Level
     /// @p_Drone : Drone
@@ -529,7 +520,7 @@ namespace SteerStone { namespace Game { namespace Entity {
 
         m_IntervalNextSave.Update(p_Diff);
         if (m_IntervalNextSave.Passed())
-            SaveToDB(true);
+            SaveToDB();
 
         m_OperatorProcessor.ProcessOperators();
 

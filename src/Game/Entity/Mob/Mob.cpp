@@ -120,9 +120,7 @@ namespace SteerStone { namespace Game { namespace Entity {
     /// @p_Diff : Execution Time
     void Mob::UpdateMovement(uint32 const p_Diff)
     {
-        m_IntervalMoveTimer.Update(p_Diff);
-        if (!m_IntervalMoveTimer.Passed())
-            return;
+        /// TODO; Do we need to update movement every 1 second?
 
         switch (m_Behaviour)
         {
@@ -201,30 +199,7 @@ namespace SteerStone { namespace Game { namespace Entity {
                     break;
                 }
 
-                /// If player is more than our min distance, start following player
-                if (l_Distance > sWorldManager->GetIntConfig(World::IntConfigs::INT_CONFIG_MIN_FOLLOW_DISTANCE))
-                    GetSpline()->Move(l_PositionX, l_PositionY);
-                /// Check if we are too close to target, if so - move back
-                else if (l_Distance < sWorldManager->GetIntConfig(World::IntConfigs::INT_CONFIG_MIN_FOLLOW_DISTANCE))
-                {
-                    float l_Degree = Core::Utils::FloatRandom(0, 360) * M_PI / 180;
-
-                    l_PositionX += std::abs(m_RandomDistanceFromPlayerX) * std::cos(l_Degree);
-                    l_PositionY += std::abs(m_RandomDistanceFromPlayerY) * std::sin(l_Degree);
-
-                    GetSpline()->Move(l_PositionX, l_PositionY);
-                }
-
-                /// If we are not attacking, roam around the player
-                if (!IsAttacking())
-                {
-                    float l_Degree = Core::Utils::FloatRandom(0, 360) * M_PI / 180;
-
-                    l_PositionX += std::abs(m_RandomDistanceFromPlayerX) * std::cos(l_Degree);
-                    l_PositionY += std::abs(m_RandomDistanceFromPlayerY) * std::sin(l_Degree);
-
-                    GetSpline()->Move(l_PositionX, l_PositionY);
-                }
+                HandleRoaming(l_Distance, l_PositionX, l_PositionY, p_Diff);
             }
             break;
             /// Find closest player, and move to player
@@ -312,21 +287,35 @@ namespace SteerStone { namespace Game { namespace Entity {
                     break;
                 }
 
-                /// If player is more than our min distance, start following player
-                if (l_Distance > sWorldManager->GetIntConfig(World::IntConfigs::INT_CONFIG_MIN_FOLLOW_DISTANCE))
-                    GetSpline()->Move(l_PositionX, l_PositionY);
-                /// Check if we are too close to target, if so - move back
-                else if (l_Distance < sWorldManager->GetIntConfig(World::IntConfigs::INT_CONFIG_MIN_FOLLOW_DISTANCE))
-                {
-                    float l_Degree = Core::Utils::FloatRandom(0, 360) * M_PI / 180;
-
-                    l_PositionX += std::abs(m_RandomDistanceFromPlayerX) * std::cos(l_Degree);
-                    l_PositionY += std::abs(m_RandomDistanceFromPlayerY) * std::sin(l_Degree);
-
-                    GetSpline()->Move(l_PositionX, l_PositionY);
-                }
+                HandleRoaming(l_Distance, l_PositionX, l_PositionY, p_Diff);
             }
             break;
+        }
+    }
+    /// Handle Roaming
+    /// @p_Distance : Distance from target
+    /// @p_PositionX : Position X
+    /// @p_PositionY : Position Y
+    /// @p_Diff : Execution Time
+    void Mob::HandleRoaming(const float p_Distance, float p_PositionX, float p_PositionY, uint32 const p_Diff)
+    {
+        /// Movement Update
+        m_IntervalMoveTimer.Update(p_Diff);
+        if (!m_IntervalMoveTimer.Passed())
+            return;
+
+        /// If player is more than our min distance, start following player
+        if (p_Distance > sWorldManager->GetIntConfig(World::IntConfigs::INT_CONFIG_MIN_FOLLOW_DISTANCE))
+            GetSpline()->Move(p_PositionX, p_PositionY);
+        /// Check if we are too close to target, if so - move back
+        else if (p_Distance < sWorldManager->GetIntConfig(World::IntConfigs::INT_CONFIG_MIN_FOLLOW_DISTANCE))
+        {
+            float l_Degree = Core::Utils::FloatRandom(0, 360) * M_PI / 180;
+
+            p_PositionX += std::abs(m_RandomDistanceFromPlayerX) * std::cos(l_Degree);
+            p_PositionY += std::abs(m_RandomDistanceFromPlayerY) * std::sin(l_Degree);
+
+            GetSpline()->Move(p_PositionX, p_PositionY);
         }
     }
 

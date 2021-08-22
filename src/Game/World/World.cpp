@@ -79,6 +79,11 @@ namespace SteerStone { namespace Game { namespace World {
 
         sZoneManager->LoadMaps();
     }
+    /// Get Player Count
+    uint32 Base::GetPlayerCount()
+    {
+        return m_Players.size();
+    }
 
     ///////////////////////////////////////////
     //                 DATABASE

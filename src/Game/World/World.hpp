@@ -86,6 +86,8 @@ namespace SteerStone { namespace Game { namespace World {
         bool StopWorld() const;
         /// Load the World
         void Load();
+        /// Get Player Count
+        uint32 GetPlayerCount();
 
         ///////////////////////////////////////////
         //             CONFIGURATION

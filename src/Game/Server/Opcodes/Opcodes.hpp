@@ -61,6 +61,7 @@ enum ClientOpCodes : uint8
 
     /// Web
     WEB_PACKET_CHECK_ONLINE             = 0x22,
+    WEB_PACKET_GET_ONLINE_COUNT         = 0x23,
 
     CLIENT_MAX_OPCODE                   = 0x7B
 };

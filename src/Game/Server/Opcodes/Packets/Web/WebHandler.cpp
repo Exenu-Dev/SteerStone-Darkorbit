@@ -19,7 +19,6 @@
 #include "Socket.hpp"
 #include "Player.hpp"
 #include "World.hpp"
-#include "Server/WebPackets.hpp"
 #include "GameFlags.hpp"
 
 /// Note;
@@ -39,6 +38,13 @@ namespace SteerStone { namespace Game { namespace Server {
         char l_Online = (l_Player ? '1' : '0');
 
         Write(&l_Online, sizeof(l_Online));
+    }
+    /// Web Handler
+    /// @p_ClientPacket : Packet recieved from Web
+    void GameSocket::HandleGetOnlineCount(ClientPacket* p_Packet)
+    {
+        uint32 l_Count = sWorldManager->GetPlayerCount();
+        Write((const char*)&l_Count, sizeof(l_Count));
     }
 }   ///< namespace Server
 }   ///< namespace Game

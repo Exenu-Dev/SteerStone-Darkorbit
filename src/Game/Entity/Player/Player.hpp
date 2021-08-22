@@ -127,11 +127,9 @@ namespace SteerStone { namespace Game { namespace Entity {
         void LoadDrones();
     public:
         /// Save Player details to database
-        /// @p_Asynchronous : Use Async connection
-        void SaveToDB(bool p_Asynchronous = false);
+        void SaveToDB();
         /// Save Ship details to database
-        /// @p_Asynchronous : Use Async connection
-        void SaveShipToDB(bool p_Asynchronous = false);
+        void SaveShipToDB();
     private:
         /// Return Drone Level
         /// @p_Drone : Drone

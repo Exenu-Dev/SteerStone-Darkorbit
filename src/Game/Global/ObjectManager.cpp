@@ -51,7 +51,7 @@ namespace SteerStone { namespace Game { namespace Global {
         l_PreparedStatement->PrepareStatement("SELECT entry, name, type, weapon_state, hit_points, shield, shield_resistance, min_damage, max_damage, behaviour, respawn_timer, min_movement_time, max_movement_time, "
             "speed, experience, honor, credits, uridium, "
             "prometium, endurium, terbium, prometid, duranium, promerium, xenomit, seprom, palladium "
-            "FROM mob_template");
+            "FROM mob_templates");
         std::unique_ptr<Core::Database::PreparedResultSet> l_PreparedResultSet = l_PreparedStatement->ExecuteStatement();
 
         uint32 l_Counter = 0;
@@ -108,7 +108,7 @@ namespace SteerStone { namespace Game { namespace Global {
 
         Core::Database::PreparedStatement* l_PreparedStatement = GameDatabase.GetPrepareStatement();
         l_PreparedStatement->PrepareStatement("SELECT portal_id, name, company, type, map_id, position_x, position_y, to_map_id, to_position_x, to_position_y "
-            "FROM portal_template");
+            "FROM portal_templates");
         std::unique_ptr<Core::Database::PreparedResultSet> l_PreparedResultSet = l_PreparedStatement->ExecuteStatement();
         
         uint32 l_Counter = 0;
@@ -147,7 +147,7 @@ namespace SteerStone { namespace Game { namespace Global {
 
         Core::Database::PreparedStatement* l_PreparedStatement = GameDatabase.GetPrepareStatement();
         l_PreparedStatement->PrepareStatement("SELECT id, name, company, type, map_id, peace, position_x, position_y "
-            "FROM station_template");
+            "FROM station_templates");
         std::unique_ptr<Core::Database::PreparedResultSet> l_PreparedResultSet = l_PreparedStatement->ExecuteStatement();
 
         uint32 l_Counter = 0;

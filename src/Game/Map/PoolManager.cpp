@@ -118,7 +118,7 @@ namespace SteerStone { namespace Game { namespace Map {
                             l_Mob->m_Resources[Entity::Resource::RESOURCE_SEPROM]    = l_MobTemplate->Seprom;
                             l_Mob->GetSpline()->SetSpeed(l_MobTemplate->Speed);
                             l_Mob->SetName(l_MobTemplate->Name);
-                            l_Mob->m_IntervalMoveTimer.SetInterval(MOVEMENT_INTERVAL);
+                            l_Mob->m_IntervalMoveTimer.SetInterval(Core::Utils::UInt32Random(l_MobTemplate->MinMovementTime, l_MobTemplate->MaxMovementTime));
                             l_Mob->m_IntervalRespawnTimer.SetInterval(l_MobTemplate->RespawnTimer);
                             l_Mob->SetMap(m_Map);
 

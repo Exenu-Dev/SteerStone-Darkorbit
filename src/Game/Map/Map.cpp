@@ -473,7 +473,7 @@ namespace SteerStone { namespace Game { namespace Map {
             l_Itr->first->ToPlayer()->SetIsJumping(false);
 
             // Save Player Stats to Database
-            l_Itr->first->ToPlayer()->SaveToDB(true);
+            l_Itr->first->ToPlayer()->SaveToDB();
 
             l_Itr = m_PlayersToJump.erase(l_Itr);
         }

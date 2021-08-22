@@ -72,6 +72,7 @@ namespace SteerStone { namespace Game { namespace Server {
         //////////////////////////////////////////////////////////////////////////
 
         StoreClientPacket(ClientOpCodes::WEB_PACKET_CHECK_ONLINE,          "WEB_PACKET_CHECK_ONLINE",         PacketStatus::STATUS_WEB,           PacketProcess::PROCESS_PLAYER_THREAD, &GameSocket::HandleCheckOnline          );
+        StoreClientPacket(ClientOpCodes::WEB_PACKET_GET_ONLINE_COUNT,      "WEB_PACKET_GET_ONLINE_COUNT",     PacketStatus::STATUS_WEB,           PacketProcess::PROCESS_PLAYER_THREAD, &GameSocket::HandleGetOnlineCount       );
 
         //////////////////////////////////////////////////////////////////////////
         //////////////////////////////////////////////////////////////////////////
