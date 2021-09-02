@@ -48,7 +48,6 @@ namespace SteerStone { namespace Game { namespace Entity {
         bool IsWeapon()   const { return m_IsWeapon; }
         bool IsSpeed()    const { return m_IsSpeed;  }
         bool IsShield()   const { return m_IsShield; }
-        uint32 GetCount() const { return m_Count;    }
 
         ItemTemplate const* GetItemTemplate() { return m_ItemTemplate; }
 
@@ -56,7 +55,6 @@ namespace SteerStone { namespace Game { namespace Entity {
     //////////////////////////////////////////////////////////////////////////
 
     private:
-        uint32 m_Count;
         bool m_IsWeapon;
         bool m_IsSpeed;
         bool m_IsShield;

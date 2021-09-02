@@ -44,7 +44,7 @@ namespace SteerStone { namespace Game { namespace Entity {
     void Inventory::LoadInventory()
     {
         Core::Database::PreparedStatement* l_PreparedStatement = GameDatabase.GetPrepareStatement();
-        l_PreparedStatement->PrepareStatement("SELECT entry, count FROM account_inventory WHERE id = ? AND equiped = 1");
+        l_PreparedStatement->PrepareStatement("SELECT id, entry_id FROM user_inventories WHERE user_id = ? AND equipped = 1 AND preset = 1");
         l_PreparedStatement->SetUint32(0, m_Player->GetId());
         std::unique_ptr<Core::Database::PreparedResultSet> l_PreparedResultSet = l_PreparedStatement->ExecuteStatement();
 
@@ -54,11 +54,10 @@ namespace SteerStone { namespace Game { namespace Entity {
             {
                 Core::Database::ResultSet* l_Result = l_PreparedResultSet->FetchResult();
 
-                if (ItemTemplate const* l_ItemTemplate = sObjectManager->GetItemTemplate(l_Result[0].GetUInt32()))
+                if (ItemTemplate const* l_ItemTemplate = sObjectManager->GetItemTemplate(l_Result[1].GetUInt32()))
                 {
                     Item l_Item;
                     l_Item.m_ItemTemplate   = l_ItemTemplate;
-                    l_Item.m_Count          = l_Result[1].GetUInt32();
                     
                     switch (l_ItemTemplate->Type)
                     {
@@ -80,12 +79,11 @@ namespace SteerStone { namespace Game { namespace Entity {
                 }
                 else
                 {
-                    LOG_WARNING("Inventory", "Cannot Item with entry %0 deleting from player inventory!", l_Result[0].GetUInt32());
+                    LOG_WARNING("Inventory", "Cannot find Item with entry %0 deleting from player inventory!", l_Result[1].GetUInt32());
 
                     Core::Database::PreparedStatement* l_PreparedStatementDelete = GameDatabase.GetPrepareStatement();
-                    l_PreparedStatementDelete->PrepareStatement("DELETE FROM account_inventory WHERE entry = ? AND id = ?");
+                    l_PreparedStatementDelete->PrepareStatement("DELETE FROM account_inventory WHERE id = ?");
                     l_PreparedStatementDelete->SetUint32(0, l_Result[0].GetUInt32());
-                    l_PreparedStatementDelete->SetUint32(1, m_Player->GetId());
                     l_PreparedStatementDelete->ExecuteStatement();
                 }
 
@@ -109,30 +107,25 @@ namespace SteerStone { namespace Game { namespace Entity {
         {
             if (l_Itr.IsWeapon())
             {
-                for (uint32 l_I = 0; l_I < l_Itr.GetCount(); l_I++)
-                {
-                    l_Damage += l_Itr.GetItemTemplate()->Value;
-                    if (l_Itr.GetItemTemplate()->Name == "LF-3")
-                        l_LF3WeaponCount++;
 
-                    m_WeaponCount++;
-                }
+                l_Damage += l_Itr.GetItemTemplate()->Value;
+                if (l_Itr.GetItemTemplate()->Name == "LF-3")
+                    l_LF3WeaponCount++;
+
+                m_WeaponCount++;
+                
             }
             else if (l_Itr.IsSpeed())
             {
-                for (uint32 l_I = 0; l_I < l_Itr.GetCount(); l_I++)
-                    l_Speed += l_Itr.GetItemTemplate()->Value;
+                l_Speed += l_Itr.GetItemTemplate()->Value;
             }
             else if (l_Itr.IsShield())
             {
-                for (uint32 l_I = 0; l_I < l_Itr.GetCount(); l_I++)
-                {
-                    l_Shield += l_Itr.GetItemTemplate()->Value;
+                l_Shield += l_Itr.GetItemTemplate()->Value;
 
-                    /// TODO; I think this is correct, we only use the highest percentage damage taken
-                    if (l_ShieldResistence < l_Itr.GetItemTemplate()->ValuePercentage)
-                        l_ShieldResistence = l_Itr.GetItemTemplate()->ValuePercentage;
-                }
+                /// TODO; I think this is correct, we only use the highest percentage damage taken
+                if (l_ShieldResistence < l_Itr.GetItemTemplate()->ValuePercentage)
+                    l_ShieldResistence = l_Itr.GetItemTemplate()->ValuePercentage;
             }
         }
 

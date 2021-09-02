@@ -175,7 +175,7 @@ namespace SteerStone { namespace Game { namespace Entity {
                 
             LoadShipFromDB();
             LoadDrones();
-            // m_Inventory.LoadInventory();
+            m_Inventory.LoadInventory();
 
 #ifdef  HEADLESS_DEBUG
             if (m_Id == 4)
@@ -539,6 +539,7 @@ namespace SteerStone { namespace Game { namespace Entity {
     /// @p_Log : Log text
     void Player::UpdateLogBook(std::string p_Log)
     {
+        return;
         Core::Database::PreparedStatement* l_PreparedStatement = GameDatabase.GetPrepareStatement();
         l_PreparedStatement->PrepareStatement("INSERT INTO log_book (id, text, date) VALUES (?, ?, NOW())");
         l_PreparedStatement->SetUint32(0, m_Id);
