@@ -132,6 +132,18 @@ namespace SteerStone { namespace Game { namespace Server { namespace Packets { n
         return &m_Buffer;
     }
 
+    /// SERVER_PACKET_CHANGE_CONFIG
+    PacketBuffer const* ChangeConfig::Write()
+    {
+        m_Buffer.AppendChar("CFG");
+        m_Buffer.AppendUInt16(Config);
+
+        m_Buffer.AppendEndSplitter();
+        m_Buffer.AppendCarriage();
+
+        return &m_Buffer;
+    }
+
 }   ///< namespace Ship
 }   ///< namespace Packets
 }   ///< namespace Server

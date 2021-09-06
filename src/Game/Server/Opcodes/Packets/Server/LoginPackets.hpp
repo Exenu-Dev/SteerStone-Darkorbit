@@ -25,8 +25,11 @@ namespace SteerStone { namespace Game { namespace Server { namespace Packets { n
     enum class InfoType
     {
         INFO_TYPE_SET_SETTINGS,
+        INFO_TYPE_SET_SHIELD,
+        INFO_TYPE_SET_SHIELD_HEALTH,
         INFO_TYPE_SET_ADMIN,
         INFO_TYPE_SET_CARGO_SPACE,
+        INFO_TYPE_SET_MESSAGE
     };
 
     /// SERVER_PACKET_PLAYER_INFO packet builder
@@ -36,13 +39,16 @@ namespace SteerStone { namespace Game { namespace Server { namespace Packets { n
             /// Constructor 
             PlayerInfo() : ServerPacket(ServerOpCodes::SERVER_PACKET_MISC_UPDATE)
             {
+                Message = "";
             }
 
             //////////////////////////////////////////////////////////////////////////
             //////////////////////////////////////////////////////////////////////////
 
+            std::string Message;
+
             /// Write the packet
-            PacketBuffer const* Write(InfoType p_InfoType, std::initializer_list<std::variant<uint32, bool>> p_Storage);
+            PacketBuffer const* Write(InfoType p_InfoType, std::initializer_list<std::variant<uint32, bool>> p_Storage = std::initializer_list<std::variant<uint32, bool>>());
     };
 
     /// SERVER_PACKET_INITIALIZE_SHIP packet builder

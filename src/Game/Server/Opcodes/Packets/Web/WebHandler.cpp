@@ -20,6 +20,7 @@
 #include "Player.hpp"
 #include "World.hpp"
 #include "GameFlags.hpp"
+#include "Server/LoginPackets.hpp"
 
 /// Note;
 /// I'm not using the Server Packets to send a response back.
@@ -45,6 +46,54 @@ namespace SteerStone { namespace Game { namespace Server {
     {
         uint32 l_Count = sWorldManager->GetPlayerCount();
         Write((const char*)&l_Count, sizeof(l_Count));
+    }
+    /// Web Handler
+    /// @p_ClientPacket : Packet recieved from Web
+    void GameSocket::HandleCanEquip(ClientPacket* p_Packet)
+    {
+        uint32 l_PlayerId = p_Packet->ReadUInt32();
+        char l_CanEquip = '0';
+
+        Entity::Player* l_Player = sWorldManager->FindPlayer(l_PlayerId);
+
+        if (l_Player)
+        {
+            if (l_Player->GetEvent() == EventType::EVENT_TYPE_STATION && !l_Player->IsInCombat())
+                l_CanEquip = '1';
+        }
+
+
+        Write(&l_CanEquip, sizeof(l_CanEquip));
+    }
+    /// Web Handler
+    /// @p_ClientPacket : Packet recieved from Web
+    void GameSocket::HandleUpdateInventory(ClientPacket* p_Packet)
+    {
+        uint32 l_PlayerId = p_Packet->ReadUInt32();
+
+        Entity::Player* l_Player = sWorldManager->FindPlayer(l_PlayerId);
+
+        if (l_Player)
+        {
+            if (l_Player->GetEvent() == EventType::EVENT_TYPE_STATION && !l_Player->IsInCombat())
+            {
+                /// Reload our inventory
+                l_Player->GetInventory()->LoadInventory();
+                l_Player->GetInventory()->CalculateStats();
+                
+                /// Send Packet
+                /// TODO; Shields are int32 but packet struct is asking for uint32 - could be a possible overflow?
+                /// TODO; Check if this packet is correct
+                l_Player->SendPacket(Server::Packets::Login::PlayerInfo().Write(Server::Packets::Login::InfoType::INFO_TYPE_SET_SHIELD_HEALTH,
+                    {
+                       (uint32)l_Player->GetHitPoints(),
+                       (uint32)l_Player->GetHitMaxPoints(),
+                       (uint32)l_Player->GetShield(),
+                       (uint32)l_Player->GetMaxShield(),
+                    }));
+
+            }
+        }
     }
 }   ///< namespace Server
 }   ///< namespace Game

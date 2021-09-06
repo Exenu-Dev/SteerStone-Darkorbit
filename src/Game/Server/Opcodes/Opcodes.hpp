@@ -58,10 +58,14 @@ enum ClientOpCodes : uint8
     CLIENT_PACKET_CANCEL_LOG_OUT        = 0x6F,
     CLIENT_PACKET_LOOT_CARGO            = 0x78,
     CLIENT_PACKET_UPDATE_SETTINGS       = 0x41,
+    CLIENT_PACKET_CHANGE_CONFIG         = 0x53,
+    CLIENT_PACKET_UNKNOWN               = 0x62,
 
     /// Web
     WEB_PACKET_CHECK_ONLINE             = 0x22,
     WEB_PACKET_GET_ONLINE_COUNT         = 0x23,
+    WEB_PACKET_CAN_EQUIP                = 0x24,
+    WEB_PACKET_UPDATE_INVENTORY         = 0x25,
 
     CLIENT_MAX_OPCODE                   = 0x7B
 };
@@ -103,6 +107,7 @@ enum ServerOpCodes : uint8
     SERVER_PACKET_CARGO_BAY_FULL        = 0x66,
     SERVER_PACKET_SHOOT_ROCKET          = 0x77,
     SERVER_PACKET_CROSS_HAIR            = 0x36,
+    SERVER_PACKET_CHANGE_CONFIG         = 0x53,
 
     /// Web Packets
     SERVER_PACKET_CHECK_ONLINE          = 0x22,

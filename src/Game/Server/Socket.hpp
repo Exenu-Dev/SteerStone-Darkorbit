@@ -95,6 +95,9 @@ namespace SteerStone { namespace Game { namespace Server {
             /// Ship Handler
             /// @p_ClientPacket : Packet recieved from client
             void HandleChangeRocket(ClientPacket* p_Packet);
+            /// Ship Handler
+            /// @p_ClientPacket : Packet recieved from client
+            void HandleChangeConfig(ClientPacket* p_Packet);
 
             /// Map Handler
             /// @p_ClientPacket : Packet recieved from client
@@ -134,6 +137,12 @@ namespace SteerStone { namespace Game { namespace Server {
             /// Web Handler
             /// @p_ClientPacket : Packet recieved from Web
             void HandleGetOnlineCount(ClientPacket* p_Packet);
+            /// Web Handler
+            /// @p_ClientPacket : Packet recieved from Web
+            void HandleCanEquip(ClientPacket* p_Packet);
+            /// Web Handler
+            /// @p_ClientPacket : Packet recieved from Web
+            void HandleUpdateInventory(ClientPacket* p_Packet);
 
             /// Pointer to Player
             Entity::Player* ToPlayer();

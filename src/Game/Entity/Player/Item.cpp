@@ -24,7 +24,6 @@ namespace SteerStone { namespace Game { namespace Entity {
     /// Constructor
     Item::Item()
     {
-        m_Count         = 0;
         m_IsWeapon      = false;
         m_IsSpeed       = false;
         m_IsShield      = false;

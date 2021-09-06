@@ -43,9 +43,13 @@ namespace SteerStone { namespace Game { namespace Entity {
     /// Load Inventory from database
     void Inventory::LoadInventory()
     {
+        // Clear Inventory
+        m_Items.clear();
+
         Core::Database::PreparedStatement* l_PreparedStatement = GameDatabase.GetPrepareStatement();
-        l_PreparedStatement->PrepareStatement("SELECT id, entry_id FROM user_inventories WHERE user_id = ? AND equipped = 1 AND preset = 1");
+        l_PreparedStatement->PrepareStatement("SELECT id, entry_id FROM user_inventories WHERE user_id = ? AND equipped = 1 AND preset = ?");
         l_PreparedStatement->SetUint32(0, m_Player->GetId());
+        l_PreparedStatement->SetUint16(1, m_Player->GetPreset());
         std::unique_ptr<Core::Database::PreparedResultSet> l_PreparedResultSet = l_PreparedStatement->ExecuteStatement();
 
         if (l_PreparedResultSet)

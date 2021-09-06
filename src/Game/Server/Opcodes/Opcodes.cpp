@@ -67,12 +67,16 @@ namespace SteerStone { namespace Game { namespace Server {
         StoreClientPacket(ClientOpCodes::CLIENT_PACKET_CANCEL_LOG_OUT,    "CLIENT_PACKET_CANCEL_LOG_OUT",     PacketStatus::STATUS_LOGGED_IN,      PacketProcess::PROCESS_WORLD_THREAD,  &GameSocket::HandleCancelLogout        );
         StoreClientPacket(ClientOpCodes::CLIENT_PACKET_LOOT_CARGO,        "CLIENT_PACKET_LOOT_CARGO",         PacketStatus::STATUS_LOGGED_IN,      PacketProcess::PROCESS_MAP_THREAD,    &GameSocket::HandleLootCargo           );
         StoreClientPacket(ClientOpCodes::CLIENT_PACKET_UPDATE_SETTINGS,   "CLIENT_PACKET_UPDATE_SETTINGS",    PacketStatus::STATUS_LOGGED_IN,      PacketProcess::PROCESS_PLAYER_THREAD, &GameSocket::HandleUpdateSettings      );
+        StoreClientPacket(ClientOpCodes::CLIENT_PACKET_CHANGE_CONFIG,     "CLIENT_PACKET_CHANGE_CONFIG",      PacketStatus::STATUS_LOGGED_IN,      PacketProcess::PROCESS_PLAYER_THREAD, &GameSocket::HandleChangeConfig        );
+        StoreClientPacket(ClientOpCodes::CLIENT_PACKET_UNKNOWN,           "CLIENT_PACKET_UNKNOWN",            PacketStatus::STATUS_UNHANDLED,      PacketProcess::PROCESS_PLAYER_THREAD, &GameSocket::HandleNULL                );
 
         //////////////////////////////////////////////////////////////////////////
         //////////////////////////////////////////////////////////////////////////
 
         StoreClientPacket(ClientOpCodes::WEB_PACKET_CHECK_ONLINE,          "WEB_PACKET_CHECK_ONLINE",         PacketStatus::STATUS_WEB,           PacketProcess::PROCESS_PLAYER_THREAD, &GameSocket::HandleCheckOnline          );
         StoreClientPacket(ClientOpCodes::WEB_PACKET_GET_ONLINE_COUNT,      "WEB_PACKET_GET_ONLINE_COUNT",     PacketStatus::STATUS_WEB,           PacketProcess::PROCESS_PLAYER_THREAD, &GameSocket::HandleGetOnlineCount       );
+        StoreClientPacket(ClientOpCodes::WEB_PACKET_CAN_EQUIP,             "WEB_PACKET_CAN_EQUIP",            PacketStatus::STATUS_WEB,           PacketProcess::PROCESS_PLAYER_THREAD, &GameSocket::HandleCanEquip             );
+        StoreClientPacket(ClientOpCodes::WEB_PACKET_UPDATE_INVENTORY,      "WEB_PACKET_UPDATE_INVENTORY",     PacketStatus::STATUS_WEB,           PacketProcess::PROCESS_PLAYER_THREAD, &GameSocket::HandleUpdateInventory      );
 
         //////////////////////////////////////////////////////////////////////////
         //////////////////////////////////////////////////////////////////////////
@@ -109,6 +113,7 @@ namespace SteerStone { namespace Game { namespace Server {
         StoreServerPacket(ServerOpCodes::SERVER_PACKET_REMOVE_CARGO,        "SERVER_PACKET_REMOVE_CARGO",           &GameSocket::HandleServer);
         StoreServerPacket(ServerOpCodes::SERVER_PACKET_CROSS_HAIR,          "SERVER_PACKET_CROSS_HAIR",             &GameSocket::HandleServer);
         StoreServerPacket(ServerOpCodes::SERVER_PACKET_TARGET_HEALTH,       "SERVER_PACKET_TARGET_HEALTH",          &GameSocket::HandleServer);
+        StoreServerPacket(ServerOpCodes::SERVER_PACKET_CHANGE_CONFIG,       "SERVER_PACKET_CHANGE_CONFIG",          &GameSocket::HandleServer);
 
         /// Web Packets
         StoreServerPacket(ServerOpCodes::SERVER_PACKET_CHECK_ONLINE,        "SERVER_PACKET_CHECK_ONLINE",           &GameSocket::HandleServer);

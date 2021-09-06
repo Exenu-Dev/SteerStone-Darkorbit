@@ -174,7 +174,7 @@ namespace SteerStone { namespace Game { namespace Entity {
             m_MinDamage         = p_MinDamage;
             m_MaxDamage         = p_MaxDamage;
             GetSpline()->SetSpeed(GetSpline()->GetSpeed() + p_Speed);
-            m_MaxShield         += p_Shield;
+            m_MaxShield         = p_Shield;
             m_Shield            = m_MaxShield;
             m_ShieldResistance  = p_ShieldResistance;
         }

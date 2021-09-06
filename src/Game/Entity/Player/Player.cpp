@@ -75,8 +75,10 @@ namespace SteerStone { namespace Game { namespace Entity {
         m_LoggingOut            = false;
         m_Event                 = EventType::EVENT_TYPE_NONE;
 
+        /// Timers
         m_IntervalNextSave.SetInterval(sWorldManager->GetIntConfig(World::IntConfigs::INT_CONFIG_SAVE_PLAYER_TO_DATABASE));
         m_IntervalRadiation.SetInterval(RADIATION_TIMER);
+        ConfigTimer.SetInterval(CONFIG_TIMER);
 
         m_AttackRange           = sWorldManager->GetIntConfig(World::IntConfigs::INT_CONFIG_PLAYER_ATTACK_RANGE);
 
@@ -197,7 +199,7 @@ namespace SteerStone { namespace Game { namespace Entity {
         l_PreparedStatement->PrepareStatement("SELECT type, speed, shield, max_shield, hit_points, max_hit_points, cargo_space, cargo_space_max, "
             "position_x, position_y, map_id, max_battery, max_rockets, use_system_font,"
             " prometium, endurium, terbium, xenomit, prometid, duranium, promerium, palladium, seprom,"
-            " battery_lcb_10, battery_mcb_25, battery_mcb_50, battery_ucb_100, battery_sab_50, rocket_r310, rocket_plt_2026, rocket_plt_2021, mines, smart_bombs, instant_shields FROM user_ships WHERE user_id = ?");
+            " battery_lcb_10, battery_mcb_25, battery_mcb_50, battery_ucb_100, battery_sab_50, rocket_r310, rocket_plt_2026, rocket_plt_2021, mines, smart_bombs, instant_shields, preset FROM user_ships WHERE user_id = ?");
         l_PreparedStatement->SetUint32(0, m_Id);
         std::unique_ptr<Core::Database::PreparedResultSet> l_PreparedResultSet = l_PreparedStatement->ExecuteStatement();
 
@@ -245,6 +247,8 @@ namespace SteerStone { namespace Game { namespace Entity {
             m_Ammo.m_Mines              = l_Result[31].GetInt32();
             m_Ammo.m_SmartBombs         = l_Result[32].GetInt32();
             m_Ammo.m_InstantShields     = l_Result[33].GetInt32();
+
+            m_Preset                    = l_Result[34].GetUInt8();
         }
         else
             LOG_ASSERT(false, "Player", "Failed to load ship data for player %0", m_Id);
@@ -518,6 +522,9 @@ namespace SteerStone { namespace Game { namespace Entity {
             break;
         }
 
+        /// Timers
+        ConfigTimer.Update(p_Diff);
+
         m_IntervalNextSave.Update(p_Diff);
         if (m_IntervalNextSave.Passed())
             SaveToDB();
@@ -766,6 +773,36 @@ namespace SteerStone { namespace Game { namespace Entity {
         l_BatteryAmmoPacket.BatteryUCB100     = m_Ammo.m_BatteryUCB100;
         l_BatteryAmmoPacket.BatterySAB50      = m_Ammo.m_BatterySAB50;
         SendPacket(l_BatteryAmmoPacket.Write());
+    }
+    /// Change Configuration
+    void Player::ChangeConfiguration(const uint16 p_Config)
+    {
+        if (ConfigTimer.Passed())
+        {
+            if (!IsInCombat())
+            {
+                m_Preset = p_Config;
+
+                m_Inventory.LoadInventory();
+                m_Inventory.CalculateStats();
+
+                Server::Packets::Ship::ChangeConfig l_Packet;
+                l_Packet.Config = p_Config;
+                SendPacket(l_Packet.Write());
+
+                SendPacket(Server::Packets::Login::PlayerInfo().Write(Server::Packets::Login::InfoType::INFO_TYPE_SET_SHIELD_HEALTH,
+                    {
+                       (uint32)GetHitPoints(),
+                       (uint32)GetHitMaxPoints(),
+                       (uint32)GetShield(),
+                       (uint32)GetMaxShield(),
+                    }));
+
+                return;
+            }
+        }
+
+        SendPacket(Server::Packets::Misc::Update().Write(Server::Packets::Misc::InfoUpdate::INFO_UPDATE_MESSAGE, { "You cannot change config yet!" }));
     }
     /// Send Drone Info
     Server::PacketBuffer const Player::BuildDronePacket()

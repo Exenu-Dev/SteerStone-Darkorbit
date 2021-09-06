@@ -16,6 +16,8 @@
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include "Packets/Server/MiscPackets.hpp"
+#include "Packets/Server/ShipPackets.hpp"
 #include "Socket.hpp"
 #include "Player.hpp"
 #include "GameFlags.hpp"
@@ -50,6 +52,16 @@ namespace SteerStone { namespace Game { namespace Server {
         }
 
         m_Player->SetRocketType(l_RocketType);
+    }
+
+    /// Ship Handler
+    /// @p_ClientPacket : Packet recieved from client
+    void GameSocket::HandleChangeConfig(ClientPacket* p_Packet)
+    {
+        if (p_Packet->ReadString() == "CFG")
+        {
+            m_Player->ChangeConfiguration(p_Packet->ReadString()[0] == '1' ? 1 : 2);
+        }
     }
 
 }   ///< namespace Server

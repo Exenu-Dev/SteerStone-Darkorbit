@@ -26,6 +26,7 @@
 #include "Inventory.hpp"
 
 #define RADIATION_TIMER 1000
+#define CONFIG_TIMER 5000 ///< TODO; Move to config settings under player?
 
 namespace SteerStone { namespace Game { namespace Entity {
 
@@ -197,6 +198,8 @@ namespace SteerStone { namespace Game { namespace Entity {
         void SendMapUpdate();
         /// Send Battery, Rocket and mine update
         void SendAmmoUpdate();
+        /// Change Configuration
+        void ChangeConfiguration(const uint16 p_Config);
         /// Send Drone Info
         Server::PacketBuffer const BuildDronePacket();
         /// Send Drone Info
@@ -233,6 +236,7 @@ namespace SteerStone { namespace Game { namespace Entity {
         uint32 GetCargoSpace()     const     { return m_CargoSpace;       }
         uint32 GetMaxCargoSpace()  const     { return m_MaxCargoSpace;    }
         uint32 GetMaxBattery()     const     { return m_MaxBattery;       }
+        uint8 GetPreset()          const     { return m_Preset;           }
         EventType GetEvent()       const     { return m_Event;            } 
         bool HasLoggedOut() const            { return m_LoggingOut;       }
         bool HasDrones()           const     { return !m_Drones.empty();  }
@@ -249,7 +253,10 @@ namespace SteerStone { namespace Game { namespace Entity {
         void UpdateExperience(uint32 const p_Experience);
         void UpdateHonor(uint32 const p_Honour)           { m_Honor += p_Honour;           }
         void SetCargoSpace(uint32 const p_CargoSpace)     { m_CargoSpace = p_CargoSpace;   }
+
+        /// Timers
         Core::Diagnostic::IntervalTimer IntervalLogout;
+        Core::Diagnostic::IntervalTimer ConfigTimer;
 
     //////////////////////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////////////////////
@@ -265,6 +272,7 @@ namespace SteerStone { namespace Game { namespace Entity {
         uint32 m_MaxBattery;
         uint32 m_MaxRockets;
         uint32 m_CargoSpace;
+        uint16 m_Preset;
         bool m_Premium;
 
         /// Player Settings

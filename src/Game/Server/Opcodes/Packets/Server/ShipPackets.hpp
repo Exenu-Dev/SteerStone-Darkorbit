@@ -191,6 +191,24 @@ namespace SteerStone { namespace Game { namespace Server { namespace Packets { n
         PacketBuffer const* Write();
     };
 
+    /// SERVER_PACKET_CHANGE_CONFIG packet builder
+    class ChangeConfig final : public ServerPacket
+    {
+    public:
+        /// Constructor 
+        ChangeConfig() : ServerPacket(ServerOpCodes::SERVER_PACKET_CHANGE_CONFIG)
+        {
+        }
+
+        //////////////////////////////////////////////////////////////////////////
+        //////////////////////////////////////////////////////////////////////////
+
+        uint16 Config;
+
+        /// Write the packet
+        PacketBuffer const* Write();
+    };
+
 }   ///< namespace Ship
 }   ///< namespace Packets
 }   ///< namespace Server
