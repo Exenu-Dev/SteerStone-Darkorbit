@@ -779,27 +779,24 @@ namespace SteerStone { namespace Game { namespace Entity {
     {
         if (ConfigTimer.Passed())
         {
-            if (!IsInCombat())
-            {
-                m_Preset = p_Config;
+            m_Preset = p_Config;
 
-                m_Inventory.LoadInventory();
-                m_Inventory.CalculateStats();
+            m_Inventory.LoadInventory();
+            m_Inventory.CalculateStats();
 
-                Server::Packets::Ship::ChangeConfig l_Packet;
-                l_Packet.Config = p_Config;
-                SendPacket(l_Packet.Write());
+            Server::Packets::Ship::ChangeConfig l_Packet;
+            l_Packet.Config = p_Config;
+            SendPacket(l_Packet.Write());
 
-                SendPacket(Server::Packets::Login::PlayerInfo().Write(Server::Packets::Login::InfoType::INFO_TYPE_SET_SHIELD_HEALTH,
-                    {
-                       (uint32)GetHitPoints(),
-                       (uint32)GetHitMaxPoints(),
-                       (uint32)GetShield(),
-                       (uint32)GetMaxShield(),
-                    }));
+            SendPacket(Server::Packets::Login::PlayerInfo().Write(Server::Packets::Login::InfoType::INFO_TYPE_SET_SHIELD_HEALTH,
+                {
+                    (uint32)GetHitPoints(),
+                    (uint32)GetHitMaxPoints(),
+                    (uint32)GetShield(),
+                    (uint32)GetMaxShield(),
+                }));
 
-                return;
-            }
+            return; 
         }
 
         SendPacket(Server::Packets::Misc::Update().Write(Server::Packets::Misc::InfoUpdate::INFO_UPDATE_MESSAGE, { "You cannot change config yet!" }));

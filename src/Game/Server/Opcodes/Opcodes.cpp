@@ -114,6 +114,7 @@ namespace SteerStone { namespace Game { namespace Server {
         StoreServerPacket(ServerOpCodes::SERVER_PACKET_CROSS_HAIR,          "SERVER_PACKET_CROSS_HAIR",             &GameSocket::HandleServer);
         StoreServerPacket(ServerOpCodes::SERVER_PACKET_TARGET_HEALTH,       "SERVER_PACKET_TARGET_HEALTH",          &GameSocket::HandleServer);
         StoreServerPacket(ServerOpCodes::SERVER_PACKET_CHANGE_CONFIG,       "SERVER_PACKET_CHANGE_CONFIG",          &GameSocket::HandleServer);
+        StoreServerPacket(ServerOpCodes::SERVER_PACKET_CARGO_BAY_FULL,      "SERVER_PACKET_CARGO_BAY_FULL",         &GameSocket::HandleServer);
 
         /// Web Packets
         StoreServerPacket(ServerOpCodes::SERVER_PACKET_CHECK_ONLINE,        "SERVER_PACKET_CHECK_ONLINE",           &GameSocket::HandleServer);
