@@ -179,14 +179,6 @@ namespace SteerStone { namespace Game { namespace Entity {
             LoadDrones();
             m_Inventory.LoadInventory();
 
-#ifdef  HEADLESS_DEBUG
-            if (m_Id == 4)
-            {
-                static uint32 l_Counter = 4;
-                m_Id = l_Counter++;
-            }
-#endif
-
             return true;
         }
 
