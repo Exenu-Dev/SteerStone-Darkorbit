@@ -23,14 +23,13 @@
 
 namespace SteerStone { namespace Game { namespace Map {
 
-    enum PoolType
+    enum PoolType1
     {
         POOL_TYPE_MOB       = 0,
         POOL_TYPE_BONUS_BOX = 1
     };
 
     class Base;
-    enum Type;
 
     /// Pool Manager
     class PoolManager

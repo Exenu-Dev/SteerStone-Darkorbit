@@ -57,7 +57,7 @@ namespace SteerStone { namespace Core { namespace Database {
 
         std::vector<std::string> l_Tokens = Utils::SplitAll(p_InfoString, ";", false);
 
-        auto& l_Itr = l_Tokens.begin();
+        auto l_Itr = l_Tokens.begin();
 
         if (l_Itr != l_Tokens.end())
             l_Host = *l_Itr++;

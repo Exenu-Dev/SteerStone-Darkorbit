@@ -212,7 +212,7 @@ namespace SteerStone  { namespace Core { namespace Logger {
         l_TimeInfo = localtime(&l_RawTime);
 
         char l_Time[14];
-        sprintf_s(l_Time, "%02d:%02d:%02d", l_TimeInfo->tm_hour, l_TimeInfo->tm_min, l_TimeInfo->tm_sec);
+        snprintf(l_Time, sizeof l_Time, "%02d:%02d:%02d", l_TimeInfo->tm_hour, l_TimeInfo->tm_min, l_TimeInfo->tm_sec);
 
         return l_Time;
     }

@@ -20,6 +20,7 @@
 #include "Database/SQLCommon.hpp"
 
 #include <assert.h>
+#include <cstring>
 
 namespace SteerStone { namespace Core { namespace Database {
 

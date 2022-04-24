@@ -48,19 +48,20 @@ endforeach()
 # Add Executable
 add_executable(${EXECUTABLE_NAME} ${SOURCE_LIST})
 
-# External Link Libaries
-target_link_libraries(${EXECUTABLE_NAME} 
-  PRIVATE ${OPENSSL_LIBRARIES}
-  PRIVATE ${Boost_LIBRARIES}
-  PRIVATE ${MYSQL_LIBRARY}
+# External Link Includes
+target_include_directories(${EXECUTABLE_NAME}
+  PUBLIC ${Boost_INCLUDE_DIRS}
+  PUBLIC ${OPENSSL_INCLUDE_DIR}
+  PUBLIC ${MYSQL_INCLUDE_DIR}
   Engine
 )
 
-# External Link Includes
-target_include_directories(${EXECUTABLE_NAME}
-  PRIVATE ${Boost_INCLUDE_DIRS}
-  PRIVATE ${OPENSSL_INCLUDE_DIR}
-  PRIVATE ${MYSQL_INCLUDE_DIR}
+# External Link Libaries
+target_link_libraries(${EXECUTABLE_NAME} 
+  PUBLIC ${OPENSSL_LIBRARIES}
+  PUBLIC ${Boost_LIBRARIES}
+  PUBLIC ${MYSQL_LIBRARY}
+  Engine
 )
 
 # Define OutDir to SOURCE/bin/(platform)_(configuaration) folder.

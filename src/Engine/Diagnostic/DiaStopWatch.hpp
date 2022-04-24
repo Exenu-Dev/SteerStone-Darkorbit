@@ -27,7 +27,7 @@ namespace SteerStone { namespace Core { namespace Diagnostic {
     /// Time measuring tools
     class StopWatch
     {
-        using TimeStamp = std::chrono::time_point<std::chrono::high_resolution_clock>;
+        using TimeStamp = std::chrono::steady_clock::time_point;
 
         public:
             /// Constructor

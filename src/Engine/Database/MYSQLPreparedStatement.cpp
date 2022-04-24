@@ -19,6 +19,8 @@
 #include "Database/Database.hpp"
 #include "Logger/LogDefines.hpp"
 
+#include <cstring>
+
 namespace SteerStone { namespace Core { namespace Database {
 
     /// Constructor

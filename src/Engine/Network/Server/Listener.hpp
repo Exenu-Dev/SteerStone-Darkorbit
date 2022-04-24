@@ -89,7 +89,7 @@ namespace SteerStone { namespace Core { namespace Network {
                 return m_NetworkThreads[l_Index].get();
             }
             /// Accept incoming connections
-            void Listener<T>::BeginAccept()
+            void BeginAccept()
             {
                 auto l_Worker = SelectWorker();
                 auto l_Socket = l_Worker->CreateSocket();
@@ -101,7 +101,7 @@ namespace SteerStone { namespace Core { namespace Network {
                     });
             }
             /// Accept new connection and create socket
-            void Listener<T>::OnAccept(NetworkThread<T>* p_Worker, std::shared_ptr<T> const& p_Socket, const boost::system::error_code& p_ErrorCode)
+            void OnAccept(NetworkThread<T>* p_Worker, std::shared_ptr<T> const& p_Socket, const boost::system::error_code& p_ErrorCode)
             {
                 if (p_ErrorCode)
                     p_Worker->RemoveSocket(p_Socket.get());

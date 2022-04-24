@@ -50,5 +50,12 @@ target_include_directories(${LIBRARY_NAME}
   PRIVATE ${MYSQL_INCLUDE_DIR}
 )
 
+# External Link Libaries
+target_link_libraries(${LIBRARY_NAME} 
+  PRIVATE ${OPENSSL_LIBRARIES}
+  PRIVATE ${Boost_LIBRARIES}
+  PRIVATE ${MYSQL_LIBRARY}
+)
+
 # Define OutDir to SOURCE/bin/(platform)_(configuaration) folder.
 set_target_properties(${LIBRARY_NAME} PROPERTIES PROJECT_LABEL "Engine")

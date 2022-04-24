@@ -20,6 +20,8 @@
 #include <PCH/Precompiled.hpp>
 #include "Core/Core.hpp"
 
+#include <cmath>
+
 #define M_PI 3.14159265358979323846
 
 namespace SteerStone { namespace Core { namespace Utils {

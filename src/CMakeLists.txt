@@ -17,5 +17,5 @@
 
 # Engine must be included first
 add_subdirectory(Engine)
-add_subdirectory(Policy)
 add_subdirectory(Game)
+add_subdirectory(Policy)

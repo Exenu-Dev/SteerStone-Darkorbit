@@ -201,7 +201,7 @@ namespace SteerStone { namespace Game { namespace Entity {
         /// Change Configuration
         void ChangeConfiguration(const uint16 p_Config);
         /// Send Drone Info
-        Server::PacketBuffer const BuildDronePacket();
+        Server::PacketBuffer const* BuildDronePacket();
         /// Send Drone Info
         void SendDrones();
         /// Process Packets

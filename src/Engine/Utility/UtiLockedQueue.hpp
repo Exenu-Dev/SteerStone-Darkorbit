@@ -125,7 +125,8 @@ namespace SteerStone { namespace Core { namespace Utils {
 
     private:
         /// Delete object
-        template<typename T> typename std::enable_if<std::is_pointer<T>::value>::type DeleteQueuedObject(T& p_Object) { delete p_Object; p_Object = nullptr; }
+        template<typename E = T>
+        typename std::enable_if<std::is_pointer<T>::value>::type DeleteQueuedObject(T& p_Object) { delete p_Object; p_Object = nullptr; }
 
     private:
         std::deque<T> m_Queue;                ///< Storage for objects
