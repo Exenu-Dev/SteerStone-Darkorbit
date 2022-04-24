@@ -20,13 +20,10 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-    - uses: ankane/setup-mysql@v1
-      with:
-        mysql-version: 5.6
 
     - name: Boost
-      run: sudo apt-get update && sudo apt-get install -yq libssl-dev
-      
+      run: sudo apt-get update && sudo apt-get install -yq libssl-dev libboost-all-dev mariadb-server
+    
     - name: GCC
       run: sudo apt install gcc-8 g++-8
 
