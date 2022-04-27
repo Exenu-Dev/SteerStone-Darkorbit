@@ -146,8 +146,14 @@ namespace SteerStone { namespace Game { namespace Server {
             return;
         }
 
-        m_Player->Attack(l_Object->ToUnit());
+        // Cannot attack if there's player has no weapons
+        if (m_Player->GetInventory()->GetWeaponCount() == 0)
+        {
+            SendPacket(Server::Packets::Misc::Update().Write(Server::Packets::Misc::InfoUpdate::INFO_UPDATE_MESSAGE, { "You need a weapon to be equipped to attack!" }));
+            return;
+        }
 
+        m_Player->Attack(l_Object->ToUnit());
     }
 
     /// Map Handler

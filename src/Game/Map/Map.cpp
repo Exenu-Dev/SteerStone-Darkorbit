@@ -197,7 +197,7 @@ namespace SteerStone { namespace Game { namespace Map {
                 case 2:  ///< 1-2
                 case 3:  ///< 1-3
                 case 4:  ///< 1-4 
-                case 17: ///< 1-5
+                case 17: ///< 1-5   
                 case 18: ///< 1-6
                 case 19: ///< 1-7
                 case 20: ///< 1-8
