@@ -168,12 +168,15 @@ namespace SteerStone { namespace Game { namespace Server {
         {
             /// First we need to strip the secret key
             std::string l_Buffer = SteerStone::Core::Utils::String::ReplaceAll(p_Buffer, l_SecretKey + '|', "");
-
-            int l_Header = std::stoi(l_Buffer.substr(0, 2));
+            int l_Header = l_Buffer[0];
 
             ClientOpCodes l_Opcode = static_cast<ClientOpCodes>(*(char*)&l_Header);
 
             OpcodeHandler const* l_OpCodeHandler = sOpCode->GetClientPacket(l_Opcode);
+
+            if (!l_OpCodeHandler->Name)
+                return false;
+
 
             ExecutePacket(l_OpCodeHandler, new ClientPacket(l_Buffer));
 
