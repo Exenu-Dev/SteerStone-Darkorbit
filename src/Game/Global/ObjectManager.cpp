@@ -165,8 +165,8 @@ namespace SteerStone { namespace Game { namespace Global {
                 l_StationTemplate->Type      = l_Result[3].GetUInt16();
                 l_StationTemplate->MapId     = l_Result[4].GetUInt32();
                 l_StationTemplate->Peace     = l_Result[5].GetBool();
-                l_StationTemplate->PositionX = l_Result[6].GetFloat();
-                l_StationTemplate->PositionY = l_Result[7].GetFloat();
+                l_StationTemplate->PositionX = l_Result[6].GetDouble();
+                l_StationTemplate->PositionY = l_Result[7].GetDouble();
 
                 m_StationTemplate[l_StationTemplate->MapId] = l_StationTemplate;
 
