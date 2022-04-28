@@ -171,7 +171,9 @@ namespace SteerStone { namespace Game { namespace Server {
 
         if (static_cast<uint32>(p_Opcode) < ClientOpCodes::CLIENT_MAX_OPCODE)
         {
-            if (OpcodeHandler const* l_Handler = GetClientPacket(p_Opcode))
+            OpcodeHandler const* l_Handler = GetClientPacket(p_Opcode);
+
+            if (l_Handler && l_Handler->Name)
                 l_StringStream << l_Handler->Name;
             else
                 l_StringStream << "UNKNOWN OPCODE";
