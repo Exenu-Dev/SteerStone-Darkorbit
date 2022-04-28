@@ -1,0 +1,21 @@
+[Chat Configuration]
+
+### SECTION INDEX ###
+#   SERVER SETTINGS
+
+### SERVER SETTINGS ###
+
+## Chat Port
+#   Description: TCP port to reach the server.
+#   Default: 9338
+ChatPort = 9338
+
+## BindIP
+#	Description: Bind server to Ip/Host Name
+#	Default: "0.0.0.0" - (Bind to all IPs on the system)
+BindIP = "0.0.0.0"
+
+## Child Listeners
+#	Description: Amount of Child Listeners to spawn
+#	Default: 1
+ChildListeners = 1
