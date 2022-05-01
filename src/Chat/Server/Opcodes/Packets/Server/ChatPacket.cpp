@@ -19,6 +19,22 @@
 #include "ChatPacket.hpp"
 
 namespace SteerStone { namespace Chat { namespace Server { namespace Packets {
+
+    /// Write the packet
+	PacketBuffer const* SendMessageToRoom::Write()
+	{
+        m_Buffer.AppendUInt16(RoomId);
+        m_Buffer.AppendSplit();
+        m_Buffer.AppendChar(Username.c_str());
+        m_Buffer.AppendSplit();
+        m_Buffer.AppendChar(Message.c_str());
+        m_Buffer.AppendSplit();
+        m_Buffer.AppendChar("");
+        m_Buffer.AppendChar("#");
+        m_Buffer.AppendEndSplitter();
+
+        return &m_Buffer;
+	}
 }   ///< Packets
 }   ///< Server
 }   ///< Chat

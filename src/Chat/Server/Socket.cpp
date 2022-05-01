@@ -100,7 +100,7 @@ namespace SteerStone { namespace Chat { namespace Server {
             LOG_INFO("ChatSocket", "Sending Packet <%0> to %1", sOpCode->GetServerPacket(p_PacketBuffer->GetContents()[0]).Name, GetRemoteAddress());
         #endif
 
-        WriteSync((const char*)p_PacketBuffer->GetContents());
+        Write((const char*)p_PacketBuffer->GetContents(), p_PacketBuffer->GetSize());
     }
 
     /// For Non-Implemented packets

@@ -38,11 +38,13 @@ enum class PacketProcess
 
 enum ClientOpCodes
 {
-    CLIENT_PACKET_LOG_IN = 0xD7
+    CLIENT_PACKET_LOG_IN        = 0xD7,
+    CLIENT_PACKET_SEND_MESSAGE  = 0x86
 };
 
 enum ServerOpCodes
 {
+    SERVER_PACKET_SEND_MESSAGE = 0x61
 };
 
 namespace SteerStone { namespace Chat { namespace Server {

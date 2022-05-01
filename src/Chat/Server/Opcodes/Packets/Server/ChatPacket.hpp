@@ -20,6 +20,29 @@
 #include "Socket.hpp"
 
 namespace SteerStone { namespace Chat { namespace Server { namespace Packets {
+    class SendMessageToRoom final : public ServerPacket
+    {
+    public:
+        /// Constructor 
+        SendMessageToRoom() : ServerPacket("a%")
+        {
+            RoomId = 0;
+            Message = "";
+            Username = "";
+            Clan = "";
+        }
+
+        //////////////////////////////////////////////////////////////////////////
+        //////////////////////////////////////////////////////////////////////////
+
+        /// Write the packet
+        PacketBuffer const* Write();
+
+        uint16 RoomId;
+        std::string Message;
+        std::string Username;
+        std::string Clan;
+    };
 }   ///< Packets
 }   ///< Server
 }   ///< Chat

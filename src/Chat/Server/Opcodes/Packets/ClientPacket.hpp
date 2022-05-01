@@ -42,7 +42,10 @@ namespace SteerStone { namespace Chat { namespace Server {
 
                 /// First two characters is the header, so add the two characters together to form a int
                 m_Header        = int32(l_Header[0]) + int32(l_Header[1]);
-                m_Payload       = Core::Utils::SplitAll(p_String, "@", false); ///< Header is also apart of the payload
+
+                /// Replace % with @ as these two often get mixed up in the packet
+                std::string l_Buffer = Core::Utils::String::ReplaceAll(p_String, "%", "@");
+                m_Payload       = Core::Utils::SplitAll(l_Buffer, "@", false); ///< Header is also apart of the payload
                 m_ReadPosition  = 0;
 
                 /// Skip header, it's in payload
@@ -57,6 +60,11 @@ namespace SteerStone { namespace Chat { namespace Server {
             //////////////////////////////////////////////////////////////////////////
             //////////////////////////////////////////////////////////////////////////
 
+             /// String to ReadUInt16
+            const uint16 ReadUInt16()
+            {
+                return std::stoi(m_Payload[m_ReadPosition++]);
+            }
             /// String to UInt32
             const uint32 ReadUInt32()
             {

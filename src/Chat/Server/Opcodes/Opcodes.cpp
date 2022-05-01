@@ -51,10 +51,13 @@ namespace SteerStone { namespace Chat { namespace Server {
     /// Load our packets into storages to be accessed later
     void OpCodes::InitializePackets()
     {
-        StoreClientPacket(ClientOpCodes::CLIENT_PACKET_LOG_IN, "CLIENT_PACKET_LOG_IN", PacketStatus::STATUS_HANDLED, PacketProcess::PROCESS_NOW, &ChatSocket::HandleLogin);
+        StoreClientPacket(ClientOpCodes::CLIENT_PACKET_LOG_IN,          "CLIENT_PACKET_LOG_IN",         PacketStatus::STATUS_HANDLED, PacketProcess::PROCESS_NOW, &ChatSocket::HandleLogin);
+        StoreClientPacket(ClientOpCodes::CLIENT_PACKET_SEND_MESSAGE,    "CLIENT_PACKET_SEND_MESSAGE",   PacketStatus::STATUS_HANDLED, PacketProcess::PROCESS_NOW, &ChatSocket::HandleSendMessage);
 
         //////////////////////////////////////////////////////////////////////////
         //////////////////////////////////////////////////////////////////////////        
+
+        StoreServerPacket(ServerOpCodes::SERVER_PACKET_SEND_MESSAGE, "SERVER_PACKET_SEND_MESSAGE", &ChatSocket::HandleServer);
 
         LOG_INFO("OpCodes", "Loaded %0 Client Packets", m_ClientOpCodes.size());
         LOG_INFO("OpCodes", "Loaded %0 Server Packets", m_ServerOpCodes.size());

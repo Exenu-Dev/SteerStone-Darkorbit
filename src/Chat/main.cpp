@@ -23,8 +23,9 @@
 #include "Logger/Base.hpp"
 #include "Config/Config.hpp"
 #include "Database/DatabaseTypes.hpp"
+#include "Diagnostic/DiaServerWatch.hpp"
 
-#include "Socket.hpp"
+#include "ChatManager.hpp"
 
 DatabaseType GameDatabase;
 
@@ -77,8 +78,26 @@ int main()
 
     LOG_INFO("Chat", "Chat Server successfully booted, listening on %0 %1", l_Address, l_Port);
 
-    while (true)
+    uint32 l_RealCurrTime = 0;
+    uint32 l_RealPrevTime = sServerTimeManager->Tick();
+    uint32 l_PrevSleepTime = 0;
+    
+    while (!sChatManager->StopWorld())
     {
-        std::this_thread::sleep_until(std::chrono::system_clock::now() + std::chrono::hours(std::numeric_limits<int>::max()));
+        l_RealCurrTime = sServerTimeManager->GetServerTime();
+        uint32 const& l_Diff = sServerTimeManager->Tick();
+
+        sChatManager->Update(l_Diff);
+
+        l_RealPrevTime = l_RealCurrTime;
+
+        /// Update the world every 60 ms
+        if (l_Diff <= CHAT_SLEEP_TIMER + l_PrevSleepTime)
+        {
+            l_PrevSleepTime = CHAT_SLEEP_TIMER + l_PrevSleepTime - l_Diff;
+            std::this_thread::sleep_for(std::chrono::milliseconds((uint32)(l_PrevSleepTime)));
+        }
+        else
+            l_PrevSleepTime = 0;
     }
 }

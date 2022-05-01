@@ -35,7 +35,7 @@ namespace SteerStone { namespace Chat { namespace Server {
         /// @p_ReserveSize : Reserve size for our m_Storage
         explicit PacketBuffer(std::size_t p_ReserveSize = STORAGE_INITIAL_SIZE) : m_WritePosition(0), m_ReadPosition(0)
         {
-            m_Storage.reserve(STORAGE_INITIAL_SIZE);
+            m_Storage.reserve(p_ReserveSize);
         }
         /// Deconstructor
         ~PacketBuffer() {}
@@ -45,11 +45,9 @@ namespace SteerStone { namespace Chat { namespace Server {
      
         /// Append Bool
         /// @p_Header : Header of packet
-        void AppendHeader(char p_Header)
+        void AppendHeader(char* p_Header)
         {
-            /// Not used for policy server
-            //AppendChar("0");
-            //AppendChar(&p_Header);
+            AppendChar(p_Header);
         }
         /// Append String
         /// @p_Value : Append a string to our storage
@@ -110,13 +108,13 @@ namespace SteerStone { namespace Chat { namespace Server {
         /// Apennd Splitter
         void AppendSplit()
         {
-            std::string l_Split = "|";
+            std::string l_Split = "@";
             Append(l_Split.c_str(), l_Split.length());
         }
         /// Knock off last byte
         void AppendEndSplitter()
         {
-            m_Storage.pop_back();
+            m_Storage.push_back('\0');
         }
         /// Append end of packet
         void AppendCarriage()
@@ -157,7 +155,7 @@ namespace SteerStone { namespace Chat { namespace Server {
         /// @p_Size : Size
         void Resize(std::size_t const p_Size)
         {
-            m_Storage.reserve(p_Size);
+            m_Storage.resize(p_Size);
         }
         /// Reserve Storage
         /// @p_Size : Size
