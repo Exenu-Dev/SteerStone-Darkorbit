@@ -18,6 +18,7 @@
 
 #include "Player.hpp"
 #include "Database/DatabaseTypes.hpp"
+#include "Packets/Server/ChatPacket.hpp"
 
 namespace SteerStone { namespace Chat { namespace Entity {
 
@@ -43,7 +44,7 @@ namespace SteerStone { namespace Chat { namespace Entity {
     bool Player::LoadFromDB()
     {
         Core::Database::PreparedStatement* l_PreparedStatement = GameDatabase.GetPrepareStatement();
-        l_PreparedStatement->PrepareStatement("SELECT username, company FROM users WHERE id = ?");
+        l_PreparedStatement->PrepareStatement("SELECT username, company, `rank` FROM users WHERE id = ?");
         l_PreparedStatement->SetUint32(0, m_Id);
         std::unique_ptr<Core::Database::PreparedResultSet> l_PreparedResultSet = l_PreparedStatement->ExecuteStatement();
 
@@ -53,6 +54,7 @@ namespace SteerStone { namespace Chat { namespace Entity {
 
 			m_Username	= l_Result[0].GetString();
 			m_CompanyId = static_cast<Company>(l_Result[1].GetUInt16());
+			m_RankId	= static_cast<Rank>(l_Result[2].GetUInt8());
 
 			Server::PacketBuffer l_PacketBuffer;
 
@@ -88,6 +90,10 @@ namespace SteerStone { namespace Chat { namespace Entity {
 			l_PacketBuffer.AppendEndSplitter();
 
 			SendPacket(&l_PacketBuffer);
+
+			Server::Packets::SystemMessage l_SystemMessagePacket;
+			l_SystemMessagePacket.Message = "\n<span class='mod'>Welcome to <a class='highlight' target=\"_blank\" href=\"http://www.github.com/LiamAshdown/Darkorbit-Emulato\">Darkorbit Emulator</a> made by <a class='highlight' target=\"_blank\" href=\"http://www.github.com/LiamAshdown\">Quadral.</a>\n</span>";
+			SendPacket(l_SystemMessagePacket.Write());
 
 			return true;
 		}

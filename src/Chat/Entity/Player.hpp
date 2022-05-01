@@ -70,8 +70,10 @@ namespace SteerStone { namespace Chat { namespace Entity {
         ///////////////////////////////////////////
     public:
         /// Getters Function
-        uint32 GetId()             const     { return m_Id;               }
-        std::string GetUsername()  const     { return m_Username;         }
+        uint32 GetId()             const     { return m_Id;                     }
+        std::string GetUsername()  const     { return m_Username;               }
+        bool IsAdmin()             const     { return m_RankId == Rank::ADMIN;  }
+
         std::shared_ptr<Server::ChatSocket> ToSocket() { return m_Socket; }
 
         /// Timers
@@ -86,6 +88,7 @@ namespace SteerStone { namespace Chat { namespace Entity {
         std::string m_Username;
         std::vector<uint16> m_RoomIds;
         Company m_CompanyId;
+        Rank m_RankId;
         std::shared_ptr<Server::ChatSocket> m_Socket;                    ///< Socket
     };
 

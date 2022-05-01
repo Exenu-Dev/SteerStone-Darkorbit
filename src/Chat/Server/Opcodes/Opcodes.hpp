@@ -44,7 +44,9 @@ enum ClientOpCodes
 
 enum ServerOpCodes
 {
-    SERVER_PACKET_SEND_MESSAGE = 0x61
+    SERVER_PACKET_SEND_MESSAGE        = 0x61,
+    SERVER_PACKET_SEND_SYSTEM_MESSAGE = 0x64,
+    SERVER_PACKET_SEND_ADMIN_MESSAGE  = 0x6A
 };
 
 namespace SteerStone { namespace Chat { namespace Server {

@@ -41,12 +41,12 @@ namespace SteerStone { namespace Chat { namespace Server {
                 std::string l_Header = p_String.substr(0, 2);        
 
                 /// First two characters is the header, so add the two characters together to form a int
-                m_Header        = int32(l_Header[0]) + int32(l_Header[1]);
+                m_Header = int32(l_Header[0]) + int32(l_Header[1]);
 
                 /// Replace % with @ as these two often get mixed up in the packet
                 std::string l_Buffer = Core::Utils::String::ReplaceAll(p_String, "%", "@");
-                m_Payload       = Core::Utils::SplitAll(l_Buffer, "@", false); ///< Header is also apart of the payload
-                m_ReadPosition  = 0;
+                m_Payload            = Core::Utils::SplitAll(l_Buffer, "@", false); ///< Header is also apart of the payload
+                m_ReadPosition       = 0;
 
                 /// Skip header, it's in payload
                 ReadSkip();

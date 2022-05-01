@@ -30,11 +30,11 @@ namespace SteerStone { namespace Chat { namespace Server {
 
 		uint32 l_UserId = p_Packet->ReadUInt32();
 
-		Entity::Player* l_Player = new Entity::Player(this);
-		l_Player->m_Id = l_UserId;
+		m_Player = new Entity::Player(this);
+		m_Player->m_Id = l_UserId;
 
-		if (l_Player->LoadFromDB())
-			sChatManager->AddPlayer(l_Player);
+		if (m_Player->LoadFromDB())
+			sChatManager->AddPlayer(m_Player);
 		else
 			LOG_WARNING("Player", "Failed to initialize player %0", l_UserId);
 	}
@@ -45,7 +45,7 @@ namespace SteerStone { namespace Chat { namespace Server {
 		uint16 l_RoomId = p_Packet->ReadUInt16();
 		std::string l_Message = p_Packet->ReadString();
 
-		sChatManager->SendMessageToRoom(l_Message, l_RoomId);
+		sChatManager->SendMessageToRoom(m_Player, l_Message, l_RoomId);
 	}
 }   ///< namespace Server
 }   ///< namespace Chat

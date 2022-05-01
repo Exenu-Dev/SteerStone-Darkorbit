@@ -21,6 +21,16 @@
 #include "ServerPacket.hpp"
 #include "Opcodes/Opcodes.hpp"
 
+/// Declarations
+namespace SteerStone { namespace Chat { namespace Entity {
+    
+    class Player;
+
+}   ///< Entity
+}   ///< Chat
+}   ///< SteerStone
+
+
 namespace SteerStone { namespace Chat { namespace Server { 
 
     class ChatSocket : public Core::Network::Socket
@@ -68,6 +78,9 @@ namespace SteerStone { namespace Chat { namespace Server {
             /// @p_OpCodeHandler : Handler of Client Packet
             /// @p_Packet        : Client Packet
             void ExecutePacket(const OpcodeHandler* p_OpCodeHandler, ClientPacket* p_Packet);
+
+        private:
+            Entity::Player* m_Player;                       ///< Player of socket
     };
 
 }   ///< namespace Server

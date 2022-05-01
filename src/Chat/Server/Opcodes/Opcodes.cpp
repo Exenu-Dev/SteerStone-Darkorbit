@@ -57,7 +57,8 @@ namespace SteerStone { namespace Chat { namespace Server {
         //////////////////////////////////////////////////////////////////////////
         //////////////////////////////////////////////////////////////////////////        
 
-        StoreServerPacket(ServerOpCodes::SERVER_PACKET_SEND_MESSAGE, "SERVER_PACKET_SEND_MESSAGE", &ChatSocket::HandleServer);
+        StoreServerPacket(ServerOpCodes::SERVER_PACKET_SEND_MESSAGE,        "SERVER_PACKET_SEND_MESSAGE",        &ChatSocket::HandleServer);
+        StoreServerPacket(ServerOpCodes::SERVER_PACKET_SEND_SYSTEM_MESSAGE, "SERVER_PACKET_SEND_SYSTEM_MESSAGE", &ChatSocket::HandleServer);
 
         LOG_INFO("OpCodes", "Loaded %0 Client Packets", m_ClientOpCodes.size());
         LOG_INFO("OpCodes", "Loaded %0 Server Packets", m_ServerOpCodes.size());

@@ -47,9 +47,10 @@ namespace SteerStone { namespace Chat { namespace Channel {
         bool StopWorld() const;
 
         /// Send Message
+        ///@ p_Player : Player who is sending the message
         ///@ p_Message: Message to send
         ///@ p_RoomId: Room Id to send to
-        void SendMessageToRoom(std::string const p_Message, uint16 const p_RoomId);
+        void SendMessageToRoom(Entity::Player const* p_Player, std::string const p_Message, uint16 const p_RoomId);
 
         //////////////////////////////////////////////////////////////////////////
         //////////////////////////////////////////////////////////////////////////

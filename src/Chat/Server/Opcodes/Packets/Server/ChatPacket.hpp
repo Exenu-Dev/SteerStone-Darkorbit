@@ -20,6 +20,7 @@
 #include "Socket.hpp"
 
 namespace SteerStone { namespace Chat { namespace Server { namespace Packets {
+
     class SendMessageToRoom final : public ServerPacket
     {
     public:
@@ -42,6 +43,46 @@ namespace SteerStone { namespace Chat { namespace Server { namespace Packets {
         std::string Message;
         std::string Username;
         std::string Clan;
+    };
+
+    class SystemMessage final : public ServerPacket
+    {
+    public:
+        /// Constructor 
+        SystemMessage() : ServerPacket("dq%")
+        {
+            Message = "";
+        }
+
+        //////////////////////////////////////////////////////////////////////////
+        //////////////////////////////////////////////////////////////////////////
+
+        /// Write the packet
+        PacketBuffer const* Write();
+
+        std::string Message;
+    };
+
+    class SendAdminMessage final : public ServerPacket
+    {
+    public:
+        /// Constructor 
+        SendAdminMessage() : ServerPacket("j%")
+        {
+            RoomId = 0;
+            Message = "";
+            Username = "";
+        }
+
+        //////////////////////////////////////////////////////////////////////////
+        //////////////////////////////////////////////////////////////////////////
+
+        /// Write the packet
+        PacketBuffer const* Write();
+
+        uint16 RoomId;
+        std::string Message;
+        std::string Username;
     };
 }   ///< Packets
 }   ///< Server

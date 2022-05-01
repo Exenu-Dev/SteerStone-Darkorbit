@@ -67,19 +67,31 @@ namespace SteerStone { namespace Chat { namespace Channel {
         return s_StopChat;
     }
     /// Send Message
+    ///@ p_Player : Player who is sending the message
     ///@ p_Message : Message to send
     ///@ p_RoomId: Room Id to send to
-    void Base::SendMessageToRoom(std::string const p_Message, uint16 const p_RoomId)
+    void Base::SendMessageToRoom(Entity::Player const* p_Player, std::string const p_Message, uint16 const p_RoomId)
     {
         for (auto l_Itr : m_Players)
         {
             if (l_Itr->IsInRoom(p_RoomId))
             {
-                Server::Packets::SendMessageToRoom l_Packet;
-                l_Packet.RoomId = p_RoomId;
-                l_Packet.Username = l_Itr->GetUsername();
-                l_Packet.Message = p_Message;
-                l_Itr->SendPacket(l_Packet.Write());
+                if (p_Player->IsAdmin())
+                {
+                    Server::Packets::SendAdminMessage l_Packet;
+                    l_Packet.RoomId = p_RoomId;
+                    l_Packet.Username = p_Player->GetUsername();
+                    l_Packet.Message = p_Message;
+                    l_Itr->SendPacket(l_Packet.Write());
+                }
+                else
+                {
+                    Server::Packets::SendMessageToRoom l_Packet;
+                    l_Packet.RoomId = p_RoomId;
+                    l_Packet.Username = p_Player->GetUsername();
+                    l_Packet.Message = p_Message;
+                    l_Itr->SendPacket(l_Packet.Write());
+                }
             }
         }
     }
