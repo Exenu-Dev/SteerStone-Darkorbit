@@ -16,69 +16,36 @@
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "Packets/Server/ChatPacket.hpp"
-#include "Database/DatabaseTypes.hpp"
-#include "Socket.hpp"
 #include "ChatManager.hpp"
-#include "Common.hpp"
 
 namespace SteerStone { namespace Chat { namespace Server {
 
+	/// Handle Login Handler
+	/// @p_ClientPacket : Packet recieved from client
 	void ChatSocket::HandleLogin(ClientPacket* p_Packet)
 	{
+		// Skip first two
+		p_Packet->ReadSkip();
+		p_Packet->ReadSkip();
+
 		uint32 l_UserId = p_Packet->ReadUInt32();
 
-		Core::Database::PreparedStatement* l_PreparedStatement = GameDatabase.GetPrepareStatement();
-		l_PreparedStatement->PrepareStatement("SELECT username, company FROM users WHERE id = ?");
-		l_PreparedStatement->SetUint32(0, l_UserId);
-		std::unique_ptr<Core::Database::PreparedResultSet> l_PreparedResultSet = l_PreparedStatement->ExecuteStatement();
+		Entity::Player* l_Player = new Entity::Player(this);
+		l_Player->m_Id = l_UserId;
 
-		if (l_PreparedResultSet)
-		{
-			Core::Database::ResultSet* l_Result = l_PreparedResultSet->FetchResult();
+		if (l_Player->LoadFromDB())
+			sChatManager->AddPlayer(l_Player);
+		else
+			LOG_WARNING("Player", "Failed to initialize player %0", l_UserId);
+	}
+	/// Handle Send Message
+	/// @p_ClientPacket : Packet recieved from client
+	void ChatSocket::HandleSendMessage(ClientPacket* p_Packet)
+	{
+		uint16 l_RoomId = p_Packet->ReadUInt16();
+		std::string l_Message = p_Packet->ReadString();
 
-			std::string l_Username = l_Result[0].GetString();
-
-			uint16 l_CompanyId = l_Result[1].GetUInt16();
-			Company l_Company = static_cast<Company>(l_CompanyId);
-			std::vector<uint16> l_RoomIds;
-
-			PacketBuffer l_PacketBuffer;
-
-			switch (l_Company)
-			{
-				case Company::EARTH:
-				{
-					l_PacketBuffer.AppendChar("by%1|Global|1|-1|0|0}3|EIC|2|-1|0|0}5|Clan Search|3|-1|0|0#");
-					l_RoomIds.push_back(3);
-				}
-				break;
-				case Company::MMO:
-				{
-					l_PacketBuffer.AppendChar("by%1|Global|1|-1|0|0}2|MMO|2|-1|0|0}5|Clan Search|3|-1|0|0#");
-					l_RoomIds.push_back(2);
-				}
-				break;
-				case Company::VRU:
-				{
-					l_PacketBuffer.AppendChar("by%1|Global|1|-1|0|0}4|VRU|2|-1|0|0}5|Clan Search|3|-1|0|0#");
-					l_RoomIds.push_back(4);
-				}
-				break;
-				default:
-				{
-					LOG_WARNING("Chat", "Failed to find company %0", l_CompanyId);
-				}
-				break;
-			}
-
-			l_RoomIds.push_back(1);
-			l_RoomIds.push_back(5);
-
-			sChatManager->AddUser(l_UserId, l_Username, l_RoomIds);
-
-			SendPacket(&l_PacketBuffer);
-		}
+		sChatManager->SendMessageToRoom(l_Message, l_RoomId);
 	}
 }   ///< namespace Server
 }   ///< namespace Chat

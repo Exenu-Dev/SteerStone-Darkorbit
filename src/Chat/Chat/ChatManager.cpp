@@ -17,6 +17,7 @@
 */
 
 #include "ChatManager.hpp"
+#include "Packets/Server/ChatPacket.hpp"
 
 namespace SteerStone { namespace Chat { namespace Channel {
 
@@ -37,16 +38,50 @@ namespace SteerStone { namespace Chat { namespace Channel {
     //////////////////////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////////////////////
 
-    /// Add User
-    ///@ p_UserId: User Id
-    ///@ p_Username: Username
-    void Base::AddUser(uint32 const p_UserId, std::string const p_Username, std::vector<uint16> const p_RoomIds)
+    /// Static StopChat
+    volatile bool Base::s_StopChat = false;
+
+    /// Add Player
+    ///@ p_Player : Player
+    void Base::AddPlayer(Entity::Player* p_Player)
     {
-        User l_User;
-        l_User.UserId = p_UserId;
-        l_User.Name = p_Username;
-        l_User.RoomIds = p_RoomIds;
-        m_Users[p_UserId] = l_User;
+        m_Players.insert(p_Player);
+    }
+
+    /// Update the chat
+    ///@ p_Diff : Time Diff
+    void Base::Update(uint32 const p_Diff)
+    {
+        for (auto l_Itr : m_Players)
+        {
+            l_Itr->IntervalPing.Update(p_Diff);
+            if (l_Itr->IntervalPing.Passed())
+            {
+
+            }
+        }
+    }
+    /// Stop World Updating
+    bool Base::StopWorld() const
+    {
+        return s_StopChat;
+    }
+    /// Send Message
+    ///@ p_Message : Message to send
+    ///@ p_RoomId: Room Id to send to
+    void Base::SendMessageToRoom(std::string const p_Message, uint16 const p_RoomId)
+    {
+        for (auto l_Itr : m_Players)
+        {
+            if (l_Itr->IsInRoom(p_RoomId))
+            {
+                Server::Packets::SendMessageToRoom l_Packet;
+                l_Packet.RoomId = p_RoomId;
+                l_Packet.Username = l_Itr->GetUsername();
+                l_Packet.Message = p_Message;
+                l_Itr->SendPacket(l_Packet.Write());
+            }
+        }
     }
 }
 }

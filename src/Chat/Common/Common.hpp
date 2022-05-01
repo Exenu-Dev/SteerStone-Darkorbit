@@ -20,6 +20,8 @@
 #include <PCH/Precompiled.hpp>
 #include "Core/Core.hpp"
 
+#define PING_TIMER 25000
+
 enum class Company : uint16
 {
     NOMAD       = 0,
