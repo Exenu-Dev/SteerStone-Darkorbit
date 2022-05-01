@@ -49,9 +49,9 @@ namespace SteerStone { namespace Chat { namespace Server {
             void HandleNULL(ClientPacket* p_Packet);
             /// For Server packets (Do not require handlers)
             void HandleServer(ClientPacket* p_Packet) {}
-            /// Chat Handler
+            /// Handle Login Handler
             /// @p_ClientPacket : Packet recieved from client
-            void HandleChat(ClientPacket* p_Packet);
+            void HandleLogin(ClientPacket* p_Packet);
 
 
         //////////////////////////////////////////////////////////////////////////

@@ -131,6 +131,16 @@ namespace SteerStone { namespace Core { namespace Network {
                 ForceSendAndClose();
         }
     }
+    /// Write Data synchronously
+    /// @p_Buffer : Buffer which holds the data
+    void Socket::WriteSync(const char* p_Buffer)
+    {
+        boost::asio::streambuf l_Buffer;
+        std::ostream os(&l_Buffer);
+        os << p_Buffer << (char)0;
+
+        boost::asio::write(m_Socket,l_Buffer.data());
+    }
     /// Get the total read length of the packet
     std::size_t const Socket::ReadLength()
     {

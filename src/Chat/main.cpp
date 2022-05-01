@@ -22,8 +22,11 @@
 #include "Network/Server/Listener.hpp"
 #include "Logger/Base.hpp"
 #include "Config/Config.hpp"
+#include "Database/DatabaseTypes.hpp"
 
 #include "Socket.hpp"
+
+DatabaseType GameDatabase;
 
 int main()
 {
@@ -46,6 +49,16 @@ int main()
     //////////////////////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////////////////////
 
+    static std::string l_DatabaseInfo = sConfigManager->GetString("GameDatabaseInfo").c_str();
+    static int32       l_WorkerThreads = sConfigManager->GetInt("GameWorkerThreads", 1);
+    static int32       l_Instances = sConfigManager->GetInt("MySQLInstances", 5);
+
+    if (!GameDatabase.Start(l_DatabaseInfo.c_str(), l_Instances, l_WorkerThreads))
+        return -1;
+
+    //////////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////////
+
     /// Loading
     sOpCode->InitializePackets();
 
@@ -54,7 +67,7 @@ int main()
         
     /// Network
     static const std::string l_Address          = sConfigManager->GetString("BindIP", "127.0.0.1");
-    static const int32 l_Port                   = sConfigManager->GetInt("Chat", 843);
+    static const int32 l_Port                   = sConfigManager->GetInt("ChatPort", 9338);
     static const int32 l_ChildListeners         = sConfigManager->GetInt("ChildListeners", 1);
 
     SteerStone::Core::Network::Listener<SteerStone::Chat::Server::ChatSocket> l_Listener(l_Address, l_Port, l_ChildListeners);
@@ -62,7 +75,7 @@ int main()
     //////////////////////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////////////////////
 
-    LOG_INFO("Policy", "Chat Server successfully booted, listening on %0 %1", l_Address, l_Port);
+    LOG_INFO("Chat", "Chat Server successfully booted, listening on %0 %1", l_Address, l_Port);
 
     while (true)
     {

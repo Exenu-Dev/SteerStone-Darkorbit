@@ -44,10 +44,16 @@ namespace SteerStone { namespace Chat { namespace Server {
             l_BufferVec.resize(l_BufferVec.size() + 1);
             l_BufferVec[l_BufferVec.size() - 1] = 0;
 
-            /// Form packet and execute handler
-            ClientPacket l_ClientPacket((char*)& l_BufferVec[0]);
-            OpcodeHandler const l_OpcodeHandler = sOpCode->GetClientPacket(l_ClientPacket.GetHeader());
-            ExecutePacket(&l_OpcodeHandler, &l_ClientPacket);
+            std::string l_Buffer = (char*)&l_BufferVec[0];
+
+            if (l_Buffer.length() > 2) {
+                // Get Header
+                std::string l_Header = l_Buffer.substr(0, 2);
+
+                ClientPacket l_ClientPacket((char*)&l_BufferVec[0]);
+                OpcodeHandler const l_OpcodeHandler = sOpCode->GetClientPacket(l_ClientPacket.GetHeader());
+                ExecutePacket(&l_OpcodeHandler, &l_ClientPacket);
+            }
 
             return Core::Network::ProcessState::Successful;
         }
@@ -94,7 +100,7 @@ namespace SteerStone { namespace Chat { namespace Server {
             LOG_INFO("ChatSocket", "Sending Packet <%0> to %1", sOpCode->GetServerPacket(p_PacketBuffer->GetContents()[0]).Name, GetRemoteAddress());
         #endif
 
-        Write((const char*)p_PacketBuffer->GetContents(), p_PacketBuffer->GetSize(), true);
+        WriteSync((const char*)p_PacketBuffer->GetContents());
     }
 
     /// For Non-Implemented packets

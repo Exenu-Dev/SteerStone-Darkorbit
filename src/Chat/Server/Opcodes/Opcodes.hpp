@@ -28,7 +28,7 @@
 enum class PacketStatus
 {
     STATUS_UNHANDLED,
-    STATUS_AUTHENTICATION
+    STATUS_HANDLED
 };
 
 enum class PacketProcess
@@ -38,6 +38,7 @@ enum class PacketProcess
 
 enum ClientOpCodes
 {
+    CLIENT_PACKET_LOG_IN = 0xD7
 };
 
 enum ServerOpCodes

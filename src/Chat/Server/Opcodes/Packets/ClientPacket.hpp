@@ -38,9 +38,11 @@ namespace SteerStone { namespace Chat { namespace Server {
             /// @p_String : String of packet
             ClientPacket(const std::string& p_String)
             {
-                /// The first byte is the header
-                m_Header        = p_String[0];
-                m_Payload       = Core::Utils::SplitAll(p_String, "|", false); ///< Header is also apart of the payload
+                std::string l_Header = p_String.substr(0, 2);        
+
+                /// First two characters is the header, so add the two characters together to form a int
+                m_Header        = int32(l_Header[0]) + int32(l_Header[1]);
+                m_Payload       = Core::Utils::SplitAll(p_String, "@", false); ///< Header is also apart of the payload
                 m_ReadPosition  = 0;
 
                 /// Skip header, it's in payload
@@ -106,7 +108,7 @@ namespace SteerStone { namespace Chat { namespace Server {
         //////////////////////////////////////////////////////////////////////////
 
         private:
-            uint8 m_Header;                     ///< Header
+            uint32 m_Header;                    ///< Header
             std::vector<std::string> m_Payload; ///< Payload
             uint32 m_ReadPosition;              ///< Read Position
     };
