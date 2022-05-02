@@ -84,6 +84,21 @@ namespace SteerStone { namespace Chat { namespace Server { namespace Packets {
         std::string Message;
         std::string Username;
     };
+
+    class Ping final : public ServerPacket
+    {
+    public:
+        /// Constructor 
+        Ping() : ServerPacket("ek%")
+        {
+        }
+
+        //////////////////////////////////////////////////////////////////////////
+        //////////////////////////////////////////////////////////////////////////
+
+        /// Write the packet
+        PacketBuffer const* Write();
+    };
 }   ///< Packets
 }   ///< Server
 }   ///< Chat

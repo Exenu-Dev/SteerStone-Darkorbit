@@ -57,7 +57,9 @@ namespace SteerStone { namespace Chat { namespace Channel {
             l_Itr->IntervalPing.Update(p_Diff);
             if (l_Itr->IntervalPing.Passed())
             {
-
+                Server::Packets::Ping l_Packet;
+                l_Itr->SendPacket(Server::Packets::Ping().Write());
+                l_Itr->IntervalPing.Reset();
             }
         }
     }

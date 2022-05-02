@@ -31,6 +31,7 @@ namespace SteerStone { namespace Chat { namespace Entity {
 		m_RoomIds   = {};
 		m_Username  = "";
 		m_CompanyId = Company::NOMAD;
+		IntervalPing.SetInterval(PING_TIMER);
     }
     /// Deconstructor
     Player::~Player()

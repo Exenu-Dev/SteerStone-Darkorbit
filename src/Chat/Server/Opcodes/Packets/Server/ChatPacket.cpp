@@ -59,6 +59,15 @@ namespace SteerStone { namespace Chat { namespace Server { namespace Packets {
 
         return &m_Buffer;
     }
+
+    /// Write the packet
+    PacketBuffer const* Ping::Write()
+    {
+        m_Buffer.AppendChar("#");
+        m_Buffer.AppendEndSplitter();
+
+        return &m_Buffer;
+    }
 }   ///< Packets
 }   ///< Server
 }   ///< Chat
