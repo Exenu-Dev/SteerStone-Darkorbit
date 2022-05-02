@@ -125,11 +125,11 @@ namespace SteerStone { namespace Game { namespace Global {
                 l_PortalTemplate->Company       = l_Result[2].GetUInt16();
                 l_PortalTemplate->Type          = l_Result[3].GetUInt16();
                 l_PortalTemplate->MapId         = l_Result[4].GetUInt32();
-                l_PortalTemplate->PositionX     = l_Result[5].GetFloat();
-                l_PortalTemplate->PositionY     = l_Result[6].GetFloat();
+                l_PortalTemplate->PositionX     = l_Result[5].GetDouble();
+                l_PortalTemplate->PositionY     = l_Result[6].GetDouble();
                 l_PortalTemplate->ToMapId       = l_Result[7].GetUInt32();
-                l_PortalTemplate->ToPositionX   = l_Result[8].GetFloat();
-                l_PortalTemplate->ToPositionY   = l_Result[9].GetFloat();
+                l_PortalTemplate->ToPositionX   = l_Result[8].GetDouble();
+                l_PortalTemplate->ToPositionY   = l_Result[9].GetDouble();
 
                 m_PortalTemplate[l_PortalTemplate->MapId].push_back(l_PortalTemplate);
 
@@ -214,6 +214,49 @@ namespace SteerStone { namespace Game { namespace Global {
 
         LOG_INFO("ObjectManager", "Loaded %0 Item Templates in %1 ms", l_Counter, sServerTimeManager->GetTimeDifference(l_StartTime, sServerTimeManager->GetServerTime()));
     }
+    /// Load Ship Template
+    void Manager::LoadShipTemplate()
+    {
+        uint32 l_StartTime = sServerTimeManager->GetServerTime();
+
+        Core::Database::PreparedStatement* l_PreparedStatement = GameDatabase.GetPrepareStatement();
+        l_PreparedStatement->PrepareStatement("SELECT entry, name, description, hit_points, nano_hull, speed, cargo, lasers, generators, "
+            "rockets, ammo, extras, credits, uridium, disabled FROM ship_templates");
+        std::unique_ptr<Core::Database::PreparedResultSet> l_PreparedResultSet = l_PreparedStatement->ExecuteStatement();
+
+        uint32 l_Counter = 0;
+
+        if (l_PreparedResultSet)
+        {
+            do
+            {
+                Core::Database::ResultSet* l_Result = l_PreparedResultSet->FetchResult();
+
+                Entity::ShipTemplate* l_ShipTemplate = new Entity::ShipTemplate();
+                l_ShipTemplate->Entry           = l_Result[0].GetUInt32();
+                l_ShipTemplate->Name            = l_Result[1].GetString();
+                l_ShipTemplate->Description     = l_Result[2].GetString();
+                l_ShipTemplate->HitPoints       = l_Result[3].GetUInt32();
+                l_ShipTemplate->NanoHull        = l_Result[4].GetUInt32();
+                l_ShipTemplate->Cargo           = l_Result[5].GetUInt32();
+                l_ShipTemplate->Lasers          = l_Result[6].GetUInt32();
+                l_ShipTemplate->Generators      = l_Result[7].GetUInt32();
+                l_ShipTemplate->Rockets         = l_Result[8].GetUInt32();
+                l_ShipTemplate->Ammo            = l_Result[9].GetUInt32();
+                l_ShipTemplate->Extras          = l_Result[10].GetUInt32();
+                l_ShipTemplate->Credits         = l_Result[11].GetUInt32();
+                l_ShipTemplate->Uridium         = l_Result[12].GetUInt32();
+                l_ShipTemplate->Disabled        = l_Result[13].GetBool();
+
+                m_ShipTemplate[l_ShipTemplate->Entry] = l_ShipTemplate;
+
+                l_Counter++;
+
+            } while (l_PreparedResultSet->GetNextRow());
+        }
+
+        LOG_INFO("ObjectManager", "Loaded %0 Ship Templates in %1 ms", l_Counter, sServerTimeManager->GetTimeDifference(l_StartTime, sServerTimeManager->GetServerTime()));
+    }
 
     /// Returns Mob Template
     /// @p_Entry : Entry
@@ -236,7 +279,7 @@ namespace SteerStone { namespace Game { namespace Global {
         return std::vector<Entity::PortalTemplate*>{};
     }
     /// Returns Station Template
-    /// @p_Entry : Map Id
+    /// @p_MapId : Map Id
     Entity::StationTemplate const* Manager::GetStationTemplate(uint32 const p_MapId)
     {
         auto const l_Itr = m_StationTemplate.find(p_MapId);
@@ -246,11 +289,21 @@ namespace SteerStone { namespace Game { namespace Global {
         return nullptr;
     }
     /// Returns Item Template
-    /// @p_Entry : Map Id
+    /// @p_Entry : Entry Id
     Entity::ItemTemplate const* Manager::GetItemTemplate(uint32 const p_Entry)
     {
         auto const l_Itr = m_ItemTemplate.find(p_Entry);
         if (l_Itr != m_ItemTemplate.end())
+            return l_Itr->second;
+
+        return nullptr;
+    }
+    /// Returns Ship Template
+    /// @p_Entry : Entry Id
+    Entity::ShipTemplate const* Manager::GetShipTemplate(uint32 const p_Entry)
+    {
+        auto const l_Itr = m_ShipTemplate.find(p_Entry);
+        if (l_Itr != m_ShipTemplate.end())
             return l_Itr->second;
 
         return nullptr;

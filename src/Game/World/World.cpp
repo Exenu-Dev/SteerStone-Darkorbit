@@ -76,6 +76,7 @@ namespace SteerStone { namespace Game { namespace World {
         sObjectManager->LoadPortalTemplate();
         sObjectManager->LoadStationTemplate();
         sObjectManager->LoadItemTemplate();
+        sObjectManager->LoadShipTemplate();
 
         sZoneManager->LoadMaps();
     }

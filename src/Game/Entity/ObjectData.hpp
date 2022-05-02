@@ -175,6 +175,47 @@ namespace SteerStone { namespace Game { namespace Entity {
         uint32 Uridium;
     };
 
+    struct ShipTemplate
+    {
+        ShipTemplate()
+        {
+            Entry               = 0;
+            Name                = "";
+            Description         = "";
+            HitPoints           = 0;
+            NanoHull            = 0;
+            Speed               = 0;
+            Cargo               = 0;
+            Lasers              = 0;
+            Generators          = 0;
+            Rockets             = 0;
+            Ammo                = 0;
+            Extras              = 0;
+            Credits             = 0;
+            Uridium             = 0;
+            Disabled            = false;
+        }
+
+        //////////////////////////////////////////////////////////////////////////
+        //////////////////////////////////////////////////////////////////////////
+
+        uint32 Entry;
+        std::string Name;
+        std::string Description;
+        uint32 HitPoints;
+        uint32 NanoHull;
+        uint32 Speed;
+        uint32 Cargo;
+        uint32 Lasers;
+        uint32 Generators;
+        uint32 Rockets;
+        uint32 Ammo;
+        uint32 Extras;
+        uint32 Credits;
+        uint32 Uridium;
+        bool Disabled;
+    };
+
 }   ///< namespace Entity
 }   ///< namespace Game
 }   ///< namespace Steerstone
