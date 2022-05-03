@@ -175,7 +175,7 @@ namespace SteerStone { namespace Game { namespace Server {
             OpcodeHandler const* l_OpCodeHandler = sOpCode->GetClientPacket(l_Opcode);
 
             if (!l_OpCodeHandler->Name)
-                return false;
+                return true;
 
 
             ExecutePacket(l_OpCodeHandler, new ClientPacket(l_Buffer));
@@ -238,7 +238,7 @@ namespace SteerStone { namespace Game { namespace Server {
         Write((const char*)p_PacketBuffer->GetContents(), p_PacketBuffer->GetSize());
     }
     /// For Non-Implemented packets
-    void GameSocket::HandleNULL(ClientPacket* p_Packet)
+    void GameSocket::HandleNULL(ClientPacket* p_Packet) 
     {
         LOG_WARNING("GameSocket", "Received unhandled packet. Header: %0", p_Packet->GetHeader());
     }

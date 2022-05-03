@@ -103,9 +103,10 @@ namespace SteerStone { namespace Game { namespace Entity {
         p_Player->UpdateUridium(m_Uridium);
         p_Player->UpdateExperience(m_Experience);
         p_Player->UpdateHonor(m_Honor);
-        p_Player->UpdateLogBook("<span style=\"padding-left: 15px;\">You have destroyed " + GetName() + "</span><br>" +
-            "<span style=\"padding-left: 15px;\">You received " + std::to_string(m_Credits) + " credits" + "</span><br>" +
-            "<span style=\"padding-left: 15px;\">You received " + std::to_string(m_Uridium) + " uridium" + "</span><br>");
+        p_Player->UpdateLogBook("<div class=\"logdata\">You have destroyed " + GetName() + " alien ship.</div>" +
+            "<div class=\"logdata\">You received " + std::to_string(m_Entry) + " Experience Points." + "</div>" +
+            "<div class=\"logdata\">You received " + std::to_string(m_Credits) + " Credits." + "</div>" +
+            "<div class=\"logdata\">You received " + std::to_string(m_Uridium) + " Uridium." + "</div>");
 
         p_Player->ToPlayer()->SendPacket(Server::Packets::Misc::Reward().Write(Server::Packets::Misc::RewardType::REWARD_TYPE_CREDIT,     { m_Credits,    p_Player->GetCredits()                          }));
         p_Player->ToPlayer()->SendPacket(Server::Packets::Misc::Reward().Write(Server::Packets::Misc::RewardType::REWARD_TYPE_URIDIUM,    { m_Uridium,    p_Player->GetUridium()                          }));

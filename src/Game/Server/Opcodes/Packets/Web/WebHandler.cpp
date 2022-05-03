@@ -21,6 +21,7 @@
 #include "World.hpp"
 #include "GameFlags.hpp"
 #include "Server/LoginPackets.hpp"
+#include "ObjectManager.hpp"
 
 /// Note;
 /// I'm not using the Server Packets to send a response back.
@@ -94,6 +95,40 @@ namespace SteerStone { namespace Game { namespace Server {
 
             }
         }
+    }
+    /// Web Handler
+    /// @p_ClientPacket : Packet recieved from Web
+    void GameSocket::HandleUpdateShip(ClientPacket* p_Packet)
+    {
+        uint32 l_PlayerId = p_Packet->ReadUInt32();
+
+        Entity::Player* l_Player = sWorldManager->FindPlayer(l_PlayerId);
+        char l_CanEquip = '0';
+
+        if (l_Player)
+        {
+            if (l_Player->GetEvent() == EventType::EVENT_TYPE_STATION && !l_Player->IsInCombat())
+            {
+                uint32 l_EntryId = p_Packet->ReadUInt32();
+
+                const Entity::ShipTemplate* l_ShipTemplate = sObjectManager->GetShipTemplate(l_EntryId);
+
+                if (l_ShipTemplate)
+                {
+                    l_Player->m_HitPoints = l_ShipTemplate->HitPoints;
+                    l_Player->m_ShipType = l_ShipTemplate->Entry;
+                    l_Player->m_MaxRockets = l_ShipTemplate->Rockets;
+                    l_Player->m_MaxCargoSpace = l_ShipTemplate->Cargo;
+
+                    l_Player->SaveShipToDB();
+                    l_Player->SendInitializeShip();
+
+                    l_CanEquip = '1';
+                }
+            }
+        }
+
+        Write(&l_CanEquip, sizeof(l_CanEquip));
     }
 }   ///< namespace Server
 }   ///< namespace Game
