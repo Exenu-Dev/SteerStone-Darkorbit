@@ -34,12 +34,13 @@ namespace SteerStone { namespace Game { namespace Server {
     void GameSocket::HandleCheckOnline(ClientPacket* p_Packet)
     {
         uint32 l_PlayerId = p_Packet->ReadUInt32();
+        PacketBuffer l_PacketBuffer;
 
         Entity::Player* l_Player = sWorldManager->FindPlayer(l_PlayerId);
 
-        char l_Online = (l_Player ? '1' : '0');
+        l_PacketBuffer.AppendBool(l_Player ? true : false);
 
-        Write(&l_Online, sizeof(l_Online));
+        Write((char*)l_PacketBuffer.GetContents(), l_PacketBuffer.GetSize(), true);
     }
     /// Web Handler
     /// @p_ClientPacket : Packet recieved from Web
@@ -129,6 +130,40 @@ namespace SteerStone { namespace Game { namespace Server {
         }
 
         Write(&l_CanEquip, sizeof(l_CanEquip));
+    }
+    /// Web Handler
+    /// @p_ClientPacket : Packet recieved from Web
+    void GameSocket::HandleBroughtAmmo(ClientPacket* p_Packet)
+    {
+        uint32 l_PlayerId = p_Packet->ReadUInt32();
+
+        Entity::Player* l_Player = sWorldManager->FindPlayer(l_PlayerId);
+        PacketBuffer l_PacketBuffer;
+        l_PacketBuffer.AppendChar("Error");
+        if (l_Player)
+        {
+            uint32 l_EntryId = p_Packet->ReadUInt32();
+            uint32 l_Amount = p_Packet->ReadUInt32();
+            const Entity::ItemTemplate* l_ItemTemplate = sObjectManager->GetItemTemplate(l_EntryId);
+
+            if (l_ItemTemplate) {
+                // TODO; Need a better method of detecting what ammo is being updated
+                // As checking by name is not a good idea as this could change
+                if (l_ItemTemplate->Name == "LCB-10")
+                    l_Player->SetBatteryAmmo(BatteryType::BATTERY_TYPE_LCB10, l_Amount);
+                else if (l_ItemTemplate->Name == "MCB-25")
+                    l_Player->SetBatteryAmmo(BatteryType::BATTERY_TYPE_MCB25, l_Amount);
+                else if (l_ItemTemplate->Name == "MCB-50")
+                    l_Player->SetBatteryAmmo(BatteryType::BATTERY_TYPE_MCB50, l_Amount);
+                else if (l_ItemTemplate->Name == "SAB-50")
+                    l_Player->SetBatteryAmmo(BatteryType::BATTERY_TYPE_SAB50, l_Amount);
+            }
+            else {
+                LOG_WARNING("Web", "Failed to find Item Template for %0", l_EntryId);
+            }
+        }
+
+        Write((char*)l_PacketBuffer.GetContents(), l_PacketBuffer.GetSize(), true);
     }
 }   ///< namespace Server
 }   ///< namespace Game

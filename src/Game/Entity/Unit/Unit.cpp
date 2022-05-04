@@ -181,6 +181,14 @@ namespace SteerStone { namespace Game { namespace Entity {
             return;
         }
 
+        if (IsPlayer())
+            // Check if player still has any ammo left
+            if (ToPlayer()->GetSelectedBatteryAmmo() <= 0) {
+                ToPlayer()->CancelAttack();
+
+                ToPlayer()->SendPacket(Server::Packets::Misc::Update().Write(Server::Packets::Misc::InfoUpdate::INFO_UPDATE_MESSAGE, { "No more ammo." }));
+            }
+
         /// Check if we are in range
         if (m_AttackState == AttackState::ATTACK_STATE_IN_RANGE)
         {
@@ -207,6 +215,34 @@ namespace SteerStone { namespace Game { namespace Entity {
             {
                 /// Update last time attacked
                 m_LastTimeAttacked = sServerTimeManager->GetServerTime();
+
+                // If is player, we need to decrease the ammo by weapon count
+                if (IsPlayer())
+                {
+                    uint32 l_WeaponCount = ToPlayer()->GetInventory()->GetWeaponCount();
+
+                    switch (ToPlayer()->GetLaserType())
+                    {
+                        case BatteryType::BATTERY_TYPE_LCB10:
+                            ToPlayer()->SetBatteryAmmo(BatteryType::BATTERY_TYPE_LCB10, -l_WeaponCount);
+                            break;
+                        case BatteryType::BATTERY_TYPE_MCB25:
+                            ToPlayer()->SetBatteryAmmo(BatteryType::BATTERY_TYPE_MCB25, -l_WeaponCount);
+                            break;
+                        case BatteryType::BATTERY_TYPE_MCB50:
+                            ToPlayer()->SetBatteryAmmo(BatteryType::BATTERY_TYPE_MCB50, -l_WeaponCount);
+                            break;
+                        case BatteryType::BATTERY_TYPE_SAB50:
+                            ToPlayer()->SetBatteryAmmo(BatteryType::BATTERY_TYPE_SAB50, -l_WeaponCount);
+                            break;
+                        case BatteryType::BATTERY_TYPE_UCB100:
+                            ToPlayer()->SetBatteryAmmo(BatteryType::BATTERY_TYPE_UCB100, -l_WeaponCount);
+                            break;
+                        default:
+                            LOG_ASSERT(false, "Unit", "Cannot update player ammo, type doesn't exist %0", ToPlayer()->GetLaserType());
+                            break;
+                    }
+                }
 
                 /// Can we hit target?
                 if (CalculateHitChance())

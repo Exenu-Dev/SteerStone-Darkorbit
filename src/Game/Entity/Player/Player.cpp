@@ -467,7 +467,7 @@ namespace SteerStone { namespace Game { namespace Entity {
             break;
             case DeathState::JUST_DIED:
             {
-                //m_DeathState = DeathState::DEAD;
+                m_DeathState = DeathState::DEAD;
 
                 CancelAttack();
 
@@ -494,22 +494,6 @@ namespace SteerStone { namespace Game { namespace Entity {
                     }
                     break;
                 }
-
-               // TODO; Does this need to be removed?
-               /* SetMap(sZoneManager->GetMap(l_RespawnMapId));
-                GetSpline()->SetPosition(0.0f, 0.0f);
-
-                SendClientSettings();
-                GetInventory()->CalculateStats();
-                SendInitializeShip();
-                SendDrones();
-                SendMapUpdate();
-                SendAmmoUpdate();
-                SendAccountRank();
-                SendLoggedIn();
-                sZoneManager->AddToMap(this);
-
-                m_DeathState = DeathState::ALIVE;*/
             }
             break;
         }
@@ -536,12 +520,14 @@ namespace SteerStone { namespace Game { namespace Entity {
 
     /// Update Log Book (used for website)
     /// @p_Log : Log text
-    void Player::UpdateLogBook(std::string p_Log)
+    /// @p_LogBookType : Type of Log Book
+    void Player::UpdateLogBook(std::string p_Log, LogBookType const p_LogBookType /*= LogBookType::LOG_BOOK_TYPE_DETAILED*/)
     {
         Core::Database::PreparedStatement* l_PreparedStatement = GameDatabase.GetPrepareStatement();
-        l_PreparedStatement->PrepareStatement("INSERT INTO log_books (entry_id, text, date) VALUES (?, ?, NOW())");
+        l_PreparedStatement->PrepareStatement("INSERT INTO log_books (entry_id, type, text, date) VALUES (?, ?, ?, NOW())");
         l_PreparedStatement->SetUint32(0, m_Id);
-        l_PreparedStatement->SetString(1, p_Log);
+        l_PreparedStatement->SetUint16(1, static_cast<uint16>(p_LogBookType));
+        l_PreparedStatement->SetString(2, p_Log);
         l_PreparedStatement->ExecuteStatement();
     }
 
@@ -1186,6 +1172,8 @@ namespace SteerStone { namespace Game { namespace Entity {
         SendPacket(&l_Buffer);
     }
 
+    /// Update Experience
+    /// @p_Experience : Experience to be added
     void Player::UpdateExperience(uint32 const p_Experience)
     {
         m_Experience += p_Experience;
@@ -1198,6 +1186,56 @@ namespace SteerStone { namespace Game { namespace Entity {
             SendPacket(Server::Packets::Misc::Update().Write(Server::Packets::Misc::InfoUpdate::INFO_UPDATE_LEVEL_UP, { l_Level, LevelExperience::All[l_Level] - m_Experience }));
             m_Level = l_Level;
         }
+    }
+
+    /// Set Battery Ammo
+    ///@p_BatteryType : Battery Type
+    ///@p_Amount : Amount to add
+    void Player::SetBatteryAmmo(BatteryType const p_BatteryType, const uint32 p_Amount)
+    {
+        switch (p_BatteryType)
+        {
+            case BatteryType::BATTERY_TYPE_LCB10:
+                m_Ammo.m_BatteryLCB10 += p_Amount;
+
+                if (m_Ammo.m_BatteryLCB10 < 0) {
+                    m_Ammo.m_BatteryLCB10 = 0;
+                }
+                break;
+            case BatteryType::BATTERY_TYPE_MCB25:
+                m_Ammo.m_BatteryMCB25 += p_Amount;
+
+                if (m_Ammo.m_BatteryMCB25 < 0) {
+                    m_Ammo.m_BatteryMCB25 = 0;
+                }
+                break;
+            case BatteryType::BATTERY_TYPE_MCB50:
+                m_Ammo.m_BatteryMCB50 += p_Amount;
+
+                if (m_Ammo.m_BatteryMCB50 < 0) {
+                    m_Ammo.m_BatteryMCB50 = 0;
+                }
+                break;
+            case BatteryType::BATTERY_TYPE_SAB50:
+                m_Ammo.m_BatterySAB50 += p_Amount;
+
+                if (m_Ammo.m_BatterySAB50 < 0) {
+                    m_Ammo.m_BatterySAB50 = 0;
+                }
+                break;
+            case BatteryType::BATTERY_TYPE_UCB100:
+                m_Ammo.m_BatteryUCB100 += p_Amount;
+
+                if (m_Ammo.m_BatteryUCB100 < 0) {
+                    m_Ammo.m_BatteryUCB100 = 0;
+                }
+                break;
+            default:
+                LOG_ASSERT(false, "Player", "Cannot update ammo with battery type %0", static_cast<uint16>(p_BatteryType));
+                break;
+        }
+
+        SendAmmoUpdate();
     }
 
 }   ///< namespace Entity

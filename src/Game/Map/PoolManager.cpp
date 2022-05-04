@@ -58,7 +58,7 @@ namespace SteerStone { namespace Game { namespace Map {
     void PoolManager::InitializeMobs()
     {
         Core::Database::PreparedStatement* l_PreparedStatement = GameDatabase.GetPrepareStatement();
-        l_PreparedStatement->PrepareStatement("SELECT entry, min_count, max_count FROM mobs WHERE map_id = ?");
+        l_PreparedStatement->PrepareStatement("SELECT entry, chance FROM mobs WHERE map_id = ?");
         l_PreparedStatement->SetUint32(0, m_Map->GetId());
         std::unique_ptr<Core::Database::PreparedResultSet> l_PreparedResultSet = l_PreparedStatement->ExecuteStatement();
 
@@ -88,7 +88,7 @@ namespace SteerStone { namespace Game { namespace Map {
                     {
                         float l_MaxX = (l_RadiusX * l_X);
 
-                        for (uint32 l_I = 0; l_I < Core::Utils::UInt32Random(l_Result[1].GetUInt32(), l_Result[2].GetUInt32()); l_I++)
+                        if (Core::Utils::RoleChanceFloat(l_Result[1].GetFloat())) 
                         {
                             Entity::Mob* l_Mob          = new Entity::Mob();
                             l_Mob->m_Entry              = l_MobTemplate->Entry;

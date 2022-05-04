@@ -185,7 +185,7 @@ enum RocketType
     MAX_ROCKET           = 3
 };
 
-enum BatteryType
+enum BatteryType : uint16
 {
     BATTERY_TYPE_LCB10  = 1,
     BATTERY_TYPE_MCB25  = 2,
@@ -329,3 +329,9 @@ namespace LevelExperience
                                  LEVEL_28 };
 
 }   ///< namespace LevelExperience
+
+enum class LogBookType : uint16
+{
+    LOG_BOOK_TYPE_OVERVIEW = 0,
+    LOG_BOOK_TYPE_DETAILED = 1
+};

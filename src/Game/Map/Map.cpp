@@ -389,6 +389,9 @@ namespace SteerStone { namespace Game { namespace Map {
                 m_Grids[std::get<0>(p_Object->GetGridIndex())][std::get<1>(p_Object->GetGridIndex())]->Add(p_Object, true);
             }
 
+            if (p_Object->ToUnit()->IsInRadiationZone())
+                p_Object->ToUnit()->SetInRadiationZone(false);
+
             m_Grids[std::get<0>(p_Object->GetGridIndex())][std::get<1>(p_Object->GetGridIndex())]->Move(p_Object);
         }
     }

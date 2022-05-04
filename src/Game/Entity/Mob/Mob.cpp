@@ -106,7 +106,11 @@ namespace SteerStone { namespace Game { namespace Entity {
         p_Player->UpdateLogBook("<div class=\"logdata\">You have destroyed " + GetName() + " alien ship.</div>" +
             "<div class=\"logdata\">You received " + std::to_string(m_Entry) + " Experience Points." + "</div>" +
             "<div class=\"logdata\">You received " + std::to_string(m_Credits) + " Credits." + "</div>" +
-            "<div class=\"logdata\">You received " + std::to_string(m_Uridium) + " Uridium." + "</div>");
+            "<div class=\"logdata\">You received " + std::to_string(m_Uridium) + " Uridium." + "</div>", LogBookType::LOG_BOOK_TYPE_OVERVIEW);
+
+        p_Player->UpdateLogBook("You received " + std::to_string(m_Experience) + " EP.");
+        p_Player->UpdateLogBook("You received " + std::to_string(m_Honor) + " honor.");
+        p_Player->UpdateLogBook("You destroyed alien ship " + GetName());
 
         p_Player->ToPlayer()->SendPacket(Server::Packets::Misc::Reward().Write(Server::Packets::Misc::RewardType::REWARD_TYPE_CREDIT,     { m_Credits,    p_Player->GetCredits()                          }));
         p_Player->ToPlayer()->SendPacket(Server::Packets::Misc::Reward().Write(Server::Packets::Misc::RewardType::REWARD_TYPE_URIDIUM,    { m_Uridium,    p_Player->GetUridium()                          }));

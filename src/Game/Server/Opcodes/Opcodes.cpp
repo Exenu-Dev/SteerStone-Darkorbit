@@ -78,6 +78,7 @@ namespace SteerStone { namespace Game { namespace Server {
         StoreClientPacket(ClientOpCodes::WEB_PACKET_CAN_EQUIP,             "WEB_PACKET_CAN_EQUIP",            PacketStatus::STATUS_WEB,           PacketProcess::PROCESS_PLAYER_THREAD, &GameSocket::HandleCanEquip             );
         StoreClientPacket(ClientOpCodes::WEB_PACKET_UPDATE_INVENTORY,      "WEB_PACKET_UPDATE_INVENTORY",     PacketStatus::STATUS_WEB,           PacketProcess::PROCESS_PLAYER_THREAD, &GameSocket::HandleUpdateInventory      );
         StoreClientPacket(ClientOpCodes::WEB_PACKET_UPDATE_SHIP,           "WEB_PACKET_UPDATE_SHIP",          PacketStatus::STATUS_WEB,           PacketProcess::PROCESS_PLAYER_THREAD, &GameSocket::HandleUpdateShip           );
+        StoreClientPacket(ClientOpCodes::WEB_PACKET_BROUGHT_AMMO,          "WEB_PACKET_BROUGHT_AMMO",         PacketStatus::STATUS_WEB,           PacketProcess::PROCESS_PLAYER_THREAD, &GameSocket::HandleBroughtAmmo          );
 
         //////////////////////////////////////////////////////////////////////////
         //////////////////////////////////////////////////////////////////////////

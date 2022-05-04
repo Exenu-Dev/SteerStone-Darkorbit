@@ -66,6 +66,7 @@ namespace SteerStone { namespace Game { namespace Entity {
         //////////////////////////////////////////////////////////////////////////
         //////////////////////////////////////////////////////////////////////////
 
+
     private:
         int32 m_BatteryLCB10;
         int32 m_BatteryMCB25;
@@ -151,7 +152,8 @@ namespace SteerStone { namespace Game { namespace Entity {
     public:
         /// Update Log Book (used for website)
         /// @p_Log : Log text
-        void UpdateLogBook(std::string p_Log);
+        /// @p_LogBookType : Type of Log Book
+        void UpdateLogBook(std::string p_Log, LogBookType const p_LogBookType = LogBookType::LOG_BOOK_TYPE_DETAILED);
 
         ///////////////////////////////////////////
         //        SURROUNDING SYSTEM
@@ -243,6 +245,26 @@ namespace SteerStone { namespace Game { namespace Entity {
         Ammo const* GetAmmo()      const     { return &m_Ammo;            }
         Inventory* GetInventory()            { return &m_Inventory;       }
         std::shared_ptr<Server::GameSocket> ToSocket() { return m_Socket; }
+        uint32 const GetSelectedBatteryAmmo()
+        {
+            switch (m_LaserType)
+            {
+                case BatteryType::BATTERY_TYPE_LCB10:
+                    return m_Ammo.m_BatteryLCB10;
+                break;
+                case BatteryType::BATTERY_TYPE_MCB25:
+                    return m_Ammo.m_BatteryMCB25;
+                case BatteryType::BATTERY_TYPE_MCB50:
+                    return m_Ammo.m_BatteryMCB50;
+                case BatteryType::BATTERY_TYPE_SAB50:
+                    return m_Ammo.m_BatterySAB50;
+                case BatteryType::BATTERY_TYPE_UCB100:
+                    return m_Ammo.m_BatteryUCB100;
+                default:
+                    LOG_ASSERT(false, "Player", "Could not find ammo for type %0", m_LaserType);
+                break;
+            }
+        }
 
         /// Setters Function
         void SetEventType(EventType const p_EventType)    { m_Event = p_EventType;         }
@@ -251,6 +273,7 @@ namespace SteerStone { namespace Game { namespace Entity {
         void UpdateCredits(uint32 const p_Credits)        { m_Credits += p_Credits;        }
         void UpdateUridium(uint32 const p_Uridium)        { m_Uridium += p_Uridium;        }
         void UpdateExperience(uint32 const p_Experience);
+        void SetBatteryAmmo(BatteryType const p_BatteryType, const uint32 p_Amount);
         void UpdateHonor(uint32 const p_Honour)           { m_Honor += p_Honour;           }
         void SetCargoSpace(uint32 const p_CargoSpace)     { m_CargoSpace = p_CargoSpace;   }
 
