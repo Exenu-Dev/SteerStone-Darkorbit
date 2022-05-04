@@ -1140,7 +1140,13 @@ namespace SteerStone { namespace Game { namespace Entity {
         Server::ClientPacket* l_ClientPacket = nullptr;
         while (m_RecievedQueue.Next(l_ClientPacket, p_PacketFilter))
         {
-            m_Socket->ExecutePacket(sOpCode->GetClientPacket(static_cast<ClientOpCodes>(l_ClientPacket->GetHeader())), l_ClientPacket);
+            Server::OpcodeHandler const* l_OpcodeHandler = sOpCode->GetClientPacket(static_cast<ClientOpCodes>(l_ClientPacket->GetHeader()));
+
+            if (l_OpcodeHandler && l_OpcodeHandler->Name)
+                m_Socket->ExecutePacket(l_OpcodeHandler, l_ClientPacket);
+            else
+                LOG_WARNING("Opcode", "Received unhandled opcode %0", l_ClientPacket->GetHeader());
+            
             delete l_ClientPacket;
         }
 
