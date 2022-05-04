@@ -18,6 +18,7 @@
 
 #include "Packets/Server/MiscPackets.hpp"
 #include "Packets/Server/ShipPackets.hpp"
+#include "Packets/Server/AttackPackets.hpp"
 #include "Socket.hpp"
 #include "Player.hpp"
 #include "GameFlags.hpp"
@@ -37,6 +38,16 @@ namespace SteerStone { namespace Game { namespace Server {
         }
 
         m_Player->SetLaserType(l_LaserType);
+
+        // If attacking, also update laser colour
+        if (m_Player->IsAttacking())
+        {
+            Server::Packets::Attack::LaserShoot l_Packet;
+            l_Packet.FromId = m_Player->GetObjectGUID().GetCounter();
+            l_Packet.ToId = m_Player->GetTarget()->GetObjectGUID().GetCounter();
+            l_Packet.LaserId = m_Player->GetLaserColourId();
+            m_Player->GetMap()->SendPacketToNearByGridsIfInSurrounding(l_Packet.Write(), m_Player, true);
+        }
     }
 
     /// Ship Handler

@@ -45,13 +45,13 @@ namespace SteerStone { namespace Game { namespace Entity {
         m_Rank              = 0;
         m_WeaponState       = 0;
         m_DeathState        = DeathState::ALIVE;
-        m_LaserType         = 0;
+        m_LaserType         = 1;
         m_RocketType        = 0;
         m_Attacking         = false;
         m_AttackRange       = 0;
         m_AttackState       = AttackState::ATTACK_STATE_NONE;
-        m_SelectedLaser     = 1;
-        m_SelectedRocket    = 1;
+        m_SelectedLaser     = 0;
+        m_SelectedRocket    = 0;
         m_LastTimeAttacked  = 0;
         m_Experience        = 0;
         m_Behaviour         = Behaviour::BEHAVIOUR_PASSIVE;
@@ -111,7 +111,7 @@ namespace SteerStone { namespace Game { namespace Entity {
         Server::Packets::Attack::LaserShoot l_Packet;
         l_Packet.FromId  = GetObjectGUID().GetCounter();
         l_Packet.ToId    = GetTarget()->GetObjectGUID().GetCounter();
-        l_Packet.LaserId = m_WeaponState >= WeaponState::WEAPON_STATE_FULLY_EQUIPPED ? m_LaserType : WeaponState::WEAPON_STATE_NOT_EQUIPPED;
+        l_Packet.LaserId = m_WeaponState >= WeaponState::WEAPON_STATE_FULLY_EQUIPPED ? GetLaserColourId() : WeaponState::WEAPON_STATE_NOT_EQUIPPED;
         GetMap()->SendPacketToNearByGridsIfInSurrounding(l_Packet.Write(), this, true);
 
         /// If target is mob, then assign mob to attack us if mob is not already tagged
@@ -325,7 +325,7 @@ namespace SteerStone { namespace Game { namespace Entity {
                 Server::Packets::Attack::LaserShoot l_Packet;
                 l_Packet.FromId     = GetObjectGUID().GetCounter();
                 l_Packet.ToId       = GetTarget()->GetObjectGUID().GetCounter();
-                l_Packet.LaserId    = m_LaserType;
+                l_Packet.LaserId    = GetLaserColourId();
                 GetMap()->SendPacketToNearByGridsIfInSurrounding(l_Packet.Write(), this, true);
 
                 m_AttackState = AttackState::ATTACK_STATE_IN_RANGE;
@@ -368,17 +368,18 @@ namespace SteerStone { namespace Game { namespace Entity {
     }
     /// Calculate Damage done for target
     uint32 Unit::CalculateDamageDone()
-    {
+    {   
         uint32 l_MinDamage = 0;
         uint32 l_MaxDamage = 0;
-        switch (m_SelectedLaser)
+
+        switch (m_LaserType)
         {
             case BatteryType::BATTERY_TYPE_LCB10:
             case BatteryType::BATTERY_TYPE_MCB25:
             case BatteryType::BATTERY_TYPE_MCB50:
             case BatteryType::BATTERY_TYPE_UCB100:
-                l_MinDamage = m_MinDamage * m_SelectedLaser;
-                l_MaxDamage = m_MaxDamage * m_SelectedLaser;
+                l_MinDamage = m_MinDamage * m_LaserType;
+                l_MaxDamage = m_MaxDamage * m_LaserType;
                 break;
             default:
                 break;

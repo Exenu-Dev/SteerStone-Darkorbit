@@ -155,7 +155,7 @@ namespace SteerStone { namespace Game { namespace Map {
             Server::Packets::Attack::LaserShoot l_Packet;
             l_Packet.FromId     = p_ObjectBuilt->GetObjectGUID().GetCounter();
             l_Packet.ToId       = p_ObjectBuilt->ToUnit()->GetTarget()->GetObjectGUID().GetCounter();
-            l_Packet.LaserId    = p_ObjectBuilt->ToUnit()->GetLaserType();
+            l_Packet.LaserId    = p_ObjectBuilt->ToUnit()->GetLaserColourId();
             p_Player->SendPacket(l_Packet.Write());
         }
 

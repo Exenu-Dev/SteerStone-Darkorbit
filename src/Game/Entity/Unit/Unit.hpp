@@ -145,6 +145,7 @@ namespace SteerStone { namespace Game { namespace Entity {
         uint16 GetWeaponState()     const { return m_WeaponState;       }
         uint16 GetDeathState()      const { return m_DeathState;        }
         uint16 GetLaserType()       const { return m_LaserType;         }    
+        uint16 GetLaserColourId()   const { return m_LaserType - 1;     }    
         uint32 GetExperience()      const { return m_Experience;        }
         uint16 GetBehaviour()       const { return m_Behaviour;         }
         uint32 GetRespawnTimer()    const { return m_RespawnTimer;      }
@@ -204,8 +205,8 @@ namespace SteerStone { namespace Game { namespace Entity {
         uint16 m_DeathState;
         uint16 m_AttackRange;
         uint16 m_AttackState;
-        uint32 m_SelectedLaser;
-        uint32 m_SelectedRocket;
+        uint32 m_SelectedLaser; ///< TODO; Rename as this is just used for settings
+        uint32 m_SelectedRocket; ///< TODO; Rename as this is just used for settings
         uint32 m_Experience;
         uint16 m_Behaviour;
         uint32 m_RespawnTimer;
