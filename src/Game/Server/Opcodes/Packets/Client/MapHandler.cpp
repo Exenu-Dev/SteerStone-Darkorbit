@@ -167,8 +167,27 @@ namespace SteerStone { namespace Game { namespace Server {
     /// @p_ClientPacket : Packet recieved from client
     void GameSocket::HandleShootRocket(ClientPacket* p_Packet)
     {
+        uint32 l_Id = p_Packet->ReadUInt32();
 
+        /// Cannot target ourself
+        if (l_Id == m_Player->GetObjectGUID().GetCounter())
+            return;
 
+        Entity::Object* l_Object = m_Player->GetMap()->FindObject(l_Id);
+
+        if (!l_Object)
+        {
+            LOG_WARNING("Socket", "Attempted to find object %0 in map but does not exist!", l_Id);
+            return;
+        }
+
+        if (l_Object->GetType() != Entity::Type::OBJECT_TYPE_MOB && l_Object->GetType() != Entity::Type::OBJECT_TYPE_PLAYER)
+        {
+            LOG_WARNING("Socket", "Attempted to select a target which is not a unit or a player!", l_Id);
+            return;
+        }
+
+        m_Player->Attack(l_Object->ToUnit(), Entity::ATTACK_TYPE_ROCKET);
     }
 
     /// Map Handler

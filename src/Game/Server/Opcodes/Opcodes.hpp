@@ -60,6 +60,7 @@ enum ClientOpCodes : uint8
     CLIENT_PACKET_UPDATE_SETTINGS       = 0x41,
     CLIENT_PACKET_CHANGE_CONFIG         = 0x53,
     CLIENT_PACKET_UNKNOWN               = 0x62,
+    CLIENT_PACKET_ROCKET_ATTACK         = 0x76,
 
     /// Web
     WEB_PACKET_CHECK_ONLINE             = 0x22,
@@ -110,6 +111,7 @@ enum ServerOpCodes : uint8
     SERVER_PACKET_SHOOT_ROCKET          = 0x77,
     SERVER_PACKET_CROSS_HAIR            = 0x36,
     SERVER_PACKET_CHANGE_CONFIG         = 0x53,
+    SERVER_PACKET_ROCKET_ATTACK         = 0x76,
 
     /// Web Packets
     SERVER_PACKET_CHECK_ONLINE          = 0x22,

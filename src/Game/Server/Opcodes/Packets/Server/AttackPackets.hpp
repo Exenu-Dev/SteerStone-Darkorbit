@@ -223,6 +223,31 @@ namespace SteerStone { namespace Game { namespace Server { namespace Packets { n
         uint32 MaxHitPoints;
     };
 
+    /// SERVER_PACKET_ROCKET_ATTACK packet builder
+    class RocketShoot final : public ServerPacket
+    {
+    public:
+        /// Constructor 
+        RocketShoot() : ServerPacket(ServerOpCodes::SERVER_PACKET_ROCKET_ATTACK)
+        {
+            FromId      = 0;
+            ToId        = 0;
+            Hit         = false;
+            RocketId    = 0;
+        }
+
+        //////////////////////////////////////////////////////////////////////////
+        //////////////////////////////////////////////////////////////////////////
+
+        /// Write the packet
+        PacketBuffer const* Write();
+
+        uint32 FromId;
+        uint32 ToId;
+        bool Hit;
+        uint32 RocketId;
+    };
+
 }   ///< namespace Attack
 }   ///< namespace Packets
 }   ///< namespace Server

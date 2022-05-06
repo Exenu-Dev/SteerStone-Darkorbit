@@ -75,3 +75,18 @@
 
 #define STR(x) #x
 #define XSTR(x) STR(x)
+
+# define ENUM_CLASS_OPERATORS(T)																																					\
+inline constexpr T operator~(T a) noexcept { return static_cast<T>(~static_cast<uint64_t>(a)); }														\
+inline constexpr T operator&(T a, T b) noexcept { return static_cast<T>(static_cast<uint64_t>(a) & static_cast<uint64_t>(b)); }			\
+inline constexpr T operator|(T a, T b) noexcept { return static_cast<T>(static_cast<uint64_t>(a) | static_cast<uint64_t>(b)); }			\
+inline constexpr T operator^(T a, T b) noexcept { return static_cast<T>(static_cast<uint64_t>(a) ^ static_cast<uint64_t>(b)); }			\
+inline T& operator&=(T& a, T b) noexcept { return a = static_cast<T>(static_cast<uint64_t>(a) & static_cast<uint64_t>(b)); }			\
+inline T& operator|=(T& a, T b) noexcept { return a = static_cast<T>(static_cast<uint64_t>(a) | static_cast<uint64_t>(b)); }				\
+inline T& operator^=(T& a, T b) noexcept { return a = static_cast<T>(static_cast<uint64_t>(a) ^ static_cast<uint64_t>(b)); }
+
+# define ENUM_CLASS_AND_OR(T)																																						\
+inline constexpr T operator&(T a, T b) noexcept { return static_cast<T>(static_cast<uint64_t>(a) & static_cast<uint64_t>(b)); }			\
+inline constexpr T operator|(T a, T b) noexcept { return static_cast<T>(static_cast<uint64_t>(a) | static_cast<uint64_t>(b)); }			\
+inline T& operator&=(T& a, T b) noexcept { return a = static_cast<T>(static_cast<uint64_t>(a) & static_cast<uint64_t>(b)); }			\
+inline T& operator|=(T& a, T b) noexcept { return a = static_cast<T>(static_cast<uint64_t>(a) | static_cast<uint64_t>(b)); }	

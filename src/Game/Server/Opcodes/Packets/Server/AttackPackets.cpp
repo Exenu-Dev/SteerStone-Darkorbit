@@ -148,6 +148,19 @@ namespace SteerStone { namespace Game { namespace Server { namespace Packets { n
 
         return &m_Buffer;
     }
+    /// SERVER_PACKET_ROCKET_ATTACK
+    PacketBuffer const* RocketShoot::Write()
+    {
+        m_Buffer.AppendUInt32(FromId);
+        m_Buffer.AppendUInt32(ToId);
+        m_Buffer.AppendBool(true);
+        m_Buffer.AppendUInt32(RocketId);
+
+        m_Buffer.AppendEndSplitter();
+        m_Buffer.AppendCarriage();
+
+        return &m_Buffer;
+    }
 
 }   ///< namespace Attack
 }   ///< namespace Packets

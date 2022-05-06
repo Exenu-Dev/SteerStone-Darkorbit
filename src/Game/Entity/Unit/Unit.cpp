@@ -60,6 +60,7 @@ namespace SteerStone { namespace Game { namespace Entity {
         m_Credits           = 0;
         m_Uridium           = 0;
         m_InRadiationZone   = false;
+        m_AttackType        = AttackType::ATTACK_TYPE_NONE;
         
         for (uint32 l_I = 0; l_I < MAX_RESOURCE_COUNTER; l_I++)
             m_Resources[l_I] = 0;
@@ -98,7 +99,7 @@ namespace SteerStone { namespace Game { namespace Entity {
 
     /// Attack
     /// @p_Victim : Victim we are attacking
-    void Unit::Attack(Unit* p_Victim)
+    void Unit::Attack(Unit* p_Victim, AttackType const p_AttackType /*= AttackType::ATTACK_TYPE_LASER*/)
     {
         if (!CanAttackTarget(p_Victim))
             return;
@@ -107,12 +108,15 @@ namespace SteerStone { namespace Game { namespace Entity {
         if (GetTargetGUID() != p_Victim->GetGUID())
             SetTarget(p_Victim);
 
-        /// Send Attack
-        Server::Packets::Attack::LaserShoot l_Packet;
-        l_Packet.FromId  = GetObjectGUID().GetCounter();
-        l_Packet.ToId    = GetTarget()->GetObjectGUID().GetCounter();
-        l_Packet.LaserId = m_WeaponState >= WeaponState::WEAPON_STATE_FULLY_EQUIPPED ? GetLaserColourId() : WeaponState::WEAPON_STATE_NOT_EQUIPPED;
-        GetMap()->SendPacketToNearByGridsIfInSurrounding(l_Packet.Write(), this, true);
+        if ((p_AttackType & (AttackType::ATTACK_TYPE_LASER | AttackType::ATTACK_TYPE_BOTH)))
+        {
+            /// Send Attack
+            Server::Packets::Attack::LaserShoot l_Packet;
+            l_Packet.FromId = GetObjectGUID().GetCounter();
+            l_Packet.ToId = GetTarget()->GetObjectGUID().GetCounter();
+            l_Packet.LaserId = m_WeaponState >= WeaponState::WEAPON_STATE_FULLY_EQUIPPED ? GetLaserColourId() : WeaponState::WEAPON_STATE_NOT_EQUIPPED;
+            GetMap()->SendPacketToNearByGridsIfInSurrounding(l_Packet.Write(), this, true);
+        }
 
         /// If target is mob, then assign mob to attack us if mob is not already tagged
         if (GetTarget()->IsMob())
@@ -128,7 +132,182 @@ namespace SteerStone { namespace Game { namespace Entity {
 
         m_LastTimeAttacked  = sServerTimeManager->GetServerTime();
         m_Attacking         = true;
+        m_AttackType        |= p_AttackType;
         m_AttackState       = AttackState::ATTACK_STATE_IN_RANGE;
+    }
+    /// Update Rocket Attack
+    void Unit::UpdateRocketAttack()
+    {
+        int test = m_AttackType;
+        if (!(m_AttackType & (AttackType::ATTACK_TYPE_ROCKET | AttackType::ATTACK_TYPE_BOTH)))
+            return;
+
+        if (CalculateHitChance())
+        {
+            /// Now calculate damage
+            int32 l_Damage = CalculateDamageDone(AttackType::ATTACK_TYPE_ROCKET);
+            int32 l_ShieldDamage = 0;
+            CalculateDamageTaken(GetTarget(), l_Damage, l_ShieldDamage);
+
+            int32 l_HitPoints = GetTarget()->ToUnit()->GetHitPoints() - l_Damage;
+            int32 l_Shield = GetTarget()->ToUnit()->GetShield() - l_ShieldDamage;
+
+            /// If Hitpoints is 0 or less, then target is dead
+            if (l_HitPoints <= 0)
+            {
+                Kill(GetTarget()->ToUnit());
+                return;
+            }
+
+            if (l_Shield < 0)
+                l_Shield = 0;
+
+            /// Set new hitpoints and shield points
+            GetTarget()->ToUnit()->SetHitPoints(l_HitPoints);
+            GetTarget()->ToUnit()->SetShield(l_Shield);
+
+            /// Send damage effect to attacker
+            if (IsPlayer())
+            {
+                Server::Packets::Attack::MakeDamage l_MakeDamage;
+                l_MakeDamage.UpdateAmmo = false;
+                l_MakeDamage.HitPoints = GetTarget()->ToUnit()->GetHitPoints();
+                l_MakeDamage.Shield = GetTarget()->ToUnit()->GetShield();
+                l_MakeDamage.Damage = l_ShieldDamage + l_Damage; ///< Total Damage
+                ToPlayer()->SendPacket(l_MakeDamage.Write());
+
+                Server::Packets::Attack::TargetHealth l_TargetHealthPacket;
+                l_TargetHealthPacket.Shield = GetTarget()->GetShield();
+                l_TargetHealthPacket.MaxShield = GetTarget()->GetMaxShield();
+                l_TargetHealthPacket.HitPoints = GetTarget()->GetHitPoints();
+                l_TargetHealthPacket.MaxHitPoints = GetTarget()->GetHitMaxPoints();
+                ToPlayer()->SendPacket(l_TargetHealthPacket.Write());
+            }
+
+            /// Send recieved damage effect to target
+            if (GetTarget()->IsPlayer())
+            {
+                Server::Packets::Attack::RecievedDamage l_ReceivedDamagePacket;
+                l_ReceivedDamagePacket.HitPoints = GetTarget()->ToUnit()->GetHitPoints();
+                l_ReceivedDamagePacket.Shield = GetTarget()->ToUnit()->GetShield();
+                l_ReceivedDamagePacket.Damage = l_ShieldDamage + l_Damage; ///< Total Damage
+                GetTarget()->ToPlayer()->SendPacket(l_ReceivedDamagePacket.Write());
+            }
+            else if (GetTarget()->IsMob())
+            {
+                if (GetTarget()->GetHitPoints() <= Core::Utils::CalculatePercentage(GetTarget()->GetHitMaxPoints(), 15) && !GetTarget()->ToMob()->IsFleeing())
+                    GetTarget()->ToMob()->SetIsFleeing(true);
+            }
+
+            SendRocketAttack(true);
+        }
+        else
+            SendRocketAttack(false);
+
+        // Unset attack type, as player needs to manually trigger
+        // TODO; This will not be a case if player has an auto rocket type extra
+        m_AttackType &= ~AttackType::ATTACK_TYPE_ROCKET;
+    }
+    /// Update Laser Attack
+    void Unit::UpdateLaserAttack()
+    {
+        if (!(m_AttackType & (AttackType::ATTACK_TYPE_LASER | AttackType::ATTACK_TYPE_BOTH)))
+            return;
+
+        // If is player, we need to decrease the ammo by weapon count
+        if (IsPlayer())
+        {
+            uint32 l_WeaponCount = ToPlayer()->GetInventory()->GetWeaponCount();
+
+            switch (ToPlayer()->GetLaserType())
+            {
+            case BatteryType::BATTERY_TYPE_LCB10:
+                ToPlayer()->SetBatteryAmmo(BatteryType::BATTERY_TYPE_LCB10, -l_WeaponCount);
+                break;
+            case BatteryType::BATTERY_TYPE_MCB25:
+                ToPlayer()->SetBatteryAmmo(BatteryType::BATTERY_TYPE_MCB25, -l_WeaponCount);
+                break;
+            case BatteryType::BATTERY_TYPE_MCB50:
+                ToPlayer()->SetBatteryAmmo(BatteryType::BATTERY_TYPE_MCB50, -l_WeaponCount);
+                break;
+            case BatteryType::BATTERY_TYPE_SAB50:
+                ToPlayer()->SetBatteryAmmo(BatteryType::BATTERY_TYPE_SAB50, -l_WeaponCount);
+                break;
+            case BatteryType::BATTERY_TYPE_UCB100:
+                ToPlayer()->SetBatteryAmmo(BatteryType::BATTERY_TYPE_UCB100, -l_WeaponCount);
+                break;
+            default:
+                LOG_ASSERT(false, "Unit", "Cannot update player ammo, type doesn't exist %0", ToPlayer()->GetLaserType());
+                break;
+            }
+        }
+
+        /// Can we hit target?
+        if (CalculateHitChance())
+        {
+            /// Now calculate damage
+            int32 l_Damage = CalculateDamageDone(AttackType::ATTACK_TYPE_LASER);
+            int32 l_ShieldDamage = 0;
+            CalculateDamageTaken(GetTarget(), l_Damage, l_ShieldDamage);
+
+            int32 l_HitPoints = GetTarget()->ToUnit()->GetHitPoints() - l_Damage;
+            int32 l_Shield = GetTarget()->ToUnit()->GetShield() - l_ShieldDamage;
+
+            /// If Hitpoints is 0 or less, then target is dead
+            if (l_HitPoints <= 0)
+            {
+                Kill(GetTarget()->ToUnit());
+                return;
+            }
+
+            if (l_Shield < 0)
+                l_Shield = 0;
+
+            /// Set new hitpoints and shield points
+            GetTarget()->ToUnit()->SetHitPoints(l_HitPoints);
+            GetTarget()->ToUnit()->SetShield(l_Shield);
+
+            /// Send damage effect to attacker
+            if (IsPlayer())
+            {
+                Server::Packets::Attack::MakeDamage l_MakeDamage;
+                l_MakeDamage.UpdateAmmo = false;
+                l_MakeDamage.HitPoints = GetTarget()->ToUnit()->GetHitPoints();
+                l_MakeDamage.Shield = GetTarget()->ToUnit()->GetShield();
+                l_MakeDamage.Damage = l_ShieldDamage + l_Damage; ///< Total Damage
+                ToPlayer()->SendPacket(l_MakeDamage.Write());
+
+                Server::Packets::Attack::TargetHealth l_TargetHealthPacket;
+                l_TargetHealthPacket.Shield = GetTarget()->GetShield();
+                l_TargetHealthPacket.MaxShield = GetTarget()->GetMaxShield();
+                l_TargetHealthPacket.HitPoints = GetTarget()->GetHitPoints();
+                l_TargetHealthPacket.MaxHitPoints = GetTarget()->GetHitMaxPoints();
+                ToPlayer()->SendPacket(l_TargetHealthPacket.Write());
+            }
+
+            /// Send recieved damage effect to target
+            if (GetTarget()->IsPlayer())
+            {
+                Server::Packets::Attack::RecievedDamage l_ReceivedDamagePacket;
+                l_ReceivedDamagePacket.HitPoints = GetTarget()->ToUnit()->GetHitPoints();
+                l_ReceivedDamagePacket.Shield = GetTarget()->ToUnit()->GetShield();
+                l_ReceivedDamagePacket.Damage = l_ShieldDamage + l_Damage; ///< Total Damage
+                GetTarget()->ToPlayer()->SendPacket(l_ReceivedDamagePacket.Write());
+            }
+            else if (GetTarget()->IsMob())
+            {
+                if (GetTarget()->GetHitPoints() <= Core::Utils::CalculatePercentage(GetTarget()->GetHitMaxPoints(), 15) && !GetTarget()->ToMob()->IsFleeing())
+                    GetTarget()->ToMob()->SetIsFleeing(true);
+            }
+        }
+        else ///< Send Miss Packet
+        {
+            if (IsPlayer())
+                ToPlayer()->SendPacket(Server::Packets::Attack::MissSelf().Write());
+
+            if (GetTarget()->IsPlayer())
+                GetTarget()->ToPlayer()->SendPacket(Server::Packets::Attack::MissTarget().Write());
+        }
     }
     /// Can Attack Target
     /// @p_Victim : Victim
@@ -181,13 +360,12 @@ namespace SteerStone { namespace Game { namespace Entity {
             return;
         }
 
-        if (IsPlayer())
-            // Check if player still has any ammo left
-            if (ToPlayer()->GetSelectedBatteryAmmo() <= 0) {
-                ToPlayer()->CancelAttack();
+        // Check if player still has any ammo left
+        if (IsPlayer() && ToPlayer()->GetSelectedBatteryAmmo() <= 0) {
+            ToPlayer()->CancelAttack();
 
-                ToPlayer()->SendPacket(Server::Packets::Misc::Update().Write(Server::Packets::Misc::InfoUpdate::INFO_UPDATE_MESSAGE, { "No more ammo." }));
-            }
+            ToPlayer()->SendPacket(Server::Packets::Misc::Update().Write(Server::Packets::Misc::InfoUpdate::INFO_UPDATE_MESSAGE, { "No more ammo." }));
+        }
 
         /// Check if we are in range
         if (m_AttackState == AttackState::ATTACK_STATE_IN_RANGE)
@@ -216,100 +394,8 @@ namespace SteerStone { namespace Game { namespace Entity {
                 /// Update last time attacked
                 m_LastTimeAttacked = sServerTimeManager->GetServerTime();
 
-                // If is player, we need to decrease the ammo by weapon count
-                if (IsPlayer())
-                {
-                    uint32 l_WeaponCount = ToPlayer()->GetInventory()->GetWeaponCount();
-
-                    switch (ToPlayer()->GetLaserType())
-                    {
-                        case BatteryType::BATTERY_TYPE_LCB10:
-                            ToPlayer()->SetBatteryAmmo(BatteryType::BATTERY_TYPE_LCB10, -l_WeaponCount);
-                            break;
-                        case BatteryType::BATTERY_TYPE_MCB25:
-                            ToPlayer()->SetBatteryAmmo(BatteryType::BATTERY_TYPE_MCB25, -l_WeaponCount);
-                            break;
-                        case BatteryType::BATTERY_TYPE_MCB50:
-                            ToPlayer()->SetBatteryAmmo(BatteryType::BATTERY_TYPE_MCB50, -l_WeaponCount);
-                            break;
-                        case BatteryType::BATTERY_TYPE_SAB50:
-                            ToPlayer()->SetBatteryAmmo(BatteryType::BATTERY_TYPE_SAB50, -l_WeaponCount);
-                            break;
-                        case BatteryType::BATTERY_TYPE_UCB100:
-                            ToPlayer()->SetBatteryAmmo(BatteryType::BATTERY_TYPE_UCB100, -l_WeaponCount);
-                            break;
-                        default:
-                            LOG_ASSERT(false, "Unit", "Cannot update player ammo, type doesn't exist %0", ToPlayer()->GetLaserType());
-                            break;
-                    }
-                }
-
-                /// Can we hit target?
-                if (CalculateHitChance())
-                {
-                    /// Now calculate damage
-                    int32 l_Damage       = CalculateDamageDone();
-                    int32 l_ShieldDamage = 0;
-                    CalculateDamageTaken(GetTarget(), l_Damage, l_ShieldDamage);
-
-                    int32 l_HitPoints = GetTarget()->ToUnit()->GetHitPoints() - l_Damage;
-                    int32 l_Shield    = GetTarget()->ToUnit()->GetShield() - l_ShieldDamage;
-
-                    /// If Hitpoints is 0 or less, then target is dead
-                    if (l_HitPoints <= 0)
-                    {
-                        Kill(GetTarget()->ToUnit());
-                        return;
-                    }
-
-                    if (l_Shield < 0)
-                        l_Shield = 0;
-
-                    /// Set new hitpoints and shield points
-                    GetTarget()->ToUnit()->SetHitPoints(l_HitPoints);
-                    GetTarget()->ToUnit()->SetShield(l_Shield);
-
-                    /// Send damage effect to attacker
-                    if (IsPlayer())
-                    {
-                        Server::Packets::Attack::MakeDamage l_MakeDamage;
-                        l_MakeDamage.UpdateAmmo = false;
-                        l_MakeDamage.HitPoints  = GetTarget()->ToUnit()->GetHitPoints();
-                        l_MakeDamage.Shield     = GetTarget()->ToUnit()->GetShield();
-                        l_MakeDamage.Damage     = l_ShieldDamage + l_Damage; ///< Total Damage
-                        ToPlayer()->SendPacket(l_MakeDamage.Write());
-
-                        Server::Packets::Attack::TargetHealth l_TargetHealthPacket;
-                        l_TargetHealthPacket.Shield       = GetTarget()->GetShield();
-                        l_TargetHealthPacket.MaxShield    = GetTarget()->GetMaxShield();
-                        l_TargetHealthPacket.HitPoints    = GetTarget()->GetHitPoints();
-                        l_TargetHealthPacket.MaxHitPoints = GetTarget()->GetHitMaxPoints();
-                        ToPlayer()->SendPacket(l_TargetHealthPacket.Write());
-                    }
-
-                    /// Send recieved damage effect to target
-                    if (GetTarget()->IsPlayer())
-                    {
-                        Server::Packets::Attack::RecievedDamage l_ReceivedDamagePacket;
-                        l_ReceivedDamagePacket.HitPoints = GetTarget()->ToUnit()->GetHitPoints();
-                        l_ReceivedDamagePacket.Shield    = GetTarget()->ToUnit()->GetShield();
-                        l_ReceivedDamagePacket.Damage    = l_ShieldDamage + l_Damage; ///< Total Damage
-                        GetTarget()->ToPlayer()->SendPacket(l_ReceivedDamagePacket.Write());
-                    }
-                    else if (GetTarget()->IsMob())
-                    {
-                        if (GetTarget()->GetHitPoints() <= Core::Utils::CalculatePercentage(GetTarget()->GetHitMaxPoints(), 15) && !GetTarget()->ToMob()->IsFleeing())
-                            GetTarget()->ToMob()->SetIsFleeing(true);
-                    }
-                }
-                else ///< Send Miss Packet
-                {
-                    if (IsPlayer())
-                        ToPlayer()->SendPacket(Server::Packets::Attack::MissSelf().Write());
-
-                    if (GetTarget()->IsPlayer())
-                        GetTarget()->ToPlayer()->SendPacket(Server::Packets::Attack::MissTarget().Write());
-                }
+                UpdateLaserAttack();
+                UpdateRocketAttack();
             }
         }
         else if (m_AttackState == AttackState::ATTACK_STATE_OUT_OF_RANGE)
@@ -367,13 +453,16 @@ namespace SteerStone { namespace Game { namespace Entity {
         return Core::Utils::RollChanceInterger32(80);
     }
     /// Calculate Damage done for target
-    uint32 Unit::CalculateDamageDone()
+    /// @p_AttackType : Attack Type
+    uint32 Unit::CalculateDamageDone(AttackType const p_AttackType)
     {   
         uint32 l_MinDamage = 0;
         uint32 l_MaxDamage = 0;
 
-        switch (m_LaserType)
+        if (p_AttackType & (AttackType::ATTACK_TYPE_LASER))
         {
+            switch (m_LaserType)
+            {
             case BatteryType::BATTERY_TYPE_LCB10:
             case BatteryType::BATTERY_TYPE_MCB25:
             case BatteryType::BATTERY_TYPE_MCB50:
@@ -383,7 +472,27 @@ namespace SteerStone { namespace Game { namespace Entity {
                 break;
             default:
                 break;
+            }
         }
+        else if (p_AttackType & (AttackType::ATTACK_TYPE_ROCKET))
+        {
+            switch (GetRocketId())
+            {
+                case RocketType::ROCKET_TYPE_R310:
+                    l_MaxDamage = 1000;
+                    break;
+                case RocketType::ROCKET_TYPE_PLT_2026:
+                    l_MaxDamage = 2000;
+                    break;
+                case RocketType::ROCKET_TYPE_PLT_2021:
+                    l_MaxDamage = 4000;
+                    break;
+                default:
+                    LOG_ASSERT(false, "Unit", "Unknown Rocket Type %0", GetRocketId());
+            }
+        }
+        else
+            LOG_WARNING("Unit", "Unknown attack type %0", static_cast<uint16>(p_AttackType));
 
         return Core::Utils::UInt32Random(l_MinDamage, l_MaxDamage);
     }
@@ -465,6 +574,28 @@ namespace SteerStone { namespace Game { namespace Entity {
 
         p_Unit->m_DeathState = DeathState::JUST_DIED;
         CancelAttack();
+    }
+    /// Send Rocket Attack
+    /// @p_Hit : Whether the attack is a hit or not
+    void Unit::SendRocketAttack(bool const p_Hit)
+    {
+        /// If we are not attacking, then don't update
+        if (!m_Attacking || !GetTargetGUID())
+            return;
+
+        /// Cancel attack if target is dead
+        if (GetTarget()->ToUnit()->GetDeathState() == DeathState::DEAD)
+        {
+            CancelAttack();
+            return;
+        }
+
+        Server::Packets::Attack::RocketShoot l_Packet;
+        l_Packet.FromId = GetObjectGUID().GetCounter();
+        l_Packet.ToId = GetTarget()->GetObjectGUID().GetCounter();
+        l_Packet.RocketId = m_RocketType;
+        l_Packet.Hit = p_Hit;
+        GetMap()->SendPacketToNearByGridsIfInSurrounding(l_Packet.Write(), this, true);
     }
 
     ///////////////////////////////////////////

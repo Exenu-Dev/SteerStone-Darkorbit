@@ -44,6 +44,15 @@ namespace SteerStone { namespace Game { namespace Entity {
         ATTACK_STATE_OUT_OF_RANGE   = 2,
     };
 
+    enum AttackType : uint16
+    {
+        ATTACK_TYPE_NONE    = 0,
+        ATTACK_TYPE_LASER   = 1,
+        ATTACK_TYPE_ROCKET  = 2,
+        ATTACK_TYPE_BOTH    = 4
+    };
+    ENUM_CLASS_OPERATORS(AttackType)
+
     enum Resource
     {
         RESOURCE_PROMETIUM  = 0,
@@ -82,7 +91,7 @@ namespace SteerStone { namespace Game { namespace Entity {
 
         /// Attack
         /// @p_Victim : Victim we are attacking
-        void Attack(Unit* p_Victim);
+        void Attack(Unit* p_Victim, AttackType const p_AttackType = AttackType::ATTACK_TYPE_LASER);
         /// Can Attack Target
         /// @p_Victim : Victim
         bool CanAttackTarget(Unit* p_Victim);
@@ -96,7 +105,8 @@ namespace SteerStone { namespace Game { namespace Entity {
         /// Calculate Hit chance whether we can hit target
         bool CalculateHitChance();
         /// Calculate Damage done for target
-        uint32 CalculateDamageDone();
+        /// @p_AttackType : Attack Type
+        uint32 CalculateDamageDone(AttackType const p_AttackType);
         /// Deal Damage to target
         /// @p_Target : Target
         /// @p_Damage : Damage
@@ -113,10 +123,21 @@ namespace SteerStone { namespace Game { namespace Entity {
         /// Kill
         /// @p_Unit : Unit being killed
         void Kill(Unit* p_Unit);
+        /// Send Rocket Attack
+        /// @p_Hit : Whether the attack is a hit or not
+        void SendRocketAttack(bool const p_Hit);
+
+    private:
+        /// Send Rocket Attack
+        void UpdateRocketAttack();
+        /// Update Laser Attack
+        void UpdateLaserAttack();
 
         ///////////////////////////////////////////
         //                TARGET
         ///////////////////////////////////////////
+
+    public:
 
         void SetTarget(Unit* p_Target)          { m_Target = p_Target; m_TargetGUID = p_Target->GetGUID();  }
         bool HasTarget()                        { return m_Target != nullptr;                               }
@@ -146,6 +167,7 @@ namespace SteerStone { namespace Game { namespace Entity {
         uint16 GetDeathState()      const { return m_DeathState;        }
         uint16 GetLaserType()       const { return m_LaserType;         }    
         uint16 GetLaserColourId()   const { return m_LaserType - 1;     }    
+        uint16 GetRocketId()        const { return m_RocketType - 1;    }    
         uint32 GetExperience()      const { return m_Experience;        }
         uint16 GetBehaviour()       const { return m_Behaviour;         }
         uint32 GetRespawnTimer()    const { return m_RespawnTimer;      }
@@ -161,8 +183,10 @@ namespace SteerStone { namespace Game { namespace Entity {
             return m_Resources[p_Index];
         }
 
-        bool IsAttacking()          const { return m_Attacking;                      }
-        bool IsDead()               const { return m_DeathState == DeathState::DEAD; }
+        bool IsAttacking()           const { return m_Attacking;                      }
+        bool IsAttackingWithRocket() const { return m_AttackType & (AttackType::ATTACK_TYPE_ROCKET | ATTACK_TYPE_BOTH); }
+        bool IsAttackingWithLaser()  const { return m_AttackType & (AttackType::ATTACK_TYPE_LASER | ATTACK_TYPE_BOTH); }
+        bool IsDead()                const { return m_DeathState == DeathState::DEAD; }
 
         void SetHonor(int32 const p_Honor)              { m_Honor = p_Honor;            }
         void SetWeaponState(uint16 const p_WeaponState) { m_WeaponState = p_WeaponState;}
@@ -216,6 +240,7 @@ namespace SteerStone { namespace Game { namespace Entity {
         uint32 m_Uridium;
         uint32 m_Resources[9];
         uint32 m_LastTimeAttacked;
+        AttackType m_AttackType;
 
         bool m_Attacking;
         bool m_InRadiationZone;

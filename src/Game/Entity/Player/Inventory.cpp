@@ -112,6 +112,7 @@ namespace SteerStone { namespace Game { namespace Entity {
             if (l_Itr.IsWeapon())
             {
                 l_Damage += l_Itr.GetItemTemplate()->Value;
+                /// TODO; Don't check against name as this could change and would break
                 if (l_Itr.GetItemTemplate()->Name == "LF-3")
                     l_LF3WeaponCount++;
 
