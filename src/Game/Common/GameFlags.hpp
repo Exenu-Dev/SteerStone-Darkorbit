@@ -161,6 +161,16 @@ enum ConditionType
     LEVEL                = 50,
 };
 
+enum DamageType
+{
+    DAMAGE_TYPE_ANY         = 0,
+    DAMAGE_TYPE_LASER       = 1,
+    DAMAGE_TYPE_ROCKET      = 2,
+    DAMAGE_TYPE_MINE        = 3,
+    DAMAGE_TYPE_RADIATION   = 4,
+    DAMAGE_TYPE_DIRECT      = 5
+};
+
 enum class Company : uint16
 {
     NOMAD        = 0,
