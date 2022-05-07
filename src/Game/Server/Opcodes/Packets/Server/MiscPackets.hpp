@@ -43,6 +43,7 @@ namespace SteerStone { namespace Game { namespace Server { namespace Packets { n
         INFO_UPDATE_MESSAGE,
         INFO_UPDATE_HEALTH,
         INFO_UPDATE_LEVEL_UP,
+        INFO_UPDATE_CLEAR_ROCKET
     };
 
     /// SERVER_PACKET_DISPLAY_SUCC_DEBUG packet builder
@@ -76,7 +77,7 @@ namespace SteerStone { namespace Game { namespace Server { namespace Packets { n
         /// Write the packet
         /// @p_Storage : Storage
         /// @p_InfoUpdate : Type of Info
-        PacketBuffer const* Write(InfoUpdate p_InfoUpdate, std::initializer_list<std::variant<int32, std::string>> p_Storage);
+        PacketBuffer const* Write(InfoUpdate p_InfoUpdate, std::initializer_list<std::variant<int32, std::string>> p_Storage = std::initializer_list<std::variant<int32, std::string>>());
     };
 
     /// SERVER_PACKET_MISC_INFO packet builder

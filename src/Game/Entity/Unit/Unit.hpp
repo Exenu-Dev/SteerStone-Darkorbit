@@ -24,6 +24,7 @@
 #include "Diagnostic/DiaIntervalTimer.hpp"
 
 #define ATTACK_UPDATE_INTERVAL 1000ul
+#define ROCKET_ATTACK_UPDATE 2000ul
 #define MAX_RESOURCE_COUNTER 9ul
 
 namespace SteerStone { namespace Game { namespace Entity {
@@ -101,7 +102,8 @@ namespace SteerStone { namespace Game { namespace Entity {
         /// @p_Diff : Execution Time
         void AttackerStateUpdate(uint32 const p_Diff);
         /// Cancel Attack
-        void CancelAttack();
+        /// @p_AttackType : Type of attack
+        void CancelAttack(AttackType const p_AttackType = AttackType::ATTACK_TYPE_BOTH);
         /// Calculate Hit chance whether we can hit target
         bool CalculateHitChance();
         /// Calculate Damage done for target
@@ -129,7 +131,8 @@ namespace SteerStone { namespace Game { namespace Entity {
 
     private:
         /// Send Rocket Attack
-        void UpdateRocketAttack();
+        /// @p_Diff : Diff counter
+        void UpdateRocketAttack(uint32 const p_Diff);
         /// Update Laser Attack
         void UpdateLaserAttack();
 
@@ -245,6 +248,7 @@ namespace SteerStone { namespace Game { namespace Entity {
         bool m_Attacking;
         bool m_InRadiationZone;
         Core::Diagnostic::IntervalTimer m_IntervalAttackUpdate;
+        Core::Diagnostic::IntervalTimer m_IntervalRocketAttackUpdate;
 
         Unit* m_Target;
         uint64 m_TargetGUID;

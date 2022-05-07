@@ -195,6 +195,13 @@ enum RocketType
     MAX_ROCKET           = 3
 };
 
+enum RocketDamage
+{
+    ROCKET_DAMAGE_R310        = 1000,
+    ROCKET_DAMAGE_PLT_2026    = 2000,
+    ROCKET_DAMAGE_PLT_2021    = 4000
+};
+
 enum BatteryType : uint16
 {
     BATTERY_TYPE_LCB10  = 1,

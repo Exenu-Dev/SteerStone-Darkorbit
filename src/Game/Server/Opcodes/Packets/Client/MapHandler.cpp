@@ -136,12 +136,14 @@ namespace SteerStone { namespace Game { namespace Server {
 
         if (!l_Object)
         {
+            m_Player->SendClearRocketCooldown();
             LOG_WARNING("Socket", "Attempted to find object %0 in map but does not exist!", l_Id);
             return;
         }
 
         if (l_Object->GetType() != Entity::Type::OBJECT_TYPE_MOB && l_Object->GetType() != Entity::Type::OBJECT_TYPE_PLAYER)
         {
+            m_Player->SendClearRocketCooldown();
             LOG_WARNING("Socket", "Attempted to select a target which is not a unit or a player!", l_Id);
             return;
         }
@@ -149,6 +151,7 @@ namespace SteerStone { namespace Game { namespace Server {
         // Cannot attack if there's player has no weapons
         if (m_Player->GetInventory()->GetWeaponCount() == 0)
         {
+            m_Player->SendClearRocketCooldown();
             SendPacket(Server::Packets::Misc::Update().Write(Server::Packets::Misc::InfoUpdate::INFO_UPDATE_MESSAGE, { "You need a weapon to be equipped to attack!" }));
             return;
         }

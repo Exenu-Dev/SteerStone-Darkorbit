@@ -69,6 +69,7 @@ namespace SteerStone { namespace Game { namespace Entity {
         m_TargetGUID        = 0;
 
         m_IntervalAttackUpdate.SetInterval(ATTACK_UPDATE_INTERVAL);
+        m_IntervalRocketAttackUpdate.SetInterval(ROCKET_ATTACK_UPDATE);
     }
     /// Deconstructor
     Unit::~Unit()
@@ -136,11 +137,17 @@ namespace SteerStone { namespace Game { namespace Entity {
         m_AttackState       = AttackState::ATTACK_STATE_IN_RANGE;
     }
     /// Update Rocket Attack
-    void Unit::UpdateRocketAttack()
+    /// @p_Diff : Diff counter
+    void Unit::UpdateRocketAttack(uint32 const p_Diff)
     {
-        int test = m_AttackType;
         if (!(m_AttackType & (AttackType::ATTACK_TYPE_ROCKET | AttackType::ATTACK_TYPE_BOTH)))
             return;
+
+        if (!m_IntervalRocketAttackUpdate.Passed())
+            return;
+
+        if (IsPlayer())
+            ToPlayer()->SetRocketAmmo(static_cast<RocketType>(m_RocketType), -1);
 
         if (CalculateHitChance())
         {
@@ -204,9 +211,10 @@ namespace SteerStone { namespace Game { namespace Entity {
         else
             SendRocketAttack(false);
 
-        // Unset attack type, as player needs to manually trigger
-        // TODO; This will not be a case if player has an auto rocket type extra
-        m_AttackType &= ~AttackType::ATTACK_TYPE_ROCKET;
+        if (IsPlayer())
+            ToPlayer()->SendClearRocketCooldown();
+
+        CancelAttack(AttackType::ATTACK_TYPE_ROCKET);
     }
     /// Update Laser Attack
     void Unit::UpdateLaserAttack()
@@ -217,6 +225,14 @@ namespace SteerStone { namespace Game { namespace Entity {
         // If is player, we need to decrease the ammo by weapon count
         if (IsPlayer())
         {
+            // Check if player still has any ammo left
+            if (ToPlayer()->GetSelectedBatteryAmmo() <= 0)
+            {
+                ToPlayer()->CancelAttack(AttackType::ATTACK_TYPE_LASER);
+                ToPlayer()->SendPacket(Server::Packets::Misc::Update().Write(Server::Packets::Misc::InfoUpdate::INFO_UPDATE_MESSAGE, { "No more ammo." }));
+                return;
+            }
+
             uint32 l_WeaponCount = ToPlayer()->GetInventory()->GetWeaponCount();
 
             switch (ToPlayer()->GetLaserType())
@@ -345,6 +361,8 @@ namespace SteerStone { namespace Game { namespace Entity {
     /// @p_Diff : Execution Time
     void Unit::AttackerStateUpdate(uint32 const p_Diff)
     {
+        m_IntervalRocketAttackUpdate.Update(p_Diff);
+
         m_IntervalAttackUpdate.Update(p_Diff);
         if (!m_IntervalAttackUpdate.Passed())
             return;
@@ -358,13 +376,6 @@ namespace SteerStone { namespace Game { namespace Entity {
         {
             CancelAttack();
             return;
-        }
-
-        // Check if player still has any ammo left
-        if (IsPlayer() && ToPlayer()->GetSelectedBatteryAmmo() <= 0) {
-            ToPlayer()->CancelAttack();
-
-            ToPlayer()->SendPacket(Server::Packets::Misc::Update().Write(Server::Packets::Misc::InfoUpdate::INFO_UPDATE_MESSAGE, { "No more ammo." }));
         }
 
         /// Check if we are in range
@@ -381,11 +392,14 @@ namespace SteerStone { namespace Game { namespace Entity {
                 if (GetTarget()->IsPlayer())
                     GetTarget()->ToPlayer()->SendPacket(Server::Packets::Attack::EscapedTheAttack().Write());
 
-                /// Cancel laser shoot effect
-                Server::Packets::Attack::CancelLaserShoot l_Packet;
-                l_Packet.FromId = GetObjectGUID().GetCounter();
-                l_Packet.ToId   = GetTarget()->GetObjectGUID().GetCounter();
-                GetMap()->SendPacketToNearByGridsIfInSurrounding(l_Packet.Write(), this);
+                if (IsAttackingWithLaser())
+                {
+                    /// Cancel laser shoot effect
+                    Server::Packets::Attack::CancelLaserShoot l_Packet;
+                    l_Packet.FromId = GetObjectGUID().GetCounter();
+                    l_Packet.ToId = GetTarget()->GetObjectGUID().GetCounter();
+                    GetMap()->SendPacketToNearByGridsIfInSurrounding(l_Packet.Write(), this);
+                }
 
                 m_AttackState = AttackState::ATTACK_STATE_OUT_OF_RANGE;
             }
@@ -395,7 +409,7 @@ namespace SteerStone { namespace Game { namespace Entity {
                 m_LastTimeAttacked = sServerTimeManager->GetServerTime();
 
                 UpdateLaserAttack();
-                UpdateRocketAttack();
+                UpdateRocketAttack(p_Diff);
             }
         }
         else if (m_AttackState == AttackState::ATTACK_STATE_OUT_OF_RANGE)
@@ -407,29 +421,36 @@ namespace SteerStone { namespace Game { namespace Entity {
                 if (IsPlayer())
                     ToPlayer()->SendPacket(Server::Packets::Attack::AttackInRange().Write());
 
-                /// Send Attack
-                Server::Packets::Attack::LaserShoot l_Packet;
-                l_Packet.FromId     = GetObjectGUID().GetCounter();
-                l_Packet.ToId       = GetTarget()->GetObjectGUID().GetCounter();
-                l_Packet.LaserId    = GetLaserColourId();
-                GetMap()->SendPacketToNearByGridsIfInSurrounding(l_Packet.Write(), this, true);
+                if (IsAttackingWithLaser())
+                {
+                    /// Send Attack
+                    Server::Packets::Attack::LaserShoot l_Packet;
+                    l_Packet.FromId = GetObjectGUID().GetCounter();
+                    l_Packet.ToId = GetTarget()->GetObjectGUID().GetCounter();
+                    l_Packet.LaserId = GetLaserColourId();
+                    GetMap()->SendPacketToNearByGridsIfInSurrounding(l_Packet.Write(), this, true);
+                }
 
                 m_AttackState = AttackState::ATTACK_STATE_IN_RANGE;
             }
         }
     }
     /// Cancel Attack
-    void Unit::CancelAttack()
+    /// @p_AttackType : Type of attack
+    void Unit::CancelAttack(AttackType const p_AttackType)
     {
         if (!m_Attacking || m_AttackState == AttackState::ATTACK_STATE_NONE)
             return;
 
         LOG_ASSERT(GetTarget(), "Unit", "Attempted to cancel attack but target does not exist!");
 
-        Server::Packets::Attack::CancelLaserShoot l_Packet;
-        l_Packet.FromId = GetObjectGUID().GetCounter();
-        l_Packet.ToId   = GetTarget()->GetObjectGUID().GetCounter();
-        GetMap()->SendPacketToNearByGridsIfInSurrounding(l_Packet.Write(), this, true);
+        if (p_AttackType & (AttackType::ATTACK_TYPE_LASER | AttackType::ATTACK_TYPE_BOTH))
+        {
+            Server::Packets::Attack::CancelLaserShoot l_Packet;
+            l_Packet.FromId = GetObjectGUID().GetCounter();
+            l_Packet.ToId = GetTarget()->GetObjectGUID().GetCounter();
+            GetMap()->SendPacketToNearByGridsIfInSurrounding(l_Packet.Write(), this, true);
+        }
 
         if (IsMob())
         {
@@ -442,9 +463,17 @@ namespace SteerStone { namespace Game { namespace Entity {
             ToMob()->SetTaggedPlayer(nullptr);
         }
 
-        m_Attacking     = false;
-        m_AttackState   = AttackState::ATTACK_STATE_NONE;
-        ClearTarget();
+        if (p_AttackType == AttackType::ATTACK_TYPE_BOTH)
+            m_AttackType = AttackType::ATTACK_TYPE_NONE;
+        else
+            m_AttackType &= ~p_AttackType;
+
+        if (!m_AttackType)
+        {
+            m_Attacking     = false;
+            m_AttackState = AttackState::ATTACK_STATE_NONE;
+            ClearTarget();
+        }
     }
     /// Calculate Hit chance whether we can hit target
     bool Unit::CalculateHitChance()
@@ -479,13 +508,13 @@ namespace SteerStone { namespace Game { namespace Entity {
             switch (GetRocketId())
             {
                 case RocketType::ROCKET_TYPE_R310:
-                    l_MaxDamage = 1000;
+                    l_MaxDamage = RocketDamage::ROCKET_DAMAGE_R310;
                     break;
                 case RocketType::ROCKET_TYPE_PLT_2026:
-                    l_MaxDamage = 2000;
+                    l_MaxDamage = RocketDamage::ROCKET_DAMAGE_PLT_2026;
                     break;
                 case RocketType::ROCKET_TYPE_PLT_2021:
-                    l_MaxDamage = 4000;
+                    l_MaxDamage = RocketDamage::ROCKET_DAMAGE_PLT_2021;
                     break;
                 default:
                     LOG_ASSERT(false, "Unit", "Unknown Rocket Type %0", GetRocketId());

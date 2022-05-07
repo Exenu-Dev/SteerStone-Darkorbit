@@ -752,6 +752,11 @@ namespace SteerStone { namespace Game { namespace Entity {
         l_BatteryAmmoPacket.BatterySAB50      = m_Ammo.m_BatterySAB50;
         SendPacket(l_BatteryAmmoPacket.Write());
     }
+    /// Send Clear Rocket Cooldown
+    void Player::SendClearRocketCooldown()
+    {
+        SendPacket(Server::Packets::Misc::Update().Write(Server::Packets::Misc::InfoUpdate::INFO_UPDATE_CLEAR_ROCKET));
+    }
     /// Change Configuration
     void Player::ChangeConfiguration(const uint16 p_Config)
     {
@@ -1240,6 +1245,29 @@ namespace SteerStone { namespace Game { namespace Entity {
             default:
                 LOG_ASSERT(false, "Player", "Cannot update ammo with battery type %0", static_cast<uint16>(p_BatteryType));
                 break;
+        }
+
+        SendAmmoUpdate();
+    }
+    /// Set Rocket Ammo
+    ///@p_RocketType : Rocket Type
+    ///@p_Amount : Amount to add
+    void Player::SetRocketAmmo(RocketType const p_RocketType, const uint32 p_Amount)
+    {
+        switch (p_RocketType)
+        {
+        case RocketType::ROCKET_TYPE_R310:
+            m_Ammo.m_RocketR310 += p_Amount;
+            break;
+        case RocketType::ROCKET_TYPE_PLT_2026:
+            m_Ammo.m_RocketPLT2026 += p_Amount;
+            break;
+        case RocketType::ROCKET_TYPE_PLT_2021:
+            m_Ammo.m_RocketPLT2021 += p_Amount;
+            break;
+        default:
+            LOG_ASSERT(false, "Player", "Cannot update ammo with rocket type %0", static_cast<uint16>(p_RocketType));
+            break;
         }
 
         SendAmmoUpdate();

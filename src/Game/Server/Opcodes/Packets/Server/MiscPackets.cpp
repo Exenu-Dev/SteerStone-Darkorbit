@@ -49,6 +49,9 @@ namespace SteerStone { namespace Game { namespace Server { namespace Packets { n
         case InfoUpdate::INFO_UPDATE_LEVEL_UP:
             l_Type = "LUP";
             break;
+        case InfoUpdate::INFO_UPDATE_CLEAR_ROCKET:
+            l_Type = "RCD";
+            break;
         }
 
         m_Buffer.AppendChar(l_Type.c_str());
