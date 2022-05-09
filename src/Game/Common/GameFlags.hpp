@@ -204,6 +204,7 @@ enum RocketDamage
 
 enum BatteryType : uint16
 {
+    BATTERY_TYPE_NONE   = 0,
     BATTERY_TYPE_LCB10  = 1,
     BATTERY_TYPE_MCB25  = 2,
     BATTERY_TYPE_MCB50  = 3,

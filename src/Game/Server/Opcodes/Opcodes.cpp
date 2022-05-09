@@ -119,6 +119,8 @@ namespace SteerStone { namespace Game { namespace Server {
         StoreServerPacket(ServerOpCodes::SERVER_PACKET_CHANGE_CONFIG,       "SERVER_PACKET_CHANGE_CONFIG",          &GameSocket::HandleServer);
         StoreServerPacket(ServerOpCodes::SERVER_PACKET_CARGO_BAY_FULL,      "SERVER_PACKET_CARGO_BAY_FULL",         &GameSocket::HandleServer);
         StoreServerPacket(ServerOpCodes::SERVER_PACKET_ROCKET_ATTACK,       "SERVER_PACKET_ROCKET_ATTACK",          &GameSocket::HandleServer);
+        StoreServerPacket(ServerOpCodes::SERVER_PACKET_NO_AMMUNITION,       "SERVER_PACKET_NO_AMMUNITION",          &GameSocket::HandleServer);
+        StoreServerPacket(ServerOpCodes::SERVER_PACKET_CHANGE_ROCK_AMMO,    "SERVER_PACKET_CHANGE_ROCK_AMMO",       &GameSocket::HandleServer);
 
         /// Web Packets
         StoreServerPacket(ServerOpCodes::SERVER_PACKET_CHECK_ONLINE,        "SERVER_PACKET_CHECK_ONLINE",           &GameSocket::HandleServer);

@@ -19,6 +19,12 @@
 #pragma once
 #include "Socket.hpp"
 
+namespace SteerStone { namespace Game { namespace Entity {
+    enum AttackType;
+} ///< Entity
+} ///< Game
+} ///< SteerStone
+
 namespace SteerStone { namespace Game { namespace Server { namespace Packets { namespace Attack {
 
     /// SERVER_PACKET_LASER_SHOOT packet builder
@@ -246,6 +252,46 @@ namespace SteerStone { namespace Game { namespace Server { namespace Packets { n
         uint32 ToId;
         bool Hit;
         uint32 RocketId;
+    };
+
+    /// SERVER_PACKET_NO_AMMUNITION packet builder
+    class NoAmmunition final : public ServerPacket
+    {
+    public:
+        /// Constructor 
+        NoAmmunition() : ServerPacket(ServerOpCodes::SERVER_PACKET_NO_AMMUNITION)
+        {
+            TypeId = 0;
+        }
+
+        //////////////////////////////////////////////////////////////////////////
+        //////////////////////////////////////////////////////////////////////////
+
+        /// Write the packet
+        PacketBuffer const* Write();
+
+        Entity::AttackType AttackType;
+        uint16 TypeId;
+    };
+
+    /// SERVER_PACKET_CHANGE_ROCK_AMMO packet builder
+    class ChangeRocketAmmo final : public ServerPacket
+    {
+    public:
+        /// Constructor 
+        ChangeRocketAmmo() : ServerPacket(ServerOpCodes::SERVER_PACKET_CHANGE_ROCK_AMMO)
+        {
+            TypeId = 0;
+        }
+
+        //////////////////////////////////////////////////////////////////////////
+        //////////////////////////////////////////////////////////////////////////
+
+        /// Write the packet
+        PacketBuffer const* Write();
+
+        Entity::AttackType AttackType;
+        uint16 TypeId;
     };
 
 }   ///< namespace Attack

@@ -112,6 +112,8 @@ enum ServerOpCodes : uint8
     SERVER_PACKET_CROSS_HAIR            = 0x36,
     SERVER_PACKET_CHANGE_CONFIG         = 0x53,
     SERVER_PACKET_ROCKET_ATTACK         = 0x76,
+    SERVER_PACKET_NO_AMMUNITION         = 0x57,
+    SERVER_PACKET_CHANGE_ROCK_AMMO      = 0x34,
 
     /// Web Packets
     SERVER_PACKET_CHECK_ONLINE          = 0x22,

@@ -65,7 +65,34 @@ namespace SteerStone { namespace Game { namespace Entity {
 
         //////////////////////////////////////////////////////////////////////////
         //////////////////////////////////////////////////////////////////////////
+    public:
+        /// Getters Setters
+        int32 GetLCB10()   const { return m_BatteryLCB10;  }
+        int32 GetMCB25()   const { return m_BatteryMCB25;  }
+        int32 GetMCB50()   const { return m_BatteryMCB50;  }
+        int32 GetUCB100()  const { return m_BatteryUCB100; }
+        int32 GetSAB50()   const { return m_BatterySAB50;  }
 
+        /// Get Next Available Ammo
+        BatteryType GetAvailableBattery() const
+        {
+            if (m_BatteryLCB10)
+                return BatteryType::BATTERY_TYPE_LCB10;
+
+            if (m_BatteryMCB25)
+                return BatteryType::BATTERY_TYPE_MCB25;
+
+            if (m_BatteryMCB50)
+                return BatteryType::BATTERY_TYPE_MCB50;
+
+            if (m_BatteryUCB100)
+                return BatteryType::BATTERY_TYPE_UCB100;
+
+            if (m_BatterySAB50)
+                return BatteryType::BATTERY_TYPE_SAB50;
+
+            return BatteryType::BATTERY_TYPE_NONE;
+        }
 
     private:
         int32 m_BatteryLCB10;
@@ -237,6 +264,7 @@ namespace SteerStone { namespace Game { namespace Entity {
         bool IsLoggingOut()        const     { return m_LoggingOut;       }
         bool IsLoggedIn()          const     { return m_LoggedIn;         }
         bool IsJumping()           const     { return m_Jumping;          }
+        bool CanAutoChangeAmmo()   const     { return m_AutoChangeAmmo;   }
         uint32 GetCargoSpace()     const     { return m_CargoSpace;       }
         uint32 GetMaxCargoSpace()  const     { return m_MaxCargoSpace;    }
         uint32 GetMaxBattery()     const     { return m_MaxBattery;       }

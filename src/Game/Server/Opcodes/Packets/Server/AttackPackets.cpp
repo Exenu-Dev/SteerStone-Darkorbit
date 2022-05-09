@@ -17,6 +17,7 @@
 */
 
 #include "AttackPackets.hpp"
+#include "Unit.hpp"
 
 namespace SteerStone { namespace Game { namespace Server { namespace Packets { namespace Attack {
     
@@ -155,6 +156,61 @@ namespace SteerStone { namespace Game { namespace Server { namespace Packets { n
         m_Buffer.AppendUInt32(ToId);
         m_Buffer.AppendBool(true);
         m_Buffer.AppendUInt32(RocketId);
+
+        m_Buffer.AppendEndSplitter();
+        m_Buffer.AppendCarriage();
+
+        return &m_Buffer;
+    }
+
+    /// SERVER_PACKET_NO_AMMUNITION
+    PacketBuffer const* NoAmmunition::Write()
+    {
+        const char* l_AttackType = nullptr;
+        switch (AttackType)
+        {
+            case Entity::AttackType::ATTACK_TYPE_LASER:
+                l_AttackType = "L";
+                break;
+            case Entity::AttackType::ATTACK_TYPE_ROCKET:
+                l_AttackType = "R";
+                break;
+            default:
+                LOG_ASSERT(false, "AttackPackets", "Invalid Attack Type", static_cast<uint16>(AttackType));
+                break;
+        }
+
+        m_Buffer.AppendChar(l_AttackType);
+        m_Buffer.AppendUInt16(TypeId);
+
+        m_Buffer.AppendEndSplitter();
+        m_Buffer.AppendCarriage();
+
+        return &m_Buffer;
+    }
+
+    /// SERVER_PACKET_CHANGE_ROCK_AMMO
+    PacketBuffer const* ChangeRocketAmmo::Write()
+    {
+        const char* l_AttackType = nullptr;
+        switch (AttackType)
+        {
+        case Entity::AttackType::ATTACK_TYPE_LASER:
+            l_AttackType = "L";
+            break;
+        case Entity::AttackType::ATTACK_TYPE_ROCKET:
+            l_AttackType = "R";
+            break;
+        default:
+            LOG_ASSERT(false, "AttackPackets", "Invalid Attack Type", static_cast<uint16>(AttackType));
+            break;
+        }
+
+        m_Buffer.AppendChar(l_AttackType);
+
+        // Intended, don't know which one is used on client
+        m_Buffer.AppendUInt16(TypeId);
+        m_Buffer.AppendUInt16(TypeId);
 
         m_Buffer.AppendEndSplitter();
         m_Buffer.AppendCarriage();

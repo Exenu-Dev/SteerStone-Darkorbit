@@ -228,9 +228,49 @@ namespace SteerStone { namespace Game { namespace Entity {
             // Check if player still has any ammo left
             if (ToPlayer()->GetSelectedBatteryAmmo() <= 0)
             {
-                ToPlayer()->CancelAttack(AttackType::ATTACK_TYPE_LASER);
-                ToPlayer()->SendPacket(Server::Packets::Misc::Update().Write(Server::Packets::Misc::InfoUpdate::INFO_UPDATE_MESSAGE, { "No more ammo." }));
-                return;
+                if (ToPlayer()->CanAutoChangeAmmo())
+                {
+                    BatteryType l_BatteryType = ToPlayer()->GetAmmo()->GetAvailableBattery();
+
+                    if (l_BatteryType != BatteryType::BATTERY_TYPE_NONE)
+                    {
+                        ToPlayer()->SetLaserType(l_BatteryType);
+
+                        Server::Packets::Attack::NoAmmunition l_NoAmmunition;
+                        l_NoAmmunition.AttackType = AttackType::ATTACK_TYPE_LASER;
+                        ToPlayer()->SendPacket(l_NoAmmunition.Write());
+
+                        Server::Packets::Attack::ChangeRocketAmmo l_ChangeRocketAmmoPacket;
+                        l_ChangeRocketAmmoPacket.AttackType = AttackType::ATTACK_TYPE_LASER;
+                        l_ChangeRocketAmmoPacket.TypeId = GetLaserType();
+                        ToPlayer()->SendPacket(l_ChangeRocketAmmoPacket.Write());
+
+                        /// Send Attack
+                        Server::Packets::Attack::LaserShoot l_Packet;
+                        l_Packet.FromId = GetObjectGUID().GetCounter();
+                        l_Packet.ToId = GetTarget()->GetObjectGUID().GetCounter();
+                        l_Packet.LaserId = GetLaserColourId();
+                        GetMap()->SendPacketToNearByGridsIfInSurrounding(l_Packet.Write(), this, true);
+                    }
+                    else
+                    {
+                        Server::Packets::Attack::NoAmmunition l_NoAmmunition;
+                        l_NoAmmunition.AttackType = AttackType::ATTACK_TYPE_LASER;
+                        ToPlayer()->SendPacket(l_NoAmmunition.Write());
+
+                        ToPlayer()->CancelAttack(AttackType::ATTACK_TYPE_LASER);
+                        return;
+                    }
+                }
+                else
+                {
+                    Server::Packets::Attack::NoAmmunition l_NoAmmunition;
+                    l_NoAmmunition.AttackType = AttackType::ATTACK_TYPE_LASER;
+                    ToPlayer()->SendPacket(l_NoAmmunition.Write());
+
+                    ToPlayer()->CancelAttack(AttackType::ATTACK_TYPE_LASER);
+                    return;
+                }
             }
 
             uint32 l_WeaponCount = ToPlayer()->GetInventory()->GetWeaponCount();
