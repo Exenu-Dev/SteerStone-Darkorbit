@@ -228,6 +228,10 @@ namespace SteerStone { namespace Game { namespace Entity {
             // Check if player still has any ammo left
             if (ToPlayer()->GetSelectedBatteryAmmo() <= 0)
             {
+                Server::Packets::Attack::NoAmmunition l_NoAmmunitionPacket;
+                l_NoAmmunitionPacket.AttackType = AttackType::ATTACK_TYPE_LASER;
+                ToPlayer()->SendPacket(l_NoAmmunitionPacket.Write());
+
                 if (ToPlayer()->CanAutoChangeAmmo())
                 {
                     BatteryType l_BatteryType = ToPlayer()->GetAmmo()->GetAvailableBattery();
@@ -236,10 +240,7 @@ namespace SteerStone { namespace Game { namespace Entity {
                     {
                         ToPlayer()->SetLaserType(l_BatteryType);
 
-                        Server::Packets::Attack::NoAmmunition l_NoAmmunition;
-                        l_NoAmmunition.AttackType = AttackType::ATTACK_TYPE_LASER;
-                        ToPlayer()->SendPacket(l_NoAmmunition.Write());
-
+                        // Change ammo to next available ammo slot
                         Server::Packets::Attack::ChangeRocketAmmo l_ChangeRocketAmmoPacket;
                         l_ChangeRocketAmmoPacket.AttackType = AttackType::ATTACK_TYPE_LASER;
                         l_ChangeRocketAmmoPacket.TypeId = GetLaserType();
@@ -254,20 +255,12 @@ namespace SteerStone { namespace Game { namespace Entity {
                     }
                     else
                     {
-                        Server::Packets::Attack::NoAmmunition l_NoAmmunition;
-                        l_NoAmmunition.AttackType = AttackType::ATTACK_TYPE_LASER;
-                        ToPlayer()->SendPacket(l_NoAmmunition.Write());
-
                         ToPlayer()->CancelAttack(AttackType::ATTACK_TYPE_LASER);
                         return;
                     }
                 }
                 else
                 {
-                    Server::Packets::Attack::NoAmmunition l_NoAmmunition;
-                    l_NoAmmunition.AttackType = AttackType::ATTACK_TYPE_LASER;
-                    ToPlayer()->SendPacket(l_NoAmmunition.Write());
-
                     ToPlayer()->CancelAttack(AttackType::ATTACK_TYPE_LASER);
                     return;
                 }
