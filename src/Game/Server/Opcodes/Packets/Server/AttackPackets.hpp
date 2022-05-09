@@ -19,12 +19,6 @@
 #pragma once
 #include "Socket.hpp"
 
-namespace SteerStone { namespace Game { namespace Entity {
-    enum AttackType;
-} ///< Entity
-} ///< Game
-} ///< SteerStone
-
 namespace SteerStone { namespace Game { namespace Server { namespace Packets { namespace Attack {
 
     /// SERVER_PACKET_LASER_SHOOT packet builder
