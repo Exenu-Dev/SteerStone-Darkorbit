@@ -147,7 +147,7 @@ namespace SteerStone { namespace Game { namespace Entity {
             return;
 
         if (IsPlayer())
-            ToPlayer()->SetRocketAmmo(static_cast<RocketType>(m_RocketType), -1);
+            ToPlayer()->SetRocketAmmo(static_cast<RocketType>(GetRocketId()), -1);
 
         if (CalculateHitChance())
         {
