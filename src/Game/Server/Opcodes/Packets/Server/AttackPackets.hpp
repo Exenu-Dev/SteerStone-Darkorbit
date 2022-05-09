@@ -270,7 +270,7 @@ namespace SteerStone { namespace Game { namespace Server { namespace Packets { n
         /// Write the packet
         PacketBuffer const* Write();
 
-        Entity::AttackType AttackType;
+        uint16 AttackType;
         uint16 TypeId;
     };
 
@@ -290,7 +290,7 @@ namespace SteerStone { namespace Game { namespace Server { namespace Packets { n
         /// Write the packet
         PacketBuffer const* Write();
 
-        Entity::AttackType AttackType;
+        uint16 AttackType;
         uint16 TypeId;
     };
 
