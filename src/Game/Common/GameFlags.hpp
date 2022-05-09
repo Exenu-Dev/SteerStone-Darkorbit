@@ -1,6 +1,6 @@
 /*
 * Liam Ashdown
-* Copyright (C) 2021
+* Copyright (C) 2022
 *
 * Thisprogram isfree software: you can redistribute it and/or modify
 * it under the termsof the GNU General Public License aspublished by
