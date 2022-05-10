@@ -147,7 +147,37 @@ namespace SteerStone { namespace Game { namespace Entity {
             return;
 
         if (IsPlayer())
+        {
+            // Check if player still has any ammo left
+            if (ToPlayer()->GetSelectedRocketAmmo() <= 0)
+            {
+                Server::Packets::Attack::NoAmmunition l_NoAmmunitionPacket;
+                l_NoAmmunitionPacket.AttackType = AttackType::ATTACK_TYPE_ROCKET;
+                ToPlayer()->SendPacket(l_NoAmmunitionPacket.Write());
+
+                if (ToPlayer()->CanAutoChangeAmmo())
+                {
+                    RocketType l_RocketType = ToPlayer()->GetAmmo()->GetAvailableRocket();
+
+                    if (l_RocketType != RocketType::ROCKET_TYPE_NONE)
+                    {
+                        ToPlayer()->SetRocketType(l_RocketType);
+
+                        // Change ammo to next available ammo slot
+                        Server::Packets::Attack::ChangeRocketAmmo l_ChangeRocketAmmoPacket;
+                        l_ChangeRocketAmmoPacket.AttackType = AttackType::ATTACK_TYPE_ROCKET;
+                        l_ChangeRocketAmmoPacket.TypeId = m_RocketType;
+                        ToPlayer()->SendPacket(l_ChangeRocketAmmoPacket.Write());
+                    }
+                }
+
+                ToPlayer()->SendClearRocketCooldown();
+                ToPlayer()->CancelAttack(AttackType::ATTACK_TYPE_ROCKET);
+                return;
+            }
+
             ToPlayer()->SetRocketAmmo(static_cast<RocketType>(GetRocketId()), -1);
+        }
 
         if (CalculateHitChance())
         {
@@ -538,7 +568,7 @@ namespace SteerStone { namespace Game { namespace Entity {
         }
         else if (p_AttackType & (AttackType::ATTACK_TYPE_ROCKET))
         {
-            switch (GetRocketId())
+            switch (m_RocketType)
             {
                 case RocketType::ROCKET_TYPE_R310:
                     l_MaxDamage = RocketDamage::ROCKET_DAMAGE_R310;
@@ -550,7 +580,7 @@ namespace SteerStone { namespace Game { namespace Entity {
                     l_MaxDamage = RocketDamage::ROCKET_DAMAGE_PLT_2021;
                     break;
                 default:
-                    LOG_ASSERT(false, "Unit", "Unknown Rocket Type %0", GetRocketId());
+                    LOG_ASSERT(false, "Unit", "Unknown Rocket Type %0", m_RocketType);
             }
         }
         else

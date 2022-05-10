@@ -189,10 +189,11 @@ enum InventoryType
 
 enum RocketType
 {
-    ROCKET_TYPE_R310     = 0,
-    ROCKET_TYPE_PLT_2026 = 1,
-    ROCKET_TYPE_PLT_2021 = 2,
-    MAX_ROCKET           = 3
+    ROCKET_TYPE_NONE     = 0,
+    ROCKET_TYPE_R310     = 1,
+    ROCKET_TYPE_PLT_2026 = 2,
+    ROCKET_TYPE_PLT_2021 = 3,
+    MAX_ROCKET           = 4
 };
 
 enum RocketDamage

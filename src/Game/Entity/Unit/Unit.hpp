@@ -170,7 +170,7 @@ namespace SteerStone { namespace Game { namespace Entity {
         uint16 GetDeathState()      const { return m_DeathState;        }
         uint16 GetLaserType()       const { return m_LaserType;         }    
         uint16 GetLaserColourId()   const { return m_LaserType - 1;     }    
-        uint16 GetRocketId()        const { return m_RocketType - 1;    }    
+        uint16 GetRocketId()        const { return m_RocketType -1;     }
         uint32 GetExperience()      const { return m_Experience;        }
         uint16 GetBehaviour()       const { return m_Behaviour;         }
         uint32 GetRespawnTimer()    const { return m_RespawnTimer;      }

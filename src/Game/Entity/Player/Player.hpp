@@ -94,6 +94,21 @@ namespace SteerStone { namespace Game { namespace Entity {
             return BatteryType::BATTERY_TYPE_NONE;
         }
 
+        /// Get Available Rocket
+        RocketType GetAvailableRocket() const
+        {
+            if (m_RocketR310)
+                return RocketType::ROCKET_TYPE_R310;
+
+            if (m_RocketPLT2021)
+                return RocketType::ROCKET_TYPE_PLT_2021;
+
+            if (m_RocketPLT2026)
+                return RocketType::ROCKET_TYPE_PLT_2026;
+
+            return RocketType::ROCKET_TYPE_NONE;
+        }
+
     private:
         int32 m_BatteryLCB10;
         int32 m_BatteryMCB25;
@@ -293,6 +308,22 @@ namespace SteerStone { namespace Game { namespace Entity {
                 default:
                     LOG_ASSERT(false, "Player", "Could not find ammo for type %0", m_LaserType);
                 break;
+            }
+        }
+        uint32 const GetSelectedRocketAmmo()
+        {
+            switch (m_RocketType)
+            {
+                case RocketType::ROCKET_TYPE_R310:
+                    return m_Ammo.m_RocketR310;
+                case RocketType::ROCKET_TYPE_PLT_2021:
+                    return m_Ammo.m_RocketPLT2021;
+                case RocketType::ROCKET_TYPE_PLT_2026:
+                    return m_Ammo.m_RocketPLT2026;
+                default:
+                    LOG_ASSERT(false, "Unit", "Could not find rocket for type %0", m_RocketType);
+                break;
+                        
             }
         }
 

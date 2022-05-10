@@ -1258,12 +1258,21 @@ namespace SteerStone { namespace Game { namespace Entity {
         {
         case RocketType::ROCKET_TYPE_R310:
             m_Ammo.m_RocketR310 += p_Amount;
+
+            if (m_Ammo.m_RocketR310 <= 0)
+                m_Ammo.m_RocketR310 = 0;
             break;
         case RocketType::ROCKET_TYPE_PLT_2026:
             m_Ammo.m_RocketPLT2026 += p_Amount;
+
+            if (m_Ammo.m_RocketPLT2026 <= 0)
+                m_Ammo.m_RocketPLT2026 = 0;
             break;
         case RocketType::ROCKET_TYPE_PLT_2021:
             m_Ammo.m_RocketPLT2021 += p_Amount;
+
+            if (m_Ammo.m_RocketPLT2021 <= 0)
+                m_Ammo.m_RocketPLT2021 = 0;
             break;
         default:
             LOG_ASSERT(false, "Player", "Cannot update ammo with rocket type %0", static_cast<uint16>(p_RocketType));
