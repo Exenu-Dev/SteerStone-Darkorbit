@@ -128,6 +128,9 @@ namespace SteerStone { namespace Game { namespace Entity {
         /// Send Rocket Attack
         /// @p_Hit : Whether the attack is a hit or not
         void SendRocketAttack(bool const p_Hit);
+        /// Send Laser Attack
+        /// @p_Hit : Whether the attack is a hit or not
+        void SendLaserAttack(bool const p_Hit);
 
     private:
         /// Send Rocket Attack

@@ -327,24 +327,57 @@ namespace SteerStone { namespace Game { namespace Entity {
             /// Now calculate damage
             int32 l_Damage = CalculateDamageDone(AttackType::ATTACK_TYPE_LASER);
             int32 l_ShieldDamage = 0;
+            int32 l_TotalDamage = 0;
             CalculateDamageTaken(GetTarget(), l_Damage, l_ShieldDamage);
 
-            int32 l_HitPoints = GetTarget()->ToUnit()->GetHitPoints() - l_Damage;
-            int32 l_Shield = GetTarget()->ToUnit()->GetShield() - l_ShieldDamage;
-
-            /// If Hitpoints is 0 or less, then target is dead
-            if (l_HitPoints <= 0)
+            switch (GetLaserType())
             {
-                Kill(GetTarget()->ToUnit());
-                return;
+                case BatteryType::BATTERY_TYPE_SAB50:
+                {
+                    int32 l_Shield = GetTarget()->ToUnit()->GetShield() - l_Damage;
+
+                    if (l_Shield < 0)
+                    {
+                        CancelAttack(AttackType::ATTACK_TYPE_LASER);
+                        l_Shield = 0;
+                    }
+
+                    GetTarget()->ToUnit()->SetShield(l_Shield);
+                    SetShield(l_Damage);
+
+                    if (GetShield() >= GetMaxShield())
+                        SetShield(GetMaxShield());
+
+                    l_TotalDamage = l_Damage;
+
+                    // For some reason SAB50 requires the send laser shoot packet to be called every second
+                    // otherwise laser visual is lost
+                    SendLaserAttack(true);
+                }
+                break;
+                default:
+                {
+                    int32 l_HitPoints = GetTarget()->ToUnit()->GetHitPoints() - l_Damage;
+                    int32 l_Shield = GetTarget()->ToUnit()->GetShield() - l_ShieldDamage;
+
+                    /// If Hitpoints is 0 or less, then target is dead
+                    if (l_HitPoints <= 0)
+                    {
+                        Kill(GetTarget()->ToUnit());
+                        return;
+                    }
+
+                    if (l_Shield < 0)
+                        l_Shield = 0;
+
+                    /// Set new hitpoints and shield points
+                    GetTarget()->ToUnit()->SetHitPoints(l_HitPoints);
+                    GetTarget()->ToUnit()->SetShield(l_Shield);
+
+                    l_TotalDamage = l_ShieldDamage + l_Damage;
+                }
+                break;
             }
-
-            if (l_Shield < 0)
-                l_Shield = 0;
-
-            /// Set new hitpoints and shield points
-            GetTarget()->ToUnit()->SetHitPoints(l_HitPoints);
-            GetTarget()->ToUnit()->SetShield(l_Shield);
 
             /// Send damage effect to attacker
             if (IsPlayer())
@@ -353,7 +386,7 @@ namespace SteerStone { namespace Game { namespace Entity {
                 l_MakeDamage.UpdateAmmo = false;
                 l_MakeDamage.HitPoints = GetTarget()->ToUnit()->GetHitPoints();
                 l_MakeDamage.Shield = GetTarget()->ToUnit()->GetShield();
-                l_MakeDamage.Damage = l_ShieldDamage + l_Damage; ///< Total Damage
+                l_MakeDamage.Damage = l_TotalDamage; ///< Total Damage
                 ToPlayer()->SendPacket(l_MakeDamage.Write());
 
                 Server::Packets::Attack::TargetHealth l_TargetHealthPacket;
@@ -562,6 +595,10 @@ namespace SteerStone { namespace Game { namespace Entity {
                 l_MinDamage = m_MinDamage * m_LaserType;
                 l_MaxDamage = m_MaxDamage * m_LaserType;
                 break;
+            case BatteryType::BATTERY_TYPE_SAB50:
+                l_MinDamage = m_MinDamage;
+                l_MaxDamage = m_MaxDamage;
+                break;
             default:
                 break;
             }
@@ -671,7 +708,7 @@ namespace SteerStone { namespace Game { namespace Entity {
     /// @p_Hit : Whether the attack is a hit or not
     void Unit::SendRocketAttack(bool const p_Hit)
     {
-        /// If we are not attacking, then don't update
+        /// If we are not attacking, then don't send
         if (!m_Attacking || !GetTargetGUID())
             return;
 
@@ -688,6 +725,40 @@ namespace SteerStone { namespace Game { namespace Entity {
         l_Packet.RocketId = m_RocketType;
         l_Packet.Hit = p_Hit;
         GetMap()->SendPacketToNearByGridsIfInSurrounding(l_Packet.Write(), this, true);
+    }
+    /// Send Laser Attack
+    /// @p_Hit : Whether the attack is a hit or not
+    void Unit::SendLaserAttack(bool const p_Hit)
+    {
+        /// If we are not attacking, then don't send
+        if (!m_Attacking || !GetTargetGUID())
+            return;
+
+        /// Cancel attack if target is dead
+        if (GetTarget()->ToUnit()->GetDeathState() == DeathState::DEAD)
+        {
+            CancelAttack();
+            return;
+        }
+
+        if (p_Hit)
+        {
+            /// Send Attack
+            Server::Packets::Attack::LaserShoot l_Packet;
+            l_Packet.FromId = GetObjectGUID().GetCounter();
+            l_Packet.ToId = GetTarget()->GetObjectGUID().GetCounter();
+            l_Packet.LaserId = GetLaserColourId();
+            GetMap()->SendPacketToNearByGridsIfInSurrounding(l_Packet.Write(), this, true);
+        }
+        else
+        {
+            /// Cancel laser shoot effect
+            Server::Packets::Attack::CancelLaserShoot l_Packet;
+            l_Packet.FromId = GetObjectGUID().GetCounter();
+            l_Packet.ToId = GetTarget()->GetObjectGUID().GetCounter();
+            GetMap()->SendPacketToNearByGridsIfInSurrounding(l_Packet.Write(), this);
+        }
+
     }
 
     ///////////////////////////////////////////
