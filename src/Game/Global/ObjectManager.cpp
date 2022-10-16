@@ -64,7 +64,7 @@ namespace SteerStone { namespace Game { namespace Global {
 
                 Entity::MobTemplate* l_MobTemplate = new Entity::MobTemplate();
 
-                l_MobTemplate->Entry            = l_Result[0].GetUInt32();
+                l_MobTemplate->Entry            = l_Result[0].GetUInt64();
                 l_MobTemplate->Name             = l_Result[1].GetString();
                 l_MobTemplate->Type             = l_Result[2].GetUInt16();
                 l_MobTemplate->WeaponState      = l_Result[3].GetUInt16();
@@ -159,7 +159,7 @@ namespace SteerStone { namespace Game { namespace Global {
                 Core::Database::ResultSet* l_Result = l_PreparedResultSet->FetchResult();
 
                 Entity::StationTemplate* l_StationTemplate = new Entity::StationTemplate();
-                l_StationTemplate->Id        = l_Result[0].GetUInt32();
+                l_StationTemplate->Id        = l_Result[0].GetUInt64();
                 l_StationTemplate->Name      = l_Result[1].GetString();
                 l_StationTemplate->Company   = l_Result[2].GetUInt16();
                 l_StationTemplate->Type      = l_Result[3].GetUInt16();
@@ -196,14 +196,14 @@ namespace SteerStone { namespace Game { namespace Global {
                 Core::Database::ResultSet* l_Result = l_PreparedResultSet->FetchResult();
 
                 Entity::ItemTemplate* l_ItemTemplate = new Entity::ItemTemplate();
-                l_ItemTemplate->Id              = l_Result[0].GetUInt32();
+                l_ItemTemplate->Id              = l_Result[0].GetUInt64();
                 l_ItemTemplate->Name            = l_Result[1].GetString();
-                l_ItemTemplate->Type            = l_Result[2].GetUInt32();
-                l_ItemTemplate->GFX             = l_Result[3].GetUInt32();
-                l_ItemTemplate->Value           = l_Result[4].GetUInt32();
-                l_ItemTemplate->ValuePercentage = l_Result[5].GetUInt32();
-                l_ItemTemplate->Credits         = l_Result[6].GetUInt32();
-                l_ItemTemplate->Uridium         = l_Result[7].GetUInt32();
+                l_ItemTemplate->Type            = l_Result[2].GetUInt16();
+                l_ItemTemplate->GFX             = l_Result[3].GetUInt16();
+                l_ItemTemplate->Value           = l_Result[4].GetUInt16();
+                l_ItemTemplate->ValuePercentage = l_Result[5].GetUInt16();
+                l_ItemTemplate->Credits         = l_Result[6].GetUInt16();
+                l_ItemTemplate->Uridium         = l_Result[7].GetUInt16();
 
                 m_ItemTemplate[l_ItemTemplate->Id] = l_ItemTemplate;
 
@@ -233,7 +233,7 @@ namespace SteerStone { namespace Game { namespace Global {
                 Core::Database::ResultSet* l_Result = l_PreparedResultSet->FetchResult();
 
                 Entity::ShipTemplate* l_ShipTemplate = new Entity::ShipTemplate();
-                l_ShipTemplate->Entry           = l_Result[0].GetUInt32();
+                l_ShipTemplate->Entry           = l_Result[0].GetUInt64();
                 l_ShipTemplate->Name            = l_Result[1].GetString();
                 l_ShipTemplate->Description     = l_Result[2].GetString();
                 l_ShipTemplate->HitPoints       = l_Result[3].GetUInt32();

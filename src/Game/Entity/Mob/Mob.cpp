@@ -177,10 +177,10 @@ namespace SteerStone { namespace Game { namespace Entity {
                     }
                 }
 
-                /// If player last time shot is more than 10 seconds ago, then cancel combat
+                /// If player last time shot is more than 10 seconds ago (MAX_LAST_TIME_ATTACKED), then cancel combat
                 if (GetTaggedPlayer())
                 {
-                    if (!IsInCombat())
+                    if (!GetTaggedPlayer()->IsAttacking())
                     {
                         CancelAttack();
                         break;
@@ -265,7 +265,7 @@ namespace SteerStone { namespace Game { namespace Entity {
                 /// If player last time shot is more than 10 seconds ago, then cancel combat
                 if (GetTaggedPlayer())
                 {
-                    if (!IsInCombat())
+                    if (!GetTaggedPlayer()->IsInCombat())
                     {
                         CancelAttack();
                         break;

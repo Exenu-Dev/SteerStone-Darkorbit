@@ -986,9 +986,9 @@ namespace SteerStone { namespace Game { namespace Entity {
                     if (l_Itr.Type == DroneType::DRONE_TYPE_FLAK)
                     {
                         if (l_Counter == 1)
-                            l_Drones += "-" + std::to_string(GetDroneLevel(l_Itr)) + ",";
+                            l_Drones += "-" + std::to_string(GetDroneLevel(l_Itr) + 9) + ",";
                         else
-                            l_Drones += "0-" + std::to_string(GetDroneLevel(l_Itr)) + ",";
+                            l_Drones += "0-" + std::to_string(GetDroneLevel(l_Itr) + 9) + ",";
                     }
                     else if (l_Itr.Type == DroneType::DRONE_TYPE_IRIS)
                     {

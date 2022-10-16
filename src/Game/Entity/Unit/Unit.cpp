@@ -343,7 +343,7 @@ namespace SteerStone { namespace Game { namespace Entity {
                     }
 
                     GetTarget()->ToUnit()->SetShield(l_Shield);
-                    SetShield(l_Damage);
+                    SetShield(GetShield() + l_Damage);
 
                     if (GetShield() >= GetMaxShield())
                         SetShield(GetMaxShield());
@@ -408,6 +408,10 @@ namespace SteerStone { namespace Game { namespace Entity {
             }
             else if (GetTarget()->IsMob())
             {
+                // If Mob is not attacking, then attack the attacker
+                if (!GetTarget()->IsAttacking())
+                    GetTarget()->Attack(this);
+
                 if (GetTarget()->GetHitPoints() <= Core::Utils::CalculatePercentage(GetTarget()->GetHitMaxPoints(), 15) && !GetTarget()->ToMob()->IsFleeing())
                     GetTarget()->ToMob()->SetIsFleeing(true);
             }
@@ -446,7 +450,7 @@ namespace SteerStone { namespace Game { namespace Entity {
         return true;
     }
     /// Is In Combat
-    bool Entity::Unit::IsInCombat()
+    bool Entity::Unit::IsInCombat() const
     {
         if (sServerTimeManager->GetTimeDifference(m_LastTimeAttacked, sServerTimeManager->GetServerTime()) > MAX_LAST_TIME_ATTACKED)
             return false;

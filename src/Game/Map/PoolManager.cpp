@@ -68,7 +68,7 @@ namespace SteerStone { namespace Game { namespace Map {
             {
                 Core::Database::ResultSet* l_Result = l_PreparedResultSet->FetchResult();
 
-                Entity::MobTemplate const* l_MobTemplate = sObjectManager->GetMobTemplate(l_Result[0].GetUInt32());
+                Entity::MobTemplate const* l_MobTemplate = sObjectManager->GetMobTemplate(l_Result[0].GetUInt64());
                 if (!l_MobTemplate)
                 {
                     LOG_WARNING("PoolManager", "Could not find entry %0 in mob template!", l_Result[0].GetUInt32());
@@ -88,7 +88,7 @@ namespace SteerStone { namespace Game { namespace Map {
                     {
                         float l_MaxX = (l_RadiusX * l_X);
 
-                        if (Core::Utils::RoleChanceFloat(l_Result[1].GetFloat())) 
+                        if (Core::Utils::RoleChanceFloat(l_Result[1].GetDouble())) 
                         {
                             Entity::Mob* l_Mob          = new Entity::Mob();
                             l_Mob->m_Entry              = l_MobTemplate->Entry;

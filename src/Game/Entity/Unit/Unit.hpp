@@ -89,7 +89,6 @@ namespace SteerStone { namespace Game { namespace Entity {
         ///////////////////////////////////////////
         //             ATTACK SYSTEM
         ///////////////////////////////////////////
-
         /// Attack
         /// @p_Victim : Victim we are attacking
         void Attack(Unit* p_Victim, AttackType const p_AttackType = AttackType::ATTACK_TYPE_LASER);
@@ -97,7 +96,7 @@ namespace SteerStone { namespace Game { namespace Entity {
         /// @p_Victim : Victim
         bool CanAttackTarget(Unit* p_Victim);
         /// Is In Combat
-        bool IsInCombat();
+        bool IsInCombat() const;
         /// Update Attack
         /// @p_Diff : Execution Time
         void AttackerStateUpdate(uint32 const p_Diff);
