@@ -22,6 +22,7 @@
 #include "Utility/UtiLockedQueue.hpp"
 #include "Player.hpp"
 #include "GameFlags.hpp"
+#include "Commands.hpp"
 
 #define WORLD_SLEEP_TIMER 60
 
@@ -138,6 +139,7 @@ namespace SteerStone { namespace Game { namespace World {
         uint32 m_IntConfigs[INT_CONFIG_MAX];                                ///< Holds config settings for int
         bool m_BoolConfigs[BOOL_CONFIG_MAX];                                ///< Holds config settings for bool
         float m_FloatConfigs[FLOAT_CONFIG_MAX];                             ///< Holds config settings for float
+        Commands* m_Commands;                                               ///< Process the player commands from chat server
 
         static volatile bool s_StopWorld;                                   ///< Stop World Updating
     };

@@ -91,7 +91,7 @@ int main()
 
         l_RealPrevTime = l_RealCurrTime;
 
-        /// Update the world every 60 ms
+        /// Update the chat every 60 ms
         if (l_Diff <= CHAT_SLEEP_TIMER + l_PrevSleepTime)
         {
             l_PrevSleepTime = CHAT_SLEEP_TIMER + l_PrevSleepTime - l_Diff;

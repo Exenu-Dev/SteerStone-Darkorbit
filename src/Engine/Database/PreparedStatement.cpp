@@ -67,7 +67,7 @@ namespace SteerStone { namespace Core { namespace Database {
     /// ExecuteStatement
     /// Execute the statement
     /// @p_FreeStatementAutomatically : Free the prepared statement when PreparedResultSet deconstructors
-    std::unique_ptr<PreparedResultSet> PreparedStatement::ExecuteStatement(bool p_FreeStatementAutomatically)
+    std::unique_ptr<PreparedResultSet> PreparedStatement::ExecuteStatement(bool p_FreeStatementAutomatically/*= false*/)
     {
         if (m_PrepareError)
             return nullptr;

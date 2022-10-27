@@ -69,7 +69,8 @@ namespace SteerStone { namespace Game { namespace Server {
         StoreClientPacket(ClientOpCodes::CLIENT_PACKET_UPDATE_SETTINGS,   "CLIENT_PACKET_UPDATE_SETTINGS",    PacketStatus::STATUS_LOGGED_IN,      PacketProcess::PROCESS_PLAYER_THREAD, &GameSocket::HandleUpdateSettings      );
         StoreClientPacket(ClientOpCodes::CLIENT_PACKET_CHANGE_CONFIG,     "CLIENT_PACKET_CHANGE_CONFIG",      PacketStatus::STATUS_LOGGED_IN,      PacketProcess::PROCESS_PLAYER_THREAD, &GameSocket::HandleChangeConfig        );
         StoreClientPacket(ClientOpCodes::CLIENT_PACKET_UNKNOWN,           "CLIENT_PACKET_UNKNOWN",            PacketStatus::STATUS_UNHANDLED,      PacketProcess::PROCESS_PLAYER_THREAD, &GameSocket::HandleNULL                );
-        StoreClientPacket(ClientOpCodes::CLIENT_PACKET_ROCKET_ATTACK,     "CLIENT_PACKET_ROCKET_ATTACK",      PacketStatus::STATUS_UNHANDLED,      PacketProcess::PROCESS_PLAYER_THREAD, &GameSocket::HandleShootRocket          );
+        StoreClientPacket(ClientOpCodes::CLIENT_PACKET_ROCKET_ATTACK,     "CLIENT_PACKET_ROCKET_ATTACK",      PacketStatus::STATUS_UNHANDLED,      PacketProcess::PROCESS_PLAYER_THREAD, &GameSocket::HandleShootRocket         );
+        StoreClientPacket(ClientOpCodes::CLIENT_PACKET_SELL_RESOURCES,    "CLIENT_PACKET_SELL_RESOURCES",     PacketStatus::STATUS_UNHANDLED,      PacketProcess::PROCESS_PLAYER_THREAD, &GameSocket::HandleSellResources       );
 
         //////////////////////////////////////////////////////////////////////////
         //////////////////////////////////////////////////////////////////////////

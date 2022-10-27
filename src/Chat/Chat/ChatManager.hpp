@@ -52,6 +52,18 @@ namespace SteerStone { namespace Chat { namespace Channel {
         ///@ p_RoomId: Room Id to send to
         void SendMessageToRoom(Entity::Player const* p_Player, std::string const p_Message, uint16 const p_RoomId);
 
+        /// Add Process Command
+        ///@ p_Id : Player Id
+        ///@ p_Command : Command to process
+        void AddProcessCommand(const uint32 p_Id, const std::string p_Command);
+
+        /// Send System Message
+        /// @p_Message : System Message
+        void SendSystemMessage(const std::string p_Message);
+
+        /// Get the total players
+        uint32 const TotalPlayers();
+
         //////////////////////////////////////////////////////////////////////////
         //////////////////////////////////////////////////////////////////////////
 

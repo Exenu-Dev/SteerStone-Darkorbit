@@ -34,13 +34,12 @@ namespace SteerStone { namespace Game { namespace Server {
     void GameSocket::HandleCheckOnline(ClientPacket* p_Packet)
     {
         uint32 l_PlayerId = p_Packet->ReadUInt32();
-        PacketBuffer l_PacketBuffer;
 
         Entity::Player* l_Player = sWorldManager->FindPlayer(l_PlayerId);
 
-        l_PacketBuffer.AppendBool(l_Player ? true : false);
+        char l_IsOnline = l_Player ? '1' : '0';
 
-        Write((char*)l_PacketBuffer.GetContents(), l_PacketBuffer.GetSize(), true);
+        Write(&l_IsOnline, sizeof(l_IsOnline));
     }
     /// Web Handler
     /// @p_ClientPacket : Packet recieved from Web

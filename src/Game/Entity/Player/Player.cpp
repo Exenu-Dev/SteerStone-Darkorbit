@@ -124,7 +124,7 @@ namespace SteerStone { namespace Game { namespace Entity {
             "user_settings.ignore_box, user_settings.convert_gates, user_settings.convert_oppo, user_settings.sound_off, user_settings.bg_music_off, user_settings.display_status, user_settings.display_bubble, user_settings.selected_laser, user_settings.selected_rocket, user_settings.display_digits, "
             "user_settings.display_chat, user_settings.display_drones, user_settings.show_star_system, user_settings.ignore_cargo, user_settings.ignore_hostile_cargo, user_settings.auto_change_ammo, user_settings.enable_buy_fast"
             " FROM users INNER JOIN user_settings ON user_settings.user_id = users.id WHERE users.id = ?");
-        l_PreparedStatement->SetUint32(0, m_Id);
+        l_PreparedStatement->SetUint64(0, m_Id);
         std::unique_ptr<Core::Database::PreparedResultSet> l_PreparedResultSet = l_PreparedStatement->ExecuteStatement();
 
         if (l_PreparedResultSet)
@@ -193,7 +193,7 @@ namespace SteerStone { namespace Game { namespace Entity {
             "position_x, position_y, map_id, max_battery, max_rockets, use_system_font,"
             " prometium, endurium, terbium, xenomit, prometid, duranium, promerium, palladium, seprom,"
             " battery_lcb_10, battery_mcb_25, battery_mcb_50, battery_ucb_100, battery_sab_50, rocket_r310, rocket_plt_2026, rocket_plt_2021, mines, smart_bombs, instant_shields, preset FROM user_ships WHERE user_id = ?");
-        l_PreparedStatement->SetUint32(0, m_Id);
+        l_PreparedStatement->SetUint64(0, m_Id);
         std::unique_ptr<Core::Database::PreparedResultSet> l_PreparedResultSet = l_PreparedStatement->ExecuteStatement();
 
         if (l_PreparedResultSet)
@@ -210,7 +210,7 @@ namespace SteerStone { namespace Game { namespace Entity {
             m_MaxCargoSpace             = l_Result[7].GetUInt32();
 
             SetGUID(ObjectGUID(GUIDType::Player, 0, m_Id));
-            GetSpline()->SetPosition(l_Result[8].GetFloat(), l_Result[9].GetFloat(), l_Result[8].GetFloat(), l_Result[9].GetFloat());
+            GetSpline()->SetPosition(l_Result[8].GetDouble(), l_Result[9].GetDouble(), l_Result[8].GetDouble(), l_Result[9].GetDouble());
             SetMap(sZoneManager->GetMap(l_Result[10].GetUInt32()));
 
             m_MaxBattery                = l_Result[11].GetUInt32();
@@ -1273,6 +1273,10 @@ namespace SteerStone { namespace Game { namespace Entity {
 
             if (m_Ammo.m_RocketPLT2021 <= 0)
                 m_Ammo.m_RocketPLT2021 = 0;
+            break;
+        case RocketType::ROCKET_TYPE_NONE:
+            /// Don't do anything
+            return;
             break;
         default:
             LOG_ASSERT(false, "Player", "Cannot update ammo with rocket type %0", static_cast<uint16>(p_RocketType));

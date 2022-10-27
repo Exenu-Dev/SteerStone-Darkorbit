@@ -93,7 +93,7 @@ namespace SteerStone { namespace Chat { namespace Entity {
 			SendPacket(&l_PacketBuffer);
 
 			Server::Packets::SystemMessage l_SystemMessagePacket;
-			l_SystemMessagePacket.Message = "\n<span class='mod'>Welcome to <a class='highlight' target=\"_blank\" href=\"http://www.github.com/LiamAshdown/Darkorbit-Emulato\">Darkorbit Emulator</a> made by <a class='highlight' target=\"_blank\" href=\"http://www.github.com/LiamAshdown\">Quadral.</a>\n</span>";
+			l_SystemMessagePacket.Message = "\n<span class='mod'>Welcome to <a class='highlight' target=\"_blank\" href=\"http://www.github.com/LiamAshdown/Darkorbit-Emulator\">Darkorbit Emulator</a> made by <a class='highlight' target=\"_blank\" href=\"http://www.github.com/LiamAshdown\">Quadral.</a>\n</span>";
 			SendPacket(l_SystemMessagePacket.Write());
 
 			return true;
@@ -106,6 +106,18 @@ namespace SteerStone { namespace Chat { namespace Entity {
 	bool Player::IsInRoom(uint16 const p_RoomId)
 	{
 		return std::find(m_RoomIds.begin(), m_RoomIds.end(), p_RoomId) != m_RoomIds.end();
+	}
+
+	/// Send Message to self
+	/// @p_Message : Message to be sent to the player
+	/// @p_RoomId : Room Id the player is in
+	void Player::SendMessageToSelf(std::string const p_Message, uint16 const p_RoomId)
+	{
+		Server::Packets::SendMessageToRoom l_Packet;
+		l_Packet.RoomId = p_RoomId;
+		l_Packet.Username = "test";
+		l_Packet.Message = p_Message;
+		// l_Itr->SendPacket(l_Packet.Write());
 	}
 
 	///////////////////////////////////////////

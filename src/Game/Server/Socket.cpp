@@ -175,8 +175,11 @@ namespace SteerStone { namespace Game { namespace Server {
             OpcodeHandler const* l_OpCodeHandler = sOpCode->GetClientPacket(l_Opcode);
 
             if (!l_OpCodeHandler->Name)
+            {
+                LOG_WARNING("Web", "Received Uknown Packet from Web");
+                CloseSocket();
                 return true;
-
+            }
 
             ExecutePacket(l_OpCodeHandler, new ClientPacket(l_Buffer));
 
@@ -194,12 +197,27 @@ namespace SteerStone { namespace Game { namespace Server {
             LOG_INFO("GameSocket", "Received packet %0 from %1", sOpCode->GetClientOpCodeName(static_cast<ClientOpCodes>(p_Packet->GetHeader())), GetRemoteAddress());
         #endif
 
+        const uint32 l_Id = p_Packet->ReadUInt32();
+
+        /// Check to see if player exists in the world
+        /// This could be the case of player logged out and then
+        /// logged back in.
+        /// We might aswell just to use the same player object incase
+        /// the database has not been saved yet.
+        Entity::Player* l_Player = sWorldManager->FindPlayer(l_Id);
+
+        if (l_Player) 
+        {
+            l_Player->SaveToDB();
+            l_Player->m_Socket->CloseSocket();
+        }
+
         /// This is a cheeky way of doing it
         /// The issue is, if we add the player to the map on player thread,
         /// there will be a race condition, so initialize the player and then pass the packet to the world thread
         /// the world thread gets updated before the map thread
-        m_Player              = new Entity::Player(this);
-        m_Player->m_Id        = p_Packet->ReadInt32();
+        m_Player = new Entity::Player(this);
+        m_Player->m_Id = l_Id;
         m_Player->m_SessionId = p_Packet->ReadString();
 
         if (!m_Player->LoadFromDB())

@@ -17,6 +17,7 @@
 */
 
 #include "ChatManager.hpp"
+#include "Database/DatabaseTypes.hpp"
 #include "Packets/Server/ChatPacket.hpp"
 
 namespace SteerStone { namespace Chat { namespace Channel {
@@ -54,6 +55,12 @@ namespace SteerStone { namespace Chat { namespace Channel {
     {
         for (auto l_Itr : m_Players)
         {
+            if (!l_Itr->ToSocket() || l_Itr->ToSocket()->IsClosed())
+            {
+                m_Players.erase(l_Itr);
+                continue;
+            }
+
             l_Itr->IntervalPing.Update(p_Diff);
             if (l_Itr->IntervalPing.Passed())
             {
@@ -68,6 +75,7 @@ namespace SteerStone { namespace Chat { namespace Channel {
     {
         return s_StopChat;
     }
+
     /// Send Message
     ///@ p_Player : Player who is sending the message
     ///@ p_Message : Message to send
@@ -96,6 +104,39 @@ namespace SteerStone { namespace Chat { namespace Channel {
                 }
             }
         }
+    }
+
+    /// Add Process Command
+    ///@ p_Id : Player Id
+    ///@ p_Command : Command to process
+    void Base::AddProcessCommand(const uint32 p_Id, const std::string p_Command)
+    {
+        Core::Database::PreparedStatement* l_PreparedStatement = GameDatabase.GetPrepareStatement();
+        l_PreparedStatement->PrepareStatement("INSERT INTO process_commands (type, user_id, processed, created_at, updated_at) VALUES (?, ?, ?, NOW(), NOW())");
+        l_PreparedStatement->SetString(0, p_Command);
+        l_PreparedStatement->SetUint32(1, p_Id);
+        l_PreparedStatement->SetBool(2, false);
+        l_PreparedStatement->ExecuteStatement(true);
+
+    }
+
+    /// Send System Message
+    /// @p_Message : System Message
+    void Base::SendSystemMessage(const std::string p_Message)
+    {
+        Server::Packets::SystemMessage l_SystemMessagePacket;
+        l_SystemMessagePacket.Message = p_Message;
+
+        for (auto l_Itr : m_Players)
+        {
+            l_Itr->SendPacket(l_SystemMessagePacket.Write());
+        }
+    }
+
+    /// Get the total players
+    uint32 const Base::TotalPlayers()
+    {
+        return m_Players.size();
     }
 }
 }

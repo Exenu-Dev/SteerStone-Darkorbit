@@ -61,6 +61,7 @@ enum ClientOpCodes : uint8
     CLIENT_PACKET_CHANGE_CONFIG         = 0x53,
     CLIENT_PACKET_UNKNOWN               = 0x62,
     CLIENT_PACKET_ROCKET_ATTACK         = 0x76,
+    CLIENT_PACKET_SELL_RESOURCES        = 0x62,
 
     /// Web
     WEB_PACKET_CHECK_ONLINE             = 0x22,

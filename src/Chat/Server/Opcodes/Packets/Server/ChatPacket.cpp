@@ -53,7 +53,18 @@ namespace SteerStone { namespace Chat { namespace Server { namespace Packets {
         m_Buffer.AppendSplit();
         m_Buffer.AppendChar(Message.c_str());
         m_Buffer.AppendSplit();
-        m_Buffer.AppendChar("3"); //< Admin message type? TODO; Research this
+        m_Buffer.AppendChar("1"); //< Admin message type? TODO; Research this
+        m_Buffer.AppendChar("#");
+        m_Buffer.AppendEndSplitter();
+
+        return &m_Buffer;
+    }
+
+    /// Write the packet
+    PacketBuffer const* UserCount::Write()
+    {
+        std::string l_Message = "Users online " + std::to_string(Total);
+        m_Buffer.AppendChar(l_Message.c_str());
         m_Buffer.AppendChar("#");
         m_Buffer.AppendEndSplitter();
 

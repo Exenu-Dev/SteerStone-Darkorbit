@@ -195,6 +195,13 @@ namespace SteerStone { namespace Game { namespace Server {
 
     /// Map Handler
     /// @p_ClientPacket : Packet recieved from client
+    void GameSocket::HandleSellResources(ClientPacket* p_Packet)
+    {
+        int test = 0;
+    }
+
+    /// Map Handler
+    /// @p_ClientPacket : Packet recieved from client
     void GameSocket::HandleLootCargo(ClientPacket* p_Packet)
     {
         uint32 l_Id = p_Packet->ReadUInt32();

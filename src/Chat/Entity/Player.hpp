@@ -55,6 +55,11 @@ namespace SteerStone { namespace Chat { namespace Entity {
         ///@ p_RoomId: Room Id to search for
         bool IsInRoom(uint16 const p_RoomId);
 
+        /// Send Message to self
+        /// @p_Message : Message to be sent to the player
+        /// @p_RoomId : Room Id the player is in
+        void SendMessageToSelf(std::string const p_Message, uint16 const p_RoomId);
+
         ///////////////////////////////////////////
         //              PACKETS
         ///////////////////////////////////////////

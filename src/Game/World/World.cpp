@@ -31,8 +31,9 @@ namespace SteerStone { namespace Game { namespace World {
     //////////////////////////////////////////////////////////////////////////
 
     /// Constructor
-    Base::Base()
+    Base::Base() : m_Commands(nullptr), m_BoolConfigs(), m_IntConfigs(), m_FloatConfigs()
     {
+        m_Commands = new Commands();
     }
     /// Deconstructor
     Base::~Base()
@@ -60,6 +61,8 @@ namespace SteerStone { namespace Game { namespace World {
         ProcessPlayerPackets(p_Diff);
         ProcessRemovalPlayer(p_Diff);
 
+        m_Commands->ProcessCommands();
+
         sZoneManager->Update(p_Diff);
     }
     /// Stop World Updating
@@ -85,10 +88,6 @@ namespace SteerStone { namespace Game { namespace World {
     {
         return m_Players.size();
     }
-
-    ///////////////////////////////////////////
-    //                 DATABASE
-    ///////////////////////////////////////////
 
     ///////////////////////////////////////////
     //             CONFIGURATION

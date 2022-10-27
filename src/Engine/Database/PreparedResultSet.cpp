@@ -124,7 +124,7 @@ namespace SteerStone { namespace Core { namespace Database {
                     }
 
                     /// Insert buffer into storage
-                    m_Results[uint32(m_RowPosition) * m_FieldCount + l_I].SetValue(l_Buffer, MySQLTypeToFieldType(m_Bind[l_I].buffer_type, m_Fields[l_I].flags & UNSIGNED_FLAG ? false : true),
+                    m_Results[uint32(m_RowPosition) * m_FieldCount + l_I].SetValue(l_Buffer, MySQLTypeToFieldType(m_Bind[l_I].buffer_type, m_Fields[l_I].flags & UNSIGNED_FLAG ? true : false),
                         l_FetchedLength);
 
                     /// Move buffer pointer to next part
@@ -133,7 +133,7 @@ namespace SteerStone { namespace Core { namespace Database {
                 else
                 {
                     /// Insert buffer into storage
-                    m_Results[m_RowPosition * m_FieldCount + l_I].SetValue(nullptr, MySQLTypeToFieldType(m_Bind[l_I].buffer_type, m_Fields[l_I].flags & UNSIGNED_FLAG ? false : true),
+                    m_Results[m_RowPosition * m_FieldCount + l_I].SetValue(nullptr, MySQLTypeToFieldType(m_Bind[l_I].buffer_type, m_Fields[l_I].flags & UNSIGNED_FLAG ? true : false),
                         l_FetchedLength);
                 }
             }
