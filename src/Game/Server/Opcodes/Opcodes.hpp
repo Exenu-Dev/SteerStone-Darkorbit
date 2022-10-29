@@ -115,6 +115,7 @@ enum ServerOpCodes : uint8
     SERVER_PACKET_ROCKET_ATTACK         = 0x76,
     SERVER_PACKET_NO_AMMUNITION         = 0x57,
     SERVER_PACKET_CHANGE_ROCK_AMMO      = 0x34,
+    SERVER_PACKET_UPDATE_ORE            = 0x45,
 
     /// Web Packets
     SERVER_PACKET_CHECK_ONLINE          = 0x22,

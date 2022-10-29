@@ -209,6 +209,41 @@ namespace SteerStone { namespace Game { namespace Server { namespace Packets { n
         PacketBuffer const* Write();
     };
 
+    /// SERVER_PACKET_UPDATE_ORE packet builder
+    class UpdateOre final : public ServerPacket
+    {
+    public:
+        /// Constructor 
+        UpdateOre() : ServerPacket(ServerOpCodes::SERVER_PACKET_UPDATE_ORE)
+        {
+            Promerium   = 0;
+            Endurium    = 0;
+            Terbium     = 0;
+            Promerium   = 0;
+            Duranium    = 0;
+            Promerium   = 0;
+            Palladium   = 0;
+            Seprom      = 0;
+        }
+
+        //////////////////////////////////////////////////////////////////////////
+        //////////////////////////////////////////////////////////////////////////
+
+        uint32 Prometium;
+        uint32 Endurium;
+        uint32 Terbium;
+        uint32 Xenomit;
+        uint32 Prometid;
+        uint32 Duranium;
+        uint32 Promerium;
+        uint32 Palladium;
+        uint32 Seprom;
+
+
+        /// Write the packet
+        PacketBuffer const* Write();
+    };
+
 }   ///< namespace Ship
 }   ///< namespace Packets
 }   ///< namespace Server

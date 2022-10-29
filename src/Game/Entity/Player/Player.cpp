@@ -1136,6 +1136,22 @@ namespace SteerStone { namespace Game { namespace Entity {
 
         SendPacket(Server::Packets::Misc::Info().Write(Server::Packets::Misc::InfoType::INFO_TYPE_DRONES, { GetObjectGUID().GetCounter(), l_Drones }));
     }
+    /// Update Ores
+    void Player::UpdateOres()
+    {
+        Server::Packets::Ship::UpdateOre l_Packet;
+        l_Packet.Prometium = GetResource(Resource::RESOURCE_PROMETIUM);
+        l_Packet.Endurium = GetResource(Resource::RESOURCE_ENDURIUM);
+        l_Packet.Terbium = GetResource(Resource::RESOURCE_TERBIUM);
+        l_Packet.Xenomit = GetResource(Resource::RESOURCE_XENOMIT);
+        l_Packet.Prometid = GetResource(Resource::RESOURCE_PROMETID);
+        l_Packet.Duranium = GetResource(Resource::RESOURCE_DURANIUM);
+        l_Packet.Promerium = GetResource(Resource::RESOURCE_PROMERIUM);
+        l_Packet.Palladium = GetResource(Resource::RESOURCE_PALLADIUM);
+        l_Packet.Seprom = GetResource(Resource::RESOURCE_SEPROM);
+
+        SendPacket(l_Packet.Write());
+    }
     /// Process Packets
     /// @p_PacketFilter : Type of packet
     bool Player::ProcessPacket(Server::PacketFilter& p_PacketFilter)
@@ -1289,3 +1305,5 @@ namespace SteerStone { namespace Game { namespace Entity {
 }   ///< namespace Entity
 }   ///< namespace Game
 }   ///< namespace Steerstone
+
+#define RETURN_STRING_ENUM(enumHere) return #enumHere

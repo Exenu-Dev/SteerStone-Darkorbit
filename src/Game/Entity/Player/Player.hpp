@@ -250,6 +250,8 @@ namespace SteerStone { namespace Game { namespace Entity {
         Server::PacketBuffer const* BuildDronePacket();
         /// Send Drone Info
         void SendDrones();
+        /// Update Orders
+        void UpdateOres();
         /// Process Packets
         /// @p_PacketFilter : Type of packet
         bool ProcessPacket(Server::PacketFilter& p_PacketFilter);
