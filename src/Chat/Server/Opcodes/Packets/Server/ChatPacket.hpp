@@ -103,6 +103,54 @@ namespace SteerStone { namespace Chat { namespace Server { namespace Packets {
         uint32 Total;
     };
 
+    class BanUser final : public ServerPacket
+    {
+    public:
+        /// Constructor 
+        BanUser() : ServerPacket("at%")
+        {
+        }
+
+        //////////////////////////////////////////////////////////////////////////
+        //////////////////////////////////////////////////////////////////////////
+
+        /// Write the packet
+        PacketBuffer const* Write();
+    };
+
+    class IPBan final : public ServerPacket
+    {
+    public:
+        /// Constructor 
+        IPBan() : ServerPacket("ey%")
+        {
+        }
+
+        //////////////////////////////////////////////////////////////////////////
+        //////////////////////////////////////////////////////////////////////////
+
+        /// Write the packet
+        PacketBuffer const* Write();
+    };
+
+    class BanMessage final : public ServerPacket
+    {
+    public:
+        /// Constructor 
+        BanMessage() : ServerPacket("db%")
+        {
+        }
+
+        //////////////////////////////////////////////////////////////////////////
+        //////////////////////////////////////////////////////////////////////////
+
+        /// Write the packet
+        PacketBuffer const* Write();
+
+        std::string StartedAt;
+        std::string EndsAt;
+    };
+
     class Ping final : public ServerPacket
     {
     public:

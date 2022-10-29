@@ -55,11 +55,6 @@ namespace SteerStone { namespace Chat { namespace Entity {
         ///@ p_RoomId: Room Id to search for
         bool IsInRoom(uint16 const p_RoomId);
 
-        /// Send Message to self
-        /// @p_Message : Message to be sent to the player
-        /// @p_RoomId : Room Id the player is in
-        void SendMessageToSelf(std::string const p_Message, uint16 const p_RoomId);
-
         ///////////////////////////////////////////
         //              PACKETS
         ///////////////////////////////////////////
@@ -69,13 +64,18 @@ namespace SteerStone { namespace Chat { namespace Entity {
         void SendPacket(Server::PacketBuffer const* p_PacketBuffer);
         /// Send Ping
         void SendPing();
+        /// Send Message to self
+        /// This uses the system message packet
+        /// @p_Message : Message to be sent to the player
+        void SendMessageToSelf(std::string const p_Message);
+
 
         ///////////////////////////////////////////
         //            GETTERS/SETTERS
         ///////////////////////////////////////////
     public:
         /// Getters Function
-        uint32 GetId()             const     { return m_Id;                     }
+        uint64 GetId()             const     { return m_Id;                     }
         std::string GetUsername()  const     { return m_Username;               }
         bool IsAdmin()             const     { return m_RankId == Rank::ADMIN;  }
 

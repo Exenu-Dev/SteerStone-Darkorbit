@@ -207,6 +207,19 @@ namespace SteerStone { namespace Core { namespace Database {
             return std::to_string(l_Time->day) + "/" + std::to_string(l_Time->month) + "/" + std::to_string(l_Time->year);
         }
 
+        std::string GetDateTimeToString() const
+        {
+            if (!Data.Buffer)
+                return "";
+
+            if (Data.Type != FieldType::FIELD_DATE)
+                LOG_WARNING("Database", "Converting %0 to FIELD_DATE", FieldTypeToString(Data.Type));
+
+            MYSQL_TIME* l_Time = (MYSQL_TIME*)Data.Buffer;
+
+            return std::to_string(l_Time->day) + "/" + std::to_string(l_Time->month) + "/" + std::to_string(l_Time->year) + " " + std::to_string(l_Time->hour) + ":" + std::to_string(l_Time->minute) + ":" + std::to_string(l_Time->second);
+        }
+
         std::string GetString() const
         {
             if (!Data.Buffer)

@@ -37,6 +37,8 @@ namespace SteerStone { namespace Chat { namespace Server {
 		m_Player = new Entity::Player(this);
 		m_Player->m_Id = l_UserId;
 
+		sChatManager->PlayerIsBanned(m_Player);
+
 		if (m_Player->LoadFromDB())
 			sChatManager->AddPlayer(m_Player);
 		else
@@ -61,6 +63,9 @@ namespace SteerStone { namespace Chat { namespace Server {
 			return;
 		}
 
+		if (sChatManager->PlayerIsBanned(m_Player))
+			return;
+
 		/// Check if it's a command
 		if (l_Message[0] == '/') {
 			std::string l_Command = l_Message.erase(0, 1);
@@ -71,6 +76,11 @@ namespace SteerStone { namespace Chat { namespace Server {
 
 			if (boost::algorithm::contains(l_Command, "announce"))
 			{
+				// Only an admin can perform this action
+				if (!m_Player->IsAdmin()) {
+					return;
+				}
+
 				std::vector<std::string> l_Splitter = Core::Utils::SplitAll(l_Command, " ", false);
 
 				l_Splitter.erase(l_Splitter.begin());
@@ -84,6 +94,27 @@ namespace SteerStone { namespace Chat { namespace Server {
 				Server::Packets::UserCount l_Packet;
 				l_Packet.Total = sChatManager->TotalPlayers();
 				m_Player->SendPacket(l_Packet.Write());
+			}
+			else if (boost::algorithm::contains(l_Command, "ban"))
+			{
+				// Only an admin can perform this action
+				if (!m_Player->IsAdmin()) {
+					return;
+				}
+
+				std::vector<std::string> l_Splitter = Core::Utils::SplitAll(l_Command, " ", false);
+
+				if (l_Splitter.size() < 3)
+					return;
+
+				std::string l_Username = l_Splitter[1];
+				std::string l_Days = l_Splitter[l_Splitter.size() - 1];
+
+				l_Splitter.erase(l_Splitter.begin(), l_Splitter.begin() + 2);
+
+				std::string l_Reason = boost::algorithm::join(l_Splitter, " ");
+
+				sChatManager->BanPlayer(l_Username, m_Player, l_Reason, l_Days);
 			}
 			else
 				sChatManager->AddProcessCommand(m_Player->GetId(), l_Command);

@@ -98,6 +98,14 @@ namespace SteerStone { namespace Core { namespace Utils {
     {
         return p_Base = CalculatePercentage(p_Base, p_Percentage);
     }
+    /// Check to see if string is a number
+    /// @p_String : String to check against
+    inline bool IsNumber(const std::string& p_String)
+    {
+        std::string::const_iterator l_Itr = p_String.begin();
+        while (l_Itr != p_String.end() && std::isdigit(*l_Itr)) ++l_Itr;
+        return !p_String.empty() && l_Itr == p_String.end();
+    }
 
 }   ///< namespace Utils
 }   ///< namespace Core

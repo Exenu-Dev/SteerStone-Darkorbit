@@ -39,6 +39,9 @@ namespace SteerStone { namespace Chat { namespace Channel {
         /// Add Player
         ///@ p_Player : Player
         void AddPlayer(Entity::Player* p_Player);
+        /// Return Player in chat
+        /// @p_Id : Id of player
+        Entity::Player* FindPlayer(uint64 const p_Id);
 
         /// Update the Chat
         ///@ p_Diff : Time Diff
@@ -60,6 +63,19 @@ namespace SteerStone { namespace Chat { namespace Channel {
         /// Send System Message
         /// @p_Message : System Message
         void SendSystemMessage(const std::string p_Message);
+
+        /// Ban Player
+        /// @p_BannedUsername : Player who is banned
+        /// @p_Player         : Player who banned the player
+        /// @p_Reason         : Reason why player is banned
+        /// @p_DaysHours      : How many days or hours the player is banned for
+        void BanPlayer(const std::string p_BannedUsername, Entity::Player* p_Player, const std::string p_Reason, std::string p_DaysHours);
+
+        /// Check if player is banned
+        /// If the player is banned, then send packet to let know user is banned (if true)
+        /// @p_Player : Player who may be banned
+        /// @p_SendPacket : Send Packet to banned player to inform the they are banned.
+        const bool PlayerIsBanned(Entity::Player* p_Player, const bool p_SendPacket = true);
 
         /// Get the total players
         uint32 const TotalPlayers();

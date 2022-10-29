@@ -108,18 +108,6 @@ namespace SteerStone { namespace Chat { namespace Entity {
 		return std::find(m_RoomIds.begin(), m_RoomIds.end(), p_RoomId) != m_RoomIds.end();
 	}
 
-	/// Send Message to self
-	/// @p_Message : Message to be sent to the player
-	/// @p_RoomId : Room Id the player is in
-	void Player::SendMessageToSelf(std::string const p_Message, uint16 const p_RoomId)
-	{
-		Server::Packets::SendMessageToRoom l_Packet;
-		l_Packet.RoomId = p_RoomId;
-		l_Packet.Username = "test";
-		l_Packet.Message = p_Message;
-		// l_Itr->SendPacket(l_Packet.Write());
-	}
-
 	///////////////////////////////////////////
 	//              PACKETS
 	///////////////////////////////////////////
@@ -137,6 +125,15 @@ namespace SteerStone { namespace Chat { namespace Entity {
 	{
 		Server::PacketBuffer l_PacketBuffer;
 		l_PacketBuffer.AppendChar("");
+	}
+	/// Send Message to self
+	/// This uses the system message packet
+	/// @p_Message : Message to be sent to the player
+	void Player::SendMessageToSelf(std::string const p_Message)
+	{
+		Server::Packets::SystemMessage l_SystemMessagePacket;
+		l_SystemMessagePacket.Message = p_Message;
+		SendPacket(l_SystemMessagePacket.Write());
 	}
 }   ///< namespace Entity
 }   ///< namespace Game
