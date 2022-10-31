@@ -83,14 +83,14 @@ namespace SteerStone { namespace Game { namespace Server {
                 l_Player->GetInventory()->CalculateStats();
                 
                 /// Send Packet
-                /// TODO; Shields are int32 but packet struct is asking for uint32 - could be a possible overflow?
+                /// TODO; Max Shields/Health are uint32 but packet struct is asking for int32 - could be a possible overflow?
                 /// TODO; Check if this packet is correct
                 l_Player->SendPacket(Server::Packets::Login::PlayerInfo().Write(Server::Packets::Login::InfoType::INFO_TYPE_SET_SHIELD_HEALTH,
                     {
-                       (uint32)l_Player->GetHitPoints(),
-                       (uint32)l_Player->GetHitMaxPoints(),
-                       (uint32)l_Player->GetShield(),
-                       (uint32)l_Player->GetMaxShield(),
+                       l_Player->GetHitPoints(),
+                       (int32)l_Player->GetHitMaxPoints(),
+                       l_Player->GetShield(),
+                       (int32)l_Player->GetMaxShield(),
                     }));
 
             }

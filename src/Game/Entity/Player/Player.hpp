@@ -27,6 +27,7 @@
 
 #define RADIATION_TIMER 1000
 #define CONFIG_TIMER 5000 ///< TODO; Move to config settings under player?
+#define ORE_CALCULATION_AMOUNT 500000
 
 namespace SteerStone { namespace Game { namespace Entity {
 
@@ -250,8 +251,16 @@ namespace SteerStone { namespace Game { namespace Entity {
         Server::PacketBuffer const* BuildDronePacket();
         /// Send Drone Info
         void SendDrones();
+        /// Update Cargo Space
+        void UpdateCargoSpace();
         /// Update Orders
         void UpdateOres();
+        /// Set Ore Prices
+        void SetOrePrices();
+        /// On Trade Ore
+        /// @p_ResourceId : Resource Id which we are trading
+        /// @p_OreAmount : The Ore amount we are trading
+        void OnTradeOre(const uint32 p_ResourceId, const uint32 p_OreAmount);
         /// Process Packets
         /// @p_PacketFilter : Type of packet
         bool ProcessPacket(Server::PacketFilter& p_PacketFilter);

@@ -75,6 +75,46 @@ namespace SteerStone { namespace Game { namespace Server {
         }
     }
 
+    /// Ship Handler
+    /// @p_ClientPacket : Packet recieved from client
+    void GameSocket::HandleSellOre(ClientPacket* p_Packet)
+    {
+        if (m_Player->GetEvent() != EventType::EVENT_TYPE_STATION)
+        {
+            m_Player->SendPacket(Server::Packets::Misc::Update().Write(Server::Packets::Misc::InfoUpdate::INFO_UPDATE_MESSAGE, { "You are not near a station!" }));
+            return;
+        }
+
+        /// Resource Id starts at 1 on client while on server we start at 0.
+        uint32 l_ResourceId = p_Packet->ReadUInt32() - 1;
+        uint32 l_Total = p_Packet->ReadUInt32();
+
+        if (l_ResourceId > MAX_RESOURCE_COUNTER)
+            return;
+
+        if (l_Total > m_Player->GetResource(l_ResourceId))
+        {
+            LOG_WARNING("Player", "Player %0 attempted to sell ore more than what they have", m_Player->GetName());
+            return;
+        }
+
+        if (m_Player->GetResource(l_ResourceId) == 0)
+            return;
+
+        m_Player->OnTradeOre(l_ResourceId, l_Total);
+    }
+
+    /// Ship Handler
+    /// @p_ClientPacket : Packet recieved from client
+    void GameSocket::HandleOrePrices(ClientPacket* p_Packet)
+    {
+        /// Can only trigger at a station
+        if (m_Player->GetEvent() != EventType::EVENT_TYPE_STATION)
+            return;
+
+        m_Player->SetOrePrices();
+    }
+
 }   ///< namespace Server
 }   ///< namespace Game
 }   ///< namespace SteerStone

@@ -21,7 +21,7 @@
 namespace SteerStone { namespace Game { namespace Server { namespace Packets { namespace Login {
 
     /// SERVER_PACKET_LOGIN
-    PacketBuffer const* PlayerInfo::Write(InfoType p_InfoType, std::initializer_list<std::variant<uint32, bool>> p_Storage)
+    PacketBuffer const* PlayerInfo::Write(InfoType p_InfoType, std::initializer_list<std::variant<int32, bool>> p_Storage)
     {
         std::string l_Type;
 
@@ -53,8 +53,8 @@ namespace SteerStone { namespace Game { namespace Server { namespace Packets { n
         {
             if (auto l_Value = std::get_if<bool>(&l_Itr))
                 m_Buffer.AppendBool(*l_Value);
-            else if (auto l_Value = std::get_if<uint32>(&l_Itr))
-                m_Buffer.AppendUInt32(*l_Value);
+            else if (auto l_Value = std::get_if<int32>(&l_Itr))
+                m_Buffer.AppendInt32(*l_Value);
         }
 
         if (Message.length())

@@ -44,6 +44,8 @@ namespace SteerStone { namespace Game { namespace World {
     /// Process the commands
     void Commands::ProcessCommands()
     {
+        return;
+
         Core::Database::PreparedStatement* l_PreparedStatement = GameDatabase.GetPrepareStatement();
         l_PreparedStatement->PrepareStatement("SELECT id, type, user_id FROM process_commands WHERE processed = ?");
         l_PreparedStatement->SetBool(0, false);

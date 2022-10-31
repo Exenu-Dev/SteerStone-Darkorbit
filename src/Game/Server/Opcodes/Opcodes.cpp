@@ -69,8 +69,10 @@ namespace SteerStone { namespace Game { namespace Server {
         StoreClientPacket(ClientOpCodes::CLIENT_PACKET_UPDATE_SETTINGS,   "CLIENT_PACKET_UPDATE_SETTINGS",    PacketStatus::STATUS_LOGGED_IN,      PacketProcess::PROCESS_PLAYER_THREAD, &GameSocket::HandleUpdateSettings      );
         StoreClientPacket(ClientOpCodes::CLIENT_PACKET_CHANGE_CONFIG,     "CLIENT_PACKET_CHANGE_CONFIG",      PacketStatus::STATUS_LOGGED_IN,      PacketProcess::PROCESS_PLAYER_THREAD, &GameSocket::HandleChangeConfig        );
         StoreClientPacket(ClientOpCodes::CLIENT_PACKET_UNKNOWN,           "CLIENT_PACKET_UNKNOWN",            PacketStatus::STATUS_UNHANDLED,      PacketProcess::PROCESS_PLAYER_THREAD, &GameSocket::HandleNULL                );
-        StoreClientPacket(ClientOpCodes::CLIENT_PACKET_ROCKET_ATTACK,     "CLIENT_PACKET_ROCKET_ATTACK",      PacketStatus::STATUS_UNHANDLED,      PacketProcess::PROCESS_PLAYER_THREAD, &GameSocket::HandleShootRocket         );
-        StoreClientPacket(ClientOpCodes::CLIENT_PACKET_SELL_RESOURCES,    "CLIENT_PACKET_SELL_RESOURCES",     PacketStatus::STATUS_UNHANDLED,      PacketProcess::PROCESS_PLAYER_THREAD, &GameSocket::HandleSellResources       );
+        StoreClientPacket(ClientOpCodes::CLIENT_PACKET_ROCKET_ATTACK,     "CLIENT_PACKET_ROCKET_ATTACK",      PacketStatus::STATUS_LOGGED_IN,      PacketProcess::PROCESS_PLAYER_THREAD, &GameSocket::HandleShootRocket         );
+        StoreClientPacket(ClientOpCodes::CLIENT_PACKET_SELL_RESOURCES,    "CLIENT_PACKET_SELL_RESOURCES",     PacketStatus::STATUS_LOGGED_IN,      PacketProcess::PROCESS_PLAYER_THREAD, &GameSocket::HandleSellResources       );
+        StoreClientPacket(ClientOpCodes::CLIENT_PACKET_ORE_PRICES,        "CLIENT_PACKET_ORE_PRICES",         PacketStatus::STATUS_LOGGED_IN,      PacketProcess::PROCESS_PLAYER_THREAD, &GameSocket::HandleOrePrices           );
+        StoreClientPacket(ClientOpCodes::CLIENT_PACKET_SELL_ORE,          "CLIENT_PACKET_SELL_ORE",           PacketStatus::STATUS_LOGGED_IN,      PacketProcess::PROCESS_PLAYER_THREAD, &GameSocket::HandleSellOre             );
 
         //////////////////////////////////////////////////////////////////////////
         //////////////////////////////////////////////////////////////////////////
@@ -123,6 +125,7 @@ namespace SteerStone { namespace Game { namespace Server {
         StoreServerPacket(ServerOpCodes::SERVER_PACKET_NO_AMMUNITION,       "SERVER_PACKET_NO_AMMUNITION",          &GameSocket::HandleServer);
         StoreServerPacket(ServerOpCodes::SERVER_PACKET_CHANGE_ROCK_AMMO,    "SERVER_PACKET_CHANGE_ROCK_AMMO",       &GameSocket::HandleServer);
         StoreServerPacket(ServerOpCodes::SERVER_PACKET_UPDATE_ORE,          "SERVER_PACKET_UPDATE_ORE",             &GameSocket::HandleServer);
+        StoreServerPacket(ServerOpCodes::SERVER_PACKET_SET_ORE_PRICES,      "SERVER_PACKET_SET_ORE_PRICES",         &GameSocket::HandleServer);
 
         /// Web Packets
         StoreServerPacket(ServerOpCodes::SERVER_PACKET_CHECK_ONLINE,        "SERVER_PACKET_CHECK_ONLINE",           &GameSocket::HandleServer);

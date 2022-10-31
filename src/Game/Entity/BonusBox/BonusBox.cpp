@@ -81,7 +81,7 @@ namespace SteerStone { namespace Game { namespace Entity {
 
             for (uint32 l_I = 0; l_I < MAX_RESOURCE_COUNTER; l_I++)
             {
-                uint32 l_CargoLeftOver = p_Player->GetMaxCargoSpace() - p_Player->GetCargoSpace();
+                uint32 l_CargoLeftOver = p_Player->GetCargoSpace();
                 int32 l_Resource = static_cast<int32>(GetResource(l_I));
 
                 if (l_CargoLeftOver == 0)
@@ -105,6 +105,7 @@ namespace SteerStone { namespace Game { namespace Entity {
 
                 SetResource(l_I, l_Resource);
                 p_Player->SetResource(l_I, l_CargoResourceTaken[l_I]);
+                p_Player->SetCargoSpace(p_Player->GetCargoSpace() - l_CargoResourceTaken[l_I]);
             }
 
             p_Player->SendPacket(Server::Packets::Misc::Reward().Write(Server::Packets::Misc::RewardType::REWARD_TYPE_CARGO, {
@@ -117,7 +118,10 @@ namespace SteerStone { namespace Game { namespace Entity {
                 l_CargoResourceTaken[Entity::Resource::RESOURCE_PROMERIUM] }));
 
             /// Update cargo
-            p_Player->SendPacket(Server::Packets::Login::PlayerInfo().Write(Server::Packets::Login::InfoType::INFO_TYPE_SET_CARGO_SPACE, { p_Player->GetCargoSpace() }));
+            p_Player->UpdateCargoSpace();
+
+            /// Update Ores
+            p_Player->UpdateOres();
 
             /// If player does not own the cargo, then take away honor also
             if (GetOwnerId() != p_Player->GetObjectGUID().GetCounter() && IsFriendlyCargo())

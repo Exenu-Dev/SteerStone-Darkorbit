@@ -206,7 +206,7 @@ namespace SteerStone { namespace Game { namespace Server {
     {
         uint32 l_Id = p_Packet->ReadUInt32();
 
-        if (m_Player->GetCargoSpace() == m_Player->GetMaxCargoSpace())
+        if (m_Player->GetCargoSpace() == 0)
         {
             m_Player->SendPacket(Server::Packets::Ship::CargoFull().Write());
             return;

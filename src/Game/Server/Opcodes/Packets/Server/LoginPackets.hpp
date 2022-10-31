@@ -48,7 +48,7 @@ namespace SteerStone { namespace Game { namespace Server { namespace Packets { n
             std::string Message;
 
             /// Write the packet
-            PacketBuffer const* Write(InfoType p_InfoType, std::initializer_list<std::variant<uint32, bool>> p_Storage = std::initializer_list<std::variant<uint32, bool>>());
+            PacketBuffer const* Write(InfoType p_InfoType, std::initializer_list<std::variant<int32, bool>> p_Storage = std::initializer_list<std::variant<int32, bool>>());
     };
 
     /// SERVER_PACKET_INITIALIZE_SHIP packet builder

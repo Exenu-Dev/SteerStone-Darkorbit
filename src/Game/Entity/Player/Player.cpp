@@ -15,6 +15,7 @@
 * You should have received a copy of the GNU General Public License
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
+#include <boost/algorithm/string.hpp>
 
 #include "Packets/Server/LoginPackets.hpp"
 #include "Packets/Server/MapPackets.hpp"
@@ -623,8 +624,8 @@ namespace SteerStone { namespace Game { namespace Entity {
             m_BackgroundMusicOff,
             m_DisplayStatus,
             m_DisplayBubble,
-            m_SelectedLaser,
-            m_SelectedRocket,
+            (int32)m_SelectedLaser,
+            (int32)m_SelectedRocket,
             m_DisplayDigits,
             m_DisplayChat,
             m_DisplayDrones,
@@ -773,16 +774,58 @@ namespace SteerStone { namespace Game { namespace Entity {
 
             SendPacket(Server::Packets::Login::PlayerInfo().Write(Server::Packets::Login::InfoType::INFO_TYPE_SET_SHIELD_HEALTH,
                 {
-                    (uint32)GetHitPoints(),
-                    (uint32)GetHitMaxPoints(),
-                    (uint32)GetShield(),
-                    (uint32)GetMaxShield(),
+                    GetHitPoints(),
+                    (int32)GetHitMaxPoints(),
+                    GetShield(),
+                    (int32)GetMaxShield(),
                 }));
 
             return; 
         }
 
         SendPacket(Server::Packets::Misc::Update().Write(Server::Packets::Misc::InfoUpdate::INFO_UPDATE_MESSAGE, { "You cannot change config yet!" }));
+    }
+    /// On Trade Ore
+    /// @p_ResourceId : Resource Id which we are trading
+    /// @p_OreAmount : The Ore amount we are trading
+    void Player::OnTradeOre(const uint32 p_ResourceId, const uint32 p_OreAmount)
+    {
+        uint32 l_OreWorth = 0;
+
+        switch (p_ResourceId)
+        {
+        case Resource::RESOURCE_PROMETIUM:
+            l_OreWorth = 10;
+            break;
+        case Resource::RESOURCE_ENDURIUM:
+            l_OreWorth = 15;
+            break;
+        case Resource::RESOURCE_TERBIUM:
+            l_OreWorth = 25;
+            break;
+        case Resource::RESOURCE_PROMETID:
+        case Resource::RESOURCE_DURANIUM:
+            l_OreWorth = 200;
+            break;
+        case Resource::RESOURCE_PROMERIUM:
+            l_OreWorth = 500;
+            break;
+        default:
+            LOG_ASSERT(false, "Player", "Received unknown resource on OnTradeOre");
+            break;
+        }
+
+        l_OreWorth = std::floor(l_OreWorth * (1 + GetHonor() / ORE_CALCULATION_AMOUNT));
+
+        uint32 l_CreditsRewarded = p_OreAmount * l_OreWorth;
+
+        m_Credits += l_CreditsRewarded;
+        m_Resources[p_ResourceId] -= p_OreAmount;
+        m_CargoSpace += p_OreAmount;
+
+        SendPacket(Server::Packets::Misc::Reward().Write(Server::Packets::Misc::RewardType::REWARD_TYPE_CREDIT, { l_CreditsRewarded, m_Credits }));
+        
+        UpdateCargoSpace();
     }
     /// Send Drone Info
     Server::PacketBuffer const* Player::BuildDronePacket()
@@ -1136,6 +1179,11 @@ namespace SteerStone { namespace Game { namespace Entity {
 
         SendPacket(Server::Packets::Misc::Info().Write(Server::Packets::Misc::InfoType::INFO_TYPE_DRONES, { GetObjectGUID().GetCounter(), l_Drones }));
     }
+    /// Update Cargo Space
+    void Player::UpdateCargoSpace()
+    {
+        SendPacket(Server::Packets::Login::PlayerInfo().Write(Server::Packets::Login::InfoType::INFO_TYPE_SET_CARGO_SPACE, { (int32)GetCargoSpace(), (int32)GetMaxCargoSpace() }));
+    }
     /// Update Ores
     void Player::UpdateOres()
     {
@@ -1149,6 +1197,19 @@ namespace SteerStone { namespace Game { namespace Entity {
         l_Packet.Promerium = GetResource(Resource::RESOURCE_PROMERIUM);
         l_Packet.Palladium = GetResource(Resource::RESOURCE_PALLADIUM);
         l_Packet.Seprom = GetResource(Resource::RESOURCE_SEPROM);
+
+        SendPacket(l_Packet.Write());
+    }
+    /// Set Ore Prices
+    void Player::SetOrePrices()
+    {
+        Server::Packets::Ship::OrePrices l_Packet;
+        l_Packet.Prometium = std::floor(10 * (1 + GetHonor() / ORE_CALCULATION_AMOUNT));
+        l_Packet.Endurium = std::floor(15 * (1 + GetHonor() / ORE_CALCULATION_AMOUNT));
+        l_Packet.Terbium = std::floor(25 * (1 + GetHonor() / ORE_CALCULATION_AMOUNT));
+        l_Packet.Prometid = std::floor(200 * (1 + GetHonor() / ORE_CALCULATION_AMOUNT));
+        l_Packet.Duranium = std::floor(200 * (1 + GetHonor() / ORE_CALCULATION_AMOUNT));;
+        l_Packet.Promerium = std::floor(500 * (1 + GetHonor() / ORE_CALCULATION_AMOUNT));;
 
         SendPacket(l_Packet.Write());
     }
@@ -1305,5 +1366,3 @@ namespace SteerStone { namespace Game { namespace Entity {
 }   ///< namespace Entity
 }   ///< namespace Game
 }   ///< namespace Steerstone
-
-#define RETURN_STRING_ENUM(enumHere) return #enumHere

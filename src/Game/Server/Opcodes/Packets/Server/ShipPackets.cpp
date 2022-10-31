@@ -163,6 +163,22 @@ namespace SteerStone { namespace Game { namespace Server { namespace Packets { n
         return &m_Buffer;
     }
 
+    /// SERVER_PACKET_SET_ORE_PRICES
+    PacketBuffer const* OrePrices::Write()
+    {
+        m_Buffer.AppendUInt32(Prometium);
+        m_Buffer.AppendUInt32(Endurium);
+        m_Buffer.AppendUInt32(Terbium);
+        m_Buffer.AppendUInt32(Prometid);
+        m_Buffer.AppendUInt32(Duranium);
+        m_Buffer.AppendUInt32(Promerium);
+
+        m_Buffer.AppendEndSplitter();
+        m_Buffer.AppendCarriage();
+
+        return &m_Buffer;
+    }
+
 }   ///< namespace Ship
 }   ///< namespace Packets
 }   ///< namespace Server

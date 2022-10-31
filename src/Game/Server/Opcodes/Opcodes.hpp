@@ -62,6 +62,8 @@ enum ClientOpCodes : uint8
     CLIENT_PACKET_UNKNOWN               = 0x62,
     CLIENT_PACKET_ROCKET_ATTACK         = 0x76,
     CLIENT_PACKET_SELL_RESOURCES        = 0x62,
+    CLIENT_PACKET_SELL_ORE              = 0x54,
+    CLIENT_PACKET_ORE_PRICES            = 0x62,
 
     /// Web
     WEB_PACKET_CHECK_ONLINE             = 0x22,
@@ -116,6 +118,7 @@ enum ServerOpCodes : uint8
     SERVER_PACKET_NO_AMMUNITION         = 0x57,
     SERVER_PACKET_CHANGE_ROCK_AMMO      = 0x34,
     SERVER_PACKET_UPDATE_ORE            = 0x45,
+    SERVER_PACKET_SET_ORE_PRICES        = 0x67,
 
     /// Web Packets
     SERVER_PACKET_CHECK_ONLINE          = 0x22,

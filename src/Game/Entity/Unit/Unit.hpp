@@ -187,6 +187,35 @@ namespace SteerStone { namespace Game { namespace Entity {
 
             return m_Resources[p_Index];
         }
+        uint32 GetResourceCreditPrice(uint32 const p_Index) const
+        {
+            if (p_Index > MAX_RESOURCE_COUNTER)
+                LOG_ASSERT(false, "Unit", "Attempted to get resource but index is unknown! Index: %0", p_Index);
+
+            uint32 l_Credits = 0;
+
+            switch (p_Index)
+            {
+            case Resource::RESOURCE_PROMETIUM:
+                break;
+            case Resource::RESOURCE_ENDURIUM:
+                break;
+            case Resource::RESOURCE_TERBIUM:
+                break;
+            case Resource::RESOURCE_XENOMIT:
+                break;
+            case Resource::RESOURCE_PROMETID:
+                break;
+            case Resource::RESOURCE_DURANIUM:
+                break;
+            case Resource::RESOURCE_PROMERIUM:
+                break;
+            case Resource::RESOURCE_PALLADIUM:
+                break;
+            case Resource::RESOURCE_SEPROM:
+                break;
+            }
+        }
 
         bool IsAttacking()           const { return m_Attacking;                      }
         bool IsAttackingWithRocket() const { return m_AttackType & (AttackType::ATTACK_TYPE_ROCKET | ATTACK_TYPE_BOTH); }

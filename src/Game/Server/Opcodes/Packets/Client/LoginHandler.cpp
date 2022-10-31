@@ -35,6 +35,7 @@ namespace SteerStone { namespace Game { namespace Server {
         m_Player->SendAmmoUpdate();
         m_Player->SendAccountRank();
         m_Player->UpdateOres();
+        m_Player->UpdateCargoSpace();
         m_Player->SendLoggedIn();
 
         sZoneManager->AddToMap(m_Player);
