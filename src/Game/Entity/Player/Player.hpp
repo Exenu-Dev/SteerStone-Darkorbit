@@ -251,8 +251,9 @@ namespace SteerStone { namespace Game { namespace Entity {
         Server::PacketBuffer const* BuildDronePacket();
         /// Send Drone Info
         void SendDrones();
-        /// Update Cargo Space
-        void UpdateCargoSpace();
+        /// Update Cargo Max Space
+        /// Note this updates the cargo bay on the client
+        void UpdateMaxCargoSpace();
         /// Update Orders
         void UpdateOres();
         /// Set Ore Prices

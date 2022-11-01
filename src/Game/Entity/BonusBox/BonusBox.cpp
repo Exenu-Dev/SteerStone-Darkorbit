@@ -93,19 +93,19 @@ namespace SteerStone { namespace Game { namespace Entity {
                 if (l_Resource == 0)
                     continue;
 
-                if (l_Resource > l_CargoLeftOver)
-                    l_CargoResourceTaken[l_I] = l_Resource - l_CargoLeftOver;
-                else
+                if (l_CargoLeftOver >= l_Resource)
                     l_CargoResourceTaken[l_I] = l_Resource;
+                else
+                    l_CargoResourceTaken[l_I] = l_Resource - l_CargoLeftOver;
 
                 l_Resource = l_Resource - l_CargoResourceTaken[l_I];
-
+                    
                 if (l_Resource < 0)
                     l_Resource = 0;
 
                 SetResource(l_I, l_Resource);
                 p_Player->SetResource(l_I, l_CargoResourceTaken[l_I]);
-                p_Player->SetCargoSpace(p_Player->GetCargoSpace() - l_CargoResourceTaken[l_I]);
+                p_Player->SetCargoSpace(l_CargoLeftOver - l_CargoResourceTaken[l_I]);
             }
 
             p_Player->SendPacket(Server::Packets::Misc::Reward().Write(Server::Packets::Misc::RewardType::REWARD_TYPE_CARGO, {
@@ -116,9 +116,6 @@ namespace SteerStone { namespace Game { namespace Entity {
                 l_CargoResourceTaken[Entity::Resource::RESOURCE_PROMETID],
                 l_CargoResourceTaken[Entity::Resource::RESOURCE_DURANIUM],
                 l_CargoResourceTaken[Entity::Resource::RESOURCE_PROMERIUM] }));
-
-            /// Update cargo
-            p_Player->UpdateCargoSpace();
 
             /// Update Ores
             p_Player->UpdateOres();

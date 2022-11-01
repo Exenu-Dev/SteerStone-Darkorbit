@@ -825,7 +825,8 @@ namespace SteerStone { namespace Game { namespace Entity {
 
         SendPacket(Server::Packets::Misc::Reward().Write(Server::Packets::Misc::RewardType::REWARD_TYPE_CREDIT, { l_CreditsRewarded, m_Credits }));
         
-        UpdateCargoSpace();
+        UpdateOres();
+        UpdateMaxCargoSpace();
     }
     /// Send Drone Info
     Server::PacketBuffer const* Player::BuildDronePacket()
@@ -1179,10 +1180,11 @@ namespace SteerStone { namespace Game { namespace Entity {
 
         SendPacket(Server::Packets::Misc::Info().Write(Server::Packets::Misc::InfoType::INFO_TYPE_DRONES, { GetObjectGUID().GetCounter(), l_Drones }));
     }
-    /// Update Cargo Space
-    void Player::UpdateCargoSpace()
+    /// Update Cargo Max Space
+    void Player::UpdateMaxCargoSpace()
     {
-        SendPacket(Server::Packets::Login::PlayerInfo().Write(Server::Packets::Login::InfoType::INFO_TYPE_SET_CARGO_SPACE, { (int32)GetCargoSpace(), (int32)GetMaxCargoSpace() }));
+        // SendPacket(Server::Packets::Login::PlayerInfo().Write(Server::Packets::Login::InfoType::INFO_TYPE_SET_CARGO_SPACE, { (int32)GetCargoSpace() }));
+        SendPacket(Server::Packets::Login::PlayerInfo().Write(Server::Packets::Login::InfoType::INFO_TYPE_SET_CARGO_SPACE, { (int32)GetMaxCargoSpace() }));
     }
     /// Update Ores
     void Player::UpdateOres()
