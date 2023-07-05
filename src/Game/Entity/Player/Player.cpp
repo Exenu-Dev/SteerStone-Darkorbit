@@ -1187,6 +1187,7 @@ namespace SteerStone { namespace Game { namespace Entity {
         SendPacket(Server::Packets::Login::PlayerInfo().Write(Server::Packets::Login::InfoType::INFO_TYPE_SET_CARGO_SPACE, { (int32)GetMaxCargoSpace() }));
     }
     /// Update Ores
+    /// Note this updates the cargo bay on the client
     void Player::UpdateOres()
     {
         Server::Packets::Ship::UpdateOre l_Packet;
