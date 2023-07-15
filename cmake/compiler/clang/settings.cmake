@@ -16,7 +16,7 @@
 #*
 
 # Set build-directive (used in core to tell which buildtype we used)
-add_definitions(-D_BUILD_DIRECTIVE='"$(CONFIGURATION)"')
+add_definitions(-D_BUILD_DIRECTIVE='"$$(CONFIGURATION)"')
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
 message(STATUS "Clang: Enabled c++14 support")
