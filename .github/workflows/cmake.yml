@@ -26,7 +26,8 @@ jobs:
         sudo apt-get remove -y mysql-server mysql-client mysql-common
         sudo apt-get autoremove -y
         sudo apt-get clean -y
-        sudo apt-get install -y mariadb-server libmariadb-client-lgpl-dev-compat
+        sudo apt-get update
+        sudo apt-get install -yq mariadb-server libmariadb-client-lgpl-dev-compat
 
     - name: Boost
       run: sudo apt-get update && sudo apt-get install -yq libssl-dev libboost-all-dev
