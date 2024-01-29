@@ -21,17 +21,18 @@ jobs:
     steps:
     - uses: actions/checkout@v2
 
-    - name: Remove MySQL
+    - name: MySQL
       run: |
         sudo apt-get remove -y mysql-server mysql-client mysql-common
         sudo apt-get autoremove -y
         sudo apt-get clean -y
+        sudo apt-get install -y mariadb-server libmariadb-client-lgpl-dev-compat
 
     - name: Boost
-      run: sudo apt-get update && sudo apt-get install -yq libssl-dev libboost-all-dev mariadb-server libmariadb-client-lgpl-dev-compat
+      run: sudo apt-get update && sudo apt-get install -yq libssl-dev libboost-all-dev
     
     - name: GCC
-      run: sudo apt install gcc-8 g++-8
+      run: sudo apt install gcc-9 g++-9
 
     - name: Configure CMake
       # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
