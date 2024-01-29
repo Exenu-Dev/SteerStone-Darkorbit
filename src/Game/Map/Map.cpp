@@ -428,13 +428,13 @@ namespace SteerStone { namespace Game { namespace Map {
 
     /// Add Player to Jump Queue
     /// @p_ObjectPlayer : Player being added
-    /// @p_ObjectPortal : Portal
-    void Base::AddToJumpQueue(Entity::Object* p_ObjectPlayer, Entity::Object* p_ObjectPortal)
+    /// @p_JumpQueueCordinates : Jump Queue Cordinates (MapId, PositionX, PositionY)
+    void Base::AddToJumpQueue(Entity::Object* p_ObjectPlayer, const JumpQueueCordinates p_JumpQueueCordinates)
     {
         if (p_ObjectPlayer->ToPlayer()->IsJumping())
             return;
 
-        m_PlayersToJump[p_ObjectPlayer] = std::make_pair(Core::Diagnostic::IntervalTimer(sWorldManager->GetIntConfig(World::IntConfigs::INT_CONFIG_JUMP_DELAY)), p_ObjectPortal);
+        m_PlayersToJump[p_ObjectPlayer] = std::make_pair(Core::Diagnostic::IntervalTimer(sWorldManager->GetIntConfig(World::IntConfigs::INT_CONFIG_JUMP_DELAY)), p_JumpQueueCordinates);
     }
     /// Process Jump Queue
     /// @p_Diff : Execution Time
@@ -459,12 +459,14 @@ namespace SteerStone { namespace Game { namespace Map {
             l_Itr->first->ToPlayer()->CancelAttack();
             l_Itr->first->ToPlayer()->ClearSurroundings();
 
+            l_Itr->second.second.MapId;
+
             /// Add to map
-            l_Itr->first->SetMap(sZoneManager->GetMap(l_Itr->second.second->ToPortal()->GetToMapId()));
+            l_Itr->first->SetMap(sZoneManager->GetMap(l_Itr->second.second.MapId));
 
             l_Itr->first->ToPlayer()->SendDisplayStarSystem();
-            l_Itr->first->GetSpline()->SetPosition(l_Itr->second.second->ToPortal()->GetToPositionX(), l_Itr->second.second->ToPortal()->GetToPositionY(),
-                l_Itr->second.second->ToPortal()->GetToPositionX(), l_Itr->second.second->ToPortal()->GetToPositionY());
+            l_Itr->first->GetSpline()->SetPosition(l_Itr->second.second.PositionX, l_Itr->second.second.PositionY,
+                l_Itr->second.second.PositionX, l_Itr->second.second.PositionY);
             l_Itr->first->ToPlayer()->SendInitializeShip();
             l_Itr->first->ToPlayer()->SendMapUpdate();
             l_Itr->first->ToPlayer()->SendDrones();

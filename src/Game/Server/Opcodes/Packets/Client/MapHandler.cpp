@@ -81,7 +81,12 @@ namespace SteerStone { namespace Game { namespace Server {
             l_Packet.PortalId   = l_Portal->GetObjectGUID().GetCounter();
             m_Player->SendPacket(l_Packet.Write());
 
-            m_Player->GetMap()->AddToJumpQueue(m_Player, l_Portal);
+            Game::Map::JumpQueueCordinates l_JumpQueueCordinates;
+            l_JumpQueueCordinates.MapId = l_Portal->GetToMapId();
+            l_JumpQueueCordinates.PositionX = l_Portal->GetToPositionX();
+            l_JumpQueueCordinates.PositionY = l_Portal->GetToPositionY();
+
+            m_Player->GetMap()->AddToJumpQueue(m_Player, l_JumpQueueCordinates);
             m_Player->m_Jumping = true;
         }
         else

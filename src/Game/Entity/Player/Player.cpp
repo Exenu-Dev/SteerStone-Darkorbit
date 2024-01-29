@@ -370,6 +370,14 @@ namespace SteerStone { namespace Game { namespace Entity {
         l_PreparedStatement->SetUint32(26, m_Id);
         l_PreparedStatement->ExecuteStatement();
     }
+
+    /// Send Info Message to Player
+    /// @p_Message : Message to send
+    void Player::SendInfoMessage(std::string const p_Message)
+    {
+        SendPacket(Server::Packets::Misc::Update().Write(Server::Packets::Misc::InfoUpdate::INFO_UPDATE_MESSAGE, { p_Message }));
+    }
+
     /// Return Drone Level
     /// @p_Drone : Drone
     uint16 Player::GetDroneLevel(Drone& p_Drone)
@@ -1262,6 +1270,23 @@ namespace SteerStone { namespace Game { namespace Entity {
         l_Buffer.AppendEndSplitter();
         l_Buffer.AppendCarriage();
         SendPacket(&l_Buffer);
+    }
+
+    /// Teleport Player to Map
+    /// @p_MapId : Map Id to teleport to
+    /// @p_PositionX : Position X to teleport to
+    /// @p_PositionY : Position Y to teleport to
+    void Player::Teleport(const uint32 p_MapId, const int32 p_PositionX /*= 0*/, const int32 p_PositionY /*= 0*/)
+    {
+        if (p_MapId == GetMap()->GetId())
+			return;
+
+        Game::Map::JumpQueueCordinates l_JumpQueueCordinates;
+        l_JumpQueueCordinates.MapId = p_MapId;
+        l_JumpQueueCordinates.PositionX = p_PositionX;
+        l_JumpQueueCordinates.PositionY = p_PositionY;
+
+        GetMap()->AddToJumpQueue(this, l_JumpQueueCordinates);
     }
 
     /// Update Experience

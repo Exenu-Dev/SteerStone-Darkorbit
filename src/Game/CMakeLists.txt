@@ -37,6 +37,7 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Server/Opcodes)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Server/Opcodes/Packets)
 include_directories(${CMAKE_SOURCE_DIR}/src/Engine)
 include_directories(${CMAKE_SOURCE_DIR}/dep/SFMT)
+include_directories(${CMAKE_SOURCE_DIR}/dep/json)
 
 file(GLOB_RECURSE SOURCE_LIST RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}" "*.cpp" "*.hpp")
 

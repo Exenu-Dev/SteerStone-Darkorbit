@@ -35,7 +35,14 @@ namespace SteerStone { namespace Game { namespace Map {
 
     class Entity::Object;
 
-    typedef std::unordered_map<Entity::Object*, std::pair<Core::Diagnostic::IntervalTimer, Entity::Object*>> JumpQueueMap;
+    struct JumpQueueCordinates
+    {
+        uint32 MapId;
+        int32 PositionX;
+        int32 PositionY;
+	};
+
+    typedef std::unordered_map<Entity::Object*, std::pair<Core::Diagnostic::IntervalTimer, JumpQueueCordinates>> JumpQueueMap;
 
     /// Map
     class Base
@@ -127,8 +134,8 @@ namespace SteerStone { namespace Game { namespace Map {
     public:
         /// Add Player to Jump Queue
         /// @p_ObjectPlayer : Player being added
-        /// @p_ObjectPortal : Portal
-        void AddToJumpQueue(Entity::Object* p_ObjectPlayer, Entity::Object* p_ObjectPortal);
+        /// @p_JumpQueueCordinates : Jump Queue Cordinates (MapId, PositionX, PositionY)
+        void AddToJumpQueue(Entity::Object* p_ObjectPlayer, const JumpQueueCordinates p_JumpQueueCordinates);
         /// Process Jump Queue
         /// @p_Diff : Execution Time
         void ProcessJumpQueue(uint32 const p_Diff);

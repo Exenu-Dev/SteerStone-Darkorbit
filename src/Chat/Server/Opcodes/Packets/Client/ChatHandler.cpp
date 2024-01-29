@@ -70,54 +70,7 @@ namespace SteerStone { namespace Chat { namespace Server {
 		if (l_Message[0] == '/') {
 			std::string l_Command = l_Message.erase(0, 1);
 
-			/// Check what sort of command it is
-			/// If it's a command we can process here e.g system message then we can do it here
-			/// else if it's a command to save player to database, then the game server needs to do it
-
-			if (boost::algorithm::contains(l_Command, "announce"))
-			{
-				// Only an admin can perform this action
-				if (!m_Player->IsAdmin()) {
-					return;
-				}
-
-				std::vector<std::string> l_Splitter = Core::Utils::SplitAll(l_Command, " ", false);
-
-				l_Splitter.erase(l_Splitter.begin());
-
-				std::string l_AnnounceMessage = boost::algorithm::join(l_Splitter, " ");
-
-				sChatManager->SendSystemMessage(l_AnnounceMessage);
-			}
-			else if (l_Command == "users")
-			{
-				Server::Packets::UserCount l_Packet;
-				l_Packet.Total = sChatManager->TotalPlayers();
-				m_Player->SendPacket(l_Packet.Write());
-			}
-			else if (boost::algorithm::contains(l_Command, "ban"))
-			{
-				// Only an admin can perform this action
-				if (!m_Player->IsAdmin()) {
-					return;
-				}
-
-				std::vector<std::string> l_Splitter = Core::Utils::SplitAll(l_Command, " ", false);
-
-				if (l_Splitter.size() < 3)
-					return;
-
-				std::string l_Username = l_Splitter[1];
-				std::string l_Days = l_Splitter[l_Splitter.size() - 1];
-
-				l_Splitter.erase(l_Splitter.begin(), l_Splitter.begin() + 2);
-
-				std::string l_Reason = boost::algorithm::join(l_Splitter, " ");
-
-				sChatManager->BanPlayer(l_Username, m_Player, l_Reason, l_Days);
-			}
-			else
-				sChatManager->AddProcessCommand(m_Player->GetId(), l_Command);
+			sChatManager->ProcessCommand(l_Message, m_Player);
 
 			return;
 		}

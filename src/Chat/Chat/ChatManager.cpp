@@ -38,6 +38,7 @@ namespace SteerStone { namespace Chat { namespace Channel {
     /// Constructor
     Base::Base()
     {
+        m_CommandsHandler = new Commands::Handler();
     }
     /// Deconstructor
     Base::~Base()
@@ -73,20 +74,24 @@ namespace SteerStone { namespace Chat { namespace Channel {
     ///@ p_Diff : Time Diff
     void Base::Update(uint32 const p_Diff)
     {
-        for (auto l_Itr : m_Players)
+        // Erase Remove Idiom: for removing players from the chat
+        for (auto l_Itr = m_Players.begin(); l_Itr != m_Players.end();)
         {
-            if (!l_Itr->ToSocket() || l_Itr->ToSocket()->IsClosed())
+            if (!(*l_Itr)->ToSocket() || (*l_Itr)->ToSocket()->IsClosed())
             {
-                m_Players.erase(l_Itr);
-                continue;
+                l_Itr = m_Players.erase(l_Itr);
             }
-
-            l_Itr->IntervalPing.Update(p_Diff);
-            if (l_Itr->IntervalPing.Passed())
+            else
             {
-                Server::Packets::Ping l_Packet;
-                l_Itr->SendPacket(Server::Packets::Ping().Write());
-                l_Itr->IntervalPing.Reset();
+                (*l_Itr)->IntervalPing.Update(p_Diff);
+                if ((*l_Itr)->IntervalPing.Passed())
+                {
+                    Server::Packets::Ping l_Packet;
+                    (*l_Itr)->SendPacket(Server::Packets::Ping().Write());
+                    (*l_Itr)->IntervalPing.Reset();
+                }
+
+				++l_Itr;
             }
         }
     }
@@ -126,16 +131,25 @@ namespace SteerStone { namespace Chat { namespace Channel {
         }
     }
 
+    /// Process Incoming Command
+    ///@ p_Input : Command to process
+    ///@ p_Player : Player who is sending the command
+    void Base::ProcessCommand(const std::string& p_Input, Entity::Player const* p_Player)
+    {
+        m_CommandsHandler->HandleInput(p_Input , p_Player);
+    }
+
     /// Add Process Command
     ///@ p_Id : Player Id
     ///@ p_Command : Command to process
-    void Base::AddProcessCommand(const uint32 p_Id, const std::string p_Command)
+    void Base::AddProcessCommand(const uint32 p_Id, const std::string p_Command, const nlohmann::json p_Json /*= nlohmann::json()*/)
     {
         Core::Database::PreparedStatement* l_PreparedStatement = GameDatabase.GetPrepareStatement();
-        l_PreparedStatement->PrepareStatement("INSERT INTO process_commands (type, user_id, processed, created_at, updated_at) VALUES (?, ?, ?, NOW(), NOW())");
+        l_PreparedStatement->PrepareStatement("INSERT INTO process_commands (type, user_id, processed, arguments, created_at, updated_at) VALUES (?, ?, ?, ?, NOW(), NOW())");
         l_PreparedStatement->SetString(0, p_Command);
         l_PreparedStatement->SetUint32(1, p_Id);
         l_PreparedStatement->SetBool(2, false);
+        l_PreparedStatement->SetString(3, p_Json.dump());
         l_PreparedStatement->ExecuteStatement(true);
 
     }
@@ -158,7 +172,7 @@ namespace SteerStone { namespace Chat { namespace Channel {
     /// @p_Player         : Player who banned the player
     /// @p_Reason         : Reason why player is banned
     /// @p_DaysHours      : How many days or hours the player is banned for
-    void Base::BanPlayer(const std::string p_BannedUsername, Entity::Player* p_Player, const std::string p_Reason, std::string p_DaysHours)
+    void Base::BanPlayer(const std::string p_BannedUsername, Entity::Player const* p_Player, const std::string p_Reason, std::string p_DaysHours)
     {
         Core::Database::PreparedStatement* l_PreparedStatement = GameDatabase.GetPrepareStatement();
         l_PreparedStatement->PrepareStatement("SELECT id FROM users WHERE username = ?");

@@ -175,6 +175,10 @@ namespace SteerStone { namespace Game { namespace Entity {
         void SaveToDB();
         /// Save Ship details to database
         void SaveShipToDB();
+    public:
+        /// Send Info Message to Player
+        /// @p_Message : Message to send
+        void SendInfoMessage(std::string const p_Message);
     private:
         /// Return Drone Level
         /// @p_Drone : Drone
@@ -273,6 +277,11 @@ namespace SteerStone { namespace Game { namespace Entity {
         void SendPacket(Server::PacketBuffer const* p_PacketBuffer);
         /// Kick Player
         void KickPlayer();
+        /// Teleport Player to Map
+        /// @p_MapId : Map Id to teleport to
+        /// @p_PositionX : Position X to teleport to
+        /// @p_PositionY : Position Y to teleport to
+        void Teleport(const uint32 p_MapId, const int32 p_PositionX = 0, const int32 p_PositionY = 0);
 
         ///////////////////////////////////////////
         //            GETTERS/SETTERS

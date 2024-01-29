@@ -16,6 +16,8 @@
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include "json.hpp"
+
 #include "World.hpp"
 #include "Player.hpp"
 #include "Commands.hpp"
@@ -28,6 +30,7 @@ namespace SteerStone { namespace Game { namespace World {
     /// Constructor
     Commands::Commands()
     {
+        m_CommandsHandler = new Handler();
     }
     /// Deconstructor
     Commands::~Commands()
@@ -42,12 +45,13 @@ namespace SteerStone { namespace Game { namespace World {
     ///////////////////////////////////////////
 
     /// Process the commands
+    /// Note: Currently the implementation is very basic
+    /// Ideally we need to move the commands into their own classes
+    /// Look how the chat server implements the commands
     void Commands::ProcessCommands()
     {
-        return;
-
         Core::Database::PreparedStatement* l_PreparedStatement = GameDatabase.GetPrepareStatement();
-        l_PreparedStatement->PrepareStatement("SELECT id, type, user_id FROM process_commands WHERE processed = ?");
+        l_PreparedStatement->PrepareStatement("SELECT id, type, arguments, user_id FROM process_commands WHERE processed = ?");
         l_PreparedStatement->SetBool(0, false);
         std::unique_ptr<Core::Database::PreparedResultSet> l_PreparedResultSet = l_PreparedStatement->ExecuteStatement();
 
@@ -57,9 +61,10 @@ namespace SteerStone { namespace Game { namespace World {
             {
                 Core::Database::ResultSet* l_Result = l_PreparedResultSet->FetchResult();
 
-                const uint64 l_Id           = l_Result[0].GetUInt64();
-                const std::string l_Type    = l_Result[1].GetString();
-                const uint64 l_UserId       = l_Result[2].GetUInt64();
+                const uint64 l_Id                   = l_Result[0].GetUInt64();
+                const std::string l_Type            = l_Result[1].GetString();
+                const nlohmann::json l_Arguments    = l_Result[2].GetString().length() ? nlohmann::json::parse(l_Result[2].GetString()) : nlohmann::json();
+                const uint64 l_UserId               = l_Result[3].GetUInt64();
 
                 Entity::Player* l_Player = sWorldManager->FindPlayer(l_UserId);
 
@@ -70,13 +75,7 @@ namespace SteerStone { namespace Game { namespace World {
                 }
                 else
                 {
-                    /// Player is in the world, so process the command
-
-                    if (l_Type == "save")
-                    {
-                        l_Player->SaveToDB();
-                    }
-
+                    m_CommandsHandler->HandleCommand(l_Type, l_Player, l_Arguments);
                     SetCommandAsProcessed(l_Id);
                 }
 
@@ -92,6 +91,16 @@ namespace SteerStone { namespace Game { namespace World {
         l_PreparedStatement->SetBool(0, true);
         l_PreparedStatement->SetUint64(1, p_Id);
         l_PreparedStatement->ExecuteStatement(true);
+    }
+
+    /// Clear the commands
+    /// This is primarily used when the server is booting up
+    /// We don't want to process any commands that were left over from the previous session
+    void Commands::ClearCommands()
+    {
+        Core::Database::PreparedStatement* l_PreparedStatement = GameDatabase.GetPrepareStatement();
+		l_PreparedStatement->PrepareStatement("DELETE FROM process_commands");
+		l_PreparedStatement->ExecuteStatement(true);
     }
 
 }   ///< namespace World

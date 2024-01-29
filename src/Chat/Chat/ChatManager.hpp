@@ -18,9 +18,10 @@
 
 #pragma once
 #include <PCH/Precompiled.hpp>
+#include "json.hpp"
 #include "Singleton/Singleton.hpp"
 
-#include "Player.hpp"
+#include "Commands/Handler.hpp"
 
 #define CHAT_SLEEP_TIMER 60
 
@@ -55,10 +56,15 @@ namespace SteerStone { namespace Chat { namespace Channel {
         ///@ p_RoomId: Room Id to send to
         void SendMessageToRoom(Entity::Player const* p_Player, std::string const p_Message, uint16 const p_RoomId);
 
+        /// Process Incoming Command
+        ///@ p_Input : Command to process
+        ///@ p_Player : Player who is sending the command
+        void ProcessCommand(const std::string& p_Input, Entity::Player const* p_Player);
+
         /// Add Process Command
         ///@ p_Id : Player Id
         ///@ p_Command : Command to process
-        void AddProcessCommand(const uint32 p_Id, const std::string p_Command);
+        void AddProcessCommand(const uint32 p_Id, const std::string p_Command, const nlohmann::json p_Json = nlohmann::json());
 
         /// Send System Message
         /// @p_Message : System Message
@@ -69,7 +75,7 @@ namespace SteerStone { namespace Chat { namespace Channel {
         /// @p_Player         : Player who banned the player
         /// @p_Reason         : Reason why player is banned
         /// @p_DaysHours      : How many days or hours the player is banned for
-        void BanPlayer(const std::string p_BannedUsername, Entity::Player* p_Player, const std::string p_Reason, std::string p_DaysHours);
+        void BanPlayer(const std::string p_BannedUsername, Entity::Player const* p_Player, const std::string p_Reason, std::string p_DaysHours);
 
         /// Check if player is banned
         /// If the player is banned, then send packet to let know user is banned (if true)
@@ -86,6 +92,7 @@ namespace SteerStone { namespace Chat { namespace Channel {
     private:
         PlayerSet m_Players;
         static volatile bool s_StopChat;                                   ///< Stop Chat Updating
+        Commands::Handler* m_CommandsHandler;                              ///< Commands Handler
     };
 }   ///< namespace Channel
 }   ///< namespace Chat

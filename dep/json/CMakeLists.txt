@@ -15,6 +15,8 @@
 #* along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #*
 
-add_subdirectory(openssl)
-add_subdirectory(SFMT)
-add_subdirectory(json)
+add_library(json INTERFACE)
+
+target_include_directories(json
+  INTERFACE
+    ${CMAKE_CURRENT_SOURCE_DIR})

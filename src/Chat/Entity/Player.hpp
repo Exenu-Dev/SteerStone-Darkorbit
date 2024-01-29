@@ -61,13 +61,13 @@ namespace SteerStone { namespace Chat { namespace Entity {
     public:
         /// Send Packet
         /// @p_PacketBuffer : Packet Buffer
-        void SendPacket(Server::PacketBuffer const* p_PacketBuffer);
+        void SendPacket(Server::PacketBuffer const* p_PacketBuffer) const;
         /// Send Ping
         void SendPing();
         /// Send Message to self
         /// This uses the system message packet
         /// @p_Message : Message to be sent to the player
-        void SendMessageToSelf(std::string const p_Message);
+        void SendMessageToSelf(std::string const p_Message) const;
 
 
         ///////////////////////////////////////////

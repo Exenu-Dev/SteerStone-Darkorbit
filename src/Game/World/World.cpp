@@ -74,7 +74,8 @@ namespace SteerStone { namespace Game { namespace World {
     void Base::Load()
     {
         LoadConfigs();
-
+        
+        /// Load Objects into memory
         sObjectManager->LoadMobTemplate();
         sObjectManager->LoadPortalTemplate();
         sObjectManager->LoadStationTemplate();
@@ -82,6 +83,9 @@ namespace SteerStone { namespace Game { namespace World {
         sObjectManager->LoadShipTemplate();
 
         sZoneManager->LoadMaps();
+
+        /// Clear data from previous world
+        m_Commands->ClearCommands();
     }
     /// Get Player Count
     uint32 Base::GetPlayerCount()

@@ -36,6 +36,7 @@ namespace SteerStone { namespace Chat { namespace Entity {
     /// Deconstructor
     Player::~Player()
     {
+		LOG_INFO("Chat", "Player %0 disconnected", m_Username);
     }
 
     ///////////////////////////////////////////
@@ -113,7 +114,7 @@ namespace SteerStone { namespace Chat { namespace Entity {
 	///////////////////////////////////////////
 	/// Send Packet
 	/// @p_PacketBuffer : Packet Buffer
-	void Player::SendPacket(Server::PacketBuffer const* p_PacketBuffer)
+	void Player::SendPacket(Server::PacketBuffer const* p_PacketBuffer) const
 	{
 		if (!m_Socket || !p_PacketBuffer)
 			return;
@@ -129,7 +130,7 @@ namespace SteerStone { namespace Chat { namespace Entity {
 	/// Send Message to self
 	/// This uses the system message packet
 	/// @p_Message : Message to be sent to the player
-	void Player::SendMessageToSelf(std::string const p_Message)
+	void Player::SendMessageToSelf(std::string const p_Message) const
 	{
 		Server::Packets::SystemMessage l_SystemMessagePacket;
 		l_SystemMessagePacket.Message = p_Message;

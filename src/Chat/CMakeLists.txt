@@ -20,12 +20,14 @@ set(EXECUTABLE_NAME Chat)
 
 # Include Directories
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Chat)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Chat/Commands)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Common)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Entity)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Server)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Server/Opcodes)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Server/Opcodes/Packets)
 include_directories(${CMAKE_SOURCE_DIR}/src/Engine)
+include_directories(${CMAKE_SOURCE_DIR}/dep/json)
 
 file(GLOB_RECURSE SOURCE_LIST RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}" "*.cpp" "*.hpp")
 

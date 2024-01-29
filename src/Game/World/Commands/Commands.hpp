@@ -20,6 +20,8 @@
 #include <PCH/Precompiled.hpp>
 #include "Singleton/Singleton.hpp"
 
+#include "Handler.hpp"
+
 namespace SteerStone { namespace Game { namespace World {
     /// Commands
     class Commands
@@ -41,7 +43,11 @@ namespace SteerStone { namespace Game { namespace World {
         /// Set the command as processed
         /// @p_Id : The Id of the record
         void SetCommandAsProcessed(const uint64 p_Id);
+        /// Clear the commands
+        void ClearCommands();
 
+    private:
+        Handler* m_CommandsHandler; ///< Commands Handler
     };
 
 }   ///< namespace World
