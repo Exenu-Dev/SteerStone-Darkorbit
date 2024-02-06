@@ -30,6 +30,7 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Threading)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Utility)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Network)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Database)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Time)
 include_directories(${CMAKE_SOURCE_DIR}/dep/SFMT)
 include_directories(${CMAKE_SOURCE_DIR}/dep/json)
 
