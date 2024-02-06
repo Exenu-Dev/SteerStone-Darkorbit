@@ -14,6 +14,7 @@ namespace SteerStone { namespace Chat { namespace Commands {
 		m_Commands["ban"] = std::bind(&Handler::Ban, this, std::placeholders::_1, std::placeholders::_2);
 		m_Commands["teleport"] = std::bind(&Handler::Teleport, this, std::placeholders::_1, std::placeholders::_2);
 		m_Commands["save"] = std::bind(&Handler::Save, this, std::placeholders::_1, std::placeholders::_2);
+		m_Commands["kick"] = std::bind(&Handler::Kick, this, std::placeholders::_1, std::placeholders::_2);
 	}
 
 	/// Deconstructor
@@ -143,6 +144,35 @@ namespace SteerStone { namespace Chat { namespace Commands {
 	{
 		sChatManager->AddProcessCommand(p_Player->GetId(), "save");
 	}
+	/// Kick Player
+	/// @p_Player : Player to kick
+	void Handler::Kick(Entity::Player const* p_Player, const std::vector<std::string>& p_Args)
+	{
+		if (p_Args.size() < 1)
+		{
+			p_Player->SendMessageToSelf("Usage: /kick <username>");
+			return;
+		}
+
+		if (!p_Player->IsAdmin())
+		{
+			p_Player->SendMessageToSelf("You do not have permission to use this command");
+			return;
+		}
+
+		const std::string l_Username = p_Args[0];
+
+		if (Entity::Player const* l_Player = sChatManager->FindPlayerByUsername(l_Username))
+		{
+			nlohmann::json l_Json;
+			l_Json.push_back(l_Player->GetId());
+
+			sChatManager->AddProcessCommand(p_Player->GetId(), "kick", l_Json);
+			return;
+		}
+
+		p_Player->SendMessageToSelf("Player not found");
+	}
 	/// Teleport Player
 	/// @p_Player : Player to teleport
 	/// @p_Arguments : Arguments for the command
@@ -157,6 +187,14 @@ namespace SteerStone { namespace Chat { namespace Commands {
 		if (!p_Player->IsAdmin())
 		{
 			p_Player->SendMessageToSelf("You do not have permission to use this command");
+			return;
+		}
+
+		const int32 l_MapId = std::stoi(p_Args[0]);
+
+		if (l_MapId <= 0 || l_MapId > 29)
+		{
+			p_Player->SendMessageToSelf("Invalid map id");
 			return;
 		}
 

@@ -69,6 +69,18 @@ namespace SteerStone { namespace Chat { namespace Channel {
 
         return nullptr;
     }
+    /// Find Player by Username
+    /// @p_Username : Username of player
+    Entity::Player* Base::FindPlayerByUsername(const std::string p_Username)
+    {
+        for (auto l_Itr : m_Players)
+        {
+			if (l_Itr->GetUsername() == p_Username)
+				return l_Itr;
+		}
+
+		return nullptr;
+	}
 
     /// Update the chat
     ///@ p_Diff : Time Diff

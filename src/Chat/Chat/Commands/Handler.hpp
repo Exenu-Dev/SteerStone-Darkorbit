@@ -57,6 +57,9 @@ namespace SteerStone { namespace Chat { namespace Commands {
 		/// @p_Player : Player to save
 		/// @p_Arguments : Arguments for the command
 		void Save(Entity::Player const* p_Player, const std::vector<std::string>& p_Args);
+		/// Kick Player
+		/// @p_Player : Player to kick
+		void Kick(Entity::Player const* p_Player, const std::vector<std::string>& p_Args);
 		/// Teleport Player
 		/// @p_Player : Player to teleport
 		/// @p_Arguments : Arguments for the command
