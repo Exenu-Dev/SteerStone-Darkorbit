@@ -1,6 +1,6 @@
 #include <sstream>
 
-#include "Handler.hpp"
+#include "World.hpp"
 
 namespace SteerStone { namespace Game { namespace World {
 
@@ -9,6 +9,7 @@ namespace SteerStone { namespace Game { namespace World {
 	{
 		m_Commands["teleport"] = std::bind(&Handler::Teleport, this, std::placeholders::_1, std::placeholders::_2);
 		m_Commands["save"] = std::bind(&Handler::Save, this, std::placeholders::_1, std::placeholders::_2);
+		m_Commands["kick"] = std::bind(&Handler::Kick, this, std::placeholders::_1, std::placeholders::_2);
 	}
 
 	/// Deconstructor
@@ -48,11 +49,31 @@ namespace SteerStone { namespace Game { namespace World {
 	/// @p_Arguments : Arguments for the command
 	void Handler::Teleport(Entity::Player* p_Player, nlohmann::json const& p_Arguments)
 	{
-		const auto l_MapId = p_Arguments[0].get<std::string>();
+		const auto l_MapId = std::stoi(p_Arguments[0].get<std::string>());
 
-		p_Player->Teleport(std::stoi(l_MapId));
+		if (l_MapId <= 0 || l_MapId > 29)
+		{
+			p_Player->SendInfoMessage("Invalid map id");
+			return;
+		}
+
+		p_Player->Teleport(l_MapId);
 
 		p_Player->SendInfoMessage("You will be teleported in 5 seconds");
+	}
+	/// Kick Player
+	/// @p_Player : Player to kick
+	void Handler::Kick(Entity::Player* p_Player, nlohmann::json const& p_Arguments)
+	{
+		Entity::Player * l_Player = sWorldManager->FindPlayer(p_Arguments[0].get<uint64_t>());
+
+		if (!l_Player)
+		{
+			p_Player->SendInfoMessage("Player not found");
+			return;
+		}
+
+		l_Player->KickPlayer();
 	}
 } ///< namespace World
 } ///< namespace Game

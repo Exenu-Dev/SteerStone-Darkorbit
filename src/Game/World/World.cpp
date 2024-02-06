@@ -61,9 +61,11 @@ namespace SteerStone { namespace Game { namespace World {
         ProcessPlayerPackets(p_Diff);
         ProcessRemovalPlayer(p_Diff);
 
-        m_Commands->ProcessCommands();
-
         sZoneManager->Update(p_Diff);
+
+        /// This must be processed after doing everything
+        /// Or we run into a race condition
+        m_Commands->ProcessCommands(p_Diff);
     }
     /// Stop World Updating
     bool Base::StopWorld() const

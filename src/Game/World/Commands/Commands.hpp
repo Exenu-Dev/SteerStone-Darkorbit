@@ -22,6 +22,8 @@
 
 #include "Handler.hpp"
 
+#define COMMANDS_PROCESS_INTERVAL 1000
+
 namespace SteerStone { namespace Game { namespace World {
     /// Commands
     class Commands
@@ -39,7 +41,8 @@ namespace SteerStone { namespace Game { namespace World {
         ///////////////////////////////////////////
     public:
         /// Process the Commands
-        void ProcessCommands();
+        /// @p_Diff : Execution Diff
+        void ProcessCommands(const uint32 p_Diff);
         /// Set the command as processed
         /// @p_Id : The Id of the record
         void SetCommandAsProcessed(const uint64 p_Id);
@@ -47,7 +50,8 @@ namespace SteerStone { namespace Game { namespace World {
         void ClearCommands();
 
     private:
-        Handler* m_CommandsHandler; ///< Commands Handler
+        Handler* m_CommandsHandler;                                 ///< Commands Handler
+        Core::Diagnostic::IntervalTimer m_ProcessCommandsTimer;     ///< Process Commands Timer
     };
 
 }   ///< namespace World

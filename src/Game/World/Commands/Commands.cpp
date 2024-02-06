@@ -31,6 +31,7 @@ namespace SteerStone { namespace Game { namespace World {
     Commands::Commands()
     {
         m_CommandsHandler = new Handler();
+        m_ProcessCommandsTimer.SetInterval(COMMANDS_PROCESS_INTERVAL);
     }
     /// Deconstructor
     Commands::~Commands()
@@ -48,8 +49,14 @@ namespace SteerStone { namespace Game { namespace World {
     /// Note: Currently the implementation is very basic
     /// Ideally we need to move the commands into their own classes
     /// Look how the chat server implements the commands
-    void Commands::ProcessCommands()
+    /// Process the Commands
+    /// @p_Diff : Execution Diff
+    void Commands::ProcessCommands(const uint32 p_Diff)
     {
+        m_ProcessCommandsTimer.Update(p_Diff);
+        if (!m_ProcessCommandsTimer.Passed())
+			return;
+
         Core::Database::PreparedStatement* l_PreparedStatement = GameDatabase.GetPrepareStatement();
         l_PreparedStatement->PrepareStatement("SELECT id, type, arguments, user_id FROM process_commands WHERE processed = ?");
         l_PreparedStatement->SetBool(0, false);

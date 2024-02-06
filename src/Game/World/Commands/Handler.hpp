@@ -3,9 +3,18 @@
 #include <functional>
 #include "json.hpp"
 
-#include "Player.hpp"
+namespace SteerStone { namespace Game { namespace Entity {
+
+    class Player;
+
+}   ///< namespace Entity
+}   ///< namespace Game
+}   ///< namespace SteerStone
 
 namespace SteerStone { namespace Game { namespace World {
+
+	class Entity::Player;
+
 	class Handler
 	{
 	public:
@@ -36,6 +45,10 @@ namespace SteerStone { namespace Game { namespace World {
 		/// @p_Player : Player to teleport
 		/// @p_Arguments : Arguments for the command
 		void Teleport(Entity::Player* p_Player, nlohmann::json const& p_Arguments);
+
+		/// Kick Player
+		/// @p_Player : Player to kick
+		void Kick(Entity::Player* p_Player, nlohmann::json const& p_Arguments);
 
 	private:
 		std::map<std::string, std::function<void(Entity::Player*, nlohmann::json const&)>> m_Commands;
