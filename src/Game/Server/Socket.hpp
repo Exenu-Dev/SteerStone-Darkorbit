@@ -157,7 +157,12 @@ namespace SteerStone { namespace Game { namespace Server {
             void HandleUpdateShip(ClientPacket* p_Packet);
             /// Web Handler
             /// @p_ClientPacket : Packet recieved from Web
+            void HandleUpdateDrones(ClientPacket* p_Packet);
+            /// Web Handler
+            /// @p_ClientPacket : Packet recieved from Web
             void HandleBroughtAmmo(ClientPacket* p_Packet);
+            /// Web Handler
+            /// @p_ClientPacket : Packet recieved from Web
             /// Web Handler
             /// @p_ClientPacket : Packet recieved from Web
             void HandleUpdateClans(ClientPacket* p_Packet);

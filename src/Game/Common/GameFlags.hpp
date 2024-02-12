@@ -40,17 +40,17 @@ enum PlayerShips
 
 enum NpcShips
 {
-    Streuner            = 1,
-    Lordakia            = 2,
-    Devolarium          = 3,
-    Mordon              = 4,
-    Sibelon             = 5,
-    Saimon              = 6,
-    Sibelonit           = 7,
-    Lordakium           = 8,
-    Kristallin          = 9,
-    Kristallon          = 10,
-    StreuneR            = 11,
+    Streuner            = 2,
+    Lordakia            = 71,
+    Devolarium          = 72,
+    Mordon              = 73,
+    Sibelon             = 74,
+    Saimon              = 75,
+    Sibelonit           = 76,
+    Lordakium           = 77,
+    Kristallin          = 78,
+    Kristallon          = 79,
+    StreuneR            = 4,
     Protegit            = 12,
     Cubikon             = 13,
     BossStreuner        = 14,
@@ -364,4 +364,13 @@ enum class LogBookType : uint16
 {
     LOG_BOOK_TYPE_OVERVIEW = 0,
     LOG_BOOK_TYPE_DETAILED = 1
+};
+
+enum class BoosterTypes : uint8
+{
+    BOOSTER_TYPE_XP_B01     = 25,
+    BOOSTER_TYPE_HON_B01    = 26,
+    BOOSTER_TYPE_DMG_B01    = 27,
+    BOOSTER_TYPE_SHD_B01    = 28,
+    MAX_BOOSTER             = 29
 };

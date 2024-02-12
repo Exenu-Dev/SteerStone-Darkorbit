@@ -133,7 +133,7 @@ namespace SteerStone { namespace Game { namespace Map {
 
             /// Also Send drone info
             if (p_ObjectBuilt->ToPlayer()->HasDrones())
-                p_Player->SendPacket(p_ObjectBuilt->ToPlayer()->BuildDronePacket());
+                p_Player->SendDrones();
         }
         else if (p_ObjectBuilt->IsMob())
         {

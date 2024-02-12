@@ -140,6 +140,16 @@ namespace SteerStone { namespace Game { namespace Entity {
         //////////////////////////////////////////////////////////////////////////
         //////////////////////////////////////////////////////////////////////////
 
+        /// Add Experience
+        /// @p_Experience : Experience to add
+        void AddExperience(const uint16 p_Experience)
+        {
+            Points += p_Experience;
+        }
+
+        //////////////////////////////////////////////////////////////////////////
+        //////////////////////////////////////////////////////////////////////////
+
         uint16 Type;
         uint16 Points;
     };
@@ -252,8 +262,6 @@ namespace SteerStone { namespace Game { namespace Entity {
         /// Change Configuration
         void ChangeConfiguration(const uint16 p_Config);
         /// Send Drone Info
-        Server::PacketBuffer const* BuildDronePacket();
-        /// Send Drone Info
         void SendDrones();
         /// Update Cargo Max Space
         /// Note this updates the cargo bay on the client
@@ -354,10 +362,11 @@ namespace SteerStone { namespace Game { namespace Entity {
         void SetLogout(bool const p_LoggedOut)            { m_LoggingOut = p_LoggedOut;    }
         void UpdateCredits(uint32 const p_Credits)        { m_Credits += p_Credits;        }
         void UpdateUridium(uint32 const p_Uridium)        { m_Uridium += p_Uridium;        }
-        void UpdateExperience(uint32 const p_Experience);
+        void UpdateExperience(uint32 p_Experience);
+        void UpdateDroneExperience(Entity::Object* p_Object);
         void SetBatteryAmmo(BatteryType const p_BatteryType, const uint32 p_Amount);
         void SetRocketAmmo(RocketType const p_RocketType, const uint32 p_Amount);
-        void UpdateHonor(uint32 const p_Honour)           { m_Honor += p_Honour;           }
+        void UpdateHonor(uint32 p_Honour);
         void SetCargoSpace(uint32 const p_CargoSpace)     { m_CargoSpace = p_CargoSpace;   }
 
         /// Timers

@@ -22,6 +22,7 @@
 #include "Packets/Server/ShipPackets.hpp"
 #include "Packets/Server/MiscPackets.hpp"
 #include "World.hpp"
+#include "ObjectManager.hpp"
 #include "ClanManager.hpp"
 #include "ZoneManager.hpp"
 #include "Diagnostic/DiaStopWatch.hpp"
@@ -255,6 +256,9 @@ namespace SteerStone { namespace Game { namespace Entity {
         l_PreparedStatement->PrepareStatement("SELECT type, points FROM user_drones WHERE user_id = ?");
         l_PreparedStatement->SetUint32(0, m_Id);
         std::unique_ptr<Core::Database::PreparedResultSet> l_PreparedResultSet = l_PreparedStatement->ExecuteStatement();
+
+        /// Reset Drones incase this is called from CMS
+        m_Drones = std::vector<Drone>();
 
         if (l_PreparedResultSet)
         {
@@ -845,354 +849,92 @@ namespace SteerStone { namespace Game { namespace Entity {
         UpdateMaxCargoSpace();
     }
     /// Send Drone Info
-    Server::PacketBuffer const* Player::BuildDronePacket()
-    {
-        /// TODO; Clean this code, I don't understand how drones are meant to be parsed,
-        /// current implementation is a hack fix and only works for 8 drones
-        uint32 l_DroneGroupCount = static_cast<uint32>(((std::ceil(static_cast<float>(m_Drones.size()) / 4.0f))));
-
-        std::string l_Drones;
-        uint32 l_GroupCount = 1;        ///< Group count starts at 1
-
-        switch (l_DroneGroupCount)
-        {
-            /// Back drones
-        case 1:
-        {
-            uint32 l_Counter = 1;
-
-            l_Drones = std::to_string(l_DroneGroupCount) + "/4";
-
-            for (auto l_Itr : m_Drones)
-            {
-                if (l_Itr.Type == DroneType::DRONE_TYPE_FLAK)
-                {
-                    if (l_Counter == 1)
-                        l_Drones += "-" + std::to_string(GetDroneLevel(l_Itr)) + ",";
-                    else
-                        l_Drones += "0-" + std::to_string(GetDroneLevel(l_Itr)) + ",";
-                }
-                else if (l_Itr.Type == DroneType::DRONE_TYPE_IRIS)
-                {
-                    if (l_Counter == 1)
-                        l_Drones += "-" + std::to_string(GetDroneLevel(l_Itr) + 19) + ",";
-                    else
-                        l_Drones += "0-" + std::to_string(GetDroneLevel(l_Itr) + 19) + ",";
-                }
-
-                l_Counter++;
-            }
-        }
-        default:
-        {
-            uint32 l_Counter = 1;
-
-            uint32 l_DroneSize = m_Drones.size();
-
-            switch (l_DroneSize)
-            {
-            case 5:
-            {
-                l_Drones += "3/1";
-
-                for (auto l_Itr : m_Drones)
-                {
-                    if (l_Counter == 2)
-                        l_Drones += "0/4";
-
-                    if (l_Itr.Type == DroneType::DRONE_TYPE_FLAK)
-                    {
-                        if (l_Counter <= 2)
-                            l_Drones += "-" + std::to_string(GetDroneLevel(l_Itr) + 9) + ",";
-                        else
-                            l_Drones += "0-" + std::to_string(GetDroneLevel(l_Itr) + 9) + ",";
-                    }
-                    else if (l_Itr.Type == DroneType::DRONE_TYPE_IRIS)
-                    {
-                        if (l_Counter <= 2)
-                            l_Drones += "-" + std::to_string(GetDroneLevel(l_Itr) + 19) + ",";
-                        else
-                            l_Drones += "0-" + std::to_string(GetDroneLevel(l_Itr) + 19) + ",";
-                    }
-
-                    l_Counter++;
-                }
-            }
-            break;
-            case 6:
-            {
-                l_Drones += "3/2";
-
-                for (auto l_Itr : m_Drones)
-                {
-                    if (l_Counter == 3)
-                        l_Drones += "0/4";
-                    else if (l_Counter == 7)
-                        l_Drones += "0/2";
-
-                    if (l_Itr.Type == DroneType::DRONE_TYPE_FLAK)
-                    {
-                        if (l_Counter == 3 || l_Counter == 7)
-                            l_Drones += "-" + std::to_string(GetDroneLevel(l_Itr) + 9) + ",";
-                        else
-                            l_Drones += "0-" + std::to_string(GetDroneLevel(l_Itr) + 9) + ",";
-                    }
-                    else if (l_Itr.Type == DroneType::DRONE_TYPE_IRIS)
-                    {
-                        if (l_Counter == 3 || l_Counter == 7)
-                            l_Drones += "-" + std::to_string(GetDroneLevel(l_Itr) + 19) + ",";
-                        else
-                            l_Drones += "0-" + std::to_string(GetDroneLevel(l_Itr) + 19) + ",";
-                    }
-
-                    l_Counter++;
-                }
-            }
-            break;
-            case 7:
-            {
-                l_Drones += "3/1";
-
-                for (auto l_Itr : m_Drones)
-                {
-                    if (l_Counter == 2)
-                        l_Drones += "0/4";
-                    else if (l_Counter == 6)
-                        l_Drones += "0/2";
-
-                    if (l_Itr.Type == DroneType::DRONE_TYPE_FLAK)
-                    {
-                        if (l_Counter == 2 || l_Counter == 6)
-                            l_Drones += "-" + std::to_string(GetDroneLevel(l_Itr) + 9) + ",";
-                        else
-                            l_Drones += "0-" + std::to_string(GetDroneLevel(l_Itr) + 9) + ",";
-                    }
-                    else if (l_Itr.Type == DroneType::DRONE_TYPE_IRIS)
-                    {
-                        if (l_Counter == 2 || l_Counter == 6)
-                            l_Drones += "-" + std::to_string(GetDroneLevel(l_Itr) + 19) + ",";
-                        else
-                            l_Drones += "0-" + std::to_string(GetDroneLevel(l_Itr) + 19) + ",";
-                    }
-
-                    l_Counter++;
-                }
-            }
-            break;
-            case 8:
-            {
-                l_Drones += "3/2";
-
-                for (auto l_Itr : m_Drones)
-                {
-                    if (l_Counter == 3)
-                        l_Drones += "0/4";
-                    else if (l_Counter == 7)
-                        l_Drones += "0/2";
-
-                    if (l_Itr.Type == DroneType::DRONE_TYPE_FLAK)
-                    {
-                        if (l_Counter == 3 || l_Counter == 7 || l_Counter == 1)
-                            l_Drones += "-" + std::to_string(GetDroneLevel(l_Itr) + 9) + ",";
-                        else
-                            l_Drones += "0-" + std::to_string(GetDroneLevel(l_Itr) + 9) + ",";
-                    }
-                    else if (l_Itr.Type == DroneType::DRONE_TYPE_IRIS)
-                    {
-                        if (l_Counter == 3 || l_Counter == 7 || l_Counter == 1)
-                            l_Drones += "-" + std::to_string(GetDroneLevel(l_Itr) + 19) + ",";
-                        else
-                            l_Drones += "0-" + std::to_string(GetDroneLevel(l_Itr) + 19) + ",";
-                    }
-
-                    l_Counter++;
-                }
-            }
-            break;
-            }
-        }
-        break;
-        }
-
-        l_Drones.pop_back();
-
-        return Server::Packets::Misc::Info().Write(Server::Packets::Misc::InfoType::INFO_TYPE_DRONES, { GetObjectGUID().GetCounter(), l_Drones});
-    }
-    /// Send Drone Info
     void Player::SendDrones()
     {
-        /// TODO; Clean this code, I don't understand how drones are meant to be parsed,
-        /// current implementation is a hack fix and only works for 8 drones
-
         if (m_Drones.empty())
             return;
 
-        uint32 l_DroneGroupCount = static_cast<uint32>(((std::ceil(static_cast<float>(m_Drones.size()) / 4.0f))));
+        uint32 l_DroneGroupCount = m_Drones.size() <= 4 ? 3 : 3;
 
         std::string l_Drones;
-        uint32 l_GroupCount = 1;        ///< Group count starts at 1
-        
-        switch (l_DroneGroupCount)
+
+        uint32 l_Counter = 0;
+
+        /// TODO: This could be optimized/cleaner - but for now it will be fine
+
+        for (auto l_Itr : m_Drones)
         {
-            /// Back drones
-            case 1:
+            uint32 l_DroneLevel = GetDroneLevel(l_Itr) - 1;
+
+            if (l_Itr.Type == DroneType::DRONE_TYPE_FLAK)
+                l_DroneLevel += 10;
+            else if (l_Itr.Type == DroneType::DRONE_TYPE_IRIS)
+                l_DroneLevel += 20;
+
+            if (m_Drones.size() <= 4)
             {
-                uint32 l_Counter = 1;
-
-                l_Drones = std::to_string(l_DroneGroupCount) + "/4";
-
-                for (auto l_Itr : m_Drones)
+                if (l_Counter == 0)
                 {
-                    if (l_Itr.Type == DroneType::DRONE_TYPE_FLAK)
-                    {
-                        if (l_Counter == 1)
-                            l_Drones += "-" + std::to_string(GetDroneLevel(l_Itr) + 9) + ",";
-                        else
-                            l_Drones += "0-" + std::to_string(GetDroneLevel(l_Itr) + 9) + ",";
-                    }
-                    else if (l_Itr.Type == DroneType::DRONE_TYPE_IRIS)
-                    {
-                        if (l_Counter == 1)
-                            l_Drones += "-" + std::to_string(GetDroneLevel(l_Itr) + 19) + ",";
-                        else
-                            l_Drones += "0-" + std::to_string(GetDroneLevel(l_Itr) + 19) + ",";
-                    }
-
-                    l_Counter++;
+                    l_Drones = "0/" + std::to_string(m_Drones.size()) + '-' + std::to_string(l_DroneLevel) + ",";
+                }
+                else
+                {
+                    l_Drones += "0-" + std::to_string(l_DroneLevel) + ",";
                 }
             }
-            default:
+            else if (m_Drones.size() >= 5 && m_Drones.size() <= 6)
             {
-                uint32 l_Counter = 1;
-
-                uint32 l_DroneSize = m_Drones.size();
-
-                switch (l_DroneSize)
+                if (l_Counter == 0)
                 {
-                    case 5:
-                    {
-                        l_Drones += "3/1";
-
-                        for (auto l_Itr : m_Drones)
-                        {
-                            if (l_Counter == 2)
-                                l_Drones += "0/4";
-
-                            if (l_Itr.Type == DroneType::DRONE_TYPE_FLAK)
-                            {
-                                if (l_Counter <= 2)
-                                    l_Drones += "-" + std::to_string(GetDroneLevel(l_Itr) + 9) + ",";
-                                else
-                                    l_Drones += "0-" + std::to_string(GetDroneLevel(l_Itr) + 9) + ",";
-                            }
-                            else if (l_Itr.Type == DroneType::DRONE_TYPE_IRIS)
-                            {
-                                if (l_Counter <= 2)
-                                    l_Drones += "-" + std::to_string(GetDroneLevel(l_Itr) + 19) + ",";
-                                else
-                                    l_Drones += "0-" + std::to_string(GetDroneLevel(l_Itr) + 19) + ",";
-                            }
-
-                            l_Counter++;
-                        }
-                    }
-                    break;
-                    case 6:
-                    {
-                        l_Drones += "3/2";
-
-                        for (auto l_Itr : m_Drones)
-                        {
-                            if (l_Counter == 3)
-                                l_Drones += "0/4";
-                            else if (l_Counter == 7)
-                                l_Drones += "0/2";
-
-                            if (l_Itr.Type == DroneType::DRONE_TYPE_FLAK)
-                            {
-                                if (l_Counter == 3 || l_Counter == 7)
-                                    l_Drones += "-" + std::to_string(GetDroneLevel(l_Itr) + 9) + ",";
-                                else
-                                    l_Drones += "0-" + std::to_string(GetDroneLevel(l_Itr) + 9) + ",";
-                            }
-                            else if (l_Itr.Type == DroneType::DRONE_TYPE_IRIS)
-                            {
-                                if (l_Counter == 3 || l_Counter == 7)
-                                    l_Drones += "-" + std::to_string(GetDroneLevel(l_Itr) + 19) + ",";
-                                else
-                                    l_Drones += "0-" + std::to_string(GetDroneLevel(l_Itr) + 19) + ",";
-                            }
-
-                            l_Counter++;
-                        }
-                    }
-                    break;
-                    case 7:
-                    {
-                        l_Drones += "3/1";
-
-                        for (auto l_Itr : m_Drones)
-                        {
-                            if (l_Counter == 2)
-                                l_Drones += "0/4";
-                            else if (l_Counter == 6)
-                                l_Drones += "0/2";
-
-                            if (l_Itr.Type == DroneType::DRONE_TYPE_FLAK)
-                            {
-                                if (l_Counter == 2 || l_Counter == 6)
-                                    l_Drones += "-" + std::to_string(GetDroneLevel(l_Itr) + 9) + ",";
-                                else
-                                    l_Drones += "0-" + std::to_string(GetDroneLevel(l_Itr) + 9) + ",";
-                            }
-                            else if (l_Itr.Type == DroneType::DRONE_TYPE_IRIS)
-                            {
-                                if (l_Counter == 2 || l_Counter == 6)
-                                    l_Drones += "-" + std::to_string(GetDroneLevel(l_Itr) + 19) + ",";
-                                else
-                                    l_Drones += "0-" + std::to_string(GetDroneLevel(l_Itr) + 19) + ",";
-                            }
-
-                            l_Counter++;
-                        }
-                    }
-                    break;
-                    case 8:
-                    {
-                        l_Drones += "3/2";
-
-                        for (auto l_Itr : m_Drones)
-                        {
-                            if (l_Counter == 3)
-                                l_Drones += "0/4";
-                            else if (l_Counter == 7)
-                                l_Drones += "0/2";
-
-                            if (l_Itr.Type == DroneType::DRONE_TYPE_FLAK)
-                            {
-                                if (l_Counter == 3 || l_Counter == 7 || l_Counter == 1)
-                                    l_Drones += "-" + std::to_string(GetDroneLevel(l_Itr) + 9) + ",";
-                                else
-                                    l_Drones += "0-" + std::to_string(GetDroneLevel(l_Itr) + 9) + ",";
-                            }
-                            else if (l_Itr.Type == DroneType::DRONE_TYPE_IRIS)
-                            {
-                                if (l_Counter == 3 || l_Counter == 7 || l_Counter == 1)
-                                    l_Drones += "-" + std::to_string(GetDroneLevel(l_Itr) + 19) + ",";
-                                else
-                                    l_Drones += "0-" + std::to_string(GetDroneLevel(l_Itr) + 19) + ",";
-                            }
-
-                            l_Counter++;
-                        }
-                    }
-                    break;
+                    uint32 l_GroupDroneQuantity = m_Drones.size() == 5 ? 1 : 2;
+                    l_Drones = "3/" + std::to_string(l_GroupDroneQuantity) + '-' + std::to_string(l_DroneLevel) + ",";
                 }
+                else if (l_Counter == 1)
+                {
+                    l_Drones += "0-" + std::to_string(l_DroneLevel) + ",";
+                }
+                else if (l_Counter == 2)
+                {
+					l_Drones += "0/4-" + std::to_string(l_DroneLevel) + ",";
+				}
+                else
+                {
+					l_Drones += "0-" + std::to_string(l_DroneLevel) + ",";
+				}
             }
-            break;
-        }
+            else if (m_Drones.size() >= 7 && m_Drones.size() <= 8)
+            {
+                if (l_Counter == 0)
+                {
+					uint32 l_GroupDroneQuantity = m_Drones.size() == 7 ? 1 : 2;
+					l_Drones = "3/" + std::to_string(l_GroupDroneQuantity) + '-' + std::to_string(l_DroneLevel) + ",";
+				}
+                else if (l_Counter == 1)
+                {
+                    l_Drones += "0-" + std::to_string(l_DroneLevel) + ",";
+                }
+                else if (l_Counter == 2)
+                {
+                    l_Drones += "0/4-" + std::to_string(l_DroneLevel) + ",";
+                }
+                else if (l_Counter <= 5) {
+					l_Drones += "0-" + std::to_string(l_DroneLevel) + ",";
+				}
+                else if (l_Counter == 6)
+                {
+                    uint32 l_GroupDroneQuantity = m_Drones.size() == 7 ? 1 : 2;
+                    l_Drones += "2/" + std::to_string(l_GroupDroneQuantity) + '-' + std::to_string(l_DroneLevel) + ",";
+				}
+                else
+                {
+					l_Drones += "0-" + std::to_string(l_DroneLevel) + ",";
+				}
+            }
 
-        l_Drones.pop_back();
+            l_Counter++;
+		}
+
+        l_Drones += '0';
 
         SendPacket(Server::Packets::Misc::Info().Write(Server::Packets::Misc::InfoType::INFO_TYPE_DRONES, { GetObjectGUID().GetCounter(), l_Drones }));
     }
@@ -1299,8 +1041,11 @@ namespace SteerStone { namespace Game { namespace Entity {
 
     /// Update Experience
     /// @p_Experience : Experience to be added
-    void Player::UpdateExperience(uint32 const p_Experience)
+    void Player::UpdateExperience(uint32 p_Experience)
     {
+        if (HasBooster(BoosterTypes::BOOSTER_TYPE_XP_B01))
+            p_Experience =+ Core::Utils::CalculatePercentage(p_Experience, ToPlayer()->GetBoosterValue(BoosterTypes::BOOSTER_TYPE_XP_B01));
+
         m_Experience += p_Experience;
 
         uint32 l_Level = CalculateLevel();
@@ -1313,6 +1058,391 @@ namespace SteerStone { namespace Game { namespace Entity {
         }
     }
 
+    /// Update the Drone Experience
+    /// @p_Object : Object
+    void Player::UpdateDroneExperience(Entity::Object* p_Object)
+    {
+        if (!m_Drones.size())
+            return;
+
+        uint32 l_Experience = 0;
+
+        switch (GetShipType())
+        {
+            case PlayerShips::Phoenix:
+            {
+                if (p_Object->IsMob())
+                {
+                    switch (p_Object->ToUnit()->GetShipType())
+                    {
+						case NpcShips::Streuner:
+							l_Experience = 4;
+						break;
+                        case NpcShips::Lordakia:
+                            l_Experience = 6;
+                        break;
+                        case NpcShips::Saimon:
+							l_Experience = 10;
+                        break;
+                        case NpcShips::Mordon:
+                            l_Experience = 16;
+                            break;
+                        case NpcShips::Devolarium:
+                            l_Experience = 40;
+                            break;
+                        case NpcShips::Sibelon:
+							l_Experience = 50;
+							break;
+                        case NpcShips::Sibelonit:
+							l_Experience = 20;
+							break;
+                        case NpcShips::Lordakium:
+                            l_Experience = 60;
+							break;
+                        case NpcShips::Kristallin:
+                            l_Experience = 30;
+                            break;
+                        case NpcShips::Kristallon:
+							l_Experience = 75;
+							break;
+					}
+				}
+            }
+            break;
+            case PlayerShips::Yamato:
+            {
+                if (p_Object->IsMob())
+                {
+                    switch (p_Object->ToUnit()->GetShipType())
+                    {
+                    case NpcShips::Streuner:
+                        l_Experience = 2;
+                        break;
+                    case NpcShips::Lordakia:
+                        l_Experience = 4;
+                        break;
+                    case NpcShips::Saimon:
+                        l_Experience = 8;
+                        break;
+                    case NpcShips::Mordon:
+                        l_Experience = 12;
+                        break;
+                    case NpcShips::Devolarium:
+                        l_Experience = 30;
+                        break;
+                    case NpcShips::Sibelon:
+                        l_Experience = 40;
+                        break;
+                    case NpcShips::Sibelonit:
+                        l_Experience = 16;
+                        break;
+                    case NpcShips::Lordakium:
+                        l_Experience = 50;
+                        break;
+                    case NpcShips::Kristallin:
+                        l_Experience = 20;
+                        break;
+                    case NpcShips::Kristallon:
+                        l_Experience = 65;
+                        break;
+                    }
+                }
+            }
+            break;
+            case PlayerShips::Defcom:
+            {
+                if (p_Object->IsMob())
+                {
+                    switch (p_Object->ToUnit()->GetShipType())
+                    {
+                    case NpcShips::Streuner:
+                        l_Experience = 1;
+                        break;
+                    case NpcShips::Lordakia:
+                        l_Experience = 3;
+                        break;
+                    case NpcShips::Saimon:
+                        l_Experience = 7;
+                        break;
+                    case NpcShips::Mordon:
+                        l_Experience = 10;
+                        break;
+                    case NpcShips::Devolarium:
+                        l_Experience = 25;
+                        break;
+                    case NpcShips::Sibelon:
+                        l_Experience = 35;
+                        break;
+                    case NpcShips::Sibelonit:
+                        l_Experience = 14;
+                        break;
+                    case NpcShips::Lordakium:
+                        l_Experience = 45;
+                        break;
+                    case NpcShips::Kristallin:
+                        l_Experience = 18;
+                        break;
+                    case NpcShips::Kristallon:
+                        l_Experience = 60;
+                        break;
+                    }
+                }
+            }
+            break;
+            case PlayerShips::Liberator:
+            {
+                if (p_Object->IsMob())
+                {
+                    switch (p_Object->ToUnit()->GetShipType())
+                    {
+                    case NpcShips::Streuner:
+                        l_Experience = 0;
+                        break;
+                    case NpcShips::Lordakia:
+                        l_Experience = 2;
+                        break;
+                    case NpcShips::Saimon:
+                        l_Experience = 6;
+                        break;
+                    case NpcShips::Mordon:
+                        l_Experience = 8;
+                        break;
+                    case NpcShips::Devolarium:
+                        l_Experience = 20;
+                        break;
+                    case NpcShips::Sibelon:
+                        l_Experience = 30;
+                        break;
+                    case NpcShips::Sibelonit:
+                        l_Experience = 12;
+                        break;
+                    case NpcShips::Lordakium:
+                        l_Experience = 40;
+                        break;
+                    case NpcShips::Kristallin:
+                        l_Experience = 16;
+                        break;
+                    case NpcShips::Kristallon:
+                        l_Experience = 55;
+                        break;
+                    }
+                }
+            }
+            break;
+            case PlayerShips::Piranha:
+            {
+                if (p_Object->IsMob())
+                {
+                    switch (p_Object->ToUnit()->GetShipType())
+                    {
+                    case NpcShips::Streuner:
+                        l_Experience = 0;
+                        break;
+                    case NpcShips::Lordakia:
+                        l_Experience = 1;
+                        break;
+                    case NpcShips::Saimon:
+                        l_Experience = 5;
+                        break;
+                    case NpcShips::Mordon:
+                        l_Experience = 6;
+                        break;
+                    case NpcShips::Devolarium:
+                        l_Experience = 15;
+                        break;
+                    case NpcShips::Sibelon:
+                        l_Experience = 25;
+                        break;
+                    case NpcShips::Sibelonit:
+                        l_Experience = 10;
+                        break;
+                    case NpcShips::Lordakium:
+                        l_Experience = 35;
+                        break;
+                    case NpcShips::Kristallin:
+                        l_Experience = 14;
+                        break;
+                    case NpcShips::Kristallon:
+                        l_Experience = 50;
+                        break;
+                    }
+                }
+            }
+            break;
+            case PlayerShips::Nostromo:
+            {
+                if (p_Object->IsMob())
+                {
+                    switch (p_Object->ToUnit()->GetShipType())
+                    {
+                    case NpcShips::Streuner:
+                        l_Experience = 0;
+                        break;
+                    case NpcShips::Lordakia:
+                        l_Experience = 0;
+                        break;
+                    case NpcShips::Saimon:
+                        l_Experience = 4;
+                        break;
+                    case NpcShips::Mordon:
+                        l_Experience = 4;
+                        break;
+                    case NpcShips::Devolarium:
+                        l_Experience = 10;
+                        break;
+                    case NpcShips::Sibelon:
+                        l_Experience = 22;
+                        break;
+                    case NpcShips::Sibelonit:
+                        l_Experience = 8;
+                        break;
+                    case NpcShips::Lordakium:
+                        l_Experience = 30;
+                        break;
+                    case NpcShips::Kristallin:
+                        l_Experience = 12;
+                        break;
+                    case NpcShips::Kristallon:
+                        l_Experience = 40;
+                        break;
+                    }
+                }
+            }
+            break;
+            case PlayerShips::Vengeance:
+            {
+                if (p_Object->IsMob())
+                {
+                    switch (p_Object->ToUnit()->GetShipType())
+                    {
+                    case NpcShips::Streuner:
+                        l_Experience = 0;
+                        break;
+                    case NpcShips::Lordakia:
+                        l_Experience = 0;
+                        break;
+                    case NpcShips::Saimon:
+                        l_Experience = 3;
+                        break;
+                    case NpcShips::Mordon:
+                        l_Experience = 2;
+                        break;
+                    case NpcShips::Devolarium:
+                        l_Experience = 9;
+                        break;
+                    case NpcShips::Sibelon:
+                        l_Experience = 19;
+                        break;
+                    case NpcShips::Sibelonit:
+                        l_Experience = 6;
+                        break;
+                    case NpcShips::Lordakium:
+                        l_Experience = 25;
+                        break;
+                    case NpcShips::Kristallin:
+                        l_Experience = 10;
+                        break;
+                    case NpcShips::Kristallon:
+                        l_Experience = 30;
+                        break;
+                    }
+                }
+            }
+            break;
+            case PlayerShips::Bigboy:
+            {
+                if (p_Object->IsMob())
+                {
+                    switch (p_Object->ToUnit()->GetShipType())
+                    {
+                    case NpcShips::Streuner:
+                        l_Experience = 0;
+                        break;
+                    case NpcShips::Lordakia:
+                        l_Experience = 0;
+                        break;
+                    case NpcShips::Saimon:
+                        l_Experience = 2;
+                        break;
+                    case NpcShips::Mordon:
+                        l_Experience = 1;
+                        break;
+                    case NpcShips::Devolarium:
+                        l_Experience = 8;
+                        break;
+                    case NpcShips::Sibelon:
+                        l_Experience = 17;
+                        break;
+                    case NpcShips::Sibelonit:
+                        l_Experience = 4;
+                        break;
+                    case NpcShips::Lordakium:
+                        l_Experience = 20;
+                        break;
+                    case NpcShips::Kristallin:
+                        l_Experience = 7;
+                        break;
+                    case NpcShips::Kristallon:
+                        l_Experience = 24;
+                        break;
+                    }
+                }
+            }
+            break;
+            case PlayerShips::Goliath:
+            {
+                if (p_Object->IsMob())
+                {
+                    switch (p_Object->ToUnit()->GetShipType())
+                    {
+                    case NpcShips::Streuner:
+                        l_Experience = 0;
+                        break;
+                    case NpcShips::Lordakia:
+                        l_Experience = 0;
+                        break;
+                    case NpcShips::Saimon:
+                        l_Experience = 1;
+                        break;
+                    case NpcShips::Mordon:
+                        l_Experience = 1;
+                        break;
+                    case NpcShips::Devolarium:
+                        l_Experience = 7;
+                        break;
+                    case NpcShips::Sibelon:
+                        l_Experience = 12;
+                        break;
+                    case NpcShips::Sibelonit:
+                        l_Experience = 3;
+                        break;
+                    case NpcShips::Lordakium:
+                        l_Experience = 15;
+                        break;
+                    case NpcShips::Kristallin:
+                        l_Experience = 4;
+                        break;
+                    case NpcShips::Kristallon:
+                        l_Experience = 18;
+                        break;
+                    }
+                }
+            }
+            break;
+        }
+
+        if (l_Experience)
+        {
+            for (auto& l_Itr : m_Drones)
+            {
+                l_Itr.AddExperience(l_Experience);
+			}
+
+            /// Send Drones packet, this will update the drone level
+            /// We might aswell do this each time the drone gets experience
+            SendDrones();
+        }
+    }
     /// Set Battery Ammo
     ///@p_BatteryType : Battery Type
     ///@p_Amount : Amount to add
@@ -1398,6 +1528,16 @@ namespace SteerStone { namespace Game { namespace Entity {
 
         SendAmmoUpdate();
     }
+    /// Update Honor
+    /// @p_Honor : Honor to Update
+    void Player::UpdateHonor(uint32 p_Honor)
+    {
+        if (HasBooster(BoosterTypes::BOOSTER_TYPE_HON_B01))
+            p_Honor = Core::Utils::CalculatePercentage(p_Honor, ToPlayer()->GetBoosterValue(BoosterTypes::BOOSTER_TYPE_HON_B01));
+
+		m_Honor += p_Honor;
+	}
+
 
 }   ///< namespace Entity
 }   ///< namespace Game

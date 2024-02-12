@@ -606,6 +606,14 @@ namespace SteerStone { namespace Game { namespace Entity {
             default:
                 break;
             }
+
+            if (IsPlayer())
+                if (ToPlayer()->HasBooster(BoosterTypes::BOOSTER_TYPE_DMG_B01))
+                {
+					int32 l_BoosterValue = ToPlayer()->GetBoosterValue(BoosterTypes::BOOSTER_TYPE_DMG_B01);
+					l_MinDamage += Core::Utils::CalculatePercentage(l_MinDamage, l_BoosterValue);
+					l_MaxDamage += Core::Utils::CalculatePercentage(l_MaxDamage, l_BoosterValue);
+				}
         }
         else if (p_AttackType & (AttackType::ATTACK_TYPE_ROCKET))
         {
@@ -781,6 +789,30 @@ namespace SteerStone { namespace Game { namespace Entity {
         
         if (IsPlayer())
             ToPlayer()->SetCargoSpace(ToPlayer()->GetCargoSpace() + p_Resource);
+    }
+
+    /// Get Shield
+    int32 Unit::GetShield() const
+    {
+        int32 l_Shield = m_Shield;
+
+        if (IsPlayer())
+            if (ToPlayer()->HasBooster(BoosterTypes::BOOSTER_TYPE_SHD_B01))
+				l_Shield += Core::Utils::CalculatePercentage(l_Shield, ToPlayer()->GetBoosterValue(BoosterTypes::BOOSTER_TYPE_SHD_B01));
+
+        return l_Shield;
+    }
+
+    /// Get Max Shield
+    uint32 Unit::GetMaxShield() const
+    {
+		int32 l_MaxShield = m_MaxShield;
+
+        if (IsPlayer())
+            if (ToPlayer()->HasBooster(BoosterTypes::BOOSTER_TYPE_SHD_B01))
+                l_MaxShield += Core::Utils::CalculatePercentage(l_MaxShield, ToPlayer()->GetBoosterValue(BoosterTypes::BOOSTER_TYPE_SHD_B01));
+
+        return l_MaxShield;
     }
 
 }   ///< namespace Entity

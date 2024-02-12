@@ -72,6 +72,7 @@ enum ClientOpCodes : uint8
     WEB_PACKET_UPDATE_INVENTORY         = 0x25,
     WEB_PACKET_UPDATE_SHIP              = 0x29,
     WEB_PACKET_BROUGHT_AMMO             = 0x26,
+    WEB_PACKET_UPDATE_DRONES            = 0x27,
     WEB_PACKET_UPDATE_CLANS             = 0x32,
 
     CLIENT_MAX_OPCODE                   = 0x7B

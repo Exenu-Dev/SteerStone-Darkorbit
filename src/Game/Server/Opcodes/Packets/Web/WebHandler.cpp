@@ -116,16 +116,24 @@ namespace SteerStone { namespace Game { namespace Server {
 
                 if (l_ShipTemplate)
                 {
+                    int32 l_CargoSpaceGained = l_ShipTemplate->Cargo - l_Player->m_MaxCargoSpace;
+
                     l_Player->m_HitPoints = l_ShipTemplate->HitPoints;
                     l_Player->m_ShipType = l_ShipTemplate->Entry;
                     l_Player->m_MaxRockets = l_ShipTemplate->Rockets;
                     l_Player->m_MaxCargoSpace = l_ShipTemplate->Cargo;
+                    l_Player->m_CargoSpace += l_CargoSpaceGained;
 
                     l_Player->SaveShipToDB();
                     l_Player->SendInitializeShip();
+                    l_Player->SendMapUpdate();
+                    l_Player->GetMap()->SendConstantObjects(l_Player);
 
                     l_CanEquip = '1';
                 }
+
+                // Also update the drones
+                l_Player->SendDrones();
             }
         }
 
@@ -133,6 +141,19 @@ namespace SteerStone { namespace Game { namespace Server {
     }
     /// Web Handler
     /// @p_ClientPacket : Packet recieved from Web
+    void GameSocket::HandleUpdateDrones(ClientPacket* p_Packet)
+    {
+		uint32 l_PlayerId = p_Packet->ReadUInt32();
+
+		Entity::Player* l_Player = sWorldManager->FindPlayer(l_PlayerId);
+		char l_CanEquip = '1';
+
+        if (l_Player)
+            if (l_Player->GetEvent() == EventType::EVENT_TYPE_STATION && !l_Player->IsInCombat())
+				l_Player->SendDrones();
+
+		Write(&l_CanEquip, sizeof(l_CanEquip));
+	}
     void GameSocket::HandleBroughtAmmo(ClientPacket* p_Packet)
     {
         uint32 l_PlayerId = p_Packet->ReadUInt32();

@@ -105,6 +105,7 @@ namespace SteerStone { namespace Game { namespace Entity {
         p_Player->UpdateCredits(m_Credits);
         p_Player->UpdateUridium(m_Uridium);
         p_Player->UpdateExperience(m_Experience);
+        p_Player->UpdateDroneExperience(this);
         p_Player->UpdateHonor(m_Honor);
         p_Player->UpdateLogBook("<div class=\"logdata\">You have destroyed " + GetName() + " alien ship.</div>" +
             "<div class=\"logdata\">You received " + std::to_string(m_Entry) + " Experience Points." + "</div>" +

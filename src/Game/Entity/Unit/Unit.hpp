@@ -161,9 +161,9 @@ namespace SteerStone { namespace Game { namespace Entity {
         //            GETTERS/SETTERS
         ///////////////////////////////////////////
     public:
-        int32 GetShield()           const { return m_Shield;            }
+        int32 GetShield()           const;
         uint32 GetShieldResistance()const { return m_ShieldResistance;  }
-        uint32 GetMaxShield()       const { return m_MaxShield;         }
+        uint32 GetMaxShield()       const;
         int32 GetHitPoints()        const { return m_HitPoints;         }
         uint32 GetMinDamage()       const { return m_MinDamage;         }    
         uint32 GetMaxDamage()       const { return m_MaxDamage;         }    
@@ -240,7 +240,7 @@ namespace SteerStone { namespace Game { namespace Entity {
             m_MaxDamage         = p_MaxDamage;
             GetSpline()->SetSpeed(GetSpline()->GetSpeed() + p_Speed);
             m_MaxShield         = p_Shield;
-            m_Shield            = m_MaxShield;
+            m_Shield            = p_Shield;
             m_ShieldResistance  = p_ShieldResistance;
         }
         void SetResource(uint32 const p_Index, uint32 const p_Resource);
