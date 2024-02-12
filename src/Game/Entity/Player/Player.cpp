@@ -309,9 +309,9 @@ namespace SteerStone { namespace Game { namespace Entity {
                 if (ItemTemplate const* l_ItemTemplate = sObjectManager->GetItemTemplate(l_BoosterId))
                 {
 					Booster l_Booster;
-                    l_Booster.Id            = l_Id;
-                    l_Booster.ItemTemplate  = l_ItemTemplate;
-                    l_Booster.Duration      = l_Duration;
+                    l_Booster.Id                    = l_Id;
+                    l_Booster.BoosterItemTemplate   = l_ItemTemplate;
+                    l_Booster.Duration              = l_Duration;
 
                     m_Boosters.push_back(l_Booster);
 				}
@@ -1674,12 +1674,12 @@ namespace SteerStone { namespace Game { namespace Entity {
     /// Get Booster Type
     BoosterTypes Booster::GetBoosterType() const
     {
-        return static_cast<BoosterTypes>(ItemTemplate->Id);
+        return static_cast<BoosterTypes>(BoosterItemTemplate->Id);
     }
     /// Get Booster Value
     int32 Booster::GetBoosterValue() const
     {
-        return ItemTemplate->Value != 0 ? ItemTemplate->Value : ItemTemplate->ValuePercentage;
+        return BoosterItemTemplate->Value != 0 ? BoosterItemTemplate->Value : BoosterItemTemplate->ValuePercentage;
 	}
 }   ///< namespace Entity
 }   ///< namespace Game

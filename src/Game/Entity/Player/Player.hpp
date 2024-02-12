@@ -43,7 +43,7 @@ namespace SteerStone { namespace Game { namespace Entity {
         Booster()
         {
             Id              = 0;
-            ItemTemplate    = nullptr;
+            BoosterItemTemplate    = nullptr;
             Duration        = 0;
 		}
 
@@ -51,12 +51,12 @@ namespace SteerStone { namespace Game { namespace Entity {
         //////////////////////////////////////////////////////////////////////////
 
     public:
-        ItemTemplate const* GetItemTemplate() const { return ItemTemplate; }
+        ItemTemplate const* GetItemTemplate() const { return BoosterItemTemplate; }
 
         /// Get Item Template
         ItemTemplate const* GetItemTemplate()
         {
-			return ItemTemplate;
+			return BoosterItemTemplate;
 		}
 
         /// Update Duration
@@ -78,7 +78,7 @@ namespace SteerStone { namespace Game { namespace Entity {
         //////////////////////////////////////////////////////////////////////////
 
         uint32 Id;
-        ItemTemplate const* ItemTemplate;
+        ItemTemplate const* BoosterItemTemplate;
         int32 Duration;
 	};
 
