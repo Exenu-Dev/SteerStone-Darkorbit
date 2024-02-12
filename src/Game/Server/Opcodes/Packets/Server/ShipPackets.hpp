@@ -111,6 +111,20 @@ namespace SteerStone { namespace Game { namespace Server { namespace Packets { n
         /// Constructor 
         SpawnShip() : ServerPacket(ServerOpCodes::SERVER_PACKET_SPAWN_SHIP)
         {
+            UserId                  = 0;
+			ShipId                  = 0;
+			WeaponState             = 0;
+            ClanTag                 = "";
+			Name                    = "";
+			PositionX               = 0;
+			PositionY               = 0;
+			CompanyId               = 0;
+			ClanId                  = 0;
+			Rank                    = 0;
+			ShowRedSquareOnMiniMap  = false;
+			ClanDiplomat            = 0;
+			GalaxyGatesAchieved     = 0;
+			UseBigFont              = false;
         }
 
         //////////////////////////////////////////////////////////////////////////
@@ -122,7 +136,7 @@ namespace SteerStone { namespace Game { namespace Server { namespace Packets { n
         uint32 UserId;
         uint16 ShipId;
         uint16 WeaponState;
-        std::string Clan;
+        std::string ClanTag;
         std::string Name;
         float PositionX;
         float PositionY;

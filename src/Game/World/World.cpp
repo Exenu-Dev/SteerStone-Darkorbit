@@ -21,6 +21,7 @@
 #include "Player.hpp"
 #include "ZoneManager.hpp"
 #include "ObjectManager.hpp"
+#include "ClanManager.hpp"
 #include "Config/Config.hpp"
 
 namespace SteerStone { namespace Game { namespace World {
@@ -83,6 +84,8 @@ namespace SteerStone { namespace Game { namespace World {
         sObjectManager->LoadStationTemplate();
         sObjectManager->LoadItemTemplate();
         sObjectManager->LoadShipTemplate();
+
+        sClanManager->LoadFromDB();
 
         sZoneManager->LoadMaps();
 

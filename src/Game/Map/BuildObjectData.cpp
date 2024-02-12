@@ -23,6 +23,7 @@
 #include "Grid.hpp"
 #include "Mob.hpp"
 #include "BonusBox.hpp"
+#include "ClanManager.hpp"
 #include "Player.hpp"
 #include "Utility/UtilMaths.hpp"
 
@@ -109,12 +110,17 @@ namespace SteerStone { namespace Game { namespace Map {
             l_Packet.UserId                 = p_ObjectBuilt->GetObjectGUID().GetCounter();
             l_Packet.ShipId                 = p_ObjectBuilt->ToUnit()->GetShipType();
             l_Packet.WeaponState            = p_ObjectBuilt->ToPlayer()->GetWeaponState();
-            l_Packet.Clan                   = p_ObjectBuilt->ToPlayer()->GetClanName();
+
+            if (p_ObjectBuilt->ToPlayer()->GetClan())
+            {
+                l_Packet.ClanTag            = p_ObjectBuilt->ToPlayer()->GetClan()->GetTag();
+                l_Packet.ClanId             = p_ObjectBuilt->ToPlayer()->GetClan()->GetID();
+            }
+
             l_Packet.Name                   = p_ObjectBuilt->GetName();
             l_Packet.PositionX              = p_ObjectBuilt->GetSpline()->GetPositionX();
             l_Packet.PositionY              = p_ObjectBuilt->GetSpline()->GetPositionY();
             l_Packet.CompanyId              = static_cast<uint16>(p_ObjectBuilt->ToPlayer()->GetCompany());
-            l_Packet.ClanId                 = p_ObjectBuilt->ToPlayer()->GetClanId();
             l_Packet.Rank                   = p_ObjectBuilt->ToPlayer()->GetRank();
             l_Packet.ClanDiplomat           = 0;
             l_Packet.ShowRedSquareOnMiniMap = p_ObjectBuilt->ToPlayer()->GetCompany() != p_Player->GetCompany();
@@ -132,12 +138,12 @@ namespace SteerStone { namespace Game { namespace Map {
             l_Packet.UserId                 = p_ObjectBuilt->GetObjectGUID().GetCounter();
             l_Packet.ShipId                 = p_ObjectBuilt->ToUnit()->GetShipType();
             l_Packet.WeaponState            = p_ObjectBuilt->ToMob()->GetWeaponState();
-            l_Packet.Clan                   = p_ObjectBuilt->ToMob()->GetClanName();
+            l_Packet.ClanTag                = p_ObjectBuilt->ToMob()->GetClan()->GetName();
             l_Packet.Name                   = p_ObjectBuilt->GetName();
             l_Packet.PositionX              = p_ObjectBuilt->GetSpline()->GetPositionX();
             l_Packet.PositionY              = p_ObjectBuilt->GetSpline()->GetPositionY();
             l_Packet.CompanyId              = static_cast<uint16>(p_ObjectBuilt->ToMob()->GetCompany());
-            l_Packet.ClanId                 = p_ObjectBuilt->ToMob()->GetClanId();
+            l_Packet.ClanId                 = p_ObjectBuilt->ToMob()->GetClan()->GetID();;
             l_Packet.Rank                   = p_ObjectBuilt->ToMob()->GetRank();
             l_Packet.ClanDiplomat           = 0;
             l_Packet.ShowRedSquareOnMiniMap = false;

@@ -39,8 +39,6 @@ namespace SteerStone { namespace Game { namespace Entity {
         m_MaxDamage         = 0;
         m_MaxHitPoints      = 0;
         m_GatesAchieved     = 0;
-        m_ClanId            = 0;
-        m_ClanName.clear();
         m_Company           = Company::NOMAD;
         m_Rank              = 0;
         m_WeaponState       = 0;
@@ -67,6 +65,8 @@ namespace SteerStone { namespace Game { namespace Entity {
    
         m_Target            = nullptr;
         m_TargetGUID        = 0;
+
+        m_Clan			    = nullptr;
 
         m_IntervalAttackUpdate.SetInterval(ATTACK_UPDATE_INTERVAL);
         m_IntervalRocketAttackUpdate.SetInterval(ROCKET_ATTACK_UPDATE);

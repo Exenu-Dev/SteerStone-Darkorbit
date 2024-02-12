@@ -79,7 +79,7 @@ namespace SteerStone { namespace Game { namespace Server { namespace Packets { n
         m_Buffer.AppendUInt32(UserId);
         m_Buffer.AppendUInt16(ShipId);
         m_Buffer.AppendUInt16(WeaponState);
-        m_Buffer.AppendChar(Clan.c_str());
+        m_Buffer.AppendChar(ClanTag.c_str());
         m_Buffer.AppendChar(Name.c_str());
         m_Buffer.AppendFloat(PositionX);
         m_Buffer.AppendFloat(PositionY);

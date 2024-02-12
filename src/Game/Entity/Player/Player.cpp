@@ -22,6 +22,7 @@
 #include "Packets/Server/ShipPackets.hpp"
 #include "Packets/Server/MiscPackets.hpp"
 #include "World.hpp"
+#include "ClanManager.hpp"
 #include "ZoneManager.hpp"
 #include "Diagnostic/DiaStopWatch.hpp"
 #include "Utility/UtilMaths.hpp"
@@ -120,7 +121,7 @@ namespace SteerStone { namespace Game { namespace Entity {
     bool Player::LoadFromDB()
     {
         Core::Database::PreparedStatement* l_PreparedStatement = GameDatabase.GetPrepareStatement();
-        l_PreparedStatement->PrepareStatement("SELECT users.username, users.uridium, users.credits, users.jackpot, users.experience, users.honor, users.gates_achieved, users.clan_id, users.company, users.rank, users.premium, "
+        l_PreparedStatement->PrepareStatement("SELECT users.username, users.uridium, users.credits, users.jackpot, users.experience, users.honor, users.gates_achieved, users.company, users.rank, users.premium, "
             "user_settings.display_boost, user_settings.display_damage, user_settings.display_all_las, user_settings.display_exploration, user_settings.display_name, user_settings.display_firm_icon, user_settings.display_alpha_bg, user_settings.ignore_res, "
             "user_settings.ignore_box, user_settings.convert_gates, user_settings.convert_oppo, user_settings.sound_off, user_settings.bg_music_off, user_settings.display_status, user_settings.display_bubble, user_settings.selected_laser, user_settings.selected_rocket, user_settings.display_digits, "
             "user_settings.display_chat, user_settings.display_drones, user_settings.show_star_system, user_settings.ignore_cargo, user_settings.ignore_hostile_cargo, user_settings.auto_change_ammo, user_settings.enable_buy_fast"
@@ -139,36 +140,36 @@ namespace SteerStone { namespace Game { namespace Entity {
             m_Experience                = l_Result[4].GetUInt32();
             m_Honor                     = l_Result[5].GetInt32();
             m_GatesAchieved             = l_Result[6].GetUInt16();
-            m_ClanId                    = l_Result[7].GetUInt32();
-            // m_ClanName                  = l_Result[8].GetString(); ///< TODO
-            m_Company                   = static_cast<Company>(l_Result[8].GetUInt16());
-            m_Rank                      = l_Result[9].GetUInt16();
-            m_Premium                   = l_Result[10].GetBool();
-            m_DisplayBoost              = l_Result[11].GetBool();
-            m_DisplayDamage             = l_Result[12].GetBool();
-            m_DisplayAllLas             = l_Result[13].GetBool();
-            m_DisplayExploration        = l_Result[14].GetBool();
-            m_DisplayName               = l_Result[15].GetBool();
-            m_DisplayFirmIcon           = l_Result[16].GetBool();
-            m_DisplayAlphaBG            = l_Result[17].GetBool();
-            m_IgnoreRes                 = l_Result[18].GetBool();
-            m_IgnoreBox                 = l_Result[10].GetBool();
-            m_ConvertGates              = l_Result[20].GetBool();
-            m_ConvertOppo               = l_Result[21].GetBool();
-            m_SoundOff                  = l_Result[22].GetBool();
-            m_BackgroundMusicOff        = l_Result[23].GetBool();
-            m_DisplayStatus             = l_Result[24].GetBool();
-            m_DisplayBubble             = l_Result[25].GetBool();
-            m_SelectedLaser             = l_Result[26].GetUInt16();
-            m_SelectedRocket            = l_Result[27].GetUInt16();
-            m_DisplayDigits             = l_Result[28].GetBool();
-            m_DisplayChat               = l_Result[29].GetBool();
-            m_DisplayDrones             = l_Result[30].GetBool();
-            m_ShowStarSystem            = l_Result[31].GetBool();
-            m_IgnoreCargo               = l_Result[32].GetBool();
-            m_IgnoreHostileCargo        = l_Result[33].GetBool();
-            m_AutoChangeAmmo            = l_Result[34].GetBool();
-            m_EnableBuyFast             = l_Result[35].GetBool();
+            m_Company                   = static_cast<Company>(l_Result[7].GetUInt16());
+            m_Rank                      = l_Result[8].GetUInt16();
+            m_Premium                   = l_Result[9].GetBool();
+            m_DisplayBoost              = l_Result[10].GetBool();
+            m_DisplayDamage             = l_Result[11].GetBool();
+            m_DisplayAllLas             = l_Result[12].GetBool();
+            m_DisplayExploration        = l_Result[13].GetBool();
+            m_DisplayName               = l_Result[14].GetBool();
+            m_DisplayFirmIcon           = l_Result[15].GetBool();
+            m_DisplayAlphaBG            = l_Result[16].GetBool();
+            m_IgnoreRes                 = l_Result[17].GetBool();
+            m_IgnoreBox                 = l_Result[18].GetBool();
+            m_ConvertGates              = l_Result[19].GetBool();
+            m_ConvertOppo               = l_Result[20].GetBool();
+            m_SoundOff                  = l_Result[21].GetBool();
+            m_BackgroundMusicOff        = l_Result[22].GetBool();
+            m_DisplayStatus             = l_Result[23].GetBool();
+            m_DisplayBubble             = l_Result[24].GetBool();
+            m_SelectedLaser             = l_Result[25].GetUInt16();
+            m_SelectedRocket            = l_Result[26].GetUInt16();
+            m_DisplayDigits             = l_Result[27].GetBool();
+            m_DisplayChat               = l_Result[28].GetBool();
+            m_DisplayDrones             = l_Result[29].GetBool();
+            m_ShowStarSystem            = l_Result[30].GetBool();
+            m_IgnoreCargo               = l_Result[31].GetBool();
+            m_IgnoreHostileCargo        = l_Result[32].GetBool();
+            m_AutoChangeAmmo            = l_Result[33].GetBool();
+            m_EnableBuyFast             = l_Result[34].GetBool();
+
+            m_Clan                      = sClanManager->GetClanByPlayerId(m_Id);
 
             m_Level = CalculateLevel();
 
@@ -284,7 +285,7 @@ namespace SteerStone { namespace Game { namespace Entity {
     {
         Core::Database::PreparedStatement* l_PreparedStatement = GameDatabase.GetPrepareStatement();
         l_PreparedStatement->PrepareStatement("UPDATE users INNER JOIN user_settings ON user_settings.user_id = users.id "
-            "SET users.uridium = ?, users.credits = ?, users.jackpot = ?, users.experience = ?, users.honor = ?, users.gates_achieved = ?, users.clan_id = ?, users.company = ?, users.rank = ?, users.premium = ?, "
+            "SET users.uridium = ?, users.credits = ?, users.jackpot = ?, users.experience = ?, users.honor = ?, users.gates_achieved = ?, users.company = ?, users.rank = ?, users.premium = ?, "
             "user_settings.display_boost = ?, user_settings.display_damage = ?, user_settings.display_all_las = ?, user_settings.display_exploration = ?, user_settings.display_name = ?, user_settings.display_firm_icon = ?, user_settings.display_alpha_bg = ?, user_settings.ignore_res = ?, "
             "user_settings.ignore_box = ?, user_settings.convert_gates = ?, user_settings.convert_oppo = ?, user_settings.sound_off = ?, user_settings.bg_music_off = ?, user_settings.display_status = ?, user_settings.display_bubble = ?, user_settings.selected_laser = ?, user_settings.selected_rocket = ?, user_settings.display_digits = ?, "
             "user_settings.display_chat = ?, user_settings.display_drones = ?, user_settings.show_star_system = ?, user_settings.ignore_cargo = ?, user_settings.ignore_hostile_cargo = ?, user_settings.auto_change_ammo = ?, user_settings.enable_buy_fast = ? "
@@ -296,36 +297,35 @@ namespace SteerStone { namespace Game { namespace Entity {
         l_PreparedStatement->SetUint32(3, m_Experience);
         l_PreparedStatement->SetInt32(4, m_Honor);
         l_PreparedStatement->SetUint32(5, m_GatesAchieved);
-        l_PreparedStatement->SetUint32(6, m_ClanId);
-        l_PreparedStatement->SetUint16(7, static_cast<uint16>(m_Company));
-        l_PreparedStatement->SetUint16(8, m_Rank);  
-        l_PreparedStatement->SetBool(9, m_Premium);
-        l_PreparedStatement->SetBool(10, m_DisplayBoost);
-        l_PreparedStatement->SetBool(11, m_DisplayDamage);
-        l_PreparedStatement->SetBool(12, m_DisplayAllLas);
-        l_PreparedStatement->SetBool(13, m_DisplayExploration);
-        l_PreparedStatement->SetBool(14, m_DisplayName);
-        l_PreparedStatement->SetBool(15, m_DisplayFirmIcon);
-        l_PreparedStatement->SetBool(16, m_DisplayAlphaBG);
-        l_PreparedStatement->SetBool(17, m_IgnoreRes);
-        l_PreparedStatement->SetBool(18, m_IgnoreBox);
-        l_PreparedStatement->SetBool(19, m_ConvertGates);
-        l_PreparedStatement->SetBool(20, m_ConvertOppo);
-        l_PreparedStatement->SetBool(21, m_SoundOff);
-        l_PreparedStatement->SetBool(22, m_BackgroundMusicOff);
-        l_PreparedStatement->SetBool(23, m_DisplayStatus);
-        l_PreparedStatement->SetBool(24, m_DisplayBubble);
-        l_PreparedStatement->SetBool(25, m_SelectedLaser);
-        l_PreparedStatement->SetBool(26, m_SelectedRocket);
-        l_PreparedStatement->SetBool(27, m_DisplayDigits);
-        l_PreparedStatement->SetBool(28, m_DisplayChat);
-        l_PreparedStatement->SetBool(29, m_DisplayDrones);
-        l_PreparedStatement->SetBool(30, m_ShowStarSystem);
-        l_PreparedStatement->SetBool(31, m_IgnoreCargo);
-        l_PreparedStatement->SetBool(32, m_IgnoreHostileCargo);
-        l_PreparedStatement->SetBool(33, m_AutoChangeAmmo);
-        l_PreparedStatement->SetBool(34, m_EnableBuyFast);
-        l_PreparedStatement->SetUint32(35, m_Id);
+        l_PreparedStatement->SetUint16(6, static_cast<uint16>(m_Company));
+        l_PreparedStatement->SetUint16(7, m_Rank);  
+        l_PreparedStatement->SetBool(8, m_Premium);
+        l_PreparedStatement->SetBool(9, m_DisplayBoost);
+        l_PreparedStatement->SetBool(10, m_DisplayDamage);
+        l_PreparedStatement->SetBool(11, m_DisplayAllLas);
+        l_PreparedStatement->SetBool(12, m_DisplayExploration);
+        l_PreparedStatement->SetBool(13, m_DisplayName);
+        l_PreparedStatement->SetBool(14, m_DisplayFirmIcon);
+        l_PreparedStatement->SetBool(15, m_DisplayAlphaBG);
+        l_PreparedStatement->SetBool(16, m_IgnoreRes);
+        l_PreparedStatement->SetBool(17, m_IgnoreBox);
+        l_PreparedStatement->SetBool(18, m_ConvertGates);
+        l_PreparedStatement->SetBool(19, m_ConvertOppo);
+        l_PreparedStatement->SetBool(20, m_SoundOff);
+        l_PreparedStatement->SetBool(21, m_BackgroundMusicOff);
+        l_PreparedStatement->SetBool(22, m_DisplayStatus);
+        l_PreparedStatement->SetBool(23, m_DisplayBubble);
+        l_PreparedStatement->SetBool(24, m_SelectedLaser);
+        l_PreparedStatement->SetBool(25, m_SelectedRocket);
+        l_PreparedStatement->SetBool(26, m_DisplayDigits);
+        l_PreparedStatement->SetBool(27, m_DisplayChat);
+        l_PreparedStatement->SetBool(28, m_DisplayDrones);
+        l_PreparedStatement->SetBool(29, m_ShowStarSystem);
+        l_PreparedStatement->SetBool(30, m_IgnoreCargo);
+        l_PreparedStatement->SetBool(31, m_IgnoreHostileCargo);
+        l_PreparedStatement->SetBool(32, m_AutoChangeAmmo);
+        l_PreparedStatement->SetBool(33, m_EnableBuyFast);
+        l_PreparedStatement->SetUint32(34, m_Id);
         l_PreparedStatement->ExecuteStatement();
 
         SaveShipToDB();
@@ -335,7 +335,7 @@ namespace SteerStone { namespace Game { namespace Entity {
     void Player::SaveShipToDB()
     {
         Core::Database::PreparedStatement* l_PreparedStatement = GameDatabase.GetPrepareStatement();
-        l_PreparedStatement->PrepareStatement("UPDATE user_ships SET type = ?, cargo_space = ?, "
+        l_PreparedStatement->PrepareStatement("UPDATE user_ships SET type = ?, cargo_space = ?, cargo_space_max = ?, "
             "position_x = ?, position_y = ?, map_id = ?, use_system_font = ?, "
             "prometium = ?, endurium = ?, terbium = ?, xenomit = ?, prometid = ?, duranium = ?, promerium = ?, palladium = ?, seprom = ?, "
             "battery_lcb_10 = ?, battery_mcb_25 = ?, battery_mcb_50 = ?, battery_ucb_100 = ?, battery_sab_50 = ?, rocket_r310 = ?, " 
@@ -343,31 +343,32 @@ namespace SteerStone { namespace Game { namespace Entity {
 
         l_PreparedStatement->SetUint16(0,  m_ShipType);
         l_PreparedStatement->SetUint32(1,  m_CargoSpace);
-        l_PreparedStatement->SetFloat(2,   GetSpline()->GetPositionX());
-        l_PreparedStatement->SetFloat(3,   GetSpline()->GetPositionY());
-        l_PreparedStatement->SetUint32(4,  GetMap()->GetId());
-        l_PreparedStatement->SetBool(5,    m_UseSystemFont);
-        l_PreparedStatement->SetUint32(6,  m_Resources[0]);
-        l_PreparedStatement->SetUint32(7,  m_Resources[1]);
-        l_PreparedStatement->SetUint32(8,  m_Resources[2]);
-        l_PreparedStatement->SetUint32(9,  m_Resources[3]);
-        l_PreparedStatement->SetUint32(10, m_Resources[4]);
-        l_PreparedStatement->SetUint32(11, m_Resources[5]);
-        l_PreparedStatement->SetUint32(12, m_Resources[6]);
-        l_PreparedStatement->SetUint32(13, m_Resources[7]);
-        l_PreparedStatement->SetUint32(14, m_Resources[8]);
-        l_PreparedStatement->SetUint32(15, m_Ammo.m_BatteryLCB10);
-        l_PreparedStatement->SetUint32(16, m_Ammo.m_BatteryMCB25);
-        l_PreparedStatement->SetUint32(17, m_Ammo.m_BatteryMCB50);
-        l_PreparedStatement->SetUint32(18, m_Ammo.m_BatteryUCB100);
-        l_PreparedStatement->SetUint32(19, m_Ammo.m_BatterySAB50);
-        l_PreparedStatement->SetUint32(20, m_Ammo.m_RocketR310);
-        l_PreparedStatement->SetUint32(21, m_Ammo.m_RocketPLT2026);
-        l_PreparedStatement->SetUint32(22, m_Ammo.m_RocketPLT2021);
-        l_PreparedStatement->SetUint32(23, m_Ammo.m_Mines);
-        l_PreparedStatement->SetUint32(24, m_Ammo.m_SmartBombs);
-        l_PreparedStatement->SetUint32(25, m_Ammo.m_InstantShields);
-        l_PreparedStatement->SetUint32(26, m_Id);
+        l_PreparedStatement->SetUint32(2,  m_MaxCargoSpace);
+        l_PreparedStatement->SetFloat(3,   GetSpline()->GetPositionX());
+        l_PreparedStatement->SetFloat(4,   GetSpline()->GetPositionY());
+        l_PreparedStatement->SetUint32(5,  GetMap()->GetId());
+        l_PreparedStatement->SetBool(6,    m_UseSystemFont);
+        l_PreparedStatement->SetUint32(7,  m_Resources[0]);
+        l_PreparedStatement->SetUint32(8,  m_Resources[1]);
+        l_PreparedStatement->SetUint32(9,  m_Resources[2]);
+        l_PreparedStatement->SetUint32(10, m_Resources[3]);
+        l_PreparedStatement->SetUint32(11, m_Resources[4]);
+        l_PreparedStatement->SetUint32(12, m_Resources[5]);
+        l_PreparedStatement->SetUint32(13, m_Resources[6]);
+        l_PreparedStatement->SetUint32(14, m_Resources[7]);
+        l_PreparedStatement->SetUint32(15, m_Resources[8]);
+        l_PreparedStatement->SetUint32(16, m_Ammo.m_BatteryLCB10);
+        l_PreparedStatement->SetUint32(17, m_Ammo.m_BatteryMCB25);
+        l_PreparedStatement->SetUint32(18, m_Ammo.m_BatteryMCB50);
+        l_PreparedStatement->SetUint32(19, m_Ammo.m_BatteryUCB100);
+        l_PreparedStatement->SetUint32(20, m_Ammo.m_BatterySAB50);
+        l_PreparedStatement->SetUint32(21, m_Ammo.m_RocketR310);
+        l_PreparedStatement->SetUint32(22, m_Ammo.m_RocketPLT2026);
+        l_PreparedStatement->SetUint32(23, m_Ammo.m_RocketPLT2021);
+        l_PreparedStatement->SetUint32(24, m_Ammo.m_Mines);
+        l_PreparedStatement->SetUint32(25, m_Ammo.m_SmartBombs);
+        l_PreparedStatement->SetUint32(26, m_Ammo.m_InstantShields);
+        l_PreparedStatement->SetUint32(27, m_Id);
         l_PreparedStatement->ExecuteStatement();
     }
 
@@ -541,6 +542,7 @@ namespace SteerStone { namespace Game { namespace Entity {
         l_PreparedStatement->ExecuteStatement();
     }
 
+
     ///////////////////////////////////////////
     //        SURROUNDING SYSTEM
     ///////////////////////////////////////////
@@ -682,7 +684,13 @@ namespace SteerStone { namespace Game { namespace Entity {
         l_Packet.Id             = GetObjectGUID().GetCounter();
         l_Packet.Username       = GetName();
         l_Packet.CompanyId      = static_cast<uint16>(m_Company);
-        l_Packet.ClanId         = m_ClanId;
+
+        if (GetClan())
+        {
+            l_Packet.ClanId     = GetClan()->GetID();
+            l_Packet.ClanTag    = GetClan()->GetTag();
+        }
+
         l_Packet.IsPremium      = m_Premium;
         l_Packet.Experience     = m_Experience;
         l_Packet.Honour         = m_Honor;
@@ -693,8 +701,8 @@ namespace SteerStone { namespace Game { namespace Entity {
         l_Packet.JackPot        = m_Jackpot;
         l_Packet.Rank           = m_Rank;
         l_Packet.Speed          = GetSpline()->GetSpeed();
-        l_Packet.Shield         = m_Shield;
-        l_Packet.MaxShield      = m_MaxShield;
+        l_Packet.Shield         = GetShield();
+        l_Packet.MaxShield      = GetMaxShield();
         l_Packet.HitPoints      = m_HitPoints;
         l_Packet.MaxHitPoints   = m_MaxHitPoints;
         l_Packet.PositionX      = GetSpline()->GetPositionX();

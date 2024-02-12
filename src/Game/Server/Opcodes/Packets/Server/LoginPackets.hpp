@@ -58,6 +58,8 @@ namespace SteerStone { namespace Game { namespace Server { namespace Packets { n
         /// Constructor 
         InitializeShip() : ServerPacket(ServerOpCodes::SERVER_PACKET_INITIALIZE_SHIP)
         {
+            ClanId  = 0;
+            ClanTag = "";
         }
 
         //////////////////////////////////////////////////////////////////////////
