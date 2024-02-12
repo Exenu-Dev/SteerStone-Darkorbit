@@ -44,17 +44,17 @@ namespace SteerStone { namespace Core { namespace Database {
         case enum_field_types::MYSQL_TYPE_SHORT:
         {
             if (p_UnSigned)
-                return FieldType::FIELD_I16;
-            else
                 return FieldType::FIELD_UI16;
+            else
+                return FieldType::FIELD_I16;
         }
         case enum_field_types::MYSQL_TYPE_INT24:
         case enum_field_types::MYSQL_TYPE_LONG:
         {
             if (p_UnSigned)
-                return FieldType::FIELD_I32;
-            else
                 return FieldType::FIELD_UI32;
+            else
+                return FieldType::FIELD_I32;
         }
         case enum_field_types::MYSQL_TYPE_LONGLONG:
         case enum_field_types::MYSQL_TYPE_BIT:
@@ -245,7 +245,7 @@ namespace SteerStone { namespace Core { namespace Database {
             if (!Data.Buffer)
                 return false;
 
-            int8 m_Bool = GetInt8();
+            int8 m_Bool = GetUInt8();
 
             if (m_Bool == 1)
                 return true;
