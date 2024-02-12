@@ -158,6 +158,9 @@ namespace SteerStone { namespace Game { namespace Server {
             /// Web Handler
             /// @p_ClientPacket : Packet recieved from Web
             void HandleBroughtAmmo(ClientPacket* p_Packet);
+            /// Web Handler
+            /// @p_ClientPacket : Packet recieved from Web
+            void HandleUpdateClans(ClientPacket* p_Packet);
 
             /// Pointer to Player
             Entity::Player* ToPlayer();

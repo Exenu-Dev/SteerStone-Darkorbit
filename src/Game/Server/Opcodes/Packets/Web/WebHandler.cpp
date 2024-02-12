@@ -22,6 +22,7 @@
 #include "GameFlags.hpp"
 #include "Server/LoginPackets.hpp"
 #include "ObjectManager.hpp"
+#include "ClanManager.hpp"
 
 /// Note;
 /// I'm not using the Server Packets to send a response back.
@@ -164,6 +165,19 @@ namespace SteerStone { namespace Game { namespace Server {
 
         Write((char*)l_PacketBuffer.GetContents(), l_PacketBuffer.GetSize(), true);
     }
+    /// Web Handler
+    /// @p_ClientPacket : Packet recieved from Web
+    /// Web Handler
+    /// @p_ClientPacket : Packet recieved from Web
+    void GameSocket::HandleUpdateClans(ClientPacket* p_Packet)
+    {
+        sClanManager->LoadFromDB();
+
+        nlohmann::json l_Json;
+        l_Json["status"] = "success";
+
+        Write(l_Json.dump().c_str(), l_Json.dump().length(), true);
+	}
 }   ///< namespace Server
 }   ///< namespace Game
 }   ///< namespace SteerStone

@@ -27,6 +27,12 @@
 #define ROCKET_ATTACK_UPDATE 2000ul
 #define MAX_RESOURCE_COUNTER 9ul
 
+namespace SteerStone { namespace Game { namespace Clan {
+	class Base;
+} ///< namespace Clan
+} ///< namespace Game
+} ///< namespace SteerStone
+
 namespace SteerStone { namespace Game { namespace Entity {
 
     /// Death State of unit
@@ -166,8 +172,6 @@ namespace SteerStone { namespace Game { namespace Entity {
         Company GetCompany()        const { return m_Company;           }
         uint16 GetRank()            const { return m_Rank;              }
         uint16 GetGatesAchieved()   const { return m_GatesAchieved;     }
-        uint32 GetClanId()          const { return m_ClanId;            }
-        std::string GetClanName()   const { return m_ClanName;          }
         uint16 GetWeaponState()     const { return m_WeaponState;       }
         uint16 GetDeathState()      const { return m_DeathState;        }
         uint16 GetLaserType()       const { return m_LaserType;         }    
@@ -217,6 +221,8 @@ namespace SteerStone { namespace Game { namespace Entity {
             }
         }
 
+        Clan::Base* GetClan() const { return m_Clan; }
+
         bool IsAttacking()           const { return m_Attacking;                      }
         bool IsAttackingWithRocket() const { return m_AttackType & (AttackType::ATTACK_TYPE_ROCKET | ATTACK_TYPE_BOTH); }
         bool IsAttackingWithLaser()  const { return m_AttackType & (AttackType::ATTACK_TYPE_LASER | ATTACK_TYPE_BOTH); }
@@ -239,6 +245,7 @@ namespace SteerStone { namespace Game { namespace Entity {
         }
         void SetResource(uint32 const p_Index, uint32 const p_Resource);
         void SetInRadiationZone(bool const p_InRadiation) { m_InRadiationZone = p_InRadiation; }
+        void SetClan(Clan::Base* p_Clan) { m_Clan = p_Clan; }
 
     //////////////////////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////////////////////
@@ -255,8 +262,6 @@ namespace SteerStone { namespace Game { namespace Entity {
         uint16 m_ShipType;
         uint16 m_Rank;
         uint16 m_GatesAchieved;
-        uint32 m_ClanId;
-        std::string m_ClanName;
         uint16 m_WeaponState;
         uint16 m_LaserType;
         uint16 m_RocketType;
@@ -280,6 +285,8 @@ namespace SteerStone { namespace Game { namespace Entity {
         bool m_InRadiationZone;
         Core::Diagnostic::IntervalTimer m_IntervalAttackUpdate;
         Core::Diagnostic::IntervalTimer m_IntervalRocketAttackUpdate;
+
+        Clan::Base* m_Clan;
 
         Unit* m_Target;
         uint64 m_TargetGUID;

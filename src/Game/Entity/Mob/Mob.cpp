@@ -24,6 +24,7 @@
 #include "Diagnostic/DiaServerWatch.hpp"
 #include "Utility/UtilRandom.hpp"
 #include "Utility/UtilMaths.hpp"
+#include "ClanManager.hpp"
 
 namespace SteerStone { namespace Game { namespace Entity {
 
@@ -43,6 +44,8 @@ namespace SteerStone { namespace Game { namespace Entity {
         m_Fleeing = false;
 
         m_AttackRange = sWorldManager->GetIntConfig(World::IntConfigs::INT_CONFIG_MOB_ATTACK_RANGE);
+
+        m_Clan = sClanManager->MobClan();
 
         SetType(Type::OBJECT_TYPE_MOB);
         SetGUID(ObjectGUID(GUIDType::MOB));
