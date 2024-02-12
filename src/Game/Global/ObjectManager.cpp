@@ -198,12 +198,12 @@ namespace SteerStone { namespace Game { namespace Global {
                 Entity::ItemTemplate* l_ItemTemplate = new Entity::ItemTemplate();
                 l_ItemTemplate->Id              = l_Result[0].GetUInt64();
                 l_ItemTemplate->Name            = l_Result[1].GetString();
-                l_ItemTemplate->Type            = l_Result[2].GetUInt16();
-                l_ItemTemplate->GFX             = l_Result[3].GetUInt16();
-                l_ItemTemplate->Value           = l_Result[4].GetUInt16();
-                l_ItemTemplate->ValuePercentage = l_Result[5].GetUInt16();
-                l_ItemTemplate->Credits         = l_Result[6].GetUInt16();
-                l_ItemTemplate->Uridium         = l_Result[7].GetUInt16();
+                l_ItemTemplate->Type            = l_Result[2].GetUInt32();
+                l_ItemTemplate->GFX             = l_Result[3].GetUInt32();
+                l_ItemTemplate->Value           = l_Result[4].GetInt32();
+                l_ItemTemplate->ValuePercentage = l_Result[5].GetInt32();
+                l_ItemTemplate->Credits         = l_Result[6].GetDouble();
+                l_ItemTemplate->Uridium         = l_Result[7].GetDouble();
 
                 m_ItemTemplate[l_ItemTemplate->Id] = l_ItemTemplate;
 
@@ -246,7 +246,7 @@ namespace SteerStone { namespace Game { namespace Global {
                 l_ShipTemplate->Extras          = l_Result[10].GetUInt32();
                 l_ShipTemplate->Credits         = l_Result[11].GetUInt32();
                 l_ShipTemplate->Uridium         = l_Result[12].GetUInt32();
-                l_ShipTemplate->Disabled        = l_Result[13].GetBool();
+                l_ShipTemplate->Disabled        = l_Result[13].GetUInt32(); ///GetBool();
 
                 m_ShipTemplate[l_ShipTemplate->Entry] = l_ShipTemplate;
 

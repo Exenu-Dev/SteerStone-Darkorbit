@@ -180,6 +180,7 @@ namespace SteerStone { namespace Game { namespace Entity {
                 IntervalLogout.SetInterval(sWorldManager->GetIntConfig(World::IntConfigs::INT_CONFIG_LOG_OUT_TIMER));
                 
             LoadShipFromDB();
+            LoadBoosters();
             LoadDrones();
             m_Inventory.LoadInventory();
 
@@ -283,6 +284,50 @@ namespace SteerStone { namespace Game { namespace Entity {
 
             } while (l_PreparedResultSet->GetNextRow());
         }
+    }
+    /// Load Boosters
+    void Player::LoadBoosters()
+    {
+        Core::Database::PreparedStatement* l_PreparedStatement = GameDatabase.GetPrepareStatement();
+        l_PreparedStatement->PrepareStatement("SELECT id, entry_id, duration FROM user_boosters WHERE user_id = ?");
+        l_PreparedStatement->SetUint32(0, m_Id);
+
+        std::unique_ptr<Core::Database::PreparedResultSet> l_PreparedResultSet = l_PreparedStatement->ExecuteStatement();
+
+        if (l_PreparedResultSet)
+        {
+            m_Boosters.clear();
+
+            do
+            {
+				Core::Database::ResultSet* l_Result = l_PreparedResultSet->FetchResult();
+
+				const uint32 l_Id           = l_Result[0].GetUInt32();
+                const uint32 l_BoosterId    = l_Result[1].GetUInt32();
+				const int32 l_Duration      = l_Result[1].GetInt32();
+
+                if (ItemTemplate const* l_ItemTemplate = sObjectManager->GetItemTemplate(l_BoosterId))
+                {
+					Booster l_Booster;
+                    l_Booster.Id            = l_Id;
+                    l_Booster.ItemTemplate  = l_ItemTemplate;
+                    l_Booster.Duration      = l_Duration;
+
+                    m_Boosters.push_back(l_Booster);
+				}
+                else
+                {
+					LOG_WARNING("Player", "Cannot find Booster with entry %0 deleting from player inventory!", l_BoosterId);
+
+					Core::Database::PreparedStatement* l_PreparedStatementDelete = GameDatabase.GetPrepareStatement();
+					l_PreparedStatementDelete->PrepareStatement("DELETE FROM user_boosters WHERE entry_id = ? AND user_id = ?");
+					l_PreparedStatementDelete->SetUint32(0, l_BoosterId);
+                    l_PreparedStatementDelete->SetUint32(1, m_Id);
+					l_PreparedStatementDelete->ExecuteStatement();
+				}
+
+			} while (l_PreparedResultSet->GetNextRow());
+		}
     }
     /// Save Player details to database
     void Player::SaveToDB()
@@ -474,8 +519,8 @@ namespace SteerStone { namespace Game { namespace Entity {
             case DeathState::ALIVE:
             {
                 UpdateRadiationZone(p_Diff);
-
                 UpdateSurroundings(p_Diff);
+                UpdateBoosters(p_Diff);
 
                 Unit::Update(p_Diff);
             }
@@ -546,6 +591,87 @@ namespace SteerStone { namespace Game { namespace Entity {
         l_PreparedStatement->ExecuteStatement();
     }
 
+    ///////////////////////////////////////////
+    //             BOOSTERS
+    ///////////////////////////////////////////
+
+    /// Update the Booster Times
+    /// @p_Diff : Execution Time
+    void Player::UpdateBoosters(uint32 const p_Diff)
+    {
+        /// Used to check if we need to send the boosters packet
+        /// and save the player to the database
+        bool l_Updated = false;
+
+        for (auto l_Itr = m_Boosters.begin(); l_Itr != m_Boosters.end();)
+        {
+			if (l_Itr->Update(p_Diff))
+				l_Itr++;
+            else
+            {
+                l_Itr = m_Boosters.erase(l_Itr);
+                l_Updated = true;
+            }
+		}
+
+        if (l_Updated)
+        {
+            SendBoosters();
+            /// Save player to database
+            SaveToDB();
+        }
+    }
+    /// Check to see if the player has a booster
+    /// @p_BoosterType : Booster Type
+    bool Player::HasBooster(BoosterTypes const p_BoosterType) const
+    {
+        for (auto const& l_Booster : m_Boosters)
+        {
+			if (l_Booster.GetBoosterType() == p_BoosterType)
+				return true;
+		}
+
+        return false;
+    }
+    /// Get Booster Value
+    /// @p_BoosterType : Booster Type
+    int32 Player::GetBoosterValue(BoosterTypes const p_BoosterType) const
+    {
+        for (auto const& l_Booster : m_Boosters)
+        {
+            if (l_Booster.GetBoosterType() == p_BoosterType)
+                return l_Booster.GetBoosterValue();
+        }
+
+        /// TODO; Show what booster is missing
+        LOG_ASSERT(false, "Player", "Player %0 does not have a booster of type");
+    }
+    /// Send the Boosters Packet
+    void Player::SendBoosters()
+    {
+        /// Notes
+        /// Packet is sent in the following format
+        /// XP/Honor/Damage/Shield
+
+        std::string l_BoosterString = "";
+
+        std::vector<int32> l_Boosters;
+
+        for (int l_I = static_cast<uint8>(BoosterTypes::BOOSTER_TYPE_XP_B01); l_I < static_cast<uint8>(BoosterTypes::MAX_BOOSTER); l_I++)
+        {
+            if (HasBooster(static_cast<BoosterTypes>(l_I)))
+				l_Boosters.push_back(GetBoosterValue(static_cast<BoosterTypes>(l_I)));
+            else
+                l_Boosters.push_back(0);
+		}
+
+        for (auto const& l_Booster : l_Boosters)
+			l_BoosterString += std::to_string(l_Booster) + "/";
+
+        l_BoosterString.pop_back();
+
+        SendPacket(Server::Packets::Misc::Update().Write(Server::Packets::Misc::InfoUpdate::INFO_UPDATE_BOOSTERS, { l_BoosterString }));
+    }
 
     ///////////////////////////////////////////
     //        SURROUNDING SYSTEM
@@ -1020,6 +1146,9 @@ namespace SteerStone { namespace Game { namespace Entity {
         l_Buffer.AppendEndSplitter();
         l_Buffer.AppendCarriage();
         SendPacket(&l_Buffer);
+
+        /// Close the socket
+        m_Socket->CloseSocket();
     }
 
     /// Teleport Player to Map
@@ -1538,7 +1667,20 @@ namespace SteerStone { namespace Game { namespace Entity {
 		m_Honor += p_Honor;
 	}
 
+    ///////////////////////////////////////////
+    //        BOOSTERS
+    ///////////////////////////////////////////
 
+    /// Get Booster Type
+    BoosterTypes Booster::GetBoosterType() const
+    {
+        return static_cast<BoosterTypes>(ItemTemplate->Id);
+    }
+    /// Get Booster Value
+    int32 Booster::GetBoosterValue() const
+    {
+        return ItemTemplate->Value != 0 ? ItemTemplate->Value : ItemTemplate->ValuePercentage;
+	}
 }   ///< namespace Entity
 }   ///< namespace Game
 }   ///< namespace Steerstone

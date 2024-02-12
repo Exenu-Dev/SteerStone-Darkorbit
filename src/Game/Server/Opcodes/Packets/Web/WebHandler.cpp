@@ -47,7 +47,11 @@ namespace SteerStone { namespace Game { namespace Server {
     void GameSocket::HandleGetOnlineCount(ClientPacket* p_Packet)
     {
         uint32 l_Count = sWorldManager->GetPlayerCount();
-        Write((const char*)&l_Count, sizeof(l_Count));
+
+        nlohmann::json l_Json;
+        l_Json["count"] = l_Count;
+
+        Write(l_Json.dump().c_str(), l_Json.dump().length(), true);
     }
     /// Web Handler
     /// @p_ClientPacket : Packet recieved from Web
@@ -154,6 +158,8 @@ namespace SteerStone { namespace Game { namespace Server {
 
 		Write(&l_CanEquip, sizeof(l_CanEquip));
 	}
+    /// Web Handler
+    /// @p_ClientPacket : Packet recieved from Web
     void GameSocket::HandleBroughtAmmo(ClientPacket* p_Packet)
     {
         uint32 l_PlayerId = p_Packet->ReadUInt32();
@@ -188,6 +194,25 @@ namespace SteerStone { namespace Game { namespace Server {
     }
     /// Web Handler
     /// @p_ClientPacket : Packet recieved from Web
+    void GameSocket::HandleUpdateBoosters(ClientPacket* p_Packet)
+    {
+        uint32 p_PlayerId = p_Packet->ReadUInt32();
+
+        Entity::Player* l_Player = sWorldManager->FindPlayer(p_PlayerId);
+
+        if (l_Player)
+        {
+            l_Player->LoadBoosters();
+            l_Player->SendBoosters();
+		}
+
+        nlohmann::json l_Json;
+
+        l_Json["status"] = "success";
+        l_Json["message"] = "Boosters updated";
+
+        Write(l_Json.dump().c_str(), l_Json.dump().length(), true);
+    }
     /// Web Handler
     /// @p_ClientPacket : Packet recieved from Web
     void GameSocket::HandleUpdateClans(ClientPacket* p_Packet)

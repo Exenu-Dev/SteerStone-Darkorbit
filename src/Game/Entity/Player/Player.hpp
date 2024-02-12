@@ -36,6 +36,52 @@ namespace SteerStone { namespace Game { namespace Entity {
 
     typedef std::unordered_map<uint64, std::unique_ptr<SurroundingObject>> SurroundingMap;
 
+    struct Booster
+    {
+    public:
+        /// Constructor
+        Booster()
+        {
+            Id              = 0;
+            ItemTemplate    = nullptr;
+            Duration        = 0;
+		}
+
+        //////////////////////////////////////////////////////////////////////////
+        //////////////////////////////////////////////////////////////////////////
+
+    public:
+        ItemTemplate const* GetItemTemplate() const { return ItemTemplate; }
+
+        /// Get Item Template
+        ItemTemplate const* GetItemTemplate()
+        {
+			return ItemTemplate;
+		}
+
+        /// Update Duration
+        /// @p_Diff : Execution Time
+        bool Update(uint32 const p_Diff)
+        {
+			if (Duration > 0)
+				Duration -= p_Diff;
+
+            return Duration <= 0;
+		}
+
+        /// Get Booster Type
+        BoosterTypes GetBoosterType() const;
+        /// Get Booster Value
+        int32 GetBoosterValue() const;
+
+        //////////////////////////////////////////////////////////////////////////
+        //////////////////////////////////////////////////////////////////////////
+
+        uint32 Id;
+        ItemTemplate const* ItemTemplate;
+        int32 Duration;
+	};
+
     /// Holds Ammo data
     struct Ammo
     {
@@ -180,6 +226,8 @@ namespace SteerStone { namespace Game { namespace Entity {
         void LoadShipFromDB();
         /// Load Drone Info from database
         void LoadDrones();
+        /// Load Boosters
+        void LoadBoosters();
     public:
         /// Save Player details to database
         void SaveToDB();
@@ -211,6 +259,22 @@ namespace SteerStone { namespace Game { namespace Entity {
         /// @p_Log : Log text
         /// @p_LogBookType : Type of Log Book
         void UpdateLogBook(std::string p_Log, LogBookType const p_LogBookType = LogBookType::LOG_BOOK_TYPE_DETAILED);
+
+        ///////////////////////////////////////////
+        //             BOOSTERS
+        ///////////////////////////////////////////
+    public:
+        /// Update the Booster Times
+        /// @p_Diff : Execution Time
+        void UpdateBoosters(uint32 const p_Diff);
+        /// Check to see if the player has a booster
+        /// @p_BoosterType : Booster Type
+        bool HasBooster(BoosterTypes const p_BoosterType) const;
+        /// Get Booster Value
+        /// @p_BoosterType : Booster Type
+        int32 GetBoosterValue(BoosterTypes const p_BoosterType) const;\
+        /// Send the Boosters Packet
+        void SendBoosters();
 
         ///////////////////////////////////////////
         //        SURROUNDING SYSTEM
@@ -422,6 +486,7 @@ namespace SteerStone { namespace Game { namespace Entity {
         EventType m_Event;
         Ammo m_Ammo;
         Inventory m_Inventory;
+        std::vector<Booster> m_Boosters;
         Core::Diagnostic::IntervalTimer m_IntervalNextSave;              ///< Save to database
         Core::Diagnostic::IntervalTimer m_IntervalRadiation;             ///< Save to database
 

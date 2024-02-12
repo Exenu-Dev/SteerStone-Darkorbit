@@ -244,6 +244,20 @@ namespace SteerStone { namespace Game { namespace Server {
         }
     }
 
+    void GameSocket::HandleMine(ClientPacket* p_Packet)
+    {
+        PacketBuffer l_PacketBuffer;
+        l_PacketBuffer.AppendUInt32(0);
+        l_PacketBuffer.AppendChar("n");
+        l_PacketBuffer.AppendChar("SMB");
+        l_PacketBuffer.AppendUInt32(m_Player->GetId());
+
+        l_PacketBuffer.AppendEndSplitter();
+        l_PacketBuffer.AppendCarriage();
+
+        SendPacket(&l_PacketBuffer);
+	}
+
 }   ///< namespace Server
 }   ///< namespace Game
 }   ///< namespace SteerStone

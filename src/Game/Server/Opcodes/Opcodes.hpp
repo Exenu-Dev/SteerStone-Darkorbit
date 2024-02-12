@@ -64,6 +64,7 @@ enum ClientOpCodes : uint8
     CLIENT_PACKET_SELL_RESOURCES        = 0x62,
     CLIENT_PACKET_SELL_ORE              = 0x54,
     CLIENT_PACKET_ORE_PRICES            = 0x62,
+    CLIENT_PACKET_MINE  			    = 0x53,
 
     /// Web
     WEB_PACKET_CHECK_ONLINE             = 0x22,
@@ -73,6 +74,7 @@ enum ClientOpCodes : uint8
     WEB_PACKET_UPDATE_SHIP              = 0x29,
     WEB_PACKET_BROUGHT_AMMO             = 0x26,
     WEB_PACKET_UPDATE_DRONES            = 0x27,
+    WEB_PACKET_UPDATE_BOOSTERS          = 0x28,
     WEB_PACKET_UPDATE_CLANS             = 0x32,
 
     CLIENT_MAX_OPCODE                   = 0x7B
