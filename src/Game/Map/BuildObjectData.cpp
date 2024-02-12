@@ -83,26 +83,29 @@ namespace SteerStone { namespace Game { namespace Map {
 
         if (p_ObjectBuilt->IsBonusBox())
         {
-            if (p_ObjectBuilt->ToBonusBox()->GetBoxType() == BonusBoxType::BONUS_BOX_TYPE_CARGO)
+            /// We do this because we want to change the friendly cargo to non friendly, only way I can find
+            /// I believe this is for cargo
+            if (p_ObjectBuilt->ToBonusBox()->NeedToBeUpdated())
             {
-                /// We do this because we want to change the friendly cargo to non friendly, only way I can find
-                if (p_ObjectBuilt->ToBonusBox()->NeedToBeUpdated())
-                {
-                    Server::Packets::RemoveCargo l_Packet;
-                    l_Packet.Id = p_ObjectBuilt->GetObjectGUID().GetCounter();
-                    p_Player->SendPacket(l_Packet.Write());
-                }
-
-                /// TODO; Find packet which updates from friendly to non friendly cargo, currently it visually bugs out when sending Cargo packet again to update
-                Server::Packets::Cargo l_Packet;
-                l_Packet.Id         = p_ObjectBuilt->GetObjectGUID().GetCounter();
-                l_Packet.Type       = (p_ObjectBuilt->ToBonusBox()->GetOwnerId() != p_Player->GetObjectGUID().GetCounter() && p_ObjectBuilt->ToUnit()->GetCompany() == p_Player->GetCompany()) ? !p_ObjectBuilt->ToBonusBox()->IsFriendlyCargo() : 1;
-                l_Packet.PositionX  = p_ObjectBuilt->GetSpline()->GetPositionX();
-                l_Packet.PositionY  = p_ObjectBuilt->GetSpline()->GetPositionY();
+                Server::Packets::RemoveCargo l_Packet;
+                l_Packet.Id = p_ObjectBuilt->GetObjectGUID().GetCounter();
                 p_Player->SendPacket(l_Packet.Write());
-
-                return;
             }
+
+            /// TODO; Find packet which updates from friendly to non friendly cargo, currently it visually bugs out when sending Cargo packet again to update
+            Server::Packets::Cargo l_Packet;
+            l_Packet.Id         = p_ObjectBuilt->GetObjectGUID().GetCounter();
+
+            if (p_ObjectBuilt->ToBonusBox()->GetBoxType() == BonusBoxType::BONUS_BOX_TYPE_CARGO)
+                l_Packet.Type = (p_ObjectBuilt->ToBonusBox()->GetOwnerId() != p_Player->GetObjectGUID().GetCounter() && p_ObjectBuilt->ToUnit()->GetCompany() == p_Player->GetCompany()) ? !p_ObjectBuilt->ToBonusBox()->IsFriendlyCargo() : 1;
+            else
+                l_Packet.Type = static_cast<uint16>(p_ObjectBuilt->ToBonusBox()->GetBoxType());
+
+            l_Packet.PositionX  = p_ObjectBuilt->GetSpline()->GetPositionX();
+            l_Packet.PositionY  = p_ObjectBuilt->GetSpline()->GetPositionY();
+            p_Player->SendPacket(l_Packet.Write());
+
+            return;
         }
         else if (p_ObjectBuilt->IsPlayer())
         {

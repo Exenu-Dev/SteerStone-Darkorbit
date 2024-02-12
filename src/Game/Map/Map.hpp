@@ -182,6 +182,20 @@ namespace SteerStone { namespace Game { namespace Map {
             }
         }
 
+        /// Is Main Battle Zone Map
+        /// TODO: Better naming could be done here
+        bool IsMainBattleZoneMap()
+        {
+            switch (m_Id)
+            {
+                case 16:    ///< 4-4
+                case 29:    ///< 4-5
+				    return true;
+				default:
+					return false;
+            }
+        }
+
         PoolManager* GetPoolManager() { return &m_PoolManager;  }
 
         //////////////////////////////////////////////////////////////////////////

@@ -53,6 +53,7 @@ namespace SteerStone { namespace Game { namespace Map {
     void PoolManager::Initialize()
     {
         InitializeMobs();
+        InitializeBonusBoxes();
     }
     /// Load Mobs into pool
     void PoolManager::InitializeMobs()
@@ -142,6 +143,46 @@ namespace SteerStone { namespace Game { namespace Map {
 
             } while (l_PreparedResultSet->GetNextRow());
         }
+    }
+
+    /// Load Bonus Boxes into pool
+    void PoolManager::InitializeBonusBoxes()
+    {
+        /// We don't generate bonus boxes for main battle zone maps
+        if (m_Map->IsMainBattleZoneMap())
+            return;
+
+        float l_PreviousRadiusX = 1.0f;
+        float l_PreviousRadiusY = 1.0f;
+        float l_RadiusX = (m_Map->GetMapSizeX() / MAX_GRIDS) * GRID_CELLS;
+        float l_RadiusY = (m_Map->GetMapSizeY() / MAX_GRIDS) * GRID_CELLS;
+
+        for (uint32 l_Y = 1; l_Y < GRID_CELLS + 1; l_Y++)
+        {
+            float l_MaxY = (l_RadiusY * l_Y);
+
+            for (uint32 l_X = 1; l_X < GRID_CELLS + 1; l_X++)
+            {
+                float l_MaxX = (l_RadiusX * l_X);
+
+                if (Core::Utils::RoleChanceFloat(80.f))
+                {
+					Entity::BonusBox* l_BonusBox = new Entity::BonusBox(BonusBoxType::BONUS_BOX_TYPE_BONUS);
+
+					l_BonusBox->SetMap(m_Map);
+					l_BonusBox->GetSpline()->SetPosition(Core::Utils::FloatRandom(l_PreviousRadiusX, l_MaxX - DISTANCE_AWAY_FROM_BORDER), Core::Utils::FloatRandom(l_PreviousRadiusY, l_MaxY - DISTANCE_AWAY_FROM_BORDER));
+					m_Map->Add(l_BonusBox);
+					m_Pool[POOL_TYPE_BONUS_BOX]->Add(l_BonusBox);
+                }
+             
+                l_PreviousRadiusX = l_MaxX;
+            }
+
+            l_PreviousRadiusX = 1.0f;
+            l_PreviousRadiusY = l_MaxY;
+        }
+
+        LOG_INFO("PoolManager", "Initialized Bonus Boxes for Map %0", m_Map->GetId());
     }
 
     /// Update Pool

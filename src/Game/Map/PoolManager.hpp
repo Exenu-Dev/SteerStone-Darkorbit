@@ -55,6 +55,8 @@ namespace SteerStone { namespace Game { namespace Map {
     private:
         /// Load Mobs into pool
         void InitializeMobs();
+        /// Load Bonus Boxes into pool
+        void InitializeBonusBoxes();
 
     public:
         /// Update Pool

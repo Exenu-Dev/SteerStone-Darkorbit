@@ -292,6 +292,17 @@ enum DroneLevel
 enum class BonusBoxType
 {
     BONUS_BOX_TYPE_CARGO = 0,
+    BONUS_BOX_TYPE_BONUS = 2
+};
+
+enum class BonusBoxRewardType
+{
+    BONUS_BOX_REWARD_TYPE_CREDITS,
+    BONUS_BOX_REWARD_TYPE_URIDIUM,
+    BONUS_BOX_REWARD_TYPE_LCB10,
+    BONUS_BOX_REWARD_TYPE_MCB25,
+    BONUS_BOX_REWARD_TYPE_MCB50,
+    BONUS_BOX_REWARD_TYPE_SAB50
 };
 
 enum WeaponState
