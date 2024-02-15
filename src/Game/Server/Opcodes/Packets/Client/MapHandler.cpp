@@ -23,6 +23,7 @@
 #include "Socket.hpp"
 #include "Portal.hpp"
 #include "BonusBox.hpp"
+#include "Mine.hpp"
 #include "Ore.hpp"
 #include "ZoneManager.hpp"
 #include "World.hpp"
@@ -247,11 +248,12 @@ namespace SteerStone { namespace Game { namespace Server {
 
     void GameSocket::HandleMine(ClientPacket* p_Packet)
     {
-        PacketBuffer l_PacketBuffer;
-        l_PacketBuffer.AppendUInt32(0);
-        l_PacketBuffer.AppendChar("n");
-        l_PacketBuffer.AppendChar("SMB");
-        l_PacketBuffer.AppendUInt32(m_Player->GetId());
+        Entity::Mine* l_Mine = new Entity::Mine(m_Player);
+        l_Mine->SetMap(m_Player->GetMap());
+        l_Mine->GetSpline()->SetPosition(m_Player->GetSpline()->GetPositionX(), m_Player->GetSpline()->GetPositionY());
+        l_Mine->GetMap()->Add(l_Mine);
+	}
+
     void GameSocket::HandleLootOre(ClientPacket* p_Packet)
     {
 		uint32 l_Id = p_Packet->ReadUInt32();

@@ -131,6 +131,22 @@ namespace SteerStone { namespace Game { namespace Server { namespace Packets {
         return &m_Buffer;
     }
 
+    /// SERVER_PACKET_SPAWN_MINE
+    PacketBuffer const* SpawnMine::Write()
+    {
+        // 0|L|{mineId}|{mineType}|{X}|{Y}|{pulseColorId}|{shockwaveColorId}
+        m_Buffer.AppendUInt32(Id);
+        m_Buffer.AppendUInt32(Type);
+        m_Buffer.AppendUInt32(PositionX);
+        m_Buffer.AppendUInt32(PositionY);
+        m_Buffer.AppendBool(false); ///< Unknown
+        m_Buffer.AppendBool(false); ///< Unknown
+
+        m_Buffer.AppendEndSplitter();
+        m_Buffer.AppendCarriage();
+
+        return &m_Buffer;
+    }
 
     /// SERVER_PACKET_DESPAWN_ORE
     PacketBuffer const* DespawnOre::Write()

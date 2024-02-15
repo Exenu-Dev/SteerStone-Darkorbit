@@ -44,9 +44,9 @@ namespace SteerStone { namespace Chat { namespace Server {
         //////////////////////////////////////////////////////////////////////////
 
             /// Get our buffer
-            PacketBuffer& GetBuffer()          { return m_Buffer;          }
+            PacketBuffer GetBuffer()          { return m_Buffer;          }
             /// Get our secondary buffer
-            PacketBuffer& GetSecondaryBuffer() { return m_SecondaryBuffer; }
+            PacketBuffer GetSecondaryBuffer() { return m_SecondaryBuffer; }
 
         protected:
             PacketBuffer m_Buffer;                  ///< String buffer which holds our data to be sent to the client

@@ -31,7 +31,9 @@ namespace SteerStone { namespace Game { namespace Entity {
         OBJECT_TYPE_MOB         = 2,
         OBJECT_TYPE_PORTAL      = 3,
         OBJECT_TYPE_STATION     = 4,
-        OBJECT_TYPE_BONUS_BOX   = 5
+        OBJECT_TYPE_BONUS_BOX   = 5,
+        OBJECT_TYPE_MINE 	    = 6,
+        OBJECT_TYPE_ORE 	    = 7,
     };
 
     class Unit;
@@ -40,6 +42,8 @@ namespace SteerStone { namespace Game { namespace Entity {
     class Station;
     class BonusBox;
     class Mob;
+    class Mine;
+    class Ore;
 
     class Object
     {
@@ -71,12 +75,15 @@ namespace SteerStone { namespace Game { namespace Entity {
         std::string GetName()                     const { return m_Name;                    }
         std::tuple<uint32, uint32> GetGridIndex() const { return m_GridIndex;               }
         bool NeedToBeUpdated()                    const { return m_NeedToBeUpdate;          }
+        bool IsScheduledForDelete()               const { return m_ScheduleForDelete; }
 
         bool IsPlayer()             const   { return m_Type == Type::OBJECT_TYPE_PLAYER;    }
         bool IsMob()                const   { return m_Type == Type::OBJECT_TYPE_MOB;       }
         bool IsPortal()             const   { return m_Type == Type::OBJECT_TYPE_PORTAL;    }
         bool IsStation()            const   { return m_Type == Type::OBJECT_TYPE_STATION;   }
         bool IsBonusBox()           const   { return m_Type == Type::OBJECT_TYPE_BONUS_BOX; }
+        bool IsMine()               const   { return m_Type == Type::OBJECT_TYPE_MINE;      }
+        bool IsOre()                const   { return m_Type == Type::OBJECT_TYPE_ORE;       }
 
         Unit* ToUnit()                      {                                               return reinterpret_cast<Unit*>(this);                               }
         Unit const* ToUnit()        const   {                                               return reinterpret_cast<Unit const*>(this);                         }
@@ -90,12 +97,17 @@ namespace SteerStone { namespace Game { namespace Entity {
         Mob const* ToMob()          const   { if (GetType() == Type::OBJECT_TYPE_MOB)       return reinterpret_cast<Mob const*>(this);          return nullptr; }
         BonusBox* ToBonusBox()              { if (GetType() == Type::OBJECT_TYPE_BONUS_BOX) return reinterpret_cast<BonusBox*>(this);           return nullptr; }
         BonusBox const* ToBonusBox()const   { if (GetType() == Type::OBJECT_TYPE_BONUS_BOX) return reinterpret_cast<BonusBox const*>(this);     return nullptr; }
+        Mine* ToMine()                      { if (GetType() == Type::OBJECT_TYPE_MINE)      return reinterpret_cast<Mine*>(this);               return nullptr; }
+        Mine const* ToMine()        const   { if (GetType() == Type::OBJECT_TYPE_MINE)      return reinterpret_cast<Mine const*>(this);         return nullptr; }
+        Ore* ToOre()                        { if (GetType() == Type::OBJECT_TYPE_ORE)       return reinterpret_cast<Ore*>(this);                return nullptr; }
+        Ore const* ToOre()          const   { if (GetType() == Type::OBJECT_TYPE_ORE)       return reinterpret_cast<Ore const*>(this);          return nullptr; }
 
-        void SetGridIndex(std::tuple<int32, int32> const p_GridIndex)   { m_GridIndex = p_GridIndex;   }
-        void SetName(std::string const p_Name)                          { m_Name = p_Name;             }
-        void SetType(Type const p_Type)                                 { m_Type = p_Type;             }
-        void SetGUID(ObjectGUID const& p_ObjectGUID)                    { m_ObjectGUID = p_ObjectGUID; }
-        void SetNeedToBeUpdated(bool const p_Update)                    { m_NeedToBeUpdate = p_Update; }
+        void SetGridIndex(std::tuple<int32, int32> const p_GridIndex)   { m_GridIndex = p_GridIndex;        }
+        void SetName(std::string const p_Name)                          { m_Name = p_Name;                  }
+        void SetType(Type const p_Type)                                 { m_Type = p_Type;                  }
+        void SetGUID(ObjectGUID const& p_ObjectGUID)                    { m_ObjectGUID = p_ObjectGUID;      }
+        void SetNeedToBeUpdated(bool const p_Update)                    { m_NeedToBeUpdate = p_Update;      }
+        void SetScheduleForDelete(bool const p_Schedule)                { LOG_ASSERT(!IsPlayer(), "Object", "Attempted to schedule a player for deletion! for Object %0", GetGUID()); m_ScheduleForDelete = p_Schedule; }
         void SetMap(Map::Base* p_Map)                                   { LOG_ASSERT(p_Map, "Object", "Attempted to assign Object Map to nullptr! for Object %0", GetGUID());  m_Map = p_Map; }
     
     //////////////////////////////////////////////////////////////////////////
@@ -106,6 +118,7 @@ namespace SteerStone { namespace Game { namespace Entity {
         ObjectGUID m_ObjectGUID;    
         std::string m_Name;
         bool m_NeedToBeUpdate;
+        bool m_ScheduleForDelete;
         Spline m_Spline;
         Map::Base* m_Map;
         std::tuple<int32, int32> m_GridIndex;

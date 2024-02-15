@@ -28,6 +28,7 @@ namespace SteerStone { namespace Game { namespace Entity {
         m_Name.clear();
         m_GridIndex         = std::make_tuple(0, 0);
         m_NeedToBeUpdate    = false;
+        m_ScheduleForDelete = false;
         m_Map               = nullptr;
     }
     /// Deconstructor

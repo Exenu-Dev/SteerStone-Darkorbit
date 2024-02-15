@@ -977,9 +977,14 @@ namespace SteerStone { namespace Game { namespace Entity {
     /// Send Drone Info
     void Player::SendDrones()
     {
-        if (m_Drones.empty())
+        if (!m_Drones.size())
             return;
 
+        SendPacket(&BuildDronesPacket());
+    }
+    /// Build Drones Packet
+    Server::PacketBuffer const Player::BuildDronesPacket()
+    {
         uint32 l_DroneGroupCount = m_Drones.size() <= 4 ? 3 : 3;
 
         std::string l_Drones;
@@ -1021,20 +1026,20 @@ namespace SteerStone { namespace Game { namespace Entity {
                 }
                 else if (l_Counter == 2)
                 {
-					l_Drones += "0/4-" + std::to_string(l_DroneLevel) + ",";
-				}
+                    l_Drones += "0/4-" + std::to_string(l_DroneLevel) + ",";
+                }
                 else
                 {
-					l_Drones += "0-" + std::to_string(l_DroneLevel) + ",";
-				}
+                    l_Drones += "0-" + std::to_string(l_DroneLevel) + ",";
+                }
             }
             else if (m_Drones.size() >= 7 && m_Drones.size() <= 8)
             {
                 if (l_Counter == 0)
                 {
-					uint32 l_GroupDroneQuantity = m_Drones.size() == 7 ? 1 : 2;
-					l_Drones = "3/" + std::to_string(l_GroupDroneQuantity) + '-' + std::to_string(l_DroneLevel) + ",";
-				}
+                    uint32 l_GroupDroneQuantity = m_Drones.size() == 7 ? 1 : 2;
+                    l_Drones = "3/" + std::to_string(l_GroupDroneQuantity) + '-' + std::to_string(l_DroneLevel) + ",";
+                }
                 else if (l_Counter == 1)
                 {
                     l_Drones += "0-" + std::to_string(l_DroneLevel) + ",";
@@ -1044,25 +1049,28 @@ namespace SteerStone { namespace Game { namespace Entity {
                     l_Drones += "0/4-" + std::to_string(l_DroneLevel) + ",";
                 }
                 else if (l_Counter <= 5) {
-					l_Drones += "0-" + std::to_string(l_DroneLevel) + ",";
-				}
+                    l_Drones += "0-" + std::to_string(l_DroneLevel) + ",";
+                }
                 else if (l_Counter == 6)
                 {
                     uint32 l_GroupDroneQuantity = m_Drones.size() == 7 ? 1 : 2;
                     l_Drones += "2/" + std::to_string(l_GroupDroneQuantity) + '-' + std::to_string(l_DroneLevel) + ",";
-				}
+                }
                 else
                 {
-					l_Drones += "0-" + std::to_string(l_DroneLevel) + ",";
-				}
+                    l_Drones += "0-" + std::to_string(l_DroneLevel) + ",";
+                }
             }
 
             l_Counter++;
-		}
+        }
 
         l_Drones += '0';
 
-        SendPacket(Server::Packets::Misc::Info().Write(Server::Packets::Misc::InfoType::INFO_TYPE_DRONES, { GetObjectGUID().GetCounter(), l_Drones }));
+        Server::Packets::Misc::Info l_InfoPacket;
+        l_InfoPacket.Write(Server::Packets::Misc::InfoType::INFO_TYPE_DRONES, { GetObjectGUID().GetCounter(), l_Drones });
+
+        return l_InfoPacket.GetBuffer();
     }
     /// Update Cargo Max Space
     void Player::UpdateMaxCargoSpace()

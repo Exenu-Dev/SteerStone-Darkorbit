@@ -37,6 +37,8 @@ namespace SteerStone { namespace Game { namespace Server { namespace Packets { n
         INFO_TYPE_DRONES,
         INFO_TYPE_GREY_OPPONENT,
         INFO_TYPE_UNGREY_OPPONENT,
+        INFO_TYPE_MINE_SMB,
+        INFO_TYPE_MINE_MIN
     };
 
     enum class InfoUpdate

@@ -51,7 +51,7 @@ namespace SteerStone { namespace Game { namespace Entity {
             return false;
 
         /// If unit is dead, remove from client
-        if (!m_Object->IsBonusBox() && m_Object->ToUnit()->GetDeathState() == Entity::DeathState::DEAD)
+        if (!m_Object->IsBonusBox() && !m_Object->IsMine() && m_Object->ToUnit()->GetDeathState() == Entity::DeathState::DEAD)
         {
             Despawn();
             return false;

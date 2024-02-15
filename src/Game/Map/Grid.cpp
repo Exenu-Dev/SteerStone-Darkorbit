@@ -27,6 +27,7 @@
 #include "Station.hpp"
 #include "Player.hpp"
 #include "World.hpp"
+#include "Mine.hpp"
 #include "Database/DatabaseTypes.hpp"
 #include "Utility/UtilMaths.hpp"
 
@@ -172,12 +173,33 @@ namespace SteerStone { namespace Game { namespace Map {
         if (m_Players.empty())
             m_State = State::Idle;
     }
+    /// Check if any objects are scheduled for deletion
+    void Grid::CheckForScheduleForDeletion()
+    {
+        for (auto l_Itr = m_Objects.begin(); l_Itr != m_Objects.end();)
+		{
+			if (l_Itr->second->IsScheduledForDelete())
+			{
+                // Remove from map
+                Remove(l_Itr->second, true, false);
+
+                auto l_ToToDelete = l_Itr->second;
+
+				l_Itr = m_Objects.erase(l_Itr);
+
+                delete l_ToToDelete;
+			}
+			else
+				++l_Itr;
+		}
+    }
     /// Update Grid
     /// @p_Diff : Execution Time
     bool Grid::Update(uint32 const p_Diff)
     {
         CheckForPlayer(p_Diff);
         UpdateSurroundingObjects();
+        CheckForScheduleForDeletion();
 
         /// TODO; This isn't really ideal, because the mobs can move to different grids
         /// find a better way instead of copying, but this is okay for now
@@ -195,7 +217,8 @@ namespace SteerStone { namespace Game { namespace Map {
                 l_Itr->second->ToMob()->Update(p_Diff);
             else if (l_Itr->second->GetType() == Entity::Type::OBJECT_TYPE_BONUS_BOX)
                 l_Itr->second->ToBonusBox()->Update(p_Diff);
-            
+            else if (l_Itr->second->GetType() == Entity::Type::OBJECT_TYPE_MINE)
+                l_Itr->second->ToMine()->Update(p_Diff);
 
             l_Itr = l_Copy.erase(l_Itr);
         }
@@ -246,7 +269,8 @@ namespace SteerStone { namespace Game { namespace Map {
     /// Remove Object from Grid
     /// @p_Object : Object being removed
     /// @p_SendPacket : Send Despawn Packet
-    void Grid::Remove(Entity::Object* p_Object, bool p_SendPacket)
+    /// @p_Remove : Remove from ObjectMap
+    void Grid::Remove(Entity::Object* p_Object, bool p_SendPacket, bool p_Remove /*= true*/)
     {
         if (p_Object->IsPlayer())
             m_Players.erase(p_Object->ToPlayer());
@@ -259,17 +283,24 @@ namespace SteerStone { namespace Game { namespace Map {
                 l_Packet.Id = p_Object->GetObjectGUID().GetCounter();
                 p_Object->GetMap()->SendPacketToNearByGridsIfInSurrounding(l_Packet.Write(), p_Object);
             }
-            else
+            else if (p_Object->IsOre())
+            {
+                Server::Packets::DespawnOre l_Packet;
+				l_Packet.Id = p_Object->GetObjectGUID().GetCounter();
+				p_Object->GetMap()->SendPacketToNearByGridsIfInSurrounding(l_Packet.Write(), p_Object);
+            }
+            else if (p_Object->IsMob() || p_Object->IsPlayer())
             {
                 Server::Packets::Ship::DespawnShip l_Packet;
                 l_Packet.Id = p_Object->GetObjectGUID().GetCounter();
                 p_Object->GetMap()->SendPacketToNearByGridsIfInSurrounding(l_Packet.Write(), p_Object, true);
             }
         }
-        
-        m_Objects.erase(p_Object->GetGUID());
 
-        //LOG_INFO("Grid", "Removed GUID: %0 from Grid: X %1 Y %2", p_Object->GetGUID(), m_GridX, m_GridY);
+        if (p_Remove)
+			m_Objects.erase(p_Object->GetGUID());
+
+        LOG_INFO("Grid", "Removed GUID: %0 from Grid: X %1 Y %2", p_Object->GetGUID(), m_GridX, m_GridY);
     }
     /// Unload objects from map
     void Grid::Unload()

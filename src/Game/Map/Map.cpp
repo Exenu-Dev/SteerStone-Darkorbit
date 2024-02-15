@@ -85,6 +85,7 @@ namespace SteerStone { namespace Game { namespace Map {
         /// TODO; We are updating the mobs twice, the Unit::Update gets updated on the grid then the pool
         /// updates anything other than the update, we should merge it into one update and this will improve
         /// performance alot.
+        /// NOTE: This must always be called first
         m_PoolManager.Update(p_Diff);
 
         ProcessJumpQueue(p_Diff);

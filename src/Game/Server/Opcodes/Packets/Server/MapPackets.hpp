@@ -191,6 +191,32 @@ namespace SteerStone { namespace Game { namespace Server { namespace Packets {
         int32 PositionX;
         int32 PositionY;
     };
+
+    /// SERVER_PACKET_SPAWN_MINE packet builder
+    class SpawnMine final : public ServerPacket
+    {
+    public:
+        /// Constructor 
+        SpawnMine() : ServerPacket(ServerOpCodes::SERVER_PACKET_SPAWN_MINE)
+        {
+            Id = 0;
+            Type = 0;
+            PositionX = 0;
+            PositionY = 0;
+        }
+
+        //////////////////////////////////////////////////////////////////////////
+        //////////////////////////////////////////////////////////////////////////
+
+        /// Write the packet
+        PacketBuffer const* Write();
+
+        uint32 Id;
+        uint16 Type;
+        int32 PositionX;
+        int32 PositionY;
+    };
+
     /// SERVER_PACKET_DESPAWN_ORE packet builder
     class DespawnOre final : public ServerPacket
     {

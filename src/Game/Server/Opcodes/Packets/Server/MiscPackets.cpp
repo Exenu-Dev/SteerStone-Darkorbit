@@ -91,6 +91,12 @@ namespace SteerStone { namespace Game { namespace Server { namespace Packets { n
         case InfoType::INFO_TYPE_UNGREY_OPPONENT:
             l_Type = "USH";
             break;
+        case InfoType::INFO_TYPE_MINE_SMB:
+            l_Type = "SMB";
+			break;
+        case InfoType::INFO_TYPE_MINE_MIN:
+			l_Type = "MIN";
+			break;
         }
 
         m_Buffer.AppendChar(l_Type.c_str());

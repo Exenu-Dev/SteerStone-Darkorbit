@@ -125,6 +125,7 @@ enum ServerOpCodes : uint8
     SERVER_PACKET_UPDATE_ORE            = 0x45,
     SERVER_PACKET_SET_ORE_PRICES        = 0x67,
     SERVER_PACKET_SPAWN_ORE             = 0x72,
+    SERVER_PACKET_SPAWN_MINE            = 0x4C,
     SERVER_PACKET_DESPAWN_ORE           = 0x71,
 
     /// Web Packets

@@ -133,6 +133,7 @@ namespace SteerStone { namespace Game { namespace Server {
         StoreServerPacket(ServerOpCodes::SERVER_PACKET_UPDATE_ORE,          "SERVER_PACKET_UPDATE_ORE",             &GameSocket::HandleServer);
         StoreServerPacket(ServerOpCodes::SERVER_PACKET_SET_ORE_PRICES,      "SERVER_PACKET_SET_ORE_PRICES",         &GameSocket::HandleServer);
         StoreServerPacket(ServerOpCodes::SERVER_PACKET_SPAWN_ORE,           "SERVER_PACKET_SPAWN_ORE",              &GameSocket::HandleServer);
+        StoreServerPacket(ServerOpCodes::SERVER_PACKET_SPAWN_MINE,          "SERVER_PACKET_SPAWN_MINE",             &GameSocket::HandleServer);
         StoreServerPacket(ServerOpCodes::SERVER_PACKET_DESPAWN_ORE,         "SERVER_PACKET_DESPAWN_ORE",            &GameSocket::HandleServer);
 
         /// Web Packets

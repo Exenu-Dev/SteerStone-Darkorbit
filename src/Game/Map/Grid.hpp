@@ -31,6 +31,7 @@ namespace SteerStone { namespace Game { namespace Entity {
     class BonusBox;
     class Mob;
     class Unit;
+    class Ore;
 
 }   ///< namespace Entity
 }   ///< namespace Game
@@ -102,6 +103,8 @@ namespace SteerStone { namespace Game { namespace Map {
         /// Check if a Player is inside the grid
         /// @p_Diff : Execution Time
         void CheckForPlayer(uint32 const p_Diff);
+        /// Check if any objects are scheduled for deletion
+        void CheckForScheduleForDeletion();
         /// Update Grid
         /// @p_Diff : Execution Time
         bool Update(uint32 const p_Diff);
@@ -121,7 +124,8 @@ namespace SteerStone { namespace Game { namespace Map {
         /// Remove Object from Grid
         /// @p_Object : Object being removed
         /// @p_SendPacket : Send Despawn Packet
-        void Remove(Entity::Object* p_Object, bool p_SendPacket = false);
+        /// @p_Remove : Remove from ObjectMap
+        void Remove(Entity::Object* p_Object, bool p_SendPacket = false, bool p_Remove = true);
         /// Unload objects from map
         void Unload();
         /// Build surrounding objects near player
@@ -170,8 +174,9 @@ namespace SteerStone { namespace Game { namespace Map {
         //            GETTERS/SETTERS
         ///////////////////////////////////////////
     public:
-        State GetState() const { return m_State; }
-        GridType GetGridType() const { return m_Type; }
+        State GetState()                const { return m_State;     }
+        GridType GetGridType()          const { return m_Type;      }
+        ObjectMap const GetObjects()    const { return m_Objects;   }
 
         //////////////////////////////////////////////////////////////////////////
         //////////////////////////////////////////////////////////////////////////
