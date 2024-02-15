@@ -786,9 +786,6 @@ namespace SteerStone { namespace Game { namespace Entity {
             m_Resources[p_Index] = 0;
         else
             m_Resources[p_Index] += p_Resource;
-        
-        if (IsPlayer())
-            ToPlayer()->SetCargoSpace(ToPlayer()->GetCargoSpace() + p_Resource);
     }
 
     /// Get Shield

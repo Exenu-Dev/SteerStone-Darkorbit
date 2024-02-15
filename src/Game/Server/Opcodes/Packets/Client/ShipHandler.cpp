@@ -85,9 +85,34 @@ namespace SteerStone { namespace Game { namespace Server {
             return;
         }
 
-        /// Resource Id starts at 1 on client while on server we start at 0.
-        uint32 l_ResourceId = p_Packet->ReadUInt32() - 1;
+        uint32 l_ResourceId = p_Packet->ReadUInt32();
         uint32 l_Total = p_Packet->ReadUInt32();
+
+        // Convert Client Id to our own id
+        switch (static_cast<OreResource>(l_ResourceId))
+        {
+        case OreResource::ORE_PROMETIUM:
+			l_ResourceId = Entity::Resource::RESOURCE_PROMETIUM;
+			break;
+        case OreResource::ORE_ENDURIUM:
+			l_ResourceId = Entity::Resource::RESOURCE_ENDURIUM;
+			break;
+        case OreResource::ORE_TERBIUM:
+            l_ResourceId = Entity::Resource::RESOURCE_TERBIUM;
+            break;
+        case OreResource::ORE_PROMETID:
+            l_ResourceId = Entity::Resource::RESOURCE_PROMETID;
+            break;
+        case OreResource::ORE_DURANIUM:
+			l_ResourceId = Entity::Resource::RESOURCE_DURANIUM;
+			break;
+        case OreResource::ORE_PROMERIUM:
+            l_ResourceId = Entity::Resource::RESOURCE_PROMERIUM;
+            break;
+        default:
+            LOG_WARNING("Player", "Player %0 attempted to sell ore with invalid resource id %1", m_Player->GetName(), l_ResourceId);
+            return;
+        }
 
         if (l_ResourceId > MAX_RESOURCE_COUNTER)
             return;

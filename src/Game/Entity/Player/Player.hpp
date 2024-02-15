@@ -327,6 +327,8 @@ namespace SteerStone { namespace Game { namespace Entity {
         void ChangeConfiguration(const uint16 p_Config);
         /// Send Drone Info
         void SendDrones();
+        /// Build Drones Packet
+        Server::PacketBuffer const BuildDronesPacket();
         /// Update Cargo Max Space
         /// Note this updates the cargo bay on the client
         void UpdateMaxCargoSpace();
@@ -373,7 +375,6 @@ namespace SteerStone { namespace Game { namespace Entity {
         bool IsLoggedIn()          const     { return m_LoggedIn;         }
         bool IsJumping()           const     { return m_Jumping;          }
         bool CanAutoChangeAmmo()   const     { return m_AutoChangeAmmo;   }
-        uint32 GetCargoSpace()     const     { return m_CargoSpace;       }
         uint32 GetMaxCargoSpace()  const     { return m_MaxCargoSpace;    }
         uint32 GetMaxBattery()     const     { return m_MaxBattery;       }
         uint8 GetPreset()          const     { return m_Preset;           }
@@ -420,6 +421,22 @@ namespace SteerStone { namespace Game { namespace Entity {
             }
         }
 
+        uint32 GetCargoSpace() const
+        {
+            return CalculateTotalCargoSpace();
+        }
+
+        /// Calculate total cargo space
+        uint32 CalculateTotalCargoSpace() const
+        {
+            uint32 totalCargoSpace = 0;
+            totalCargoSpace += m_Resources[Resource::RESOURCE_PROMETIUM];
+            totalCargoSpace += m_Resources[Resource::RESOURCE_ENDURIUM];
+            totalCargoSpace += m_Resources[Resource::RESOURCE_TERBIUM];
+            totalCargoSpace += m_Resources[Resource::RESOURCE_XENOMIT];
+            return totalCargoSpace;
+        }
+
         /// Setters Function
         void SetEventType(EventType const p_EventType)    { m_Event = p_EventType;         }
         void SetIsJumping(bool const p_Jumping)           { m_Jumping = p_Jumping;         }
@@ -431,7 +448,6 @@ namespace SteerStone { namespace Game { namespace Entity {
         void SetBatteryAmmo(BatteryType const p_BatteryType, const uint32 p_Amount);
         void SetRocketAmmo(RocketType const p_RocketType, const uint32 p_Amount);
         void UpdateHonor(uint32 p_Honour);
-        void SetCargoSpace(uint32 const p_CargoSpace)     { m_CargoSpace = p_CargoSpace;   }
 
         /// Timers
         Core::Diagnostic::IntervalTimer IntervalLogout;
@@ -450,7 +466,7 @@ namespace SteerStone { namespace Game { namespace Entity {
         uint32 m_MaxCargoSpace;
         uint32 m_MaxBattery;
         uint32 m_MaxRockets;
-        uint32 m_CargoSpace;
+        uint32 m_CargoSpace; ///< Note: This is no longer used, this can be removed
         uint16 m_Preset;
         bool m_Premium;
 

@@ -840,7 +840,7 @@ namespace SteerStone { namespace Game { namespace Entity {
         l_Packet.MapId          = GetMap()->GetId();
         l_Packet.WeaponState    = m_WeaponState;
         l_Packet.ShipId         = m_ShipType;
-        l_Packet.CargoSpace     = m_CargoSpace;
+        l_Packet.CargoSpace     = GetCargoSpace();
         l_Packet.MaxCargoSpace  = m_MaxCargoSpace;
         l_Packet.MaxBattery     = m_MaxBattery;
         l_Packet.MaxRockets     = m_MaxRockets;

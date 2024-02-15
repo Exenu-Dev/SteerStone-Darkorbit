@@ -373,4 +373,16 @@ enum class BoosterTypes : uint8
     BOOSTER_TYPE_DMG_B01    = 27,
     BOOSTER_TYPE_SHD_B01    = 28,
     MAX_BOOSTER             = 29
+/// Note these are the ids from the client
+enum class OreResource : uint8
+{
+	ORE_PROMETIUM       = 1,
+    ORE_ENDURIUM        = 2,
+    ORE_TERBIUM         = 3,
+    ORE_XENOMIT         = 4,
+    ORE_PROMETID        = 11,
+    ORE_DURANIUM        = 12,
+    ORE_PROMERIUM       = 13,
+    ORE_SEPROM          = 14,
+    ORE_PALLADIUM       = 15,
 };
