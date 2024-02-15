@@ -155,6 +155,50 @@ namespace SteerStone { namespace Game { namespace Server { namespace Packets {
         /// Constructor 
         RemoveCargo() : ServerPacket(ServerOpCodes::SERVER_PACKET_REMOVE_CARGO)
         {
+            Id = 0;
+        }
+
+        //////////////////////////////////////////////////////////////////////////
+        //////////////////////////////////////////////////////////////////////////
+
+        /// Write the packet
+        PacketBuffer const* Write();
+
+        uint32 Id;
+    };
+
+    /// SERVER_PACKET_SPAWN_ORE packet builder
+    class SpawnOre final : public ServerPacket
+    {
+    public:
+        /// Constructor 
+        SpawnOre() : ServerPacket(ServerOpCodes::SERVER_PACKET_SPAWN_ORE)
+        {
+			Id = 0;
+			Type = 0;
+			PositionX = 0;
+			PositionY = 0;
+        }
+
+        //////////////////////////////////////////////////////////////////////////
+        //////////////////////////////////////////////////////////////////////////
+
+        /// Write the packet
+        PacketBuffer const* Write();
+
+        uint32 Id;
+        uint16 Type;
+        int32 PositionX;
+        int32 PositionY;
+    };
+    /// SERVER_PACKET_DESPAWN_ORE packet builder
+    class DespawnOre final : public ServerPacket
+    {
+    public:
+        /// Constructor 
+        DespawnOre() : ServerPacket(ServerOpCodes::SERVER_PACKET_DESPAWN_ORE)
+        {
+            Id = 0;
         }
 
         //////////////////////////////////////////////////////////////////////////

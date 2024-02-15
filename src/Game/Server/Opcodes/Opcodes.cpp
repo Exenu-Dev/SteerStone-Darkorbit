@@ -74,6 +74,7 @@ namespace SteerStone { namespace Game { namespace Server {
         StoreClientPacket(ClientOpCodes::CLIENT_PACKET_ORE_PRICES,        "CLIENT_PACKET_ORE_PRICES",         PacketStatus::STATUS_LOGGED_IN,      PacketProcess::PROCESS_PLAYER_THREAD, &GameSocket::HandleOrePrices           );
         StoreClientPacket(ClientOpCodes::CLIENT_PACKET_SELL_ORE,          "CLIENT_PACKET_SELL_ORE",           PacketStatus::STATUS_LOGGED_IN,      PacketProcess::PROCESS_PLAYER_THREAD, &GameSocket::HandleSellOre             );
         StoreClientPacket(ClientOpCodes::CLIENT_PACKET_MINE,              "CLIENT_PACKET_MINE",               PacketStatus::STATUS_LOGGED_IN,      PacketProcess::PROCESS_MAP_THREAD,    &GameSocket::HandleMine                );
+        StoreClientPacket(ClientOpCodes::CLIENT_PACKET_COLLECT_ORE,       "CLIENT_PACKET_COLLECT_ORE",        PacketStatus::STATUS_LOGGED_IN,      PacketProcess::PROCESS_MAP_THREAD,    &GameSocket::HandleLootOre             );
 
         //////////////////////////////////////////////////////////////////////////
         //////////////////////////////////////////////////////////////////////////
@@ -131,6 +132,8 @@ namespace SteerStone { namespace Game { namespace Server {
         StoreServerPacket(ServerOpCodes::SERVER_PACKET_CHANGE_ROCK_AMMO,    "SERVER_PACKET_CHANGE_ROCK_AMMO",       &GameSocket::HandleServer);
         StoreServerPacket(ServerOpCodes::SERVER_PACKET_UPDATE_ORE,          "SERVER_PACKET_UPDATE_ORE",             &GameSocket::HandleServer);
         StoreServerPacket(ServerOpCodes::SERVER_PACKET_SET_ORE_PRICES,      "SERVER_PACKET_SET_ORE_PRICES",         &GameSocket::HandleServer);
+        StoreServerPacket(ServerOpCodes::SERVER_PACKET_SPAWN_ORE,           "SERVER_PACKET_SPAWN_ORE",              &GameSocket::HandleServer);
+        StoreServerPacket(ServerOpCodes::SERVER_PACKET_DESPAWN_ORE,         "SERVER_PACKET_DESPAWN_ORE",            &GameSocket::HandleServer);
 
         /// Web Packets
         StoreServerPacket(ServerOpCodes::SERVER_PACKET_CHECK_ONLINE,        "SERVER_PACKET_CHECK_ONLINE",           &GameSocket::HandleServer);

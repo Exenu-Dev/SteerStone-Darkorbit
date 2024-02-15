@@ -35,7 +35,6 @@ namespace SteerStone { namespace Game { namespace Entity {
     {
         m_OwnerId           = -1;
         m_IsFriendlyCargo   = true;
-        m_ScheduleForDelete = false;
         m_Looted            = false;
         m_IntervalFriendlyCargo.SetInterval(FRIENDLY_CARGO_TIMER);
 
@@ -107,7 +106,6 @@ namespace SteerStone { namespace Game { namespace Entity {
 
                 SetResource(l_I, l_Resource);
                 p_Player->SetResource(l_I, l_CargoResourceTaken[l_I]);
-                p_Player->SetCargoSpace(l_CargoLeftOver - l_CargoResourceTaken[l_I]);
             }
 
             p_Player->SendPacket(Server::Packets::Misc::Reward().Write(Server::Packets::Misc::RewardType::REWARD_TYPE_CARGO, {
@@ -117,7 +115,8 @@ namespace SteerStone { namespace Game { namespace Entity {
                 l_CargoResourceTaken[Entity::Resource::RESOURCE_XENOMIT],
                 l_CargoResourceTaken[Entity::Resource::RESOURCE_PROMETID],
                 l_CargoResourceTaken[Entity::Resource::RESOURCE_DURANIUM],
-                l_CargoResourceTaken[Entity::Resource::RESOURCE_PROMERIUM] }));
+                l_CargoResourceTaken[Entity::Resource::RESOURCE_PROMERIUM] 
+            }));
 
             /// Update Ores
             p_Player->UpdateOres();

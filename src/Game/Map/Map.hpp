@@ -182,6 +182,63 @@ namespace SteerStone { namespace Game { namespace Map {
             }
         }
 
+        bool IsStarterMap() const
+        {
+            switch (m_Id)
+            {
+				case 1:  ///< 1-1
+				case 5:  ///< 2-1
+				case 9:  ///< 3-1
+                case 2:  ///< 1-2
+                case 6:  ///< 2-2
+                case 10: ///< 3-2
+					return true;
+				default:
+					return false;
+			}
+		}
+
+        bool IsMidMap() const
+        {
+            switch (m_Id)
+            {
+                case 2:  ///< 1-2
+                case 3:  ///< 1-3
+                case 4:  ///< 1-4 
+                case 6:  ///< 2-2
+                case 7:  ///< 2-3
+                case 8:  ///< 2-4
+                case 10: ///< 3-2
+                case 11: ///< 3-3
+                case 12: ///< 3-4 
+					return true;
+				default:
+					return false;
+			}
+		}
+
+        bool IsLowerMap() const
+        {
+            switch (m_Id)
+            {
+                case 1:  ///< 1-1
+                case 2:  ///< 1-2
+                case 3:  ///< 1-3
+                case 4:  ///< 1-4 
+                case 5:  ///< 2-1
+                case 6:  ///< 2-2
+                case 7:  ///< 2-3
+                case 8:  ///< 2-4
+                case 9:  ///< 3-1
+                case 10: ///< 3-2
+                case 11: ///< 3-3
+                case 12: ///< 3-4 
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
         /// Is Main Battle Zone Map
         /// TODO: Better naming could be done here
         bool IsMainBattleZoneMap()

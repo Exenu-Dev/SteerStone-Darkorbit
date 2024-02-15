@@ -19,67 +19,39 @@
 #pragma once
 #include <PCH/Precompiled.hpp>
 #include "PoolUpdater.hpp"
-#include "Core/Core.hpp"
+#include "GameFlags.hpp"
 
 namespace SteerStone { namespace Game { namespace Map {
 
-    enum PoolType1
+    /// Bonus Box Pool
+    class OrePool : public PoolUpdater
     {
-        POOL_TYPE_MOB       = 0,
-        POOL_TYPE_BONUS_BOX = 1,
-        POOL_TYPE_ORE       = 2,
-    };
-
-    class Base;
-
-    /// Pool Manager
-    class PoolManager
-    {
-        DISALLOW_COPY_AND_ASSIGN(PoolManager);
-
-        //////////////////////////////////////////////////////////////////////////
-        //////////////////////////////////////////////////////////////////////////
-
     public:
         /// Constructor
-        /// @p_Map : Reference of map
-        PoolManager(Base* p_Map);
+        OrePool();
         /// Deconstructor
-        ~PoolManager();
+        ~OrePool();
 
         //////////////////////////////////////////////////////////////////////////
         //////////////////////////////////////////////////////////////////////////
-    
-    public:
-        /// Initialize Pool for map
-        void Initialize();
-    private:
-        /// Load Mobs into pool
-        void InitializeMobs();
-        /// Load Bonus Boxes into pool
-        void InitializeBonusBoxes();
-        /// Load Ores into pool
-        void InitializeOres();
 
     public:
-        /// Update Pool
+        /// Update the pool
         /// @p_Diff : Execution Time
-        void Update(uint32 const p_Diff);
+        virtual void Update(uint32 const p_Diff) override;
 
-        /// Add Bonus box to map
-        /// @p_Victim   : Victim
-        /// @p_Owner    : Owner of cargo box
-        void AddBonuxBox(Entity::Unit* p_Victim, BonusBoxType p_Type, Entity::Unit* p_Owner);
-        /// Remove Bonus Box
-        /// @p_Object : Object Bonus Box
-        void RemoveBonusBox(Entity::Object* p_Object);
+        /// Add to pool
+        /// @p_Object : Object being added
+        virtual void Add(Entity::Object* p_Object) override;
+        /// Remove from Pool
+        /// @p_Object : Object being removed
+        virtual void Remove(Entity::Object* p_Object) override;
 
         //////////////////////////////////////////////////////////////////////////
         //////////////////////////////////////////////////////////////////////////
-    
+
     private:
-        std::map<uint16, PoolUpdater*> m_Pool;
-        Base* m_Map;
+        std::unordered_map<Grid*, std::unordered_map<uint32, Entity::Ore*>> m_Pool;
     };
 
 }   ///< namespace Map

@@ -23,6 +23,7 @@
 #include "Socket.hpp"
 #include "Portal.hpp"
 #include "BonusBox.hpp"
+#include "Ore.hpp"
 #include "ZoneManager.hpp"
 #include "World.hpp"
 #include "GameFlags.hpp"
@@ -211,12 +212,6 @@ namespace SteerStone { namespace Game { namespace Server {
     {
         uint32 l_Id = p_Packet->ReadUInt32();
 
-        if (m_Player->GetCargoSpace() == 0)
-        {
-            m_Player->SendPacket(Server::Packets::Ship::CargoFull().Write());
-            return;
-        }
-
         Entity::Object* l_Object = m_Player->GetGrid()->FindObject(l_Id);
 
         if (!l_Object)
@@ -228,6 +223,12 @@ namespace SteerStone { namespace Game { namespace Server {
         if (!l_Object->IsBonusBox())
         {
             LOG_WARNING("Socket", "Attempted to loot cargo but object is not a bonus box!");
+            return;
+        }
+
+        if (m_Player->GetCargoSpace() == 0 && l_Object->ToBonusBox()->GetBoxType() == BonusBoxType::BONUS_BOX_TYPE_CARGO)
+        {
+            m_Player->SendPacket(Server::Packets::Ship::CargoFull().Write());
             return;
         }
 
@@ -251,11 +252,25 @@ namespace SteerStone { namespace Game { namespace Server {
         l_PacketBuffer.AppendChar("n");
         l_PacketBuffer.AppendChar("SMB");
         l_PacketBuffer.AppendUInt32(m_Player->GetId());
+    void GameSocket::HandleLootOre(ClientPacket* p_Packet)
+    {
+		uint32 l_Id = p_Packet->ReadUInt32();
 
-        l_PacketBuffer.AppendEndSplitter();
-        l_PacketBuffer.AppendCarriage();
+		Entity::Object* l_Object = m_Player->GetGrid()->FindObject(l_Id);
 
-        SendPacket(&l_PacketBuffer);
+        if (!l_Object)
+        {
+			LOG_WARNING("Socket", "Cannot find object %0!", l_Id);
+			return;
+		}
+
+        if (!l_Object->IsOre())
+        {
+			LOG_WARNING("Socket", "Attempted to loot ore but object is not an ore!");
+			return;
+		}
+
+		l_Object->ToOre()->RewardCredit(m_Player);
 	}
 
 }   ///< namespace Server

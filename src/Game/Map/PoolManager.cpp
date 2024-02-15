@@ -21,8 +21,10 @@
 #include "ObjectManager.hpp"
 #include "Map.hpp"
 #include "BonusBoxPool.hpp"
+#include "OrePool.hpp"
 #include "MobPool.hpp"
 #include "Mob.hpp"
+#include "Ore.hpp"
 #include "BonusBox.hpp"
 #include "Utility/UtilRandom.hpp"
 
@@ -36,6 +38,7 @@ namespace SteerStone { namespace Game { namespace Map {
 
         m_Pool[POOL_TYPE_MOB]       = new MobPool();
         m_Pool[POOL_TYPE_BONUS_BOX] = new BonusBoxPool();
+        m_Pool[POOL_TYPE_ORE]       = new OrePool();
     }
     /// Deconstructor
     PoolManager::~PoolManager()
@@ -54,6 +57,7 @@ namespace SteerStone { namespace Game { namespace Map {
     {
         InitializeMobs();
         InitializeBonusBoxes();
+        InitializeOres();
     }
     /// Load Mobs into pool
     void PoolManager::InitializeMobs()
@@ -183,6 +187,55 @@ namespace SteerStone { namespace Game { namespace Map {
         }
 
         LOG_INFO("PoolManager", "Initialized Bonus Boxes for Map %0", m_Map->GetId());
+    }
+
+    /// Load Ores into pool
+    void PoolManager::InitializeOres()
+    {
+        float l_PreviousRadiusX = 1.0f;
+		float l_PreviousRadiusY = 1.0f;
+		float l_RadiusX = (m_Map->GetMapSizeX() / MAX_GRIDS) * GRID_CELLS;
+		float l_RadiusY = (m_Map->GetMapSizeY() / MAX_GRIDS) * GRID_CELLS;
+
+        for (uint32 l_Y = 1; l_Y < GRID_CELLS + 1; l_Y++)
+        {
+			float l_MaxY = (l_RadiusY * l_Y);
+
+            for (uint32 l_X = 1; l_X < GRID_CELLS + 1; l_X++)
+            {
+				float l_MaxX = (l_RadiusX * l_X);
+
+                for (uint8 l_I = static_cast<uint8>(OreTypes::ORE_TYPE_PROMETIUM); l_I < static_cast<uint8>(OreTypes::MAX_ORE); l_I++)
+                {
+                    if (Core::Utils::RoleChanceFloat(80.f))
+                    {
+                        if (l_I == static_cast<uint8>(OreTypes::ORE_TYPE_PROMETIUM) && !m_Map->IsStarterMap())
+							continue;
+
+                        if (l_I == static_cast<uint8>(OreTypes::ORE_TYPE_TERBIUM) && !m_Map->IsMidMap())
+							continue;
+
+                        if (l_I == static_cast<uint8>(OreTypes::ORE_TYPE_ENDURIUM) && !m_Map->IsLowerMap())
+                            continue;
+
+                        OreTypes l_OreType = static_cast<OreTypes>(l_I);
+                        Entity::Ore* l_Ore = new Entity::Ore(l_OreType);
+                        l_Ore->SetMap(m_Map);
+                        l_Ore->GetSpline()->SetPosition(Core::Utils::FloatRandom(l_PreviousRadiusX, l_MaxX - DISTANCE_AWAY_FROM_BORDER), Core::Utils::FloatRandom(l_PreviousRadiusY, l_MaxY - DISTANCE_AWAY_FROM_BORDER));
+                        l_Ore->SetResource(l_Ore->GetResourceType(), 1);
+                        m_Map->Add(l_Ore);
+                        m_Pool[POOL_TYPE_ORE]->Add(l_Ore);
+                    }
+                }
+
+				l_PreviousRadiusX = l_MaxX;
+			}
+
+			l_PreviousRadiusX = 1.0f;
+			l_PreviousRadiusY = l_MaxY;
+		}
+
+		LOG_INFO("PoolManager", "Initialized Ores for Map %0", m_Map->GetId());
     }
 
     /// Update Pool

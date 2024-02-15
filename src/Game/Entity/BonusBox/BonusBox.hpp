@@ -55,7 +55,7 @@ namespace SteerStone { namespace Game { namespace Entity {
         /// @p_Diff : Execution Time
         void Update(uint32 const p_Diff);
 
-        /// Reward Credit on kill
+        /// Reward Credit on loot
         /// @p_Player : Player being rewarded
         void RewardCredit(Entity::Player* p_Player);
 
@@ -64,13 +64,11 @@ namespace SteerStone { namespace Game { namespace Entity {
         ///////////////////////////////////////////
     public:
         bool IsFriendlyCargo()      const { return m_IsFriendlyCargo;   }
-        bool IsScheduledForDelete() const { return m_ScheduleForDelete; }
         bool IsLooted()             const { return m_Looted;            }  
         BonusBoxType GetBoxType()   const { return m_BoxType;           }
         int32 GetOwnerId()          const { return m_OwnerId;           }
 
         void SetLooted() { m_Looted = true; }
-        void SetScheduleForDelete(bool const p_Schedule) { m_ScheduleForDelete = p_Schedule; }
         void SetOwnerId(int32 const p_OwnerId) { m_OwnerId = p_OwnerId; }
 
         //////////////////////////////////////////////////////////////////////////
@@ -80,7 +78,6 @@ namespace SteerStone { namespace Game { namespace Entity {
         int32 m_OwnerId;        ///< Owner of bonus box
         BonusBoxType m_BoxType;
         bool m_Looted;
-        bool m_ScheduleForDelete;
         bool m_IsFriendlyCargo;
         Core::Diagnostic::IntervalTimer m_IntervalFriendlyCargo;
     };

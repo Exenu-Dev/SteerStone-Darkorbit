@@ -140,6 +140,10 @@ namespace SteerStone { namespace Game { namespace Server {
             /// @p_ClientPacket : Packet recieved from client
             void HandleMine(ClientPacket* p_Packet);
 
+            /// Map Handler
+            /// @p_ClientPacket : Packet recieved from client
+            void HandleLootOre(ClientPacket* p_Packet);
+
             /// Debug Handler
             /// @p_ClientPacket : Packet recieved from client
             void HandleDebugInitializePlayer(ClientPacket* p_Packet);   

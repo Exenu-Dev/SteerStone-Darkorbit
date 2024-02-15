@@ -16,17 +16,17 @@
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "Entity/BonusBox/BonusBox.hpp"
-#include "BonusBoxPool.hpp"
+#include "Entity/Ore/Ore.hpp"
+#include "OrePool.hpp"
 
 namespace SteerStone { namespace Game { namespace Map {
     
     /// Constructor
-    BonusBoxPool::BonusBoxPool()
+    OrePool::OrePool()
     {
     }
     /// Deconstructor
-    BonusBoxPool::~BonusBoxPool()
+    OrePool::~OrePool()
     {
     }
 
@@ -35,7 +35,7 @@ namespace SteerStone { namespace Game { namespace Map {
 
     /// Update the pool
     /// @p_Diff : Execution Time
-    void BonusBoxPool::Update(uint32 const p_Diff)
+    void OrePool::Update(uint32 const p_Diff)
     {
         for (auto l_Itr : m_Pool)
         {
@@ -51,18 +51,21 @@ namespace SteerStone { namespace Game { namespace Map {
 
     /// Add to pool
     /// @p_Object : Object being added
-    void BonusBoxPool::Add(Entity::Object* p_Object)
+    void OrePool::Add(Entity::Object* p_Object)
     {
-        m_Pool[p_Object->GetGrid()][p_Object->GetObjectGUID().GetCounter()] = p_Object->ToBonusBox();
+        m_Pool[p_Object->GetGrid()][p_Object->GetObjectGUID().GetCounter()] = p_Object->ToOre();
     }
     /// Remove from Pool
-   /// @p_Object : Object being removed
-    void BonusBoxPool::Remove(Entity::Object* p_Object)
+    /// @p_Object : Object being removed
+    void OrePool::Remove(Entity::Object* p_Object)
     {
         auto l_Itr = m_Pool[p_Object->GetGrid()].find(p_Object->GetObjectGUID().GetCounter());
         if (l_Itr != m_Pool[p_Object->GetGrid()].end())
             m_Pool[p_Object->GetGrid()].erase(l_Itr);
     }
+
+    //////////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////////
 }   ///< namespace Map
 }   ///< namespace Game
 }   ///< namespace Steerstone

@@ -65,6 +65,7 @@ enum ClientOpCodes : uint8
     CLIENT_PACKET_SELL_ORE              = 0x54,
     CLIENT_PACKET_ORE_PRICES            = 0x62,
     CLIENT_PACKET_MINE  			    = 0x53,
+    CLIENT_PACKET_COLLECT_ORE           = 0x77,
 
     /// Web
     WEB_PACKET_CHECK_ONLINE             = 0x22,
@@ -123,6 +124,8 @@ enum ServerOpCodes : uint8
     SERVER_PACKET_CHANGE_ROCK_AMMO      = 0x34,
     SERVER_PACKET_UPDATE_ORE            = 0x45,
     SERVER_PACKET_SET_ORE_PRICES        = 0x67,
+    SERVER_PACKET_SPAWN_ORE             = 0x72,
+    SERVER_PACKET_DESPAWN_ORE           = 0x71,
 
     /// Web Packets
     SERVER_PACKET_CHECK_ONLINE          = 0x22,

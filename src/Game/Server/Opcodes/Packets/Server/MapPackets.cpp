@@ -116,6 +116,33 @@ namespace SteerStone { namespace Game { namespace Server { namespace Packets {
         return &m_Buffer;
     }
 
+    /// SERVER_PACKET_SPAWN_ORE
+    PacketBuffer const* SpawnOre::Write()
+    {
+        m_Buffer.AppendUInt32(Id);
+        m_Buffer.AppendUInt32(Type);
+        m_Buffer.AppendUInt32(PositionX);
+        m_Buffer.AppendUInt32(PositionY);
+        m_Buffer.AppendBool(false); ///< Unknown, not used by client, maybe mine
+        
+        m_Buffer.AppendEndSplitter();
+        m_Buffer.AppendCarriage();
+
+        return &m_Buffer;
+    }
+
+
+    /// SERVER_PACKET_DESPAWN_ORE
+    PacketBuffer const* DespawnOre::Write()
+    {
+        m_Buffer.AppendUInt32(Id);
+
+        m_Buffer.AppendEndSplitter();
+        m_Buffer.AppendCarriage();
+
+        return &m_Buffer;
+    }
+
 }   ///< Packets
 }   ///< Server
 }   ///< Game
