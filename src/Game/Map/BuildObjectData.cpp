@@ -22,6 +22,8 @@
 #include "Packets/Server/MiscPackets.hpp"
 #include "Grid.hpp"
 #include "Mob.hpp"
+#include "Ore.hpp"
+#include "Mine.hpp"
 #include "BonusBox.hpp"
 #include "ClanManager.hpp"
 #include "Player.hpp"
@@ -94,7 +96,7 @@ namespace SteerStone { namespace Game { namespace Map {
 
             /// TODO; Find packet which updates from friendly to non friendly cargo, currently it visually bugs out when sending Cargo packet again to update
             Server::Packets::Cargo l_Packet;
-            l_Packet.Id         = p_ObjectBuilt->GetObjectGUID().GetCounter();
+            l_Packet.Id = p_ObjectBuilt->GetObjectGUID().GetCounter();
 
             if (p_ObjectBuilt->ToBonusBox()->GetBoxType() == BonusBoxType::BONUS_BOX_TYPE_CARGO)
                 l_Packet.Type = (p_ObjectBuilt->ToBonusBox()->GetOwnerId() != p_Player->GetObjectGUID().GetCounter() && p_ObjectBuilt->ToUnit()->GetCompany() == p_Player->GetCompany()) ? !p_ObjectBuilt->ToBonusBox()->IsFriendlyCargo() : 1;
@@ -104,6 +106,28 @@ namespace SteerStone { namespace Game { namespace Map {
             l_Packet.PositionX  = p_ObjectBuilt->GetSpline()->GetPositionX();
             l_Packet.PositionY  = p_ObjectBuilt->GetSpline()->GetPositionY();
             p_Player->SendPacket(l_Packet.Write());
+
+            return;
+        }
+        else if (p_ObjectBuilt->IsMine())
+        {
+            Server::Packets::SpawnMine l_Packet;
+            l_Packet.Id = p_ObjectBuilt->GetObjectGUID().GetCounter();
+            l_Packet.Type = 1;
+            l_Packet.PositionX = p_ObjectBuilt->GetSpline()->GetPositionX();
+            l_Packet.PositionY = p_ObjectBuilt->GetSpline()->GetPositionY();
+            p_Player->SendPacket(l_Packet.Write());
+
+            return;
+        }
+        else if (p_ObjectBuilt->IsOre())
+        {
+            Server::Packets::SpawnOre l_Packet;
+			l_Packet.Id         = p_ObjectBuilt->GetObjectGUID().GetCounter();
+			l_Packet.Type       = static_cast<uint16>(p_ObjectBuilt->ToOre()->GetOreType());
+			l_Packet.PositionX  = p_ObjectBuilt->GetSpline()->GetPositionX();
+			l_Packet.PositionY  = p_ObjectBuilt->GetSpline()->GetPositionY();
+			p_Player->SendPacket(l_Packet.Write());
 
             return;
         }
@@ -133,7 +157,7 @@ namespace SteerStone { namespace Game { namespace Map {
 
             /// Also Send drone info
             if (p_ObjectBuilt->ToPlayer()->HasDrones())
-                p_Player->SendDrones();
+                p_Player->SendPacket(&p_ObjectBuilt->ToPlayer()->BuildDronesPacket());
         }
         else if (p_ObjectBuilt->IsMob())
         {
@@ -191,10 +215,19 @@ namespace SteerStone { namespace Game { namespace Map {
                     l_Itr.second->ToPlayer()->SendPacket(l_Packet.Write());
                 }
             }
-            
-            Server::Packets::Ship::DespawnShip l_Packet;
-            l_Packet.Id = l_Itr.second->GetObjectGUID().GetCounter();
-            p_Object->ToPlayer()->SendPacket(l_Packet.Write());
+
+            if (l_Itr.second->IsOre())
+            {
+                Server::Packets::DespawnOre l_Packet;
+                l_Packet.Id = l_Itr.second->GetObjectGUID().GetCounter();
+                l_Itr.second->GetMap()->SendPacketToNearByGridsIfInSurrounding(l_Packet.Write(), l_Itr.second);
+            }
+            else
+            {
+                Server::Packets::Ship::DespawnShip l_Packet;
+                l_Packet.Id = l_Itr.second->GetObjectGUID().GetCounter();
+                p_Object->ToPlayer()->SendPacket(l_Packet.Write());
+            }
         }
     }
 }   ///< namespace Map
