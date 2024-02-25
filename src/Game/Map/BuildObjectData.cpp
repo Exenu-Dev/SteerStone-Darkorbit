@@ -158,7 +158,10 @@ namespace SteerStone { namespace Game { namespace Map {
 
             /// Also Send drone info
             if (p_ObjectBuilt->ToPlayer()->HasDrones())
-                p_Player->SendPacket(&p_ObjectBuilt->ToPlayer()->BuildDronesPacket());
+            {
+                Server::Packets::Misc::Update l_InfoPacket;
+                l_InfoPacket.Write(Server::Packets::Misc::InfoUpdate::INFO_UPDATE_DRONES, { p_ObjectBuilt->GetObjectGUID().GetCounter(), p_ObjectBuilt->ToPlayer()->BuildDronesString() });
+            }
         }
         else if (p_ObjectBuilt->IsMob())
         {

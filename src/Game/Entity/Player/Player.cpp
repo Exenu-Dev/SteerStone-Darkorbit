@@ -1029,10 +1029,11 @@ namespace SteerStone { namespace Game { namespace Entity {
         if (!m_Drones.size())
             return;
 
-        SendPacket(&BuildDronesPacket());
+        Server::Packets::Misc::Update l_InfoPacket;
+        l_InfoPacket.Write(Server::Packets::Misc::InfoUpdate::INFO_UPDATE_DRONES, { GetObjectGUID().GetCounter(), BuildDronesString() });
     }
     /// Build Drones Packet
-    Server::PacketBuffer const Player::BuildDronesPacket()
+    std::string const Player::BuildDronesString()
     {
         uint32 l_DroneGroupCount = m_Drones.size() <= 4 ? 3 : 3;
 
@@ -1116,10 +1117,7 @@ namespace SteerStone { namespace Game { namespace Entity {
 
         l_Drones += '0';
 
-        Server::Packets::Misc::Update l_InfoPacket;
-        l_InfoPacket.Write(Server::Packets::Misc::InfoUpdate::INFO_UPDATE_DRONES, { GetObjectGUID().GetCounter(), l_Drones });
-
-        return l_InfoPacket.GetBuffer();
+        return l_Drones;
     }
     /// Update Cargo Max Space
     void Player::UpdateMaxCargoSpace()

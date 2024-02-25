@@ -334,7 +334,7 @@ namespace SteerStone { namespace Game { namespace Entity {
         /// Send Drone Info
         void SendDrones();
         /// Build Drones Packet
-        Server::PacketBuffer const BuildDronesPacket();
+        std::string const BuildDronesString();
         /// Update Cargo Max Space
         /// Note this updates the cargo bay on the client
         void UpdateMaxCargoSpace();
