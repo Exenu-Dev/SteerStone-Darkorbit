@@ -43,7 +43,10 @@ namespace SteerStone { namespace Game { namespace Server { namespace Packets { n
         case InfoUpdate::INFO_UPDATE_MESSAGE:
             l_Type = "STD";
             break;
-        case InfoUpdate::INFO_UPDATE_HEALTH:
+        case InfoUpdate::INFO_UPDATE_SET_SHIELD:
+            l_Type = "SHD";
+			break;
+        case InfoUpdate::INFO_UPDATE_SET_SHIELD_HEALTH:
             l_Type = "HLT";
             break;
         case InfoUpdate::INFO_UPDATE_LEVEL_UP:
@@ -55,51 +58,39 @@ namespace SteerStone { namespace Game { namespace Server { namespace Packets { n
         case InfoUpdate::INFO_UPDATE_BOOSTERS:
             l_Type = "BS";
             break;
-        }
-
-        m_Buffer.AppendChar(l_Type.c_str());
-
-        for (auto& l_Itr : p_Storage)
-        {
-            if (auto l_Value = std::get_if<std::string>(&l_Itr))
-                m_Buffer.AppendChar(l_Value->c_str());
-            else if (auto l_Value = std::get_if<int32>(&l_Itr))
-                m_Buffer.AppendInt32(*l_Value);
-        }
-
-        m_Buffer.AppendEndSplitter();
-        m_Buffer.AppendCarriage();
-
-        return &m_Buffer;
-    }
-
-    /// SERVER_PACKET_MISC_INFO
-    /// @p_Storage : Storage
-    /// @p_InfoType : Type of Info
-    PacketBuffer const* Info::Write(InfoType p_InfoType, std::initializer_list<std::variant<int32, std::string>> p_Storage)
-    {
-        std::string l_Type;
-
-        switch (p_InfoType)
-        {
-        case InfoType::INFO_TYPE_DRONES:
+        case InfoUpdate::INFO_UPDATE_EXTRAS_INFO:
+            l_Type = "ITM";
+			break;
+        case InfoUpdate::INFO_UPDATE_CPU_JUMP_CHIP:
+            l_Type = "CPU";
+			break;
+        case InfoUpdate::INFO_UPDATE_DRONES:
             l_Type = "d";
             break;
-        case InfoType::INFO_TYPE_GREY_OPPONENT:
+        case InfoUpdate::INFO_UPDATE_GREY_OPPONENT:
             l_Type = "LSH";
             break;
-        case InfoType::INFO_TYPE_UNGREY_OPPONENT:
+        case InfoUpdate::INFO_UPDATE_UNGREY_OPPONENT:
             l_Type = "USH";
             break;
-        case InfoType::INFO_TYPE_MINE_SMB:
+        case InfoUpdate::INFO_UPDATE_MINE_SMB:
             l_Type = "SMB";
-			break;
-        case InfoType::INFO_TYPE_MINE_MIN:
-			l_Type = "MIN";
-			break;
+            break;
+        case InfoUpdate::INFO_UPDATE_MINE_MIN:
+            l_Type = "MIN";
+            break;
         }
 
         m_Buffer.AppendChar(l_Type.c_str());
+
+        /// Some Updates require another additional character to specify
+        /// the type of update
+        switch (p_InfoUpdate)
+        {
+        case InfoUpdate::INFO_UPDATE_CPU_JUMP_CHIP:
+            m_Buffer.AppendChar("J");
+            break;
+        }
 
         for (auto& l_Itr : p_Storage)
         {

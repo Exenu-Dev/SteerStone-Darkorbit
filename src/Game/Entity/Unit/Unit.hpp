@@ -26,6 +26,7 @@
 #define ATTACK_UPDATE_INTERVAL 1000ul
 #define ROCKET_ATTACK_UPDATE 2000ul
 #define MAX_RESOURCE_COUNTER 9ul
+#define HIT_CHANCE 80.0f
 
 namespace SteerStone { namespace Game { namespace Clan {
 	class Base;
@@ -119,6 +120,10 @@ namespace SteerStone { namespace Game { namespace Entity {
         /// @p_Damage : Damage
         /// @p_CleanDamage : Deal damage neglecting shield
         void DealDamage(Unit* p_Target, int32 p_Damage, bool p_CleanDamage);
+        /// Heal Target
+        /// @p_Target : Target
+        /// @p_Heal : Heal amount
+        void Heal(Unit* p_Target, int32 p_Heal);
         /// Calculate Damage takem for target
         /// @p_Target : Target
         /// @p_Damage : Damage taken
@@ -164,6 +169,7 @@ namespace SteerStone { namespace Game { namespace Entity {
         int32 GetShield()           const;
         uint32 GetShieldResistance()const { return m_ShieldResistance;  }
         uint32 GetMaxShield()       const;
+        float  GetHitChance()       const { return m_HitChance;         }
         int32 GetHitPoints()        const { return m_HitPoints;         }
         uint32 GetMinDamage()       const { return m_MinDamage;         }    
         uint32 GetMaxDamage()       const { return m_MaxDamage;         }    
@@ -176,7 +182,7 @@ namespace SteerStone { namespace Game { namespace Entity {
         uint16 GetDeathState()      const { return m_DeathState;        }
         uint16 GetLaserType()       const { return m_LaserType;         }    
         uint16 GetLaserColourId()   const { return m_LaserType - 1;     }    
-        uint16 GetRocketId()        const { return m_RocketType -1;     }
+        uint16 GetRocketId()        const { return m_RocketType;     }
         uint32 GetExperience()      const { return m_Experience;        }
         uint16 GetBehaviour()       const { return m_Behaviour;         }
         uint32 GetRespawnTimer()    const { return m_RespawnTimer;      }
@@ -228,13 +234,15 @@ namespace SteerStone { namespace Game { namespace Entity {
         bool IsAttackingWithLaser()  const { return m_AttackType & (AttackType::ATTACK_TYPE_LASER | ATTACK_TYPE_BOTH); }
         bool IsDead()                const { return m_DeathState == DeathState::DEAD; }
 
-        void SetHonor(int32 const p_Honor)              { m_Honor = p_Honor;            }
-        void SetWeaponState(uint16 const p_WeaponState) { m_WeaponState = p_WeaponState;}
-        void SetHitPoints(uint32 const p_HitPoints)     { m_HitPoints = p_HitPoints;    }
-        void SetShield(uint32 const p_Shield)           { m_Shield = p_Shield;          }
-        void SetLaserType(uint16 const p_LaserType)     { m_LaserType = p_LaserType;    }
-        void SetRocketType(uint16 const p_RocketType)   { m_RocketType = p_RocketType;  }
-        void SetStats(uint32 const p_MinDamage, uint32 const p_MaxDamage, uint32 const p_Speed, uint32 const p_Shield, uint32 const p_ShieldResistance)
+        void SetHonor(int32 const p_Honor)                      { m_Honor = p_Honor;                                    }
+        void SetWeaponState(uint16 const p_WeaponState)         { m_WeaponState = p_WeaponState;                        }
+        void SetHitPoints(uint32 const p_HitPoints)             { m_HitPoints = p_HitPoints;                            }
+        void SetHitChance(float const p_HitChance)              { m_HitChance = p_HitChance;                            }
+        void SetShield(uint32 const p_Shield)                   { m_Shield = p_Shield;                                  }
+        void SetLaserType(uint16 const p_LaserType)             { m_LaserType = p_LaserType;                            }
+        void SetRocketType(uint16 const p_RocketType)           { m_RocketType = p_RocketType;                          }
+        void SetRocketAttackUpdateTimer(uint32 const p_Timer)   { m_IntervalRocketAttackUpdate.SetInterval(p_Timer);    }
+        void SetStats(uint32 const p_MinDamage, uint32 const p_MaxDamage, uint32 const p_Speed, uint32 const p_Shield, uint32 const p_ShieldResistance, float const p_HitChance)
         {
             m_MinDamage         = p_MinDamage;
             m_MaxDamage         = p_MaxDamage;
@@ -242,6 +250,7 @@ namespace SteerStone { namespace Game { namespace Entity {
             m_MaxShield         = p_Shield;
             m_Shield            = p_Shield;
             m_ShieldResistance  = p_ShieldResistance;
+            m_HitChance		 = p_HitChance;
         }
         void SetResource(uint32 const p_Index, uint32 const p_Resource);
         void SetInRadiationZone(bool const p_InRadiation) { m_InRadiationZone = p_InRadiation; }
@@ -280,6 +289,8 @@ namespace SteerStone { namespace Game { namespace Entity {
         uint32 m_Resources[9];
         uint32 m_LastTimeAttacked;
         AttackType m_AttackType;
+
+        float m_HitChance;
 
         bool m_Attacking;
         bool m_InRadiationZone;

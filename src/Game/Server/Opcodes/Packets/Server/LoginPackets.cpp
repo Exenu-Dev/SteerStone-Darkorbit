@@ -30,12 +30,6 @@ namespace SteerStone { namespace Game { namespace Server { namespace Packets { n
         case InfoType::INFO_TYPE_SET_ADMIN:
             l_Type = "ADM|CLI";
             break;
-        case InfoType::INFO_TYPE_SET_SHIELD:
-            l_Type = "SHD";
-            break;
-        case InfoType::INFO_TYPE_SET_SHIELD_HEALTH:
-            l_Type = "HLT";
-            break;
         case InfoType::INFO_TYPE_SET_CARGO_SPACE:
             l_Type = "c";
             break;
@@ -64,8 +58,6 @@ namespace SteerStone { namespace Game { namespace Server { namespace Packets { n
 
         m_Buffer.AppendEndSplitter();
         m_Buffer.AppendCarriage();
-
-        LOG_INFO("test", (const char*)m_Buffer.GetContents());
 
         return &m_Buffer;
     }

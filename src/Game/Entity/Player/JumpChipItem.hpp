@@ -20,13 +20,13 @@
 #include <PCH/Precompiled.hpp>
 #include "Core/Core.hpp"
 #include "GameFlags.hpp"
-#include "json.hpp"
+#include "Item.hpp"
 
 namespace SteerStone { namespace Game { namespace Entity {
 
     struct ItemTemplate;
 
-    class Item
+    class JumpChipItem : public Item
     {
     public:
         friend class Inventory;
@@ -36,9 +36,9 @@ namespace SteerStone { namespace Game { namespace Entity {
 
     public:
         /// Constructor
-        Item();
+        JumpChipItem();
         /// Deconstructor
-        ~Item();
+        ~JumpChipItem();
 
     //////////////////////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////////////////////
@@ -46,36 +46,11 @@ namespace SteerStone { namespace Game { namespace Entity {
     ///////////////////////////////////////////
     //            GETTERS/SETTERS
     ///////////////////////////////////////////
-    public:
-        bool IsWeapon()   const { return m_IsWeapon; }
-        bool IsSpeed()    const { return m_IsSpeed;  }
-        bool IsShield()   const { return m_IsShield; }
-        bool IsExtra()    const { return m_IsExtra;  }
-
-        uint32 GetId() const { return m_Id; }
-        std::string GetUniqueId() const { return m_UniqueId; }
-
-        template<typename KeyType>
-        KeyType GetMetaData(const std::string& key) { return m_MetaData[key].get<KeyType>(); }
-        void UpdateMetaData(const std::string& key, const nlohmann::json& value) { m_MetaData[key] = value; }
-
-        /// Get Jump Chip Type
-        JumpChipType GetJumpChipType() const;
-
-        ItemTemplate const* GetItemTemplate() const { return m_ItemTemplate; }
 
     //////////////////////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////////////////////
 
     private:
-        uint32 m_Id;
-        bool m_IsWeapon;
-        bool m_IsSpeed;
-        bool m_IsShield;
-        bool m_IsExtra;
-        std::string m_UniqueId;
-        nlohmann::json m_MetaData;
-        ItemTemplate const* m_ItemTemplate;
     };
 
 }   ///< namespace Entity

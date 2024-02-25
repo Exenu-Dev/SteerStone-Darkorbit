@@ -357,6 +357,16 @@ namespace SteerStone { namespace Core { namespace Database {
             return static_cast<uint64>(strtoull((char*)Data.Buffer, nullptr, 10));
         }
 
+        bool IsNull() const
+        {
+            return Data.Buffer == nullptr;
+        }
+
+        bool IsEmpty() const
+        {
+            return Data.Length == 0 || Data.Buffer == nullptr;
+        }
+
         private:
 #pragma pack(push, 1)
             struct

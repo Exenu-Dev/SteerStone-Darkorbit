@@ -22,6 +22,8 @@
 
 #include "Item.hpp"
 
+#define AUTO_AMMO_UNITS 10000
+
 namespace SteerStone { namespace Game { namespace Entity {
 
     class Player;
@@ -46,11 +48,34 @@ namespace SteerStone { namespace Game { namespace Entity {
     public:
         /// Load Inventory from database
         void LoadInventory();
+        /// Save Inventory to database
+        void SaveInventory();
 
         /// Calculate player stats
         void CalculateStats();
 
         uint32 GetWeaponCount() const { return m_WeaponCount; }
+
+        /// Has Auto Buy Ammo
+        bool HasAutoAmmo() const;
+        /// Check to see if player has a jump chip
+        bool HasJumpChip() const;
+        /// Get Repair Bot
+        Item* GetRepairBot() const;
+        /// Get Jump Chip
+        Item* GetJumpChip() const;
+        /// Get Item By Type
+        /// @p_ItemType : Item Type
+        Item* GetItemByType(ItemType p_ItemType) const;
+        /// Get the Jump Chip Type
+        /// Returns JUMP_CHIP_TYPE_NONE if no jump chip
+        JumpChipType GetJumpChipType() const;
+        /// Automatically purchase Ammo
+        void BuyAutoAmmo();
+
+        /// Remove Item From Inventory
+        /// @p_Item : Item to remove
+        void RemoveItem(Item* p_Item);
 
     //////////////////////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////////////////////

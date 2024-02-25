@@ -16,6 +16,7 @@
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include "Packets/Server/LoginPackets.hpp"
 #include "Packets/Server/MapPackets.hpp"
 #include "Packets/Server/ShipPackets.hpp"
 #include "Packets/Server/AttackPackets.hpp"
@@ -36,7 +37,7 @@ namespace SteerStone { namespace Game { namespace Map {
     ///////////////////////////////////////////
 
     /// Build surrounding objects near player
-    /// @p_Player : Player
+    /// @p_Player : Player to build surrounding objects for
     void Grid::BuildSurroundingObjects(Entity::Player* p_Player)
     {
         /// NOTE;
@@ -182,7 +183,7 @@ namespace SteerStone { namespace Game { namespace Map {
         if ((p_ObjectBuilt->IsMob() || p_ObjectBuilt->IsPlayer()) && p_ObjectBuilt->ToUnit()->IsAttacking())
         {
             if (p_ObjectBuilt->IsPlayer() && p_ObjectBuilt->ToUnit()->GetTarget())
-                p_Player->SendPacket(Server::Packets::Misc::Info().Write(Server::Packets::Misc::InfoType::INFO_TYPE_GREY_OPPONENT, { p_ObjectBuilt->ToUnit()->GetTarget()->GetObjectGUID().GetCounter(), p_ObjectBuilt->GetObjectGUID().GetCounter() }));
+                p_Player->SendPacket(Server::Packets::Misc::Update().Write(Server::Packets::Misc::InfoUpdate::INFO_UPDATE_GREY_OPPONENT, { p_ObjectBuilt->ToUnit()->GetTarget()->GetObjectGUID().GetCounter(), p_ObjectBuilt->GetObjectGUID().GetCounter() }));
 
             /// Send Attack
             Server::Packets::Attack::LaserShoot l_Packet;

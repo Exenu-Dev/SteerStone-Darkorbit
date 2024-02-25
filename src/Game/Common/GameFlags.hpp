@@ -38,6 +38,64 @@ enum PlayerShips
     CBSGoliath  = 53
 };
 
+/*
+pes[5] = "direct";
+var npcships = new Array();
+npcships[1] = "Streuner";
+npcships[2] = "Lordakia";
+npcships[3] = "Devolarium";
+npcships[4] = "Mordon";
+npcships[5] = "Sibelon";
+npcships[6] = "Saimon";
+npcships[7] = "Sibelonit";
+npcships[8] = "Lordakium";
+npcships[9] = "Kristallin";
+npcships[10] = "Kristallon";
+npcships[11] = "StreuneR";
+npcships[12] = "Protegit";
+npcships[13] = "Cubikon";
+npcships[14] = "Boss Streuner";
+npcships[15] = "Boss Lordakia";
+npcships[16] = "Boss Mordon";
+npcships[17] = "Boss Saimon";
+npcships[18] = "Boss Devolarium";
+npcships[19] = "Boss Sibelonit";
+npcships[20] = "Boss Sibelon";
+npcships[21] = "Boss Lordakium.";
+npcships[22] = "Boss Kristallin";
+npcships[23] = "Boss Kristallon";
+npcships[24] = "Boss StreuneR";
+npcships[25] = "UFO";
+npcships[26] = "UFONIT";
+npcships[27] = "Aggro-Streuner";
+npcships[28] = "UberStreuner";
+npcships[29] = "UberLordakia";
+npcships[30] = "UberMordon";
+npcships[31] = "UberSaimon";
+npcships[32] = "UberDevolarium";
+npcships[33] = "UberSibelonit";
+npcships[34] = "UberSibelon";
+npcships[35] = "UberLordakium";
+npcships[36] = "UberKristallin";
+npcships[37] = "UberKristallon";
+npcships[38] = "UberStreuneR";
+var playerships = new Array();
+playerships[1] = "Phoenix";
+playerships[2] = "Yamato";
+playerships[3] = "Leonov";
+playerships[4] = "Defcom";
+playerships[5] = "Liberator";
+playerships[6] = "Piranha";
+playerships[7] = "Nostromo";
+playerships[8] = "Vengeance";
+playerships[9] = "Bigboy";
+playerships[10] = "Goliath";
+playerships[52] = "7G-Goliath";
+playerships[53] = "CBS-Goliath";
+var ore_names = new Array();
+ore_names[1] = _root.resource.ore_prometium;
+*/
+
 enum NpcShips
 {
     Streuner            = 2,
@@ -185,6 +243,7 @@ enum InventoryType
     INVENTORY_TYPE_BATTERY              = 0,
     INVENTORY_TYPE_SPEED_GENERATOR      = 1,
     INVENTORY_TYPE_SHIELD_GENERATOR     = 2,
+    INVENTORY_TYPE_EXTRAS			    = 7,
 };
 
 enum RocketType
@@ -395,4 +454,54 @@ enum class OreResource : uint8
     ORE_PROMERIUM       = 13,
     ORE_SEPROM          = 14,
     ORE_PALLADIUM       = 15,
+};
+
+enum class ItemTemplatesId : uint8
+{
+    ITEM_TEMPLATE_ID_LCB_10     = 16,
+    ITEM_TEMPLATE_ID_MCB_25     = 17,
+    ITEM_TEMPLATE_ID_MCB_50     = 18,
+    ITEM_TEMPLATE_ID_SAB_50     = 19,
+    ITEM_TEMPLATE_ID_R_310      = 20,
+    ITEM_TEMPLATE_ID_PLT_2026   = 21,
+    ITEM_TEMPLATE_ID_PLT_2021   = 22,
+    ITEM_TEMPLATE_ID_AIM_01     = 31,
+    ITEM_TEMPLATE_ID_AM_CPU     = 32,
+    ITEM_TEMPLATE_ID_ROK_T01    = 33,
+    ITEM_TEMPLATE_ID_JP_01      = 34,
+    ITEM_TEMPLATE_ID_JP_02      = 35,
+    ITEM_TEMPLATE_ID_REP_1      = 36,
+};
+
+enum class JumpChipType : uint8
+{
+    JUMP_CHIP_TYPE_NONE  = 0,
+    JUMP_CHIP_TYPE_JP_01 = 1,
+    JUMP_CHIP_TYPE_JP_02 = 2,
+};
+
+enum CompanyMapId : uint8
+{
+    COMPANY_MAP_ID_MMO_1X1      = 1,
+    COMPANY_MAP_ID_MMO_1X2      = 2,
+    COMPANY_MAP_ID_MMO_1X3      = 3,
+    COMPANY_MAP_ID_EIC_1X4      = 4,
+    COMPANY_MAP_ID_EIC_2X1      = 5,
+    COMPANY_MAP_ID_EIC_2X2      = 6,
+    COMPANY_MAP_ID_EIC_2X3      = 7,
+    COMPANY_MAP_ID_EIC_2X4      = 8,
+    COMPANY_MAP_ID_VRU_3X1      = 9,
+    COMPANY_MAP_ID_VRU_3X2      = 10,
+    COMPANY_MAP_ID_VRU_3X3      = 11,
+    COMPANY_MAP_ID_VRU_3X4      = 12,
+    COMPANY_MAP_ID_NOMAN_4X4    = 13,
+    COMPANY_MAP_ID_MMO_4X1      = 14,
+    COMPANY_MAP_ID_MMO_4X2      = 15,
+    COMPANY_MAP_ID_MMO_4X3      = 16,
+
+};
+
+enum class ItemType : uint8
+{
+    ITEM_TYPE_REPAIR_BOT    = 0,
 };

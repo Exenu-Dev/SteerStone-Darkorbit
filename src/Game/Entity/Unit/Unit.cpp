@@ -16,6 +16,7 @@
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include "Opcodes/Packets//Server/LoginPackets.hpp"
 #include "Opcodes/Packets/Server/MapPackets.hpp"
 #include "Opcodes/Packets/Server/MiscPackets.hpp"
 #include "Opcodes/Packets/Server/AttackPackets.hpp"
@@ -59,6 +60,7 @@ namespace SteerStone { namespace Game { namespace Entity {
         m_Uridium           = 0;
         m_InRadiationZone   = false;
         m_AttackType        = AttackType::ATTACK_TYPE_NONE;
+        m_HitChance         = HIT_CHANCE;
         
         for (uint32 l_I = 0; l_I < MAX_RESOURCE_COUNTER; l_I++)
             m_Resources[l_I] = 0;
@@ -127,7 +129,7 @@ namespace SteerStone { namespace Game { namespace Entity {
                 GetTarget()->ToMob()->SetTaggedPlayer(ToPlayer());
                 GetTarget()->ToMob()->Attack(this);
 
-                GetGrid()->SendPacketIfInSurrounding(Server::Packets::Misc::Info().Write(Server::Packets::Misc::InfoType::INFO_TYPE_GREY_OPPONENT, { GetTarget()->GetObjectGUID().GetCounter(), GetObjectGUID().GetCounter() }), this, false);
+                GetGrid()->SendPacketIfInSurrounding(Server::Packets::Misc::Update().Write(Server::Packets::Misc::InfoUpdate::INFO_UPDATE_GREY_OPPONENT, { GetTarget()->GetObjectGUID().GetCounter(), GetObjectGUID().GetCounter() }), this, false);
             }
         }
 
@@ -193,6 +195,9 @@ namespace SteerStone { namespace Game { namespace Entity {
             if (l_HitPoints <= 0)
             {
                 Kill(GetTarget()->ToUnit());
+
+                if (IsPlayer())
+                    ToPlayer()->SendClearRocketCooldown();
                 return;
             }
 
@@ -255,6 +260,10 @@ namespace SteerStone { namespace Game { namespace Entity {
         // If is player, we need to decrease the ammo by weapon count
         if (IsPlayer())
         {
+
+            if (ToPlayer()->GetSelectedBatteryAmmo() <= 1000 && ToPlayer()->GetInventory()->HasAutoAmmo())
+                ToPlayer()->GetInventory()->BuyAutoAmmo();
+
             // Check if player still has any ammo left
             if (ToPlayer()->GetSelectedBatteryAmmo() <= 0)
             {
@@ -336,11 +345,8 @@ namespace SteerStone { namespace Game { namespace Entity {
                 {
                     int32 l_Shield = GetTarget()->ToUnit()->GetShield() - l_Damage;
 
-                    if (l_Shield < 0)
-                    {
-                        CancelAttack(AttackType::ATTACK_TYPE_LASER);
+                    if (l_Shield <= 0)
                         l_Shield = 0;
-                    }
 
                     GetTarget()->ToUnit()->SetShield(l_Shield);
                     SetShield(GetShield() + l_Damage);
@@ -353,6 +359,12 @@ namespace SteerStone { namespace Game { namespace Entity {
                     // For some reason SAB50 requires the send laser shoot packet to be called every second
                     // otherwise laser visual is lost
                     SendLaserAttack(true);
+
+                    if (l_Shield == 0)
+                    {
+                        CancelAttack(AttackType::ATTACK_TYPE_LASER);
+                        return;
+                    }
                 }
                 break;
                 default:
@@ -554,11 +566,11 @@ namespace SteerStone { namespace Game { namespace Entity {
 
         if (IsMob())
         {
-            GetGrid()->SendPacketIfInSurrounding(Server::Packets::Misc::Info().Write(Server::Packets::Misc::InfoType::INFO_TYPE_UNGREY_OPPONENT, { GetObjectGUID().GetCounter() }), this, false);
+            GetGrid()->SendPacketIfInSurrounding(Server::Packets::Misc::Update().Write(Server::Packets::Misc::InfoUpdate::INFO_UPDATE_UNGREY_OPPONENT, { GetObjectGUID().GetCounter() }), this, false);
 
             /// The target may be on other side of the map if still targetting, so send packet specifically to target
             if (GetTarget()->ToPlayer())
-                GetTarget()->ToPlayer()->SendPacket(Server::Packets::Misc::Info().Write(Server::Packets::Misc::InfoType::INFO_TYPE_UNGREY_OPPONENT, { GetObjectGUID().GetCounter() }));
+                GetTarget()->ToPlayer()->SendPacket(Server::Packets::Misc::Update().Write(Server::Packets::Misc::InfoUpdate::INFO_UPDATE_UNGREY_OPPONENT, { GetObjectGUID().GetCounter() }));
         
             ToMob()->SetTaggedPlayer(nullptr);
         }
@@ -578,8 +590,7 @@ namespace SteerStone { namespace Game { namespace Entity {
     /// Calculate Hit chance whether we can hit target
     bool Unit::CalculateHitChance()
     {
-        /// 80% chance we will hit target
-        return Core::Utils::RollChanceInterger32(80);
+        return Core::Utils::RollChanceInterger32(GetHitChance());
     }
     /// Calculate Damage done for target
     /// @p_AttackType : Attack Type
@@ -674,6 +685,22 @@ namespace SteerStone { namespace Game { namespace Entity {
             l_ReceivedDamagePacket.Damage    = l_ShieldDamage + p_Damage; ///< Total Damage
             p_Target->ToPlayer()->SendPacket(l_ReceivedDamagePacket.Write());
         }
+    }
+    /// Heal Target
+    /// @p_Target : Target
+    /// @p_Heal : Heal amount
+    void Unit::Heal(Unit* p_Target, int32 p_Heal)
+    {
+        if (p_Heal <= 0)
+        {
+            LOG_WARNING("Unit", "Attempted to heal target but heal is 0 or less!");
+            return;
+        }
+
+        DealDamage(p_Target, -p_Heal, true);
+
+        if (p_Target->IsPlayer())
+            p_Target->ToPlayer()->SendHealthAndShield();
     }
     /// Calculate Damage takem for target
     /// @p_Target : Target

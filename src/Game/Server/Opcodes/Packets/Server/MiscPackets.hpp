@@ -32,22 +32,21 @@ namespace SteerStone { namespace Game { namespace Server { namespace Packets { n
         REWARD_TYPE_BATTERY,
     };
 
-    enum class InfoType
-    {
-        INFO_TYPE_DRONES,
-        INFO_TYPE_GREY_OPPONENT,
-        INFO_TYPE_UNGREY_OPPONENT,
-        INFO_TYPE_MINE_SMB,
-        INFO_TYPE_MINE_MIN
-    };
-
     enum class InfoUpdate
     {
         INFO_UPDATE_MESSAGE,
-        INFO_UPDATE_HEALTH,
+        INFO_UPDATE_SET_SHIELD,
+        INFO_UPDATE_SET_SHIELD_HEALTH,
         INFO_UPDATE_LEVEL_UP,
         INFO_UPDATE_CLEAR_ROCKET,
-        INFO_UPDATE_BOOSTERS
+        INFO_UPDATE_BOOSTERS,
+        INFO_UPDATE_EXTRAS_INFO,
+        INFO_UPDATE_CPU_JUMP_CHIP,
+        INFO_UPDATE_DRONES,
+        INFO_UPDATE_GREY_OPPONENT,
+        INFO_UPDATE_UNGREY_OPPONENT,
+        INFO_UPDATE_MINE_SMB,
+        INFO_UPDATE_MINE_MIN
     };
 
     /// SERVER_PACKET_DISPLAY_SUCC_DEBUG packet builder
@@ -82,24 +81,6 @@ namespace SteerStone { namespace Game { namespace Server { namespace Packets { n
         /// @p_Storage : Storage
         /// @p_InfoUpdate : Type of Info
         PacketBuffer const* Write(InfoUpdate p_InfoUpdate, std::initializer_list<std::variant<int32, std::string>> p_Storage = std::initializer_list<std::variant<int32, std::string>>());
-    };
-
-    /// SERVER_PACKET_MISC_INFO packet builder
-    class Info final : public ServerPacket
-    {
-    public:
-        /// Constructor 
-        Info() : ServerPacket(ServerOpCodes::SERVER_PACKET_MISC_INFO)
-        {
-        }
-
-        //////////////////////////////////////////////////////////////////////////
-        //////////////////////////////////////////////////////////////////////////
-
-        /// Write the packet
-        /// @p_Storage : Storage
-        /// @p_InfoType : Type of Info
-        PacketBuffer const* Write(InfoType p_InfoType, std::initializer_list<std::variant<int32, std::string>> p_Storage);
     };
 
     /// SERVER_PACKET_REWARD packet builder

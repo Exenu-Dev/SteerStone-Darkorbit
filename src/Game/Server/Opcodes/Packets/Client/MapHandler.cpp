@@ -28,6 +28,9 @@
 #include "ZoneManager.hpp"
 #include "World.hpp"
 #include "GameFlags.hpp"
+#include "ZoneManager.hpp"
+#include "Station.hpp"
+
 
 namespace SteerStone { namespace Game { namespace Server {
 
@@ -143,14 +146,12 @@ namespace SteerStone { namespace Game { namespace Server {
 
         if (!l_Object)
         {
-            m_Player->SendClearRocketCooldown();
             LOG_WARNING("Socket", "Attempted to find object %0 in map but does not exist!", l_Id);
             return;
         }
 
         if (l_Object->GetType() != Entity::Type::OBJECT_TYPE_MOB && l_Object->GetType() != Entity::Type::OBJECT_TYPE_PLAYER)
         {
-            m_Player->SendClearRocketCooldown();
             LOG_WARNING("Socket", "Attempted to select a target which is not a unit or a player!", l_Id);
             return;
         }
@@ -158,7 +159,6 @@ namespace SteerStone { namespace Game { namespace Server {
         // Cannot attack if there's player has no weapons
         if (m_Player->GetInventory()->GetWeaponCount() == 0)
         {
-            m_Player->SendClearRocketCooldown();
             SendPacket(Server::Packets::Misc::Update().Write(Server::Packets::Misc::InfoUpdate::INFO_UPDATE_MESSAGE, { "You need a weapon to be equipped to attack!" }));
             return;
         }
@@ -191,7 +191,7 @@ namespace SteerStone { namespace Game { namespace Server {
             return;
         }
 
-        if (l_Object->GetType() != Entity::Type::OBJECT_TYPE_MOB && l_Object->GetType() != Entity::Type::OBJECT_TYPE_PLAYER)
+        if (!l_Object->IsMob() && !l_Object->IsPlayer())
         {
             LOG_WARNING("Socket", "Attempted to select a target which is not a unit or a player!", l_Id);
             return;
@@ -245,20 +245,123 @@ namespace SteerStone { namespace Game { namespace Server {
             m_Player->UpdateClientSettings(p_Packet);
         }
     }
-
-    void GameSocket::HandleMine(ClientPacket* p_Packet)
+    /// Map Handler
+    /// @p_ClientPacket : Packet recieved from client
+    void GameSocket::HandleChangeMisc(ClientPacket* p_Packet)
     {
-        Entity::Mine* l_Mine = new Entity::Mine(m_Player);
-        l_Mine->SetMap(m_Player->GetMap());
-        l_Mine->GetSpline()->SetPosition(m_Player->GetSpline()->GetPositionX(), m_Player->GetSpline()->GetPositionY());
-        l_Mine->GetMap()->Add(l_Mine);
+        std::string l_Type = p_Packet->ReadString();
+
+        /// Trim linebreaks
+        /// For some reason the "ROB" packet includes line breaks, very weird!
+        l_Type = Core::Utils::String::RemoveLineBreaks(l_Type);
+
+        if (l_Type == "CFG")
+        {
+            m_Player->ChangeConfiguration(p_Packet->ReadString()[0] == '1' ? 1 : 2);
+        }
+        else if (l_Type == "ROB")
+        {
+            // Check to see if player has a repair bot
+            Entity::Item* l_RepairBot = m_Player->GetInventory()->GetRepairBot();
+
+            if (!l_RepairBot)
+            {
+				m_Player->SendInfoMessage("You do not have a repair bot equipped!");
+				return;
+			}
+
+            if (!m_Player->CanRepair())
+            {
+                m_Player->SendInfoMessage("You cannot repair your ship at this time!");
+				return;
+            }
+
+            m_Player->Repair(!m_Player->IsRepairing());
+        }
+        else if (l_Type == "J")
+        {
+            JumpChipType l_JumpChipType = static_cast<JumpChipType>(p_Packet->ReadUInt32());
+
+            Entity::Item* l_JumpChip = m_Player->GetInventory()->GetJumpChip();
+
+            /// Check to see if player actually has a jump chip
+            if (!l_JumpChip)
+            {
+                m_Player->SendInfoMessage("You do not have a jump chip equipped!");
+                LOG_WARNING("Socket", "Player %0 attempted to jump without a jump chip equipped!", m_Player->GetName());
+                return;
+            }
+
+            if (l_JumpChip->GetJumpChipType() != l_JumpChipType)
+            {
+                m_Player->SendInfoMessage("You do not have the correct jump chip equipped!");
+				LOG_WARNING("Socket", "Player %0 attempted to jump with the wrong jump chip equipped!", m_Player->GetName());
+				return;
+			}
+
+            if (m_Player->IsInCombat())
+            {
+                m_Player->SendInfoMessage("You cannot jump while in combat!");
+				return;
+			}
+
+            if (m_Player->IsJumping())
+            {
+                m_Player->SendInfoMessage("You are already jumping!");
+                return;
+            }
+
+            switch (l_JumpChipType)
+            {
+                case JumpChipType::JUMP_CHIP_TYPE_JP_01:
+                {
+                    if (!m_Player->GetMap()->IsLowerMap())
+                    {
+                        m_Player->SendInfoMessage("Can only jump from X-4 maps");
+						return;
+					}
+                }
+                break;
+            }
+
+            uint32 l_MapId = m_Player->GetX1CompanyMapId();
+
+            if (l_MapId == m_Player->GetMap()->GetId())
+            {
+                m_Player->SendInfoMessage("You are already on this map!");
+                return;
+            }
+
+            Entity::Station* l_Station = sZoneManager->GetMap(l_MapId)->GetStation();
+
+            LOG_ASSERT(l_Station, "Socket", "Cannot find station for map %0", l_MapId);
+
+            m_Player->Teleport(l_MapId, l_Station->GetSpline()->GetPositionX(), l_Station->GetSpline()->GetPositionY());
+
+            int32 l_JumpsLeft = l_JumpChip->GetMetaData<uint32>("jumps") - 1;
+
+            if (l_JumpsLeft < 0)
+            {
+                m_Player->GetInventory()->RemoveItem(l_JumpChip);
+                return;
+            }
+
+            l_JumpChip->UpdateMetaData("jumps", l_JumpsLeft);
+        }
+        else if (l_Type == "MIN")
+        {
+            Entity::Mine* l_Mine = new Entity::Mine(m_Player);
+            l_Mine->SetMap(m_Player->GetMap());
+            l_Mine->GetSpline()->SetPosition(m_Player->GetSpline()->GetPositionX(), m_Player->GetSpline()->GetPositionY());
+            l_Mine->GetMap()->Add(l_Mine);
+        }
 	}
 
     void GameSocket::HandleLootOre(ClientPacket* p_Packet)
     {
 		uint32 l_Id = p_Packet->ReadUInt32();
 
-		Entity::Object* l_Object = m_Player->GetGrid()->FindObject(l_Id);
+		Entity::Object* l_Object = m_Player->GetMap()->FindObject(l_Id);
 
         if (!l_Object)
         {

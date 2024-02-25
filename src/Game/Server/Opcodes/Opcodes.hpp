@@ -58,13 +58,12 @@ enum ClientOpCodes : uint8
     CLIENT_PACKET_CANCEL_LOG_OUT        = 0x6F,
     CLIENT_PACKET_LOOT_CARGO            = 0x78,
     CLIENT_PACKET_UPDATE_SETTINGS       = 0x41,
-    CLIENT_PACKET_CHANGE_CONFIG         = 0x53,
+    CLIENT_PACKET_UPDATE_MISC           = 0x53, ///< This could be named better, not sure what to call this, handles config change, jump etc...
     CLIENT_PACKET_UNKNOWN               = 0x62,
     CLIENT_PACKET_ROCKET_ATTACK         = 0x76,
     CLIENT_PACKET_SELL_RESOURCES        = 0x62,
     CLIENT_PACKET_SELL_ORE              = 0x54,
     CLIENT_PACKET_ORE_PRICES            = 0x62,
-    CLIENT_PACKET_MINE  			    = 0x53,
     CLIENT_PACKET_COLLECT_ORE           = 0x77,
 
     /// Web

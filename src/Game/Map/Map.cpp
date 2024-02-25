@@ -226,6 +226,17 @@ namespace SteerStone { namespace Game { namespace Map {
 
         return false;
     }
+    /// Get Station on Map
+    Entity::Station* Base::GetStation() const
+    {
+        for (auto l_Itr : m_ConstantObjects)
+        {
+			if (l_Itr->GetType() == Entity::Type::OBJECT_TYPE_STATION)
+				return l_Itr->ToStation();
+		}
+        
+		return nullptr;
+    }
 
     ///////////////////////////////////////////
     //            GRID SYSTEM
@@ -432,8 +443,13 @@ namespace SteerStone { namespace Game { namespace Map {
     /// @p_JumpQueueCordinates : Jump Queue Cordinates (MapId, PositionX, PositionY)
     void Base::AddToJumpQueue(Entity::Object* p_ObjectPlayer, const JumpQueueCordinates p_JumpQueueCordinates)
     {
-        if (p_ObjectPlayer->ToPlayer()->IsJumping())
-            return;
+        if (p_ObjectPlayer->ToPlayer())
+        {
+            if (p_ObjectPlayer->ToPlayer()->IsJumping())
+				return;
+
+            p_ObjectPlayer->ToPlayer()->SetIsJumping(true);
+        }
 
         m_PlayersToJump[p_ObjectPlayer] = std::make_pair(Core::Diagnostic::IntervalTimer(sWorldManager->GetIntConfig(World::IntConfigs::INT_CONFIG_JUMP_DELAY)), p_JumpQueueCordinates);
     }
@@ -459,8 +475,7 @@ namespace SteerStone { namespace Game { namespace Map {
 
             l_Itr->first->ToPlayer()->CancelAttack();
             l_Itr->first->ToPlayer()->ClearSurroundings();
-
-            l_Itr->second.second.MapId;
+            l_Itr->first->ToPlayer()->Repair(false);
 
             /// Add to map
             l_Itr->first->SetMap(sZoneManager->GetMap(l_Itr->second.second.MapId));
@@ -469,6 +484,7 @@ namespace SteerStone { namespace Game { namespace Map {
             l_Itr->first->GetSpline()->SetPosition(l_Itr->second.second.PositionX, l_Itr->second.second.PositionY,
                 l_Itr->second.second.PositionX, l_Itr->second.second.PositionY);
             l_Itr->first->ToPlayer()->SendInitializeShip();
+            l_Itr->first->ToPlayer()->UpdateExtrasInfo();
             l_Itr->first->ToPlayer()->SendMapUpdate();
             l_Itr->first->ToPlayer()->SendDrones();
             l_Itr->first->ToPlayer()->SendAmmoUpdate();

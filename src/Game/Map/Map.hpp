@@ -26,6 +26,7 @@
 namespace SteerStone { namespace Game { namespace Entity {
 
     class Object;
+    class Station;
 
 }   ///< namespace Entity
 }   ///< namespace Game
@@ -81,6 +82,9 @@ namespace SteerStone { namespace Game { namespace Map {
         /// Is in company map
         /// @p_Target : Target checking against
         bool IsInCompanyMap(Entity::Unit* p_Target) const;
+
+        /// Get Station on Map
+        Entity::Station* GetStation() const;
 
         ///////////////////////////////////////////
         //            GRID SYSTEM
@@ -166,14 +170,47 @@ namespace SteerStone { namespace Game { namespace Map {
         uint32 GetMapSizeX()    const { return m_MapSizeX;      }
         uint32 GetMapSizeY()    const { return m_MapSizeY;      }
 
+        std::string GetName()
+        {
+            switch (m_Id)
+            {
+                case CompanyMapId::COMPANY_MAP_ID_MMO_1X2:
+				    return "1-2";
+                case CompanyMapId::COMPANY_MAP_ID_MMO_1X3:
+                    return "1-3";
+                case CompanyMapId::COMPANY_MAP_ID_EIC_1X4:
+                    return "1-4";
+                case CompanyMapId::COMPANY_MAP_ID_EIC_2X1:
+				    return "2-1";
+                case CompanyMapId::COMPANY_MAP_ID_EIC_2X2:
+				    return "2-2";
+                case CompanyMapId::COMPANY_MAP_ID_EIC_2X3:
+                    return "2-3";
+                case CompanyMapId::COMPANY_MAP_ID_EIC_2X4:
+        		    return "2-4";
+                case CompanyMapId::COMPANY_MAP_ID_VRU_3X1:
+                    return "3-1";
+                case CompanyMapId::COMPANY_MAP_ID_VRU_3X2:
+				    return "3-2";
+                case CompanyMapId::COMPANY_MAP_ID_VRU_3X3:
+                    return "3-3";
+                case CompanyMapId::COMPANY_MAP_ID_VRU_3X4:
+					return "3-4";
+                case CompanyMapId::COMPANY_MAP_ID_NOMAN_4X4:
+					return "4-4";
+                default:
+                    return "Unknown";
+            }
+        }
+
         bool IsBattleZoneMap() const
         {
             switch (m_Id)
             {
-                case 13: ///< 4-1
-                case 14: ///< 4-2
-                case 15: ///< 4-3
-                case 16: ///< 4-4
+                case CompanyMapId::COMPANY_MAP_ID_NOMAN_4X4:
+                case CompanyMapId::COMPANY_MAP_ID_MMO_4X1:
+                case CompanyMapId::COMPANY_MAP_ID_MMO_4X2:
+                case CompanyMapId::COMPANY_MAP_ID_MMO_4X3:
                     return true;
                     break;
                 default:
@@ -186,12 +223,12 @@ namespace SteerStone { namespace Game { namespace Map {
         {
             switch (m_Id)
             {
-				case 1:  ///< 1-1
-				case 5:  ///< 2-1
-				case 9:  ///< 3-1
-                case 2:  ///< 1-2
-                case 6:  ///< 2-2
-                case 10: ///< 3-2
+				case CompanyMapId::COMPANY_MAP_ID_MMO_1X1:
+                case CompanyMapId::COMPANY_MAP_ID_EIC_2X1:
+                case CompanyMapId::COMPANY_MAP_ID_VRU_3X1:
+                case CompanyMapId::COMPANY_MAP_ID_MMO_1X2:
+                case CompanyMapId::COMPANY_MAP_ID_EIC_2X2:
+                case CompanyMapId::COMPANY_MAP_ID_VRU_3X2:
 					return true;
 				default:
 					return false;
@@ -202,15 +239,15 @@ namespace SteerStone { namespace Game { namespace Map {
         {
             switch (m_Id)
             {
-                case 2:  ///< 1-2
-                case 3:  ///< 1-3
-                case 4:  ///< 1-4 
-                case 6:  ///< 2-2
-                case 7:  ///< 2-3
-                case 8:  ///< 2-4
-                case 10: ///< 3-2
-                case 11: ///< 3-3
-                case 12: ///< 3-4 
+                case CompanyMapId::COMPANY_MAP_ID_MMO_1X2:
+                case CompanyMapId::COMPANY_MAP_ID_MMO_1X3:
+                case CompanyMapId::COMPANY_MAP_ID_EIC_1X4:
+                case CompanyMapId::COMPANY_MAP_ID_EIC_2X2:
+                case CompanyMapId::COMPANY_MAP_ID_EIC_2X3:
+                case CompanyMapId::COMPANY_MAP_ID_EIC_2X4:
+                case CompanyMapId::COMPANY_MAP_ID_VRU_3X2:
+                case CompanyMapId::COMPANY_MAP_ID_VRU_3X3:
+                case CompanyMapId::COMPANY_MAP_ID_VRU_3X4:
 					return true;
 				default:
 					return false;
@@ -221,18 +258,18 @@ namespace SteerStone { namespace Game { namespace Map {
         {
             switch (m_Id)
             {
-                case 1:  ///< 1-1
-                case 2:  ///< 1-2
-                case 3:  ///< 1-3
-                case 4:  ///< 1-4 
-                case 5:  ///< 2-1
-                case 6:  ///< 2-2
-                case 7:  ///< 2-3
-                case 8:  ///< 2-4
-                case 9:  ///< 3-1
-                case 10: ///< 3-2
-                case 11: ///< 3-3
-                case 12: ///< 3-4 
+                case CompanyMapId::COMPANY_MAP_ID_MMO_1X1:
+                case CompanyMapId::COMPANY_MAP_ID_MMO_1X2:
+                case CompanyMapId::COMPANY_MAP_ID_MMO_1X3:
+                case CompanyMapId::COMPANY_MAP_ID_EIC_1X4:
+                case CompanyMapId::COMPANY_MAP_ID_EIC_2X1:
+                case CompanyMapId::COMPANY_MAP_ID_EIC_2X2:
+                case CompanyMapId::COMPANY_MAP_ID_EIC_2X3:
+                case CompanyMapId::COMPANY_MAP_ID_EIC_2X4:
+                case CompanyMapId::COMPANY_MAP_ID_VRU_3X1:
+                case CompanyMapId::COMPANY_MAP_ID_VRU_3X2:
+                case CompanyMapId::COMPANY_MAP_ID_VRU_3X3:
+                case CompanyMapId::COMPANY_MAP_ID_VRU_3X4:
                     return true;
                 default:
                     return false;
@@ -245,7 +282,7 @@ namespace SteerStone { namespace Game { namespace Map {
         {
             switch (m_Id)
             {
-                case 16:    ///< 4-4
+                case CompanyMapId::COMPANY_MAP_ID_NOMAN_4X4:
                 case 29:    ///< 4-5
 				    return true;
 				default:

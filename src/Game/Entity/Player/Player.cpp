@@ -27,6 +27,7 @@
 #include "ZoneManager.hpp"
 #include "Diagnostic/DiaStopWatch.hpp"
 #include "Utility/UtilMaths.hpp"
+#include "ZoneManager.hpp"
 
 namespace SteerStone { namespace Game { namespace Entity {
 
@@ -72,6 +73,7 @@ namespace SteerStone { namespace Game { namespace Entity {
         m_IgnoreHostileCargo    = false;
         m_AutoChangeAmmo        = false;
         m_EnableBuyFast         = false;
+        m_Repairing			    = false;
 
         m_LoggedIn              = false;
         m_Jumping               = false;
@@ -82,6 +84,7 @@ namespace SteerStone { namespace Game { namespace Entity {
         /// Timers
         m_IntervalNextSave.SetInterval(sWorldManager->GetIntConfig(World::IntConfigs::INT_CONFIG_SAVE_PLAYER_TO_DATABASE));
         m_IntervalRadiation.SetInterval(RADIATION_TIMER);
+        m_RepairBotTimer.SetInterval(REPAIR_BOT_TIMER);
         ConfigTimer.SetInterval(CONFIG_TIMER);
 
         m_AttackRange           = sWorldManager->GetIntConfig(World::IntConfigs::INT_CONFIG_PLAYER_ATTACK_RANGE);
@@ -378,6 +381,7 @@ namespace SteerStone { namespace Game { namespace Entity {
         l_PreparedStatement->ExecuteStatement();
 
         SaveShipToDB();
+        GetInventory()->SaveInventory();
     }
     /// Save Ship details to database
     /// @p_Asynchronous : Use Async connection
@@ -427,7 +431,19 @@ namespace SteerStone { namespace Game { namespace Entity {
     {
         SendPacket(Server::Packets::Misc::Update().Write(Server::Packets::Misc::InfoUpdate::INFO_UPDATE_MESSAGE, { p_Message }));
     }
-
+    /// Get Company X-1 Map Id based on Player Company
+    uint32 Player::GetX1CompanyMapId() const
+    {
+        switch (m_Company)
+        {
+			case Company::MMO:
+                return CompanyMapId::COMPANY_MAP_ID_MMO_1X1;
+			case Company::EARTH:
+				return CompanyMapId::COMPANY_MAP_ID_EIC_2X1;
+			case Company::VRU:
+				return CompanyMapId::COMPANY_MAP_ID_VRU_3X1;
+		}
+    }
     /// Return Drone Level
     /// @p_Drone : Drone
     uint16 Player::GetDroneLevel(Drone& p_Drone)
@@ -506,6 +522,45 @@ namespace SteerStone { namespace Game { namespace Entity {
         else if (GetEvent() == EventType::EVENT_TYPE_RADIATION_ZONE)
             DealDamage(this, Core::Utils::CalculatePercentage(m_IntervalRadiation.GetTick() > 5 ? 5 : m_IntervalRadiation.GetTick(), GetHitMaxPoints()), false);
     }
+    /// Update Repairing
+    /// @p_Diff : Execution Time
+    void Player::UpdateRepairing(uint32 const p_Diff)
+    {
+        m_RepairBotTimer.Update(p_Diff);
+        if (!m_RepairBotTimer.Passed())
+            return;
+
+        if (!CanRepair())
+        {
+            Repair(false);
+            return;
+        }
+
+        Item* l_RepairBot = GetInventory()->GetItemByType(ItemType::ITEM_TYPE_REPAIR_BOT);
+
+        if (!l_RepairBot)
+        {
+            m_Repairing = false;
+            LOG_WARNING("Player", "Player %0 is repairing but does not have a repair bot!", GetId());
+            return;
+        }
+
+        /// Check here is it not really needed, but might aswell
+        /// as we depend on this
+        if (l_RepairBot->GetItemTemplate()->GetValue() <= 0)
+        {
+            m_Repairing = false;
+            return;
+        }
+
+        uint32 l_RepairTimeInSeconds = l_RepairBot->GetItemTemplate()->GetValue();
+        uint32 l_Health = std::round((GetHitMaxPoints() / l_RepairTimeInSeconds));
+
+        if (GetHitPoints() + l_Health > GetHitMaxPoints())
+			l_Health = GetHitMaxPoints() - GetHitPoints();
+
+        Heal(this, l_Health);
+    }
 
     /// Update Player
     /// @p_Diff : Execution Time
@@ -521,6 +576,7 @@ namespace SteerStone { namespace Game { namespace Entity {
                 UpdateRadiationZone(p_Diff);
                 UpdateSurroundings(p_Diff);
                 UpdateBoosters(p_Diff);
+                UpdateRepairing(p_Diff);
 
                 Unit::Update(p_Diff);
             }
@@ -918,14 +974,7 @@ namespace SteerStone { namespace Game { namespace Entity {
             l_Packet.Config = p_Config;
             SendPacket(l_Packet.Write());
 
-            SendPacket(Server::Packets::Login::PlayerInfo().Write(Server::Packets::Login::InfoType::INFO_TYPE_SET_SHIELD_HEALTH,
-                {
-                    GetHitPoints(),
-                    (int32)GetHitMaxPoints(),
-                    GetShield(),
-                    (int32)GetMaxShield(),
-                }));
-
+            SendHealthAndShield();
             return; 
         }
 
@@ -1067,8 +1116,8 @@ namespace SteerStone { namespace Game { namespace Entity {
 
         l_Drones += '0';
 
-        Server::Packets::Misc::Info l_InfoPacket;
-        l_InfoPacket.Write(Server::Packets::Misc::InfoType::INFO_TYPE_DRONES, { GetObjectGUID().GetCounter(), l_Drones });
+        Server::Packets::Misc::Update l_InfoPacket;
+        l_InfoPacket.Write(Server::Packets::Misc::InfoUpdate::INFO_UPDATE_DRONES, { GetObjectGUID().GetCounter(), l_Drones });
 
         return l_InfoPacket.GetBuffer();
     }
@@ -1168,12 +1217,87 @@ namespace SteerStone { namespace Game { namespace Entity {
         if (p_MapId == GetMap()->GetId())
 			return;
 
+        Map::Base* l_Map = sZoneManager->GetMap(p_MapId);
+
+        LOG_ASSERT(l_Map, "Player", "Map %0 does not exist", p_MapId);
+
+        SendInfoMessage("Teleporting to map " + l_Map->GetName() + " in 5 seconds");
+
         Game::Map::JumpQueueCordinates l_JumpQueueCordinates;
         l_JumpQueueCordinates.MapId = p_MapId;
         l_JumpQueueCordinates.PositionX = p_PositionX;
         l_JumpQueueCordinates.PositionY = p_PositionY;
 
         GetMap()->AddToJumpQueue(this, l_JumpQueueCordinates);
+    }
+    /// Update Items
+    /// This updates the cloak, jump cpu, etc
+    void Player::UpdateExtrasInfo()
+    {
+        JumpChipType l_JumpChipType = GetInventory()->GetJumpChipType();
+
+        SendPacket(Server::Packets::Misc::Update().Write(Server::Packets::Misc::InfoUpdate::INFO_UPDATE_EXTRAS_INFO, {
+            1, ///< Weird Icon
+            0, ///< Portable Trade Ore
+            static_cast<uint8>(l_JumpChipType),
+            0,
+            GetInventory()->GetRepairBot() != nullptr ? true : false,
+            0,
+            7,
+            8,
+            0, ///< Multiplier
+            0,
+            0, ///< AIM CPU
+            0, ///< ROCKET CPU Automatically fires
+            0, ///< Cloak CPU
+        }));
+
+        if (l_JumpChipType == JumpChipType::JUMP_CHIP_TYPE_NONE)
+            return;
+
+        Item* l_JumpChip = GetInventory()->GetJumpChip();
+
+        /// This is double checking, but always good to do
+        if (!l_JumpChip)
+            return;
+
+        SendPacket(Server::Packets::Misc::Update().Write(Server::Packets::Misc::InfoUpdate::INFO_UPDATE_CPU_JUMP_CHIP, {
+            static_cast<uint8>(l_JumpChipType),
+            0, ///< Not sure what this is yet
+            l_JumpChip->GetMetaData<uint32>("jumps")
+        }));
+    }
+    /// Send the packet to update players health and shield
+    void Player::SendHealthAndShield()
+    {
+        SendPacket(Server::Packets::Misc::Update().Write(Server::Packets::Misc::InfoUpdate::INFO_UPDATE_SET_SHIELD_HEALTH,
+            {
+                GetHitPoints(),
+                (int32)GetHitMaxPoints(),
+                GetShield(),
+                (int32)GetMaxShield(),
+            }));
+    }
+    /// Check to see if the player can repair based on a series of checks
+    bool Player::CanRepair()
+    {
+        if (IsInCombat())
+            return false;
+
+        if (GetHitPoints() >= GetHitMaxPoints())
+            return false;
+
+        Item* l_RepairBot = GetInventory()->GetItemByType(ItemType::ITEM_TYPE_REPAIR_BOT);
+
+        if (!l_RepairBot)
+            return false;
+
+        /// Check here is it not really needed, but might aswell
+        /// as we depend on this
+        if (l_RepairBot->GetItemTemplate()->GetValue() <= 0)
+            return false;
+
+        return true;
     }
 
     /// Update Experience
@@ -1674,6 +1798,17 @@ namespace SteerStone { namespace Game { namespace Entity {
 
 		m_Honor += p_Honor;
 	}
+    /// Set the player to repairing mode
+    /// @p_Repair : Repair
+    void Player::Repair(bool p_Repair)
+    {
+        SetIsRepairing(p_Repair);
+
+        /// Trigger the event to update
+        // e.g if player is already at the station
+        // then trigger the station again but this time we are repairing
+        SetUpdateEvent(true);
+    }
 
     ///////////////////////////////////////////
     //        BOOSTERS

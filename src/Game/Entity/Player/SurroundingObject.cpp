@@ -117,7 +117,7 @@ namespace SteerStone { namespace Game { namespace Entity {
     /// Despawn Object
     bool SurroundingObject::Despawn()
     {
-        if (!m_Object->IsBonusBox())
+        if (m_Object->IsMob() || m_Object->IsPlayer())
         {
             /// If we are still targetting the object, keep it in client
             if (m_PlayerObject->ToUnit()->GetTarget() && m_PlayerObject->ToUnit()->GetTarget()->GetObjectGUID().GetCounter() ==
@@ -137,12 +137,20 @@ namespace SteerStone { namespace Game { namespace Entity {
             l_Packet.Id = m_Object->GetObjectGUID().GetCounter();
             m_PlayerObject->ToPlayer()->SendPacket(l_Packet.Write());
         }
-        else ///< Is Bonus Box
+        else if (m_Object->IsBonusBox()) ///< Is Cargo
         {
             Server::Packets::RemoveCargo l_Packet;
             l_Packet.Id = m_Object->GetObjectGUID().GetCounter();
             m_PlayerObject->ToPlayer()->SendPacket(l_Packet.Write());
         }
+        else if (m_Object->IsOre())
+        {
+			Server::Packets::DespawnOre l_Packet;
+			l_Packet.Id = m_Object->GetObjectGUID().GetCounter();
+			m_PlayerObject->ToPlayer()->SendPacket(l_Packet.Write());
+		}
+        else
+            LOG_WARNING("SurroundingObject", "Object type not handled for despawn! %0, %1", static_cast<uint8>(m_Object->GetType()), m_Object->GetObjectGUID().GetCounter());
 
         return true;
     }

@@ -174,6 +174,17 @@ namespace SteerStone { namespace Core { namespace Utils {
         return RawToHexString(reinterpret_cast<const uint8*>(p_Input.c_str()), p_Input.size());
     }
 
+    /// Remove line breaks from a string
+    /// @p_Str : String to remove line breaks froms
+    std::string String::RemoveLineBreaks(const std::string& p_Str)
+    {
+        std::string l_Result = p_Str;
+        l_Result.erase(std::remove(l_Result.begin(), l_Result.end(), '\n'), l_Result.end());
+        l_Result.erase(std::remove(l_Result.begin(), l_Result.end(), '\r'), l_Result.end());
+
+        return l_Result;
+    }
+
 }   ///< namespace Utils
 }   ///< namespace Core
 }   ///< namespace SteerStone

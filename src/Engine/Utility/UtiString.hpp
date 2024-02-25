@@ -86,6 +86,9 @@ namespace SteerStone { namespace Core { namespace Utils {
 
             static std::string StringToHexString(const std::string & p_Input);
 
+            /// Remove line breaks from a string
+            /// @p_Str : String to remove line breaks froms
+            static std::string RemoveLineBreaks(const std::string& p_Str);
     };
 
     //////////////////////////////////////////////////////////////////////////

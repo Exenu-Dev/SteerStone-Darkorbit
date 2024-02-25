@@ -20,6 +20,7 @@
 #include "Player.hpp"
 #include "World.hpp"
 #include "GameFlags.hpp"
+#include "Server/MiscPackets.hpp"
 #include "Server/LoginPackets.hpp"
 #include "ObjectManager.hpp"
 #include "ClanManager.hpp"
@@ -86,18 +87,8 @@ namespace SteerStone { namespace Game { namespace Server {
                 /// Reload our inventory
                 l_Player->GetInventory()->LoadInventory();
                 l_Player->GetInventory()->CalculateStats();
-                
-                /// Send Packet
-                /// TODO; Max Shields/Health are uint32 but packet struct is asking for int32 - could be a possible overflow?
-                /// TODO; Check if this packet is correct
-                l_Player->SendPacket(Server::Packets::Login::PlayerInfo().Write(Server::Packets::Login::InfoType::INFO_TYPE_SET_SHIELD_HEALTH,
-                    {
-                       l_Player->GetHitPoints(),
-                       (int32)l_Player->GetHitMaxPoints(),
-                       l_Player->GetShield(),
-                       (int32)l_Player->GetMaxShield(),
-                    }));
 
+                l_Player->SendHealthAndShield();
             }
         }
     }
@@ -165,8 +156,9 @@ namespace SteerStone { namespace Game { namespace Server {
         uint32 l_PlayerId = p_Packet->ReadUInt32();
 
         Entity::Player* l_Player = sWorldManager->FindPlayer(l_PlayerId);
-        PacketBuffer l_PacketBuffer;
-        l_PacketBuffer.AppendChar("Error");
+
+        nlohmann::json l_Json;
+
         if (l_Player)
         {
             uint32 l_EntryId = p_Packet->ReadUInt32();
@@ -176,21 +168,37 @@ namespace SteerStone { namespace Game { namespace Server {
             if (l_ItemTemplate) {
                 // TODO; Need a better method of detecting what ammo is being updated
                 // As checking by name is not a good idea as this could change
-                if (l_ItemTemplate->Name == "LCB-10")
+                if (l_ItemTemplate->Id == static_cast<uint8>(ItemTemplatesId::ITEM_TEMPLATE_ID_LCB_10))
                     l_Player->SetBatteryAmmo(BatteryType::BATTERY_TYPE_LCB10, l_Amount);
-                else if (l_ItemTemplate->Name == "MCB-25")
+                else if (l_ItemTemplate->Id == static_cast<uint8>(ItemTemplatesId::ITEM_TEMPLATE_ID_MCB_25))
                     l_Player->SetBatteryAmmo(BatteryType::BATTERY_TYPE_MCB25, l_Amount);
-                else if (l_ItemTemplate->Name == "MCB-50")
+                else if (l_ItemTemplate->Id == static_cast<uint8>(ItemTemplatesId::ITEM_TEMPLATE_ID_MCB_50))
                     l_Player->SetBatteryAmmo(BatteryType::BATTERY_TYPE_MCB50, l_Amount);
-                else if (l_ItemTemplate->Name == "SAB-50")
+                else if (l_ItemTemplate->Id == static_cast<uint8>(ItemTemplatesId::ITEM_TEMPLATE_ID_SAB_50))
                     l_Player->SetBatteryAmmo(BatteryType::BATTERY_TYPE_SAB50, l_Amount);
+                else if (l_ItemTemplate->Id == static_cast<uint8>(ItemTemplatesId::ITEM_TEMPLATE_ID_R_310))
+                    l_Player->SetRocketAmmo(RocketType::ROCKET_TYPE_R310, l_Amount);
+                else if (l_ItemTemplate->Id == static_cast<uint8>(ItemTemplatesId::ITEM_TEMPLATE_ID_PLT_2021))
+                    l_Player->SetRocketAmmo(RocketType::ROCKET_TYPE_PLT_2021, l_Amount);
+                else if (l_ItemTemplate->Id == static_cast<uint8>(ItemTemplatesId::ITEM_TEMPLATE_ID_PLT_2026))
+                    l_Player->SetRocketAmmo(RocketType::ROCKET_TYPE_PLT_2026, l_Amount);
+
+                l_Json["status"] = "success";
+                l_Json["message"] = "Ammo updated";
             }
-            else {
+            else
+            {
+                l_Json["error"] = "Failed to find Item Template for " + std::to_string(l_EntryId);
                 LOG_WARNING("Web", "Failed to find Item Template for %0", l_EntryId);
             }
         }
+        else
+        {
+			l_Json["error"] = "Failed to find player " + std::to_string(l_PlayerId);
+			LOG_WARNING("Web", "Failed to find player %0", l_PlayerId);
+		}
 
-        Write((char*)l_PacketBuffer.GetContents(), l_PacketBuffer.GetSize(), true);
+        Write(l_Json.dump().c_str(), l_Json.dump().length(), true);
     }
     /// Web Handler
     /// @p_ClientPacket : Packet recieved from Web

@@ -67,16 +67,6 @@ namespace SteerStone { namespace Game { namespace Server {
 
     /// Ship Handler
     /// @p_ClientPacket : Packet recieved from client
-    void GameSocket::HandleChangeConfig(ClientPacket* p_Packet)
-    {
-        if (p_Packet->ReadString() == "CFG")
-        {
-            m_Player->ChangeConfiguration(p_Packet->ReadString()[0] == '1' ? 1 : 2);
-        }
-    }
-
-    /// Ship Handler
-    /// @p_ClientPacket : Packet recieved from client
     void GameSocket::HandleSellOre(ClientPacket* p_Packet)
     {
         if (m_Player->GetEvent() != EventType::EVENT_TYPE_STATION)

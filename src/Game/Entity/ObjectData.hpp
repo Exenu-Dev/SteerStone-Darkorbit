@@ -22,6 +22,12 @@
 
 namespace SteerStone { namespace Game { namespace Entity {
 
+    enum class PriceType : uint8
+    {
+        PRICE_TYPE_CREDITS = 0,
+        PRICE_TYPE_URIDIUM = 1
+    };
+
     struct MobTemplate
     {
     public:
@@ -160,6 +166,31 @@ namespace SteerStone { namespace Game { namespace Entity {
             ValuePercentage     = 0;
             Credits             = 0;
             Uridium             = 0;
+        }
+
+        //////////////////////////////////////////////////////////////////////////
+        //////////////////////////////////////////////////////////////////////////
+
+    public:
+        uint32 GetPrice() const
+        {
+			if (Uridium > 0)
+				return Uridium;
+
+            return Credits;
+		}
+
+        uint32 GetValue() const
+        {
+			return Value;
+		}
+
+        PriceType GetPriceType() const
+        {
+            if (Uridium > 0)
+                return PriceType::PRICE_TYPE_URIDIUM;
+
+            return PriceType::PRICE_TYPE_CREDITS;
         }
 
         //////////////////////////////////////////////////////////////////////////

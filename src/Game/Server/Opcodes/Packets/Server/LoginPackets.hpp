@@ -25,8 +25,6 @@ namespace SteerStone { namespace Game { namespace Server { namespace Packets { n
     enum class InfoType
     {
         INFO_TYPE_SET_SETTINGS,
-        INFO_TYPE_SET_SHIELD,
-        INFO_TYPE_SET_SHIELD_HEALTH,
         INFO_TYPE_SET_ADMIN,
         INFO_TYPE_SET_CARGO_SPACE,
         INFO_TYPE_SET_MESSAGE

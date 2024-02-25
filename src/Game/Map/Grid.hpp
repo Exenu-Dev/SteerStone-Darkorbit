@@ -129,7 +129,7 @@ namespace SteerStone { namespace Game { namespace Map {
         /// Unload objects from map
         void Unload();
         /// Build surrounding objects near player
-        /// @p_Player       : Player
+        /// @p_Player       : Player to build surrounding objects for
         void BuildSurroundingObjects(Entity::Player* p_Player);
         /// Build Player Spawn Packet
         /// @p_ObjectBuilt : Object being built

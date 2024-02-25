@@ -82,8 +82,11 @@ namespace SteerStone { namespace Game { namespace Map {
                     {
                         if (l_Itr->ToPlayer()->GetEvent() == EventType::EVENT_TYPE_PORTAL)
                         {
-                            l_FoundEvent = true;
-                            continue;
+                            if (!l_Itr->ToPlayer()->IsUpdateEvent())
+                            {
+                                l_FoundEvent = true;
+                                continue;
+                            }
                         }
 
                         Server::Packets::Event l_Packet;
@@ -91,7 +94,7 @@ namespace SteerStone { namespace Game { namespace Map {
                         l_Packet.PositionY           = l_Itr->GetSpline()->GetPositionY();
                         l_Packet.InDemolitionZone    = false;
                         l_Packet.InRadiationZone     = false;
-                        l_Packet.PlayRepairAnimation = false;
+                        l_Packet.PlayRepairAnimation = l_Itr->IsRepairing();
                         l_Packet.InTradeZone         = false;
                         l_Packet.InJumpZone          = true;
                         l_Packet.Repair              = false;
@@ -108,8 +111,11 @@ namespace SteerStone { namespace Game { namespace Map {
                     {
                         if (l_Itr->ToPlayer()->GetEvent() == EventType::EVENT_TYPE_STATION)
                         {
-                            l_FoundEvent = true;
-                            continue;
+                            if (!l_Itr->ToPlayer()->IsUpdateEvent())
+                            {
+                                l_FoundEvent = true;
+                                continue;
+                            }
                         }
 
                         Server::Packets::Event l_Packet;
@@ -117,13 +123,14 @@ namespace SteerStone { namespace Game { namespace Map {
                         l_Packet.PositionY           = l_Itr->GetSpline()->GetPositionY();
                         l_Packet.InDemolitionZone    = false;
                         l_Packet.InRadiationZone     = false;
-                        l_Packet.PlayRepairAnimation = false;
+                        l_Packet.PlayRepairAnimation = l_Itr->IsRepairing();
                         l_Packet.InTradeZone         = true;
                         l_Packet.InJumpZone          = false;
                         l_Packet.Repair              = false;
                         l_Itr->ToPlayer()->SendPacket(l_Packet.Write());
 
                         l_Itr->ToPlayer()->SetEventType(EventType::EVENT_TYPE_STATION);
+                        l_Itr->ToPlayer()->SetUpdateEvent(false);
                         l_FoundEvent = true;
                     }
                 }
@@ -136,7 +143,7 @@ namespace SteerStone { namespace Game { namespace Map {
                 l_Packet.PositionY           = l_Itr->GetSpline()->GetPositionY();
                 l_Packet.InDemolitionZone    = false;
                 l_Packet.InRadiationZone     = false;
-                l_Packet.PlayRepairAnimation = false;
+                l_Packet.PlayRepairAnimation = l_Itr->IsRepairing();
                 l_Packet.InTradeZone         = false;
                 l_Packet.InJumpZone          = false;
                 l_Packet.Repair              = false;

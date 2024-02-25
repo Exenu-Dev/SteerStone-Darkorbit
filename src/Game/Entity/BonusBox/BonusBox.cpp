@@ -127,7 +127,9 @@ namespace SteerStone { namespace Game { namespace Entity {
                 p_Player->SetHonor(p_Player->GetHonor() - FRIENDLY_HONOR_TAKE_AWAY);
 
                 p_Player->SendPacket(Server::Packets::Misc::Reward().Write(Server::Packets::Misc::RewardType::REWARD_TYPE_HONOUR, {
-                    p_Player->GetHonor() }));
+                    -static_cast<int32>(FRIENDLY_HONOR_TAKE_AWAY),
+                    p_Player->GetHonor() 
+                }));
             }
 
             /// Now check if the cargo is empty
@@ -168,7 +170,9 @@ namespace SteerStone { namespace Game { namespace Entity {
 					p_Player->UpdateCredits(l_Credit);
 
                     p_Player->SendPacket(Server::Packets::Misc::Reward().Write(Server::Packets::Misc::RewardType::REWARD_TYPE_CREDIT, {
-						l_Credit }));
+						l_Credit,
+                        p_Player->GetCredits()
+                    }));
                 }
                 break;
                 case BonusBoxRewardType::BONUS_BOX_REWARD_TYPE_URIDIUM:
@@ -177,7 +181,9 @@ namespace SteerStone { namespace Game { namespace Entity {
                     p_Player->UpdateUridium(l_Uridium);
 
                     p_Player->SendPacket(Server::Packets::Misc::Reward().Write(Server::Packets::Misc::RewardType::REWARD_TYPE_URIDIUM, {
-						l_Uridium }));
+						l_Uridium,
+                        p_Player->GetUridium()
+                    }));
                 }
                 break;
                 case BonusBoxRewardType::BONUS_BOX_REWARD_TYPE_LCB10:

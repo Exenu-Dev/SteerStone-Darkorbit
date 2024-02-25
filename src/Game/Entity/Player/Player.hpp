@@ -28,6 +28,7 @@
 #define RADIATION_TIMER 1000
 #define CONFIG_TIMER 5000 ///< TODO; Move to config settings under player?
 #define ORE_CALCULATION_AMOUNT 500000
+#define REPAIR_BOT_TIMER 3000
 
 namespace SteerStone { namespace Game { namespace Entity {
 
@@ -237,6 +238,8 @@ namespace SteerStone { namespace Game { namespace Entity {
         /// Send Info Message to Player
         /// @p_Message : Message to send
         void SendInfoMessage(std::string const p_Message);
+        /// Get Company X-1 Map Id based on Player Company
+        uint32 GetX1CompanyMapId() const;
     private:
         /// Return Drone Level
         /// @p_Drone : Drone
@@ -246,6 +249,9 @@ namespace SteerStone { namespace Game { namespace Entity {
         /// Check whether player is in radiation zone
         /// p_Diff : Execution Time
         void UpdateRadiationZone(uint32 const p_Diff);
+        /// Update Repairing
+        /// @p_Diff : Execution Time
+        void UpdateRepairing(uint32 const p_Diff);
     public:
         /// Update Player
         /// @p_Diff : Execution Time
@@ -356,6 +362,11 @@ namespace SteerStone { namespace Game { namespace Entity {
         /// @p_PositionX : Position X to teleport to
         /// @p_PositionY : Position Y to teleport to
         void Teleport(const uint32 p_MapId, const int32 p_PositionX = 0, const int32 p_PositionY = 0);
+        /// Update Items
+        /// This updates the cloak, jump cpu, etc
+        void UpdateExtrasInfo();
+        /// Send the packet to update players health and shield
+        void SendHealthAndShield();
 
         ///////////////////////////////////////////
         //            GETTERS/SETTERS
@@ -375,12 +386,15 @@ namespace SteerStone { namespace Game { namespace Entity {
         bool IsLoggedIn()          const     { return m_LoggedIn;         }
         bool IsJumping()           const     { return m_Jumping;          }
         bool CanAutoChangeAmmo()   const     { return m_AutoChangeAmmo;   }
+        bool IsRepairing()         const     { return m_Repairing;        }
+        bool IsUpdateEvent()       const     { return m_UpdateEvent;      }
         uint32 GetMaxCargoSpace()  const     { return m_MaxCargoSpace;    }
         uint32 GetMaxBattery()     const     { return m_MaxBattery;       }
         uint8 GetPreset()          const     { return m_Preset;           }
         EventType GetEvent()       const     { return m_Event;            } 
         bool HasLoggedOut() const            { return m_LoggingOut;       }
         bool HasDrones()           const     { return !m_Drones.empty();  }
+        bool CanRepair();
         Ammo const* GetAmmo()      const     { return &m_Ammo;            }
         Inventory* GetInventory()            { return &m_Inventory;       }
         std::shared_ptr<Server::GameSocket> ToSocket() { return m_Socket; }
@@ -438,16 +452,31 @@ namespace SteerStone { namespace Game { namespace Entity {
         }
 
         /// Setters Function
-        void SetEventType(EventType const p_EventType)    { m_Event = p_EventType;         }
-        void SetIsJumping(bool const p_Jumping)           { m_Jumping = p_Jumping;         }
-        void SetLogout(bool const p_LoggedOut)            { m_LoggingOut = p_LoggedOut;    }
-        void UpdateCredits(uint32 const p_Credits)        { m_Credits += p_Credits;        }
-        void UpdateUridium(uint32 const p_Uridium)        { m_Uridium += p_Uridium;        }
+        void SetEventType(EventType const p_EventType)      { m_Event = p_EventType;         }
+        void SetIsJumping(bool const p_Jumping)             { m_Jumping = p_Jumping;         }
+        void SetLogout(bool const p_LoggedOut)              { m_LoggingOut = p_LoggedOut;    }
+        void SetIsRepairing(bool const p_Repairing)         { m_Repairing = p_Repairing;     }
+        void SetUpdateEvent(bool const p_UpdateEvent)       { m_UpdateEvent = p_UpdateEvent; }
+        void UpdateCredits(int32 const p_Credits)
+        {
+            if (p_Credits < 0 && m_Credits < abs(p_Credits))
+				m_Credits = 0;
+			else
+				m_Credits += p_Credits;   
+        }
+        void UpdateUridium(int32 const p_Uridium)
+        {
+            if (p_Uridium < 0 && m_Uridium < abs(p_Uridium))
+                m_Uridium = 0;
+            else
+                m_Uridium += p_Uridium;
+        }
         void UpdateExperience(uint32 p_Experience);
         void UpdateDroneExperience(Entity::Object* p_Object);
         void SetBatteryAmmo(BatteryType const p_BatteryType, const uint32 p_Amount);
         void SetRocketAmmo(RocketType const p_RocketType, const uint32 p_Amount);
         void UpdateHonor(uint32 p_Honour);
+        void Repair(bool p_Repair);
 
         /// Timers
         Core::Diagnostic::IntervalTimer IntervalLogout;
@@ -495,6 +524,8 @@ namespace SteerStone { namespace Game { namespace Entity {
         bool m_AutoChangeAmmo;
         bool m_UseSystemFont;
         bool m_EnableBuyFast;
+        bool m_Repairing;
+        bool m_UpdateEvent;
 
         bool m_LoggedIn;
         bool m_Jumping;
@@ -503,6 +534,7 @@ namespace SteerStone { namespace Game { namespace Entity {
         Ammo m_Ammo;
         Inventory m_Inventory;
         std::vector<Booster> m_Boosters;
+        Core::Diagnostic::IntervalTimer m_RepairBotTimer;
         Core::Diagnostic::IntervalTimer m_IntervalNextSave;              ///< Save to database
         Core::Diagnostic::IntervalTimer m_IntervalRadiation;             ///< Save to database
 

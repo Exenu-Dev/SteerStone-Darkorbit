@@ -16,34 +16,19 @@
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "Item.hpp"
+#include "JumpChipItem.hpp"
 #include "ObjectData.hpp"
 
 namespace SteerStone { namespace Game { namespace Entity {
     
     /// Constructor
-    Item::Item()
+    JumpChipItem::JumpChipItem()
     {
-        m_IsWeapon      = false;
-        m_IsSpeed       = false;
-        m_IsShield      = false;
-        m_IsExtra	    = false;
-        m_MetaData	    = nlohmann::json();
-        m_ItemTemplate  = nullptr;
+
     }
     /// Deconstructor
-    Item::~Item()
+    JumpChipItem::~JumpChipItem()
     {
-    }
-    /// Get Jump Chip Type
-    JumpChipType Item::GetJumpChipType() const
-    {
-        if (m_ItemTemplate->Id == static_cast<uint8>(ItemTemplatesId::ITEM_TEMPLATE_ID_JP_01))
-            return JumpChipType::JUMP_CHIP_TYPE_JP_01;
-        else if (m_ItemTemplate->Id == static_cast<uint8>(ItemTemplatesId::ITEM_TEMPLATE_ID_JP_02))
-            return JumpChipType::JUMP_CHIP_TYPE_JP_02;
-
-        return JumpChipType::JUMP_CHIP_TYPE_NONE;
     }
 
     //////////////////////////////////////////////////////////////////////////

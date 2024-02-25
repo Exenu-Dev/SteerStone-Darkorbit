@@ -77,7 +77,7 @@ namespace SteerStone { namespace Game { namespace Entity {
 			}
         }
 
-        GetGrid()->SendPacketIfInSurrounding(Server::Packets::Misc::Info().Write(Server::Packets::Misc::InfoType::INFO_TYPE_MINE_MIN, { GetObjectGUID().GetCounter() }), this);
+        GetGrid()->SendPacketIfInSurrounding(Server::Packets::Misc::Update().Write(Server::Packets::Misc::InfoUpdate::INFO_UPDATE_MINE_MIN, { GetObjectGUID().GetCounter() }), this);
         SetScheduleForDelete(true);
 	}
 
