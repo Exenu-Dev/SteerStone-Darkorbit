@@ -446,7 +446,7 @@ namespace SteerStone { namespace Game { namespace Entity {
     }
     /// Return Drone Level
     /// @p_Drone : Drone
-    uint16 Player::GetDroneLevel(Drone& p_Drone)
+    uint16 Player::GetDroneLevel(Drone& p_Drone) const
     {
         uint16 l_Level = DroneLevel::DRONE_LEVEL_1;
 
@@ -535,6 +535,9 @@ namespace SteerStone { namespace Game { namespace Entity {
             Repair(false);
             return;
         }
+
+        if (!IsRepairing())
+            return;
 
         Item* l_RepairBot = GetInventory()->GetItemByType(ItemType::ITEM_TYPE_REPAIR_BOT);
 
@@ -1029,11 +1032,10 @@ namespace SteerStone { namespace Game { namespace Entity {
         if (!m_Drones.size())
             return;
 
-        Server::Packets::Misc::Update l_InfoPacket;
-        l_InfoPacket.Write(Server::Packets::Misc::InfoUpdate::INFO_UPDATE_DRONES, { GetObjectGUID().GetCounter(), BuildDronesString() });
+        SendPacket(Server::Packets::Misc::Update().Write(Server::Packets::Misc::InfoUpdate::INFO_UPDATE_DRONES, { GetObjectGUID().GetCounter(), BuildDronesString() }));
     }
     /// Build Drones Packet
-    std::string const Player::BuildDronesString()
+    std::string Player::BuildDronesString() const
     {
         uint32 l_DroneGroupCount = m_Drones.size() <= 4 ? 3 : 3;
 

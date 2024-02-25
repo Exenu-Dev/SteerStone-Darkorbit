@@ -31,13 +31,13 @@ namespace SteerStone { namespace Game { namespace Server {
         m_Player->GetInventory()->CalculateStats();
         m_Player->SendInitializeShip();
         m_Player->UpdateExtrasInfo();
-        m_Player->SendDrones();
         m_Player->SendBoosters();
         m_Player->SendMapUpdate();
         m_Player->SendAmmoUpdate();
         m_Player->SendAccountRank();
         m_Player->UpdateOres();
         m_Player->UpdateMaxCargoSpace();
+        m_Player->SendDrones();
         m_Player->SendLoggedIn();
 
         sZoneManager->AddToMap(m_Player);

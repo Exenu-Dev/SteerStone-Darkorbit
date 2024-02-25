@@ -243,7 +243,7 @@ namespace SteerStone { namespace Game { namespace Entity {
     private:
         /// Return Drone Level
         /// @p_Drone : Drone
-        uint16 GetDroneLevel(Drone& p_Drone);
+        uint16 GetDroneLevel(Drone& p_Drone) const;
         /// Returns Level
         uint32 CalculateLevel();
         /// Check whether player is in radiation zone
@@ -334,7 +334,7 @@ namespace SteerStone { namespace Game { namespace Entity {
         /// Send Drone Info
         void SendDrones();
         /// Build Drones Packet
-        std::string const BuildDronesString();
+        std::string BuildDronesString() const;
         /// Update Cargo Max Space
         /// Note this updates the cargo bay on the client
         void UpdateMaxCargoSpace();
