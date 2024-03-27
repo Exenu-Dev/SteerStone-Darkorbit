@@ -32,7 +32,7 @@ jobs:
     - name: Boost
       uses: MarkusJx/install-boost@v2.4.5
       with:
-        boost-version: '1.81.0'
+        boost_version: '1.81.0'
     
     - name: GCC
       run: sudo apt install gcc-9 g++-9
