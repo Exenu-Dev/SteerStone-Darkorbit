@@ -61,7 +61,7 @@ include(CheckPlatform)
 
 find_package(OpenSSL REQUIRED)
 find_package(MySQL REQUIRED)
-find_package(Boost REQUIRED COMPONENTS system program_options thread regex)
+find_package(Boost 1.81.0 REQUIRED COMPONENTS system program_options thread regex)
 
 # Print out the results before continuing
 include(cmake/showoptions.cmake)
