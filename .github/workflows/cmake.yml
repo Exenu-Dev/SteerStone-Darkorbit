@@ -30,7 +30,9 @@ jobs:
         sudo apt-get install -yq mariadb-server libmariadb-client-lgpl-dev-compat
 
     - name: Boost
-      run: sudo apt-get update && sudo apt-get install -yq libssl-dev libboost-all-dev
+      uses: MarkusJx/install-boost@v2.4.5
+      with:
+        boost-version: '1.81.0'
     
     - name: GCC
       run: sudo apt install gcc-9 g++-9
