@@ -29,7 +29,8 @@ jobs:
         sudo apt-get update
         sudo apt-get install -yq mariadb-server libmariadb-client-lgpl-dev-compat
 
-    - name: Boost
+    - name: Install Boost
+      id: install-boost
       uses: MarkusJx/install-boost@v2.4.5
       with:
         boost_version: '1.81.0'
