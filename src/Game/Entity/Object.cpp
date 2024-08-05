@@ -17,6 +17,7 @@
 */
 
 #include "Object.hpp"
+#include "ZoneManager.hpp"
 
 namespace SteerStone { namespace Game { namespace Entity {
 
@@ -34,6 +35,28 @@ namespace SteerStone { namespace Game { namespace Entity {
     /// Deconstructor
     Object::~Object()
     {
+        LOG_ASSERT(m_Map == nullptr, "Object", "Object is not removed from map before delete");
+    }
+
+    //////////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////////
+
+    /// Cleanup before deletion
+    void Object::CleanupsBeforeDelete()
+    {
+        sZoneManager->RemoveFromMap(this, true);
+
+        m_Map = nullptr;
+    }
+    /// Update the object
+    /// When being called, please call this function first before calling the derived class Update function
+    /// @param p_Diff The time difference between the last update and the current one
+    bool Object::Update(uint32 p_Diff)
+    {
+        if (NeedToBeUpdated())
+            SetNeedToBeUpdated(false);
+
+        return true;
     }
 
     //////////////////////////////////////////////////////////////////////////

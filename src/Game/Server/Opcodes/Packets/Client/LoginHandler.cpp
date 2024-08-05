@@ -16,6 +16,7 @@
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include "Server/MiscPackets.hpp"
 #include "Socket.hpp"
 #include "Player.hpp"
 #include "World.hpp"
@@ -39,8 +40,23 @@ namespace SteerStone { namespace Game { namespace Server {
         m_Player->UpdateMaxCargoSpace();
         m_Player->SendDrones();
         m_Player->SendLoggedIn();
-
+        m_Player->SendQuests();
         sZoneManager->AddToMap(m_Player);
+        return;
+
+
+        Server::PacketBuffer l_PacketBuffer;
+        l_PacketBuffer.AppendChar("0");
+        l_PacketBuffer.AppendChar("9");
+        l_PacketBuffer.AppendChar("ini");
+        //l_PacketBuffer.AppendChar("case,300,1,0,0{cond,60,1,1,1,t,u,v}case,310,1,0,1{cond,70,5,2,3,NULL,NULL,NULL}cond,80,1,1,1,z,a,b}{cond,90,0,0,0,c,d,e}");
+        l_PacketBuffer.AppendChar("case,300,1,0,1,{cond,23,23,2,3,a,b,c,1,10}{cond,70,5,2,3,a,b,c}");
+        l_PacketBuffer.AppendChar("1");
+
+        l_PacketBuffer.AppendEndSplitter();
+        l_PacketBuffer.AppendCarriage();
+
+        m_Player->SendPacket(&l_PacketBuffer);
     }
 
     /// Login Handler

@@ -73,13 +73,10 @@ namespace SteerStone { namespace Core { namespace Database {
             {
                 std::shared_ptr<MYSQLPreparedStatement> l_PreparedStatement = l_Itr;
 
-                for (uint32 l_I = 0; l_I < MAX_PREPARED_STATEMENTS; l_I++)
-                {
-                    PreparedStatement* l_PrepareStatement = l_PreparedStatement->m_Statements[l_I];
+                PreparedStatement* l_PrepareStatement = l_PreparedStatement->m_Statement;
 
-                    if (l_PrepareStatement->TryLockMutex())
-                        return l_PrepareStatement;
-                }
+                if (l_PrepareStatement->TryLockMutex())
+                    return l_PrepareStatement;
             }
 
             LOG_WARNING("PreparedStatements", "Could not get a prepare statement... trying again!");

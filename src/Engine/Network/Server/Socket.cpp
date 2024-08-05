@@ -120,7 +120,7 @@ namespace SteerStone { namespace Core { namespace Network {
         PacketBuffer* l_OutBuffer = m_WriteState == WriteState::Sending ? m_SecondaryOutBuffer.get() : m_OutBuffer.get();
 
         /// Write the header
-        m_OutBuffer->Write(p_Buffer, p_Length);
+        l_OutBuffer->Write(p_Buffer, p_Length);
 
         /// Flush data if need
         if (m_WriteState == WriteState::Idle)

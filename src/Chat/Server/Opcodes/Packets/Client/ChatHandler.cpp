@@ -40,7 +40,16 @@ namespace SteerStone { namespace Chat { namespace Server {
 		sChatManager->PlayerIsBanned(m_Player);
 
 		if (m_Player->LoadFromDB())
+		{
 			sChatManager->AddPlayer(m_Player);
+
+			m_Player->SendLogin();
+			m_Player->SendRooms();
+
+			Server::Packets::DeveloperMessage l_SystemMessagePacket;
+			l_SystemMessagePacket.Message = "\n<span class='mod'>Welcome to <a class='highlight' target=\"_blank\" href=\"http://www.github.com/LiamAshdown/Darkorbit-Emulator\">Darkorbit Emulator</a> made by <a class='highlight' target=\"_blank\" href=\"http://www.github.com/LiamAshdown\">Quadral.</a>\n</span>";
+			SendPacket(l_SystemMessagePacket.Write());
+		}
 		else
 		{
 			LOG_WARNING("Player", "Failed to initialize player %0", l_UserId);
@@ -49,6 +58,13 @@ namespace SteerStone { namespace Chat { namespace Server {
 			/// the player
 			CloseSocket();
 		}
+	}
+	/// Handle Pong Handler
+	/// @p_ClientPacket : Packet recieved from client
+	void ChatSocket::HandlePong(ClientPacket* p_Packet)
+	{
+		Server::Packets::Ping l_Ping;
+		SendPacket(l_Ping.Write());
 	}
 	/// Handle Send Message
 	/// @p_ClientPacket : Packet recieved from client
@@ -75,7 +91,36 @@ namespace SteerStone { namespace Chat { namespace Server {
 			return;
 		}
 
-		sChatManager->SendMessageToRoom(m_Player, l_Message, l_RoomId);
+		Chat::Channel::Room* l_Room = m_Player->GetRoom(l_RoomId);
+		if (!l_Room)
+		{
+			LOG_WARNING("Chat", "Player %0 is not in room %1", m_Player->GetId(), l_RoomId);
+			return;
+		}
+
+		l_Room->SendRoomMessage(l_Message, m_Player);
+	}
+	/// Handle Change Room
+	/// @p_ClientPacket : Packet recieved from client
+	void ChatSocket::HandleChangeRoom(ClientPacket* p_Packet)
+	{
+		p_Packet->ReadSkip(); ///< Not sure what this is
+		uint16 l_RoomId = p_Packet->ReadUInt16();
+
+		Chat::Channel::Room* l_Room = sChatManager->GetRoomById(l_RoomId);
+		if (!l_Room)
+		{
+			LOG_WARNING("Chat", "Player %0 tried to join room %1, but room does not exist", m_Player->GetId(), l_RoomId);
+			return;
+		}
+
+		if (!m_Player->IsInRoom(l_RoomId))
+		{
+			LOG_WARNING("Chat", "Player %0 tried to join room %1, but player is not in room", m_Player->GetId(), l_RoomId);
+			return;
+		}
+
+		m_Player->m_CurrentRoom = l_Room;
 	}
 }   ///< namespace Server
 }   ///< namespace Chat

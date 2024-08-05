@@ -50,7 +50,7 @@ namespace SteerStone { namespace Game { namespace Global {
         Core::Database::PreparedStatement* l_PreparedStatement = GameDatabase.GetPrepareStatement();
         l_PreparedStatement->PrepareStatement("SELECT entry, name, type, weapon_state, hit_points, shield, shield_resistance, min_damage, max_damage, behaviour, respawn_timer, min_movement_time, max_movement_time, "
             "speed, experience, honor, credits, uridium, "
-            "prometium, endurium, terbium, prometid, duranium, promerium, xenomit, seprom, palladium "
+            "prometium, endurium, terbium, prometid, duranium, promerium, xenomit, seprom, palladium, ship_id "
             "FROM mob_templates");
         std::unique_ptr<Core::Database::PreparedResultSet> l_PreparedResultSet = l_PreparedStatement->ExecuteStatement();
 
@@ -65,6 +65,7 @@ namespace SteerStone { namespace Game { namespace Global {
                 Entity::MobTemplate* l_MobTemplate = new Entity::MobTemplate();
 
                 l_MobTemplate->Entry            = l_Result[0].GetUInt64();
+                l_MobTemplate->ShipId		    = l_Result[27].GetUInt16(); ///< Added this at the end of the query, could be added at the start of the query
                 l_MobTemplate->Name             = l_Result[1].GetString();
                 l_MobTemplate->Type             = l_Result[2].GetUInt16();
                 l_MobTemplate->WeaponState      = l_Result[3].GetUInt16();
@@ -107,7 +108,7 @@ namespace SteerStone { namespace Game { namespace Global {
         uint32 l_StartTime = sServerTimeManager->GetServerTime();
 
         Core::Database::PreparedStatement* l_PreparedStatement = GameDatabase.GetPrepareStatement();
-        l_PreparedStatement->PrepareStatement("SELECT portal_id, name, company, type, map_id, position_x, position_y, to_map_id, to_position_x, to_position_y "
+        l_PreparedStatement->PrepareStatement("SELECT portal_id, name, company, type, map_id, position_x, position_y, to_map_id, to_position_x, to_position_y, required_level "
             "FROM portal_templates");
         std::unique_ptr<Core::Database::PreparedResultSet> l_PreparedResultSet = l_PreparedStatement->ExecuteStatement();
         
@@ -130,6 +131,7 @@ namespace SteerStone { namespace Game { namespace Global {
                 l_PortalTemplate->ToMapId       = l_Result[7].GetUInt32();
                 l_PortalTemplate->ToPositionX   = l_Result[8].GetDouble();
                 l_PortalTemplate->ToPositionY   = l_Result[9].GetDouble();
+                l_PortalTemplate->Level		    = l_Result[10].GetUInt16();
 
                 m_PortalTemplate[l_PortalTemplate->MapId].push_back(l_PortalTemplate);
 
@@ -238,15 +240,16 @@ namespace SteerStone { namespace Game { namespace Global {
                 l_ShipTemplate->Description     = l_Result[2].GetString();
                 l_ShipTemplate->HitPoints       = l_Result[3].GetUInt32();
                 l_ShipTemplate->NanoHull        = l_Result[4].GetUInt32();
-                l_ShipTemplate->Cargo           = l_Result[5].GetUInt32();
-                l_ShipTemplate->Lasers          = l_Result[6].GetUInt32();
-                l_ShipTemplate->Generators      = l_Result[7].GetUInt32();
-                l_ShipTemplate->Rockets         = l_Result[8].GetUInt32();
-                l_ShipTemplate->Ammo            = l_Result[9].GetUInt32();
-                l_ShipTemplate->Extras          = l_Result[10].GetUInt32();
-                l_ShipTemplate->Credits         = l_Result[11].GetUInt32();
-                l_ShipTemplate->Uridium         = l_Result[12].GetUInt32();
-                l_ShipTemplate->Disabled        = l_Result[13].GetUInt32(); ///GetBool();
+                l_ShipTemplate->Speed           = l_Result[5].GetUInt32();
+                l_ShipTemplate->Cargo           = l_Result[6].GetUInt32();
+                l_ShipTemplate->Lasers          = l_Result[7].GetUInt32();
+                l_ShipTemplate->Generators      = l_Result[9].GetUInt32();
+                l_ShipTemplate->Rockets         = l_Result[0].GetUInt32();
+                l_ShipTemplate->Ammo            = l_Result[10].GetUInt32();
+                l_ShipTemplate->Extras          = l_Result[11].GetUInt32();
+                l_ShipTemplate->Credits         = l_Result[12].GetUInt32();
+                l_ShipTemplate->Uridium         = l_Result[13].GetUInt32();
+                l_ShipTemplate->Disabled        = l_Result[14].GetUInt32(); ///GetBool();
 
                 m_ShipTemplate[l_ShipTemplate->Entry] = l_ShipTemplate;
 

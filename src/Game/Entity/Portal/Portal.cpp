@@ -30,6 +30,7 @@ namespace SteerStone { namespace Game { namespace Entity {
         m_ToMapId       = 0;
         m_ToPositionX   = 0.0f;
         m_ToPositionY   = 0.0f;
+        m_Level         = 0;
 
         SetType(Type::OBJECT_TYPE_PORTAL);
     }

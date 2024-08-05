@@ -51,15 +51,40 @@ namespace SteerStone { namespace Chat { namespace Server {
     /// Load our packets into storages to be accessed later
     void OpCodes::InitializePackets()
     {
-        StoreClientPacket(ClientOpCodes::CLIENT_PACKET_LOG_IN,          "CLIENT_PACKET_LOG_IN",         PacketStatus::STATUS_HANDLED, PacketProcess::PROCESS_NOW, &ChatSocket::HandleLogin);
-        StoreClientPacket(ClientOpCodes::CLIENT_PACKET_SEND_MESSAGE,    "CLIENT_PACKET_SEND_MESSAGE",   PacketStatus::STATUS_HANDLED, PacketProcess::PROCESS_NOW, &ChatSocket::HandleSendMessage);
+        StoreClientPacket(ClientOpCodes::CLIENT_PACKET_LOG_IN,          "CLIENT_PACKET_LOG_IN",         PacketStatus::STATUS_HANDLED, PacketProcess::PROCESS_NOW, &ChatSocket::HandleLogin          );
+        StoreClientPacket(ClientOpCodes::CLIENT_PACKET_SEND_MESSAGE,    "CLIENT_PACKET_SEND_MESSAGE",   PacketStatus::STATUS_HANDLED, PacketProcess::PROCESS_NOW, &ChatSocket::HandleSendMessage    );
+        StoreClientPacket(ClientOpCodes::CLIENT_PACKKET_PONG,           "CLIENT_PACKKET_PONG",          PacketStatus::STATUS_HANDLED, PacketProcess::PROCESS_NOW, &ChatSocket::HandlePong           );
+        StoreClientPacket(ClientOpCodes::CLIENT_PACKET_CHANGE_ROOM,     "CLIENT_PACKET_CHANGE_ROOM",    PacketStatus::STATUS_HANDLED, PacketProcess::PROCESS_NOW, &ChatSocket::HandleChangeRoom     );
 
         //////////////////////////////////////////////////////////////////////////
         //////////////////////////////////////////////////////////////////////////        
 
-        StoreServerPacket(ServerOpCodes::SERVER_PACKET_SEND_MESSAGE,        "SERVER_PACKET_SEND_MESSAGE",        &ChatSocket::HandleServer);
-        StoreServerPacket(ServerOpCodes::SERVER_PACKET_SEND_SYSTEM_MESSAGE, "SERVER_PACKET_SEND_SYSTEM_MESSAGE", &ChatSocket::HandleServer);
-        StoreServerPacket(ServerOpCodes::SERVER_PACKET_SEND_PING,           "SERVER_PACKET_SEND_PING",           &ChatSocket::HandleServer);
+        StoreServerPacket(ServerOpCodes::SERVER_PACKET_USER_LOGIN,              "SERVER_PACKET_USER_LOGIN",             &ChatSocket::HandleServer);
+        StoreServerPacket(ServerOpCodes::SERVER_PACKET_SEND_MESSAGE,            "SERVER_PACKET_SEND_MESSAGE",           &ChatSocket::HandleServer);
+        StoreServerPacket(ServerOpCodes::SERVER_PACKET_SEND_SYSTEM_MESSAGE,     "SERVER_PACKET_SEND_SYSTEM_MESSAGE",    &ChatSocket::HandleServer);
+        StoreServerPacket(ServerOpCodes::SERVER_PACKET_SEND_PING,               "SERVER_PACKET_SEND_PING",              &ChatSocket::HandleServer);
+        StoreServerPacket(ServerOpCodes::SERVER_PACKET_SEND_BAN_MESSAGE,        "SERVER_PACKET_SEND_BAN_MESSAGE",       &ChatSocket::HandleServer);
+        StoreServerPacket(ServerOpCodes::SERVER_PACKET_SEND_IP_BAN_MESSAGE,     "SERVER_PACKET_SEND_IP_BAN_MESSAGE",    &ChatSocket::HandleServer);
+        StoreServerPacket(ServerOpCodes::SERVER_PACKET_SEND_BAN_USER,           "SERVER_PACKET_SEND_BAN_USER",          &ChatSocket::HandleServer);
+        StoreServerPacket(ServerOpCodes::SERVER_PACKET_SEND_DEVELOPER_MESSAGE,  "SERVER_PACKET_SEND_DEVELOPER_MESSAGE", &ChatSocket::HandleServer);
+        StoreServerPacket(ServerOpCodes::SERVER_PACKET_SEND_ADMIN_MESSAGE,      "SERVER_PACKET_SEND_ADMIN_MESSAGE",     &ChatSocket::HandleServer);
+        StoreServerPacket(ServerOpCodes::SERVER_PACKET_KICK_USER,               "SERVER_PACKET_KICK_USER",              &ChatSocket::HandleServer);
+        StoreServerPacket(ServerOpCodes::SERVER_PACKET_SET_ROOMLIST,            "SERVER_PACKET_SET_ROOMLIST",           &ChatSocket::HandleServer);
+        StoreServerPacket(ServerOpCodes::SERVER_PACKET_ROOM_STATUS_MESSAGE,     "SERVER_PACKET_ROOM_STATUS_MESSAGE",    &ChatSocket::HandleServer);
+        StoreServerPacket(ServerOpCodes::SERVER_PACKET_PRIVATE_ROOM_CREATED,    "SERVER_PACKET_PRIVATE_ROOM_CREATED",   &ChatSocket::HandleServer);
+        StoreServerPacket(ServerOpCodes::SERVER_PACKET_DELETE_ROOM,             "SERVER_PACKET_DELETE_ROOM",            &ChatSocket::HandleServer);
+        StoreServerPacket(ServerOpCodes::SERVER_PACKET_NOT_ROOM_OWNER,          "SERVER_PACKET_NOT_ROOM_OWNER",         &ChatSocket::HandleServer);
+        StoreServerPacket(ServerOpCodes::SERVER_PACKET_CANNOT_LEAVE_ROOM,       "SERVER_PACKET_CANNOT_LEAVE_ROOM",      &ChatSocket::HandleServer);
+        StoreServerPacket(ServerOpCodes::SERVER_PACKET_ROOM_NAME_TOO_SHORT,     "SERVER_PACKET_ROOM_NAME_TOO_SHORT",    &ChatSocket::HandleServer);
+        StoreServerPacket(ServerOpCodes::SERVER_PACKET_ROOM_NAME_TOO_LONG,      "SERVER_PACKET_ROOM_NAME_TOO_LONG",     &ChatSocket::HandleServer);
+        StoreServerPacket(ServerOpCodes::SERVER_PACKET_ROOM_INVITE_USER_NOT_FOUND,  "SERVER_PACKET_ROOM_INVITE_USER_NOT_FOUND",         &ChatSocket::HandleServer);
+        StoreServerPacket(ServerOpCodes::SERVER_PACKET_ROOM_CANNOT_INVITE_YOURSELF, "SERVER_PACKET_ROOM_CANNOT_INVITE_YOURSELF",        &ChatSocket::HandleServer);
+        StoreServerPacket(ServerOpCodes::SERVER_PACKET_USER_JOINED_INVITED_ROOM,    "SERVER_PACKET_USER_JOINED_INVITED_ROOM",           &ChatSocket::HandleServer);
+        StoreServerPacket(ServerOpCodes::SERVER_PACKET_NO_MORE_PRIVATE_ROOMS,       "SERVER_PACKET_NO_MORE_PRIVATE_ROOMS",              &ChatSocket::HandleServer);
+        StoreServerPacket(ServerOpCodes::SERVER_PACKET_CREATE_ROOM_WRONG_ARGUMENTS, "SERVER_PACKET_CREATE_ROOM_WRONG_ARGUMENTS",        &ChatSocket::HandleServer);
+        StoreServerPacket(ServerOpCodes::SERVER_PACKET_USER_DOES_NOT_EXIST,         "SERVER_PACKET_USER_DOES_NOT_EXIST",        &ChatSocket::HandleServer);
+        StoreServerPacket(ServerOpCodes::SERVER_PACKET_YOU_WHISPER,                 "SERVER_PACKET_YOU_WHISPER",        &ChatSocket::HandleServer);
+        StoreServerPacket(ServerOpCodes::SERVER_PACKET_USER_WHISPERS_YOU,           "SERVER_PACKET_USER_WHISPERS_YOU",        &ChatSocket::HandleServer);
 
         LOG_INFO("OpCodes", "Loaded %0 Client Packets", m_ClientOpCodes.size());
         LOG_INFO("OpCodes", "Loaded %0 Server Packets", m_ServerOpCodes.size());
@@ -106,6 +131,152 @@ namespace SteerStone { namespace Chat { namespace Server {
         if (l_Itr != m_ServerOpCodes.end())
             return l_Itr->second;
         return m_EmptyHandler;
+    }
+
+    std::string OpCodes::GetServerPacketHeader(uint64 const p_OpCode)
+    {
+        switch (p_OpCode)
+        {
+            case ServerOpCodes::SERVER_PACKET_USER_LOGIN:
+            {
+				return "bv";
+			}
+            break;
+            case ServerOpCodes::SERVER_PACKET_SEND_PING:
+            {
+                return "el";
+            }
+            break;
+            case ServerOpCodes::SERVER_PACKET_SEND_BAN_MESSAGE:
+            {
+                return "db";
+            }
+            break;
+            case ServerOpCodes::SERVER_PACKET_SEND_IP_BAN_MESSAGE:
+            {
+                return "ey";
+            }
+            break;
+            case ServerOpCodes::SERVER_PACKET_SEND_BAN_USER:
+            {
+                return "at";
+            }
+            break;
+            case ServerOpCodes::SERVER_PACKET_SEND_MESSAGE:
+            {
+                return "a";
+            }
+            break;
+            case ServerOpCodes::SERVER_PACKET_SEND_DEVELOPER_MESSAGE:
+            {
+                return "dq";
+            }
+            break;
+            case ServerOpCodes::SERVER_PACKET_SEND_ADMIN_MESSAGE:
+            {
+                return "j";
+            }
+            break;
+            case ServerOpCodes::SERVER_PACKET_KICK_USER:
+            {
+				return "cd";
+			}
+            break;
+            case ServerOpCodes::SERVER_PACKET_SET_ROOMLIST:
+            {
+                return "by";
+            }
+            break;
+            case ServerOpCodes::SERVER_PACKET_ROOM_STATUS_MESSAGE:
+            {
+                return "c";
+            }
+            break;
+            case ServerOpCodes::SERVER_PACKET_PRIVATE_ROOM_CREATED:
+            {
+				return "cj";
+			}
+            break;
+            case ServerOpCodes::SERVER_PACKET_DELETE_ROOM:
+            {
+				return "ck";
+			}
+            break;
+            case ServerOpCodes::SERVER_PACKET_NOT_ROOM_OWNER:
+            {
+                return "ec";
+            }
+            break;
+            case ServerOpCodes::SERVER_PACKET_CANNOT_LEAVE_ROOM:
+            {
+                return "dz";
+            }
+            break;
+            case ServerOpCodes::SERVER_PACKET_ROOM_NAME_TOO_SHORT:
+            {
+                return "ch";
+            }
+            break;
+            case ServerOpCodes::SERVER_PACKET_ROOM_NAME_TOO_LONG:
+            {
+                return "ed";
+            }
+            break;
+            case ServerOpCodes::SERVER_PACKET_ROOM_INVITE_USER_NOT_FOUND:
+            {
+                return "cp";
+            }
+            break;
+            case ServerOpCodes::SERVER_PACKET_ROOM_INVITE_NOT_YOUR_ROOM:
+            {
+                return "co";
+            }
+            break;
+            case ServerOpCodes::SERVER_PACKET_ROOM_CANNOT_INVITE_YOURSELF:
+            {
+                return "cn";
+            }
+            break;
+            case ServerOpCodes::SERVER_PACKET_USER_JOINED_INVITED_ROOM:
+            {
+                return "ea";
+            }
+            break;
+            case ServerOpCodes::SERVER_PACKET_USER_LEFT_INVITED_ROOM:
+            {
+                return "eb";
+            }
+            break;
+            case ServerOpCodes::SERVER_PACKET_NO_MORE_PRIVATE_ROOMS:
+            {
+                return "cf";
+            }
+            break;
+            case ServerOpCodes::SERVER_PACKET_CREATE_ROOM_WRONG_ARGUMENTS:
+            {
+                return "cg";
+            }
+            case ServerOpCodes::SERVER_PACKET_USER_DOES_NOT_EXIST:
+            {
+                return "ct";
+            }
+            break;
+            case ServerOpCodes::SERVER_PACKET_YOU_WHISPER:
+            {
+                return "cw";
+            }
+            break;
+            case ServerOpCodes::SERVER_PACKET_USER_WHISPERS_YOU:
+            {
+                return "cv";
+            }
+            break;
+            default:
+                LOG_WARNING("ServerPacket", "Unknown Server Opcode: %0", p_OpCode);
+            break;
+        }
+
+        return "";
     }
 
 }   ///< namespace Packet

@@ -163,7 +163,11 @@ namespace SteerStone { namespace Core { namespace Database {
                 return 0.0f;
 
             if (Data.Type != FieldType::FIELD_FLOAT)
-                LOG_WARNING("Database", "Converting %0 to FIELD_FLOAT", FieldTypeToString(Data.Type));
+            {
+                #ifdef STEERSTONE_CORE_DEBUG
+                    LOG_WARNING("Database", "Converting %0 to FIELD_FLOAT", FieldTypeToString(Data.Type));
+                #endif
+            }
 
             if (Data.Raw)
                 return *reinterpret_cast<float*>(Data.Buffer);
@@ -176,7 +180,11 @@ namespace SteerStone { namespace Core { namespace Database {
                 return 0.0f;
 
             if (Data.Type != FieldType::FIELD_DOUBLE)
-                LOG_WARNING("Database", "Converting %0 to FIELD_DOUBLE", FieldTypeToString(Data.Type));
+            {
+                #ifdef STEERSTONE_CORE_DEBUG
+                    LOG_WARNING("Database", "Converting %0 to FIELD_DOUBLE", FieldTypeToString(Data.Type));
+                #endif
+            }
 
             if (Data.Raw)
                 return *reinterpret_cast<double*>(Data.Buffer);
@@ -189,7 +197,11 @@ namespace SteerStone { namespace Core { namespace Database {
                 return NULL;
 
             if (Data.Type != FieldType::FIELD_BINARY)
-                LOG_WARNING("Database", "Converting %0 to FIELD_STRING", FieldTypeToString(Data.Type));
+            {
+                #ifdef STEERSTONE_CORE_DEBUG
+                    LOG_WARNING("Database", "Converting %0 to FIELD_STRING", FieldTypeToString(Data.Type));
+                #endif
+            }
 
             return static_cast<char const*>(Data.Buffer);
         }
@@ -200,7 +212,11 @@ namespace SteerStone { namespace Core { namespace Database {
                 return "";
 
             if (Data.Type != FieldType::FIELD_DATE)
-                LOG_WARNING("Database", "Converting %0 to FIELD_DATE", FieldTypeToString(Data.Type));
+            {
+                #ifdef STEERSTONE_CORE_DEBUG
+                    LOG_WARNING("Database", "Converting %0 to FIELD_DATE", FieldTypeToString(Data.Type));
+                #endif
+            }
 
             MYSQL_TIME* l_Time = (MYSQL_TIME*)Data.Buffer;
             
@@ -213,7 +229,11 @@ namespace SteerStone { namespace Core { namespace Database {
                 return "";
 
             if (Data.Type != FieldType::FIELD_DATE)
-                LOG_WARNING("Database", "Converting %0 to FIELD_DATE", FieldTypeToString(Data.Type));
+            {
+                #ifdef STEERSTONE_CORE_DEBUG
+                    LOG_WARNING("Database", "Converting %0 to FIELD_DATE", FieldTypeToString(Data.Type));
+                #endif
+            }
 
             MYSQL_TIME* l_Time = (MYSQL_TIME*)Data.Buffer;
 
@@ -230,7 +250,9 @@ namespace SteerStone { namespace Core { namespace Database {
                 MYSQL_TIME*  ts;
                 ts = (MYSQL_TIME*)Data.Buffer;
 
-                LOG_WARNING("Database", "Converting %0 to FIELD_STRING", FieldTypeToString(Data.Type));
+                #ifdef STEERSTONE_CORE_DEBUG
+                    LOG_WARNING("Database", "Converting %0 to FIELD_STRING", FieldTypeToString(Data.Type));
+                #endif
             }
 
             char const* l_String = GetChar();
@@ -259,7 +281,11 @@ namespace SteerStone { namespace Core { namespace Database {
                 return 0;
 
             if (Data.Type != FieldType::FIELD_I8)
-                LOG_WARNING("Database", "Converting %0 to FIELD_I8", FieldTypeToString(Data.Type));
+            {
+                #ifdef STEERSTONE_CORE_DEBUG
+                    LOG_WARNING("Database", "Converting %0 to FIELD_I8", FieldTypeToString(Data.Type));
+                #endif
+            }
 
             if (Data.Raw)
                 return *reinterpret_cast<int8*>(Data.Buffer);
@@ -272,7 +298,11 @@ namespace SteerStone { namespace Core { namespace Database {
                 return 0;
 
             if (Data.Type != FieldType::FIELD_I16)
-                LOG_WARNING("Database", "Converting %0 to FIELD_I16", FieldTypeToString(Data.Type));
+            {
+                #ifdef STEERSTONE_CORE_DEBUG
+                    LOG_WARNING("Database", "Converting %0 to FIELD_I16", FieldTypeToString(Data.Type));
+                #endif
+            }
 
             if (Data.Raw)
                 return *reinterpret_cast<int16*>(Data.Buffer);
@@ -285,7 +315,11 @@ namespace SteerStone { namespace Core { namespace Database {
                 return 0;
 
             if (Data.Type != FieldType::FIELD_I32)
-                LOG_WARNING("Database", "Converting %0 to FIELD_I32", FieldTypeToString(Data.Type));
+            {
+                #ifdef STEERSTONE_CORE_DEBUG
+                    LOG_WARNING("Database", "Converting %0 to FIELD_I32", FieldTypeToString(Data.Type));
+                #endif
+            }
 
             if (Data.Raw)
                 return *reinterpret_cast<int32*>(Data.Buffer);
@@ -298,7 +332,11 @@ namespace SteerStone { namespace Core { namespace Database {
                 return 0;
 
             if (Data.Type != FieldType::FIELD_I64)
-                LOG_WARNING("Database", "Converting %0 to FIELD_I64", FieldTypeToString(Data.Type));
+            {
+                #ifdef STEERSTONE_CORE_DEBUG
+                    LOG_WARNING("Database", "Converting %0 to FIELD_I64", FieldTypeToString(Data.Type));
+                #endif
+            }
 
             if (Data.Raw)
                 return *reinterpret_cast<int64*>(Data.Buffer);
@@ -311,7 +349,11 @@ namespace SteerStone { namespace Core { namespace Database {
                 return 0;
 
             if (Data.Type != FieldType::FIELD_UI8)
-                LOG_WARNING("Database", "Converting %0 to FIELD_UI8", FieldTypeToString(Data.Type));
+            {
+                #ifdef STEERSTONE_CORE_DEBUG
+                    LOG_WARNING("Database", "Converting %0 to FIELD_UI8", FieldTypeToString(Data.Type));
+                #endif
+            }
 
             if (Data.Raw)
                 return *reinterpret_cast<uint8*>(Data.Buffer);
@@ -324,7 +366,11 @@ namespace SteerStone { namespace Core { namespace Database {
                 return 0;
 
             if (Data.Type != FieldType::FIELD_UI16)
-                LOG_WARNING("Database", "Converting %0 to FIELD_UI16", FieldTypeToString(Data.Type));
+            {
+                #ifdef STEERSTONE_CORE_DEBUG
+                    LOG_WARNING("Database", "Converting %0 to FIELD_UI16", FieldTypeToString(Data.Type));
+                #endif
+            }
 
             if (Data.Raw)
                 return *reinterpret_cast<uint16*>(Data.Buffer);
@@ -337,7 +383,11 @@ namespace SteerStone { namespace Core { namespace Database {
                 return 0;
 
             if (Data.Type != FieldType::FIELD_UI32)
-                LOG_WARNING("Database", "Converting %0 to FIELD_UI32", FieldTypeToString(Data.Type));
+            {
+                #ifdef STEERSTONE_CORE_DEBUG
+                    LOG_WARNING("Database", "Converting %0 to FIELD_UI32", FieldTypeToString(Data.Type));
+                #endif
+            }
 
             if (Data.Raw)
                 return *reinterpret_cast<uint32*>(Data.Buffer);
@@ -350,7 +400,11 @@ namespace SteerStone { namespace Core { namespace Database {
                 return 0;
 
             if (Data.Type != FieldType::FIELD_UI64)
-                LOG_WARNING("Database", "Converting %0 to FIELD_UI64", FieldTypeToString(Data.Type));
+            {
+                #ifdef STEERSTONE_CORE_DEBUG
+                    LOG_WARNING("Database", "Converting %0 to FIELD_UI64", FieldTypeToString(Data.Type));
+                #endif
+            }
 
             if (Data.Raw)
                 return *reinterpret_cast<uint64*>(Data.Buffer);

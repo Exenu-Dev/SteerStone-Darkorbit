@@ -67,6 +67,7 @@ namespace SteerStone { namespace Core { namespace Database {
 
     private:
         std::vector<std::unique_ptr<DatabaseWorker>> m_Workers;
+        std::mutex m_Mutex;
     };
 
 }   ///< namespace Database

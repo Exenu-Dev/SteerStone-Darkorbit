@@ -106,9 +106,10 @@ namespace SteerStone { namespace Chat { namespace Server {
             AppendChar(l_Value.c_str());
         }
         /// Apennd Splitter
-        void AppendSplit()
+        void AppendSplit(bool p_AttributeSelector = false)
         {
-            std::string l_Split = "@";
+            // Client splits using these two characters
+            std::string l_Split = p_AttributeSelector ? "|" : "@";
             Append(l_Split.c_str(), l_Split.length());
         }
         /// Knock off last byte
@@ -121,6 +122,11 @@ namespace SteerStone { namespace Chat { namespace Server {
         {
             AppendChar("\r");
         }
+        /// Remove last byte
+        void PopBack()
+        {
+			m_Storage.pop_back();
+		}
         /// Append
         /// @p_Buffer : Append another PacketBuffer into our storage
         void Append(PacketBuffer const& p_Buffer)

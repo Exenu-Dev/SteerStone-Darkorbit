@@ -67,7 +67,7 @@ namespace SteerStone { namespace Game { namespace Entity {
     public:
         /// Update
         /// @p_Diff : Execution Time
-        void Update(uint32 const p_Diff);
+        bool Update(uint32 const p_Diff) override;
 
         /// Reward Credit/Uridium...
         /// @p_Player : Player is being rewarded
@@ -78,11 +78,16 @@ namespace SteerStone { namespace Game { namespace Entity {
         /// @p_Diff : Execution Time
         void UpdateMovement(uint32 const p_Diff);
         /// Handle Roaming
-        /// @p_Distance : Distance from target
-        /// @p_PositionX : Position X
-        /// @p_PositionY : Position Y
         /// @p_Diff : Execution Time
-        void HandleRoaming(const float p_Distance, float p_PositionX, float p_PositionY, uint32 const p_Diff);
+        void HandleRoaming(uint32 const p_Diff);
+
+        /// Scan for Players
+        /// Mob will attempt to find a nearby player
+        Entity::Player* ScanForPlayers();
+        /// Chase Player
+        /// @p_Player : Player to chase
+        /// @p_Attack : Attack Player if within range
+        bool ChasePlayer(Player* p_Player, bool p_Attack = false);
 
     public:
         ///////////////////////////////////////////
@@ -90,6 +95,7 @@ namespace SteerStone { namespace Game { namespace Entity {
         ///////////////////////////////////////////
 
         uint32 GetId()                                  const { return m_Entry;                                  }
+        uint16 GetShipId()                              const { return m_ShipId;                                 }
 
         Player const* GetTaggedPlayer()                 const { return m_PlayerTagger;                           }
         void SetTaggedPlayer(Player const* p_Player)          { m_PlayerTagger = p_Player;                       }
@@ -105,6 +111,7 @@ namespace SteerStone { namespace Game { namespace Entity {
 
     private:
         uint32 m_Entry;
+        uint16 m_ShipId;
 
         int32 m_RandomDistanceFromPlayerX;
         int32 m_RandomDistanceFromPlayerY;
@@ -112,9 +119,11 @@ namespace SteerStone { namespace Game { namespace Entity {
         float m_HomePositionX;
         float m_HomePositionY;
 
+        float m_LastTargetPositionX;
+        float m_LastTargetPositionY;
         Player const* m_PlayerTagger; ///< Player is targetting us
 
-        bool m_Fleeing; ///< Mob is fleeing away from player
+        bool m_Fleeing;     ///< Mob is fleeing away from player
 
         Core::Diagnostic::IntervalTimer m_IntervalMoveTimer;
         Core::Diagnostic::IntervalTimer m_IntervalRespawnTimer;

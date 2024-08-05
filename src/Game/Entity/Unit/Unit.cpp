@@ -12,7 +12,7 @@
 * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 * GNU General Public License for more details.
 *
-* You should have received a copy of the GNU General Public License
+* You should have received a copy of the GNU General Public LiFcense
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
@@ -61,6 +61,7 @@ namespace SteerStone { namespace Game { namespace Entity {
         m_InRadiationZone   = false;
         m_AttackType        = AttackType::ATTACK_TYPE_NONE;
         m_HitChance         = HIT_CHANCE;
+        m_Attackers         = {};
         
         for (uint32 l_I = 0; l_I < MAX_RESOURCE_COUNTER; l_I++)
             m_Resources[l_I] = 0;
@@ -87,13 +88,13 @@ namespace SteerStone { namespace Game { namespace Entity {
 
     /// Update
     /// @p_Diff : Execution Time
-    void Unit::Update(uint32 const p_Diff)
+    bool Unit::Update(uint32 const p_Diff)
     {
-        if (GetSpline()->IsMoving())
-            if (GetSpline()->GetLastTimeCalled() > 2000)
-                GetSpline()->SetIsMoving(false);
+        Object::Update(p_Diff);
 
         AttackerStateUpdate(p_Diff);
+
+        return true;
     }
 
     ///////////////////////////////////////////
@@ -102,7 +103,8 @@ namespace SteerStone { namespace Game { namespace Entity {
 
     /// Attack
     /// @p_Victim : Victim we are attacking
-    void Unit::Attack(Unit* p_Victim, AttackType const p_AttackType /*= AttackType::ATTACK_TYPE_LASER*/)
+    /// @p_AttackType : Type of attack
+    void Unit::Attack(Unit* p_Victim, AttackType p_AttackType /*= AttackType::ATTACK_TYPE_LASER*/)
     {
         if (!CanAttackTarget(p_Victim))
             return;
@@ -129,8 +131,14 @@ namespace SteerStone { namespace Game { namespace Entity {
                 GetTarget()->ToMob()->SetTaggedPlayer(ToPlayer());
                 GetTarget()->ToMob()->Attack(this);
 
-                GetGrid()->SendPacketIfInSurrounding(Server::Packets::Misc::Update().Write(Server::Packets::Misc::InfoUpdate::INFO_UPDATE_GREY_OPPONENT, { GetTarget()->GetObjectGUID().GetCounter(), GetObjectGUID().GetCounter() }), this, false);
+                GetGrid()->SendPacketIfInSurrounding(Server::Packets::Misc::Info().Write(Server::Packets::Misc::InfoType::INFO_TYPE_GREY_OPPONENT, { GetTarget()->GetObjectGUID().GetCounter(), GetObjectGUID().GetCounter() }), this, false);
             }
+        }
+
+        if (IsPlayer())
+        {
+            if ((p_AttackType & AttackType::ATTACK_TYPE_LASER) && ToPlayer()->GetInventory()->HasAutoRocket())
+                p_AttackType = AttackType::ATTACK_TYPE_BOTH;
         }
 
         m_LastTimeAttacked  = sServerTimeManager->GetServerTime();
@@ -247,7 +255,13 @@ namespace SteerStone { namespace Game { namespace Entity {
             SendRocketAttack(false);
 
         if (IsPlayer())
+        {
             ToPlayer()->SendClearRocketCooldown();
+
+            /// Don't cancel the attack if player has auto rocket
+            if (ToPlayer()->GetInventory()->HasAutoRocket())
+                return;
+        }
 
         CancelAttack(AttackType::ATTACK_TYPE_ROCKET);
     }
@@ -260,7 +274,6 @@ namespace SteerStone { namespace Game { namespace Entity {
         // If is player, we need to decrease the ammo by weapon count
         if (IsPlayer())
         {
-
             if (ToPlayer()->GetSelectedBatteryAmmo() <= 1000 && ToPlayer()->GetInventory()->HasAutoAmmo())
                 ToPlayer()->GetInventory()->BuyAutoAmmo();
 
@@ -520,6 +533,12 @@ namespace SteerStone { namespace Game { namespace Entity {
                 /// Update last time attacked
                 m_LastTimeAttacked = sServerTimeManager->GetServerTime();
 
+                if (IsPlayer())
+                {
+                    if (ToPlayer()->IsCloaked())
+						ToPlayer()->ToggleCloak();
+                }
+
                 UpdateLaserAttack();
                 UpdateRocketAttack(p_Diff);
             }
@@ -552,7 +571,9 @@ namespace SteerStone { namespace Game { namespace Entity {
     void Unit::CancelAttack(AttackType const p_AttackType)
     {
         if (!m_Attacking || m_AttackState == AttackState::ATTACK_STATE_NONE)
+        {
             return;
+        }
 
         LOG_ASSERT(GetTarget(), "Unit", "Attempted to cancel attack but target does not exist!");
 
@@ -566,16 +587,16 @@ namespace SteerStone { namespace Game { namespace Entity {
 
         if (IsMob())
         {
-            GetGrid()->SendPacketIfInSurrounding(Server::Packets::Misc::Update().Write(Server::Packets::Misc::InfoUpdate::INFO_UPDATE_UNGREY_OPPONENT, { GetObjectGUID().GetCounter() }), this, false);
+            GetGrid()->SendPacketIfInSurrounding(Server::Packets::Misc::Info().Write(Server::Packets::Misc::InfoType::INFO_TYPE_UNGREY_OPPONENT, { GetObjectGUID().GetCounter() }), this, false);
 
             /// The target may be on other side of the map if still targetting, so send packet specifically to target
-            if (GetTarget()->ToPlayer())
-                GetTarget()->ToPlayer()->SendPacket(Server::Packets::Misc::Update().Write(Server::Packets::Misc::InfoUpdate::INFO_UPDATE_UNGREY_OPPONENT, { GetObjectGUID().GetCounter() }));
+            if (GetTarget())
+                GetTarget()->ToPlayer()->SendPacket(Server::Packets::Misc::Info().Write(Server::Packets::Misc::InfoType::INFO_TYPE_UNGREY_OPPONENT, { GetObjectGUID().GetCounter() }));
         
             ToMob()->SetTaggedPlayer(nullptr);
         }
 
-        if (p_AttackType == AttackType::ATTACK_TYPE_BOTH)
+        if (p_AttackType & AttackType::ATTACK_TYPE_BOTH)
             m_AttackType = AttackType::ATTACK_TYPE_NONE;
         else
             m_AttackType &= ~p_AttackType;
@@ -584,7 +605,14 @@ namespace SteerStone { namespace Game { namespace Entity {
         {
             m_Attacking     = false;
             m_AttackState = AttackState::ATTACK_STATE_NONE;
+
+            /// Clear target attacker
+            GetTarget()->RemoveAttacker(this);
+
             ClearTarget();
+        }
+        else {
+             int hit = 0;
         }
     }
     /// Calculate Hit chance whether we can hit target
@@ -619,12 +647,26 @@ namespace SteerStone { namespace Game { namespace Entity {
             }
 
             if (IsPlayer())
+            {
+                /// Copy min and max damage
+                /// Reason being is because the multipliers do not stack ontop of each other
+                /// So we calculate on the original values
+                int32 l_CopyMinDamage = l_MinDamage;
+                int32 l_CopyMaxDamage = l_MaxDamage;
+
                 if (ToPlayer()->HasBooster(BoosterTypes::BOOSTER_TYPE_DMG_B01))
                 {
-					int32 l_BoosterValue = ToPlayer()->GetBoosterValue(BoosterTypes::BOOSTER_TYPE_DMG_B01);
-					l_MinDamage += Core::Utils::CalculatePercentage(l_MinDamage, l_BoosterValue);
-					l_MaxDamage += Core::Utils::CalculatePercentage(l_MaxDamage, l_BoosterValue);
-				}
+                    int32 l_BoosterValue = ToPlayer()->GetBoosterValue(BoosterTypes::BOOSTER_TYPE_DMG_B01);
+                    l_MinDamage += Core::Utils::CalculatePercentage(l_CopyMinDamage, l_BoosterValue);
+                    l_MaxDamage += Core::Utils::CalculatePercentage(l_CopyMaxDamage, l_BoosterValue);
+                }
+
+                if (LabUpgrade* l_LabUpgrade = ToPlayer()->GetLabUpgrade(LabUpgradeType::LAB_UPGRADE_TYPE_LASERS))
+                {
+					l_MinDamage += Core::Utils::CalculatePercentage(l_CopyMinDamage, l_LabUpgrade->GetCalculatedValue());
+					l_MaxDamage += Core::Utils::CalculatePercentage(l_CopyMaxDamage, l_LabUpgrade->GetCalculatedValue());
+                }
+            }
         }
         else if (p_AttackType & (AttackType::ATTACK_TYPE_ROCKET))
         {
@@ -641,6 +683,11 @@ namespace SteerStone { namespace Game { namespace Entity {
                     break;
                 default:
                     LOG_ASSERT(false, "Unit", "Unknown Rocket Type %0", m_RocketType);
+            }
+
+            if (LabUpgrade* l_LabUpgrade = ToPlayer()->GetLabUpgrade(LabUpgradeType::LAB_UPGRADE_TYPE_ROCKETS))
+            {
+                l_MaxDamage += Core::Utils::CalculatePercentage(l_MaxDamage, l_LabUpgrade->GetCalculatedValue());
             }
         }
         else
@@ -674,7 +721,10 @@ namespace SteerStone { namespace Game { namespace Entity {
 
         /// Set new hitpoints and shield points
         p_Target->SetHitPoints(l_HitPoints);
-        p_Target->SetShield(l_Shield);
+
+
+        if (!p_CleanDamage)
+            p_Target->SetShield(l_Shield);
 
         /// Send recieved damage effect to target
         if (p_Target->IsPlayer())
@@ -738,9 +788,19 @@ namespace SteerStone { namespace Game { namespace Entity {
         /// so update the current position so cargo box correctly spawns at the position where unit dies
         p_Unit->GetSpline()->UpdatePosition();
 
-        p_Unit->GetMap()->GetPoolManager()->AddBonuxBox(p_Unit, BonusBoxType::BONUS_BOX_TYPE_CARGO, this);
+        if (p_Unit->GetResourceTotal())
+            p_Unit->GetMap()->GetPoolManager()->AddBonuxBox(p_Unit, BonusBoxType::BONUS_BOX_TYPE_CARGO, this);
 
         p_Unit->m_DeathState = DeathState::JUST_DIED;
+
+        if (IsPlayer())
+        {
+            if (p_Unit->IsMob())
+                ToPlayer()->CheckQuestCondition(ConditionType::CONDITION_TYPE_KILL_NPC, {
+                    { AttributeKeys::ATTRIBUTE_KEY_NPC_ID, p_Unit->ToMob()->GetShipId() }
+                });
+        }
+
         CancelAttack();
     }
     /// Send Rocket Attack
@@ -800,11 +860,19 @@ namespace SteerStone { namespace Game { namespace Entity {
 
     }
 
+    /// Cleanup Before Delete
+    void Unit::CleanupsBeforeDelete()
+    {
+        RemoveAllAttackers();
+
+        Object::CleanupsBeforeDelete();
+    }
+
     ///////////////////////////////////////////
     //            GETTERS/SETTERS
     ///////////////////////////////////////////
 
-    void SteerStone::Game::Entity::Unit::SetResource(uint32 const p_Index, uint32 const p_Resource)
+    void SteerStone::Game::Entity::Unit::SetResource(uint32 const p_Index, int32 const p_Resource)
     {
         if (p_Index > MAX_RESOURCE_COUNTER)
             LOG_ASSERT(false, "Player", "Attempted to add resource but index is unknown! Index: %0", p_Index);
@@ -812,7 +880,14 @@ namespace SteerStone { namespace Game { namespace Entity {
         if (p_Resource == 0)
             m_Resources[p_Index] = 0;
         else
-            m_Resources[p_Index] += p_Resource;
+        {
+            int32 l_Resource = m_Resources[p_Index] + p_Resource;
+
+            if (l_Resource < 0)
+				m_Resources[p_Index] = 0;
+			else
+				m_Resources[p_Index] = l_Resource;
+        }
     }
 
     /// Get Shield

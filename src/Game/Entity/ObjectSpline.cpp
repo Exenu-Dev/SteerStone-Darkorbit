@@ -16,9 +16,10 @@
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "Object.hpp"
+#include "Player.hpp"
 #include "Diagnostic/DiaServerWatch.hpp"
 #include "Utility/UtilMaths.hpp"
+#include "Utility/UtilRandom.hpp"
 #include "Logger/Base.hpp"
 #include "Logger/LogDefines.hpp"
 
@@ -116,6 +117,36 @@ namespace SteerStone { namespace Game { namespace Entity {
 
         m_Object->GetMap()->Move(m_Object);
     }
+
+    bool Spline::IsMoving() const
+    {
+        float l_Distance = Core::Utils::DistanceSquared(m_PositionX, m_PositionY, m_PlannedPositionX, m_PlannedPositionY);
+        return l_Distance > 150.0f;
+    }
+
+    void Spline::SetSpeed(uint32 const p_Speed)
+    {
+        m_Speed = p_Speed;
+
+        if (m_Object->IsPlayer())
+            m_Object->ToPlayer()->SendUpdateSpeed();
+
+    }
+
+    float Spline::GetDistance(Spline* const p_Spline)
+    {
+        return Core::Utils::DistanceSquared(m_PositionX, m_PositionY, p_Spline->GetPositionX(), p_Spline->GetPositionY());
+    }
+
+    std::pair<float, float> Spline::PositionInCircleRadius(float const p_Radius /*=360*/)
+    {
+        auto l_Angle = Core::Utils::UInt32Random(0, 360);
+
+        float l_X = m_PositionX + p_Radius * std::cos(l_Angle);
+        float l_Y = m_PositionY + p_Radius * std::sin(l_Angle);
+
+        return std::make_pair(l_X, l_Y);
+	}
 
 }   ///< namespace Entity
 }   ///< namespace Game

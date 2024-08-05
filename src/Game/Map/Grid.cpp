@@ -187,9 +187,6 @@ namespace SteerStone { namespace Game { namespace Map {
 		{
 			if (l_Itr->second->IsScheduledForDelete())
 			{
-                // Remove from map
-                Remove(l_Itr->second, true, false);
-
                 auto l_ToToDelete = l_Itr->second;
 
 				l_Itr = m_Objects.erase(l_Itr);
@@ -307,7 +304,9 @@ namespace SteerStone { namespace Game { namespace Map {
         if (p_Remove)
 			m_Objects.erase(p_Object->GetGUID());
 
-        LOG_INFO("Grid", "Removed GUID: %0 from Grid: X %1 Y %2", p_Object->GetGUID(), m_GridX, m_GridY);
+        #ifdef STEERSTONE_CORE_DEBUG
+            LOG_INFO("Grid", "Removed GUID: %0 from Grid: X %1 Y %2", p_Object->GetGUID(), m_GridX, m_GridY);
+        #endif
     }
     /// Unload objects from map
     void Grid::Unload()

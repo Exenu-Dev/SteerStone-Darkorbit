@@ -61,6 +61,17 @@ namespace SteerStone { namespace Game { namespace Entity {
     //////////////////////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////////////////////
 
+    public:
+        ///////////////////////////////////////////
+        //                GENERAL
+        ///////////////////////////////////////////
+        /// Cleanup before deletion
+        virtual void CleanupsBeforeDelete();
+        /// Update the object
+        /// When being called, please call this function first before calling the derived class Update function
+        /// @param p_Diff The time difference between the last update and the current one
+        virtual bool Update(uint32 p_Diff);
+
         ///////////////////////////////////////////
         //            GETTERS/SETTERS
         ///////////////////////////////////////////
@@ -75,7 +86,7 @@ namespace SteerStone { namespace Game { namespace Entity {
         std::string GetName()                     const { return m_Name;                    }
         std::tuple<uint32, uint32> GetGridIndex() const { return m_GridIndex;               }
         bool NeedToBeUpdated()                    const { return m_NeedToBeUpdate;          }
-        bool IsScheduledForDelete()               const { return m_ScheduleForDelete; }
+        bool IsScheduledForDelete()               const { return m_ScheduleForDelete;       }
 
         bool IsPlayer()             const   { return m_Type == Type::OBJECT_TYPE_PLAYER;    }
         bool IsMob()                const   { return m_Type == Type::OBJECT_TYPE_MOB;       }

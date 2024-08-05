@@ -61,18 +61,21 @@ namespace SteerStone { namespace Game { namespace Map {
             if (Core::Utils::IsInCircleRadius(p_Player->GetSpline()->GetPositionX(), l_Itr.second->GetSpline()->GetPositionY(),
                 l_Itr.second->GetSpline()->GetPositionX(), l_Itr.second->GetSpline()->GetPositionY(), PLAYER_RADIUS_SCAN))
             {
+                /// If the object is a player, we need to check if they're in the surrounding of the player
                 if (l_Itr.second->IsPlayer())
                 {
                     if (!l_Itr.second->ToPlayer()->IsInSurrounding(p_Player) || l_Itr.second->NeedToBeUpdated())
                         BuildObjectSpawnAndSend(l_Itr.second, p_Player);
                     else
+                        /// Since we're in the surrounding, we don't need to despawn, so cancel any scheduled despawns
                         l_Itr.second->ToPlayer()->RemoveScheduleDespawn(p_Player);
                 }
 
                 if (!p_Player->IsInSurrounding(l_Itr.second) || l_Itr.second->NeedToBeUpdated())
                     BuildObjectSpawnAndSend(l_Itr.second, p_Player);
                 else
-                    p_Player->ToPlayer()->RemoveScheduleDespawn(l_Itr.second);
+                    /// Since we're in the surrounding, we don't need to despawn, so cancel any scheduled despawns
+                    p_Player->RemoveScheduleDespawn(l_Itr.second);
             }
         }
     }
@@ -112,13 +115,7 @@ namespace SteerStone { namespace Game { namespace Map {
         }
         else if (p_ObjectBuilt->IsMine())
         {
-            Server::Packets::SpawnMine l_Packet;
-            l_Packet.Id = p_ObjectBuilt->GetObjectGUID().GetCounter();
-            l_Packet.Type = 1;
-            l_Packet.PositionX = p_ObjectBuilt->GetSpline()->GetPositionX();
-            l_Packet.PositionY = p_ObjectBuilt->GetSpline()->GetPositionY();
-            p_Player->SendPacket(l_Packet.Write());
-
+            /// From my research, mines don't appear on the client?
             return;
         }
         else if (p_ObjectBuilt->IsOre())
@@ -134,6 +131,13 @@ namespace SteerStone { namespace Game { namespace Map {
         }
         else if (p_ObjectBuilt->IsPlayer())
         {
+            if (p_ObjectBuilt->NeedToBeUpdated())
+            {
+				Server::Packets::Ship::DespawnShip l_Packet;
+				l_Packet.Id = p_ObjectBuilt->GetObjectGUID().GetCounter();
+				p_Player->SendPacket(l_Packet.Write());
+			}
+
             Server::Packets::Ship::SpawnShip l_Packet;
             l_Packet.UserId                 = p_ObjectBuilt->GetObjectGUID().GetCounter();
             l_Packet.ShipId                 = p_ObjectBuilt->ToUnit()->GetShipType();
@@ -158,7 +162,11 @@ namespace SteerStone { namespace Game { namespace Map {
 
             /// Also Send drone info
             if (p_ObjectBuilt->ToPlayer()->HasDrones())
-            	p_Player->SendPacket(Server::Packets::Misc::Update().Write(Server::Packets::Misc::InfoUpdate::INFO_UPDATE_DRONES, { p_ObjectBuilt->GetObjectGUID().GetCounter(), p_ObjectBuilt->ToPlayer()->BuildDronesString() }));
+            	p_Player->SendPacket(Server::Packets::Misc::Info().Write(Server::Packets::Misc::InfoType::INFO_TYPE_DRONES, { p_ObjectBuilt->GetObjectGUID().GetCounter(), p_ObjectBuilt->ToPlayer()->BuildDronesString() }));
+        
+            /// This sends packet to everyone else, so we don't need to send it to the player
+            /// as there's no harm in sending it to everyone else
+            p_ObjectBuilt->ToPlayer()->SendCloak();
         }
         else if (p_ObjectBuilt->IsMob())
         {
@@ -183,7 +191,7 @@ namespace SteerStone { namespace Game { namespace Map {
         if ((p_ObjectBuilt->IsMob() || p_ObjectBuilt->IsPlayer()) && p_ObjectBuilt->ToUnit()->IsAttacking())
         {
             if (p_ObjectBuilt->IsPlayer() && p_ObjectBuilt->ToUnit()->GetTarget())
-                p_Player->SendPacket(Server::Packets::Misc::Update().Write(Server::Packets::Misc::InfoUpdate::INFO_UPDATE_GREY_OPPONENT, { p_ObjectBuilt->ToUnit()->GetTarget()->GetObjectGUID().GetCounter(), p_ObjectBuilt->GetObjectGUID().GetCounter() }));
+                p_Player->SendPacket(Server::Packets::Misc::Info().Write(Server::Packets::Misc::InfoType::INFO_TYPE_GREY_OPPONENT, { p_ObjectBuilt->ToUnit()->GetTarget()->GetObjectGUID().GetCounter(), p_ObjectBuilt->GetObjectGUID().GetCounter() }));
 
             /// Send Attack
             Server::Packets::Attack::LaserShoot l_Packet;

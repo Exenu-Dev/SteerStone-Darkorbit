@@ -24,6 +24,7 @@
 #include "Diagnostic/DiaServerWatch.hpp"
 #include "Utility/UtilRandom.hpp"
 #include "Utility/UtilMaths.hpp"
+#include <random>
 #include "ClanManager.hpp"
 
 namespace SteerStone { namespace Game { namespace Entity {
@@ -32,11 +33,15 @@ namespace SteerStone { namespace Game { namespace Entity {
     Mob::Mob()
     {
         m_Entry         = 0;
+        m_ShipId		= 0;
 
         m_HomePositionX = 0.0f;
         m_HomePositionY = 0.0f;
 
         m_PlayerTagger = nullptr;
+
+        m_LastTargetPositionX = 0.0f;
+        m_LastTargetPositionY = 0.0f;
 
         m_RandomDistanceFromPlayerX = 0;
         m_RandomDistanceFromPlayerY = 0;
@@ -53,6 +58,7 @@ namespace SteerStone { namespace Game { namespace Entity {
     /// Deconstructor
     Mob::~Mob()
     {
+        Unit::RemoveAllAttackers();
     }
 
     //////////////////////////////////////////////////////////////////////////
@@ -60,7 +66,7 @@ namespace SteerStone { namespace Game { namespace Entity {
 
     /// Update
     /// @p_Diff : Execution Time
-    void Mob::Update(uint32 const p_Diff)
+    bool Mob::Update(uint32 const p_Diff)
     {
         switch (m_DeathState)
         {
@@ -85,7 +91,7 @@ namespace SteerStone { namespace Game { namespace Entity {
             {
                 m_IntervalRespawnTimer.Update(p_Diff);
                 if (!m_IntervalRespawnTimer.Passed())
-                    return;
+                    return false;
 
                 m_DeathState = DeathState::ALIVE;
 
@@ -96,17 +102,18 @@ namespace SteerStone { namespace Game { namespace Entity {
                 break;
         }
        
+        return true;
     }
 
     /// Reward Credit/Uridium...
     /// @p_Player : Player is being rewarded
     void Mob::RewardKillCredit(Player* p_Player)
     {
-        p_Player->UpdateCredits(m_Credits);
-        p_Player->UpdateUridium(m_Uridium);
-        p_Player->UpdateExperience(m_Experience);
+        p_Player->RewardCredits(m_Credits);
+        p_Player->RewardUridium(m_Uridium);
+        p_Player->RewardExperience(m_Experience);
         p_Player->UpdateDroneExperience(this);
-        p_Player->UpdateHonor(m_Honor);
+        p_Player->RewardHonor(m_Honor);
         p_Player->UpdateLogBook("<div class=\"logdata\">You have destroyed " + GetName() + " alien ship.</div>" +
             "<div class=\"logdata\">You received " + std::to_string(m_Entry) + " Experience Points." + "</div>" +
             "<div class=\"logdata\">You received " + std::to_string(m_Credits) + " Credits." + "</div>" +
@@ -115,11 +122,6 @@ namespace SteerStone { namespace Game { namespace Entity {
         p_Player->UpdateLogBook("You received " + std::to_string(m_Experience) + " EP.");
         p_Player->UpdateLogBook("You received " + std::to_string(m_Honor) + " honor.");
         p_Player->UpdateLogBook("You destroyed alien ship " + GetName());
-
-        p_Player->ToPlayer()->SendPacket(Server::Packets::Misc::Reward().Write(Server::Packets::Misc::RewardType::REWARD_TYPE_CREDIT,     { m_Credits,    p_Player->GetCredits()                          }));
-        p_Player->ToPlayer()->SendPacket(Server::Packets::Misc::Reward().Write(Server::Packets::Misc::RewardType::REWARD_TYPE_URIDIUM,    { m_Uridium,    p_Player->GetUridium()                          }));
-        p_Player->ToPlayer()->SendPacket(Server::Packets::Misc::Reward().Write(Server::Packets::Misc::RewardType::REWARD_TYPE_HONOUR,     { m_Honor,      p_Player->GetHonor()                            }));
-        p_Player->ToPlayer()->SendPacket(Server::Packets::Misc::Reward().Write(Server::Packets::Misc::RewardType::REWARD_TYPE_EXPERIENCE, { m_Experience, p_Player->GetExperience(), p_Player->GetLevel() }));
     }
 
     //////////////////////////////////////////////////////////////////////////
@@ -129,203 +131,141 @@ namespace SteerStone { namespace Game { namespace Entity {
     /// @p_Diff : Execution Time
     void Mob::UpdateMovement(uint32 const p_Diff)
     {
-        /// TODO; Do we need to update movement every 1 second?
+        ///< If unit is 15% health or below, then move to nearest corner of the map
+        if (GetHitPoints() <= Core::Utils::CalculatePercentage(GetHitMaxPoints(), 15))
+            SetIsFleeing(true);
+
+        if (IsFleeing())
+        {
+            GetSpline()->Move();
+            return;
+        }
 
         switch (m_Behaviour)
         {
             /// Find closest player, and move to player
             case Behaviour::BEHAVIOUR_PASSIVE:
             {
-                if (!HasTarget())
-                {
-                    Entity::Player* l_Player = GetGrid()->FindNearestPlayer(this, sWorldManager->GetIntConfig(World::IntConfigs::INT_CONFIG_FIND_PLAYER_DISTANCE));
+                Player* l_Target = ScanForPlayers();
 
-                    if (!l_Player)
-                        break;
-
-                    /// Cannot target players who are at a portal or station
-                    if (l_Player->ToPlayer()->GetEvent() == EventType::EVENT_TYPE_PORTAL || l_Player->ToPlayer()->GetEvent() == EventType::EVENT_TYPE_STATION)
-                        break;
-
-                    /// Set our target
-                    SetTarget(l_Player);
-
-                    m_RandomDistanceFromPlayerX = Core::Utils::Int32Random(-400, 200);
-                    m_RandomDistanceFromPlayerY = Core::Utils::Int32Random(-100, 200);
-                }
-
-                Player* l_Target = GetTarget()->ToPlayer();
-
-                /// Cancel attack if target does not exist
-                if (!l_Target)
-                {
-                    CancelAttack();
-                    break;
-                }
-
-                if (GetTaggedPlayer())
-                    LOG_ASSERT(GetTarget()->GetGUID() == GetTaggedPlayer()->GetGUID(), "Mob", "Target and tagged player does not match!");
-
-                float l_PositionX = l_Target->GetSpline()->GetPlannedPositionX();
-                float l_PositionY = l_Target->GetSpline()->GetPlannedPositionY();
-                float l_Distance = Core::Utils::DistanceSquared(GetSpline()->GetPlannedPositionX(), GetSpline()->GetPlannedPositionY(), l_PositionX, l_PositionY);
-
-                /// Don't follow player if player is at an event, we only attack player if player has tagged us
-                if (l_Target->GetEvent() == EventType::EVENT_TYPE_PORTAL || l_Target->GetEvent() == EventType::EVENT_TYPE_STATION 
-                    || l_Target->GetEvent() == EventType::EVENT_TYPE_RADIATION_ZONE)
-                {
-                    if (l_Target->GetEvent() == EventType::EVENT_TYPE_RADIATION_ZONE || !GetTaggedPlayer())
-                    {
-                        CancelAttack();
-                        return;
-                    }
-                }
-
-                /// If player last time shot is more than 10 seconds ago (MAX_LAST_TIME_ATTACKED), then cancel combat
-                if (GetTaggedPlayer())
-                {
-                    if (!GetTaggedPlayer()->IsAttacking())
-                    {
-                        CancelAttack();
-                        break;
-                    }
-                }
-                /// else if player is farther than max distance, then cancel attack
-                else if (l_Distance > sWorldManager->GetIntConfig(World::IntConfigs::INT_CONFIG_MAX_FOLLOW_DISTANCE))
-                {
-                    CancelAttack();
-                    break;
-                }
-
-                if (IsFleeing())
-                {
-                    GetSpline()->Move();
-                    break;
-                } ///< If unit is 15% health or below, then move to nearest corner of the map
-                else if (GetHitPoints() <= Core::Utils::CalculatePercentage(GetHitMaxPoints(), 15))
-                {
-                    SetIsFleeing(true);
-                    break;
-                }
-
-                HandleRoaming(l_Distance, l_PositionX, l_PositionY, p_Diff);
+                if (l_Target)
+                    ChasePlayer(l_Target);
+                else
+                    HandleRoaming(p_Diff);
             }
             break;
             /// Find closest player, and move to player
             case Behaviour::BEHAVIOUR_AGGESSIVE:
             {
-                if (!HasTarget())
-                {
-                    Entity::Player* l_Player = GetGrid()->FindNearestPlayer(this, sWorldManager->GetIntConfig(World::IntConfigs::INT_CONFIG_FIND_PLAYER_DISTANCE));
+                Player* l_Target = ScanForPlayers();
 
-                    if (!l_Player)
-                        break;
-
-                    /// Cannot target players who are at a portal or station
-                    if (l_Player->ToPlayer()->GetEvent() == EventType::EVENT_TYPE_PORTAL || l_Player->ToPlayer()->GetEvent() == EventType::EVENT_TYPE_STATION)
-                        break;
-
-                    /// Set our target
-                    SetTarget(l_Player);
-
-                    m_RandomDistanceFromPlayerX = Core::Utils::Int32Random(-400, 200);
-                    m_RandomDistanceFromPlayerY = Core::Utils::Int32Random(-100, 200);
-                }
-
-                Player* l_Target = GetTarget()->ToPlayer();
-
-                /// Cancel attack if target does not exist
-                if (!l_Target)
-                {
-                    CancelAttack();
-                    break;
-                }
-
-                if (GetTaggedPlayer())
-                    LOG_ASSERT(GetTarget()->GetGUID() == GetTaggedPlayer()->GetGUID(), "Mob", "Target and tagged player does not match!");
-
-                float l_PositionX = l_Target->GetSpline()->GetPlannedPositionX();
-                float l_PositionY = l_Target->GetSpline()->GetPlannedPositionY();
-                float l_Distance = Core::Utils::DistanceSquared(GetSpline()->GetPlannedPositionX(), GetSpline()->GetPlannedPositionY(), l_PositionX, l_PositionY);
-
-                /// Clear target if target is jumping
-                if (l_Target->ToPlayer()->IsJumping())
-                {
-                    CancelAttack();
-                    break;
-                }
-
-                /// Don't follow player if player is at an event, we only attack player if player has tagged us
-                if (l_Target->GetEvent() == EventType::EVENT_TYPE_PORTAL || l_Target->GetEvent() == EventType::EVENT_TYPE_STATION
-                    || l_Target->GetEvent() == EventType::EVENT_TYPE_RADIATION_ZONE)
-                {
-                    if (l_Target->GetEvent() == EventType::EVENT_TYPE_RADIATION_ZONE || !GetTaggedPlayer())
-                    {
-                        CancelAttack();
-                        return;
-                    }
-                }
-
-                /// If player last time shot is more than 10 seconds ago, then cancel combat
-                if (GetTaggedPlayer())
-                {
-                    if (!GetTaggedPlayer()->IsInCombat())
-                    {
-                        CancelAttack();
-                        break;
-                    }
-                }
-                /// else if player is farther than max distance, then cancel attack
-                else if (l_Distance > sWorldManager->GetIntConfig(World::IntConfigs::INT_CONFIG_MAX_FOLLOW_DISTANCE))
-                {
-                    CancelAttack();
-                    break;
-                }
-
-                if (!IsAttacking())
-                    Attack(l_Target);
-
-                if (IsFleeing())
-                {
-                    GetSpline()->Move();
-                    break;
-                } ///< If unit is 15% health or below, then move to nearest corner of the map
-                else if (GetHitPoints() <= Core::Utils::CalculatePercentage(GetHitMaxPoints(), 15))
-                {
-                    SetIsFleeing(true);
-                    break;
-                }
-
-                HandleRoaming(l_Distance, l_PositionX, l_PositionY, p_Diff);
+                if (l_Target)
+                    ChasePlayer(l_Target);
+                else
+                    HandleRoaming(p_Diff);
             }
             break;
         }
     }
     /// Handle Roaming
-    /// @p_Distance : Distance from target
-    /// @p_PositionX : Position X
-    /// @p_PositionY : Position Y
     /// @p_Diff : Execution Time
-    void Mob::HandleRoaming(const float p_Distance, float p_PositionX, float p_PositionY, uint32 const p_Diff)
+    void Mob::HandleRoaming(uint32 const p_Diff)
     {
         /// Movement Update
         m_IntervalMoveTimer.Update(p_Diff);
         if (!m_IntervalMoveTimer.Passed())
             return;
 
-        /// If player is more than our min distance, start following player
-        if (p_Distance > sWorldManager->GetIntConfig(World::IntConfigs::INT_CONFIG_MIN_FOLLOW_DISTANCE))
-            GetSpline()->Move(p_PositionX, p_PositionY);
-        /// Check if we are too close to target, if so - move back
-        else if (p_Distance < sWorldManager->GetIntConfig(World::IntConfigs::INT_CONFIG_MIN_FOLLOW_DISTANCE))
+        /// Roam 300 units away from current position
+        float l_PositionX = GetSpline()->GetPlannedPositionX() + Core::Utils::Int32Random(-300, 300);
+        float l_PositionY = GetSpline()->GetPlannedPositionY() + Core::Utils::Int32Random(-300, 300);
+
+        GetSpline()->Move(l_PositionX, l_PositionY);
+    }
+    /// Scan for Players
+    /// Mob will attempt to find a nearby player
+    Entity::Player* Mob::ScanForPlayers()
+    {
+        Entity::Player* l_Player = nullptr;
+
+        if (HasTarget())
+            l_Player = GetTarget()->ToPlayer();
+        else
+            l_Player = GetGrid()->FindNearestPlayer(this, sWorldManager->GetIntConfig(World::IntConfigs::INT_CONFIG_FIND_PLAYER_DISTANCE));
+
+        if (!l_Player)
         {
-            float l_Degree = Core::Utils::FloatRandom(0, 360) * M_PI / 180;
-
-            p_PositionX += std::abs(m_RandomDistanceFromPlayerX) * std::cos(l_Degree);
-            p_PositionY += std::abs(m_RandomDistanceFromPlayerY) * std::sin(l_Degree);
-
-            GetSpline()->Move(p_PositionX, p_PositionY);
+            CancelAttack();
+            return nullptr;
         }
+
+        /// Cannot target players who are at a portal or station, or cloaked
+        if (!l_Player ||
+            l_Player->ToPlayer()->GetEvent() == EventType::EVENT_TYPE_PORTAL || l_Player->ToPlayer()->GetEvent() == EventType::EVENT_TYPE_STATION ||
+            l_Player->IsCloaked()
+        )
+        {
+            CancelAttack();
+            return nullptr;
+        }
+
+        /// If player last time shot is more than 10 seconds ago (MAX_LAST_TIME_ATTACKED), then cancel combat
+        if (GetTaggedPlayer())
+        {
+            LOG_ASSERT(GetTarget()->GetGUID() == GetTaggedPlayer()->GetGUID(), "Mob", "Target and tagged player does not match!");
+
+            if (!GetTaggedPlayer()->IsAttacking())
+            {
+                CancelAttack();
+                return nullptr;
+            }
+        }
+
+        if (!HasTarget())
+            SetTarget(l_Player);
+
+        return l_Player;
+    }
+    /// Chase Player
+    /// @p_Player : Player to chase
+    /// @p_Attack : Attack Player if within range
+    bool Mob::ChasePlayer(Player* p_Player, bool p_Attack/* = false*/)
+    {
+        if (!p_Player)
+			return false;
+
+        float l_PositionX = p_Player->GetSpline()->GetPositionX();
+        float l_PositionY = p_Player->GetSpline()->GetPositionY();
+        float l_Distance = Core::Utils::DistanceSquared(GetSpline()->GetPositionX(), GetSpline()->GetPositionY(), l_PositionX, l_PositionY);
+
+        if (l_Distance > sWorldManager->GetIntConfig(World::IntConfigs::INT_CONFIG_MAX_FOLLOW_DISTANCE))
+        {
+            CancelAttack();
+            return false;
+        }
+
+        if (p_Attack && !IsAttacking())
+			Attack(p_Player);
+
+        if (l_Distance > 150)
+        {
+            /// If player is more than our min distance, start following player
+            if (l_Distance > sWorldManager->GetIntConfig(World::IntConfigs::INT_CONFIG_MIN_FOLLOW_DISTANCE))
+                GetSpline()->Move(p_Player->GetSpline()->GetPositionX(), p_Player->GetSpline()->GetPositionY());
+		}
+        else
+        {
+
+            if (l_Distance < 400)
+                return false;
+
+            std::pair<float, float> l_Position = GetSpline()->PositionInCircleRadius(360);
+
+            GetSpline()->Move(l_Position.first, l_Position.second);
+        }
+
+        m_LastTargetPositionX = l_PositionX;
+        m_LastTargetPositionY = l_PositionY;
     }
 
     /// Set Is Fleeing

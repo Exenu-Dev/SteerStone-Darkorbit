@@ -68,11 +68,13 @@ namespace SteerStone { namespace Core { namespace Utils {
     /// @p_OtherPositiony   : Y Axis
     inline float DistanceSquared(float const& p_PositionX, float const& p_PositionY, float const& p_OtherPositionX, float const& p_OtherPositionY)
     {
-        float l_DeltaX = p_PositionX - p_OtherPositionX;
-        float l_DeltaY = p_PositionY - p_OtherPositionY;
-
-        return std::sqrt((l_DeltaX * l_DeltaX) + (l_DeltaY * l_DeltaY));
+        return sqrt(pow(p_OtherPositionX - p_PositionX, 2) + pow(p_OtherPositionY - p_PositionY, 2));
     }
+
+    inline float CalculateAngle(float const& p_PositionX, float const& p_PositionY, float const& p_OtherPositionX, float const& p_OtherPositionY)
+	{
+        return atan2(p_OtherPositionY - p_PositionY, p_OtherPositionX - p_PositionX);
+	}
 
     /// Percentage calculation
     /// @p_Base : Value

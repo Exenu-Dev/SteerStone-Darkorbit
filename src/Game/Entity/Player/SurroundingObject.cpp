@@ -46,9 +46,7 @@ namespace SteerStone { namespace Game { namespace Entity {
     /// @p_Diff : Execution Time
     bool SurroundingObject::Update(uint32 const p_Diff)
     {
-        /// This can happen if object (player) logs out
-        if (!m_Object)
-            return false;
+        LOG_ASSERT(m_Object, "SurroundingObject", "Object is null!");
 
         /// If unit is dead, remove from client
         if (!m_Object->IsBonusBox() && !m_Object->IsMine() && m_Object->ToUnit()->GetDeathState() == Entity::DeathState::DEAD)
@@ -58,7 +56,7 @@ namespace SteerStone { namespace Game { namespace Entity {
         }
         
         /// Object is scheduled to be despawned from client
-        if (m_ScheduleForDespawn)
+        if (IsScheduledForDespawn())
         {
             m_IntervalDelayRemoval.Update(p_Diff);
             if (m_IntervalDelayRemoval.Passed())
@@ -69,8 +67,7 @@ namespace SteerStone { namespace Game { namespace Entity {
                     return true;
             }
         }
-
-        if (!IsScheduledForDespawn())
+        else
         {
             /// Check whether the object is still in our radius view
             if (!Core::Utils::IsInCircleRadius(m_PlayerObject->GetSpline()->GetPositionX(), m_PlayerObject->GetSpline()->GetPositionY(),
@@ -115,13 +112,14 @@ namespace SteerStone { namespace Game { namespace Entity {
     }
 
     /// Despawn Object
-    bool SurroundingObject::Despawn()
+    /// @p_Force : Force Despawn
+    bool SurroundingObject::Despawn(bool p_Force/* = false*/)
     {
         if (m_Object->IsMob() || m_Object->IsPlayer())
         {
             /// If we are still targetting the object, keep it in client
-            if (m_PlayerObject->ToUnit()->GetTarget() && m_PlayerObject->ToUnit()->GetTarget()->GetObjectGUID().GetCounter() ==
-                m_Object->GetObjectGUID().GetCounter())
+            if ((m_PlayerObject->ToUnit()->GetTarget() && m_PlayerObject->ToUnit()->GetTarget()->GetObjectGUID().GetCounter() ==
+                m_Object->GetObjectGUID().GetCounter()) && !p_Force)
             {
                 /// If its a mob, then clear the target of the mob
                 if (m_Object->GetType() == Type::OBJECT_TYPE_MOB)

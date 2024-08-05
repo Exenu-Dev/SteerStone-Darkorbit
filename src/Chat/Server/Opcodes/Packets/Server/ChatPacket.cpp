@@ -37,7 +37,7 @@ namespace SteerStone { namespace Chat { namespace Server { namespace Packets {
 	}
 
     /// Write the packet
-    PacketBuffer const* SystemMessage::Write()
+    PacketBuffer const* DeveloperMessage::Write()
     {
         m_Buffer.AppendChar(Message.c_str());
         m_Buffer.AppendChar("#");
@@ -56,17 +56,6 @@ namespace SteerStone { namespace Chat { namespace Server { namespace Packets {
         m_Buffer.AppendChar(Message.c_str());
         m_Buffer.AppendSplit();
         m_Buffer.AppendChar("1"); //< Admin message type? TODO; Research this
-        m_Buffer.AppendChar("#");
-        m_Buffer.AppendEndSplitter();
-
-        return &m_Buffer;
-    }
-
-    /// Write the packet
-    PacketBuffer const* UserCount::Write()
-    {
-        std::string l_Message = "Users online " + std::to_string(Total);
-        m_Buffer.AppendChar(l_Message.c_str());
         m_Buffer.AppendChar("#");
         m_Buffer.AppendEndSplitter();
 
@@ -137,6 +126,206 @@ namespace SteerStone { namespace Chat { namespace Server { namespace Packets {
         m_Buffer.AppendChar(std::to_string(l_TimeLeft).c_str()); ///< Hours
         m_Buffer.AppendSplit();
         m_Buffer.AppendChar(" "); // unknown
+        m_Buffer.AppendChar("#");
+        m_Buffer.AppendEndSplitter();
+
+        return &m_Buffer;
+    }
+
+    PacketBuffer const* KickUser::Write()
+    {
+        m_Buffer.AppendChar("#");
+        m_Buffer.AppendEndSplitter();
+
+        return &m_Buffer;
+    }
+
+    /// SERVER_PACKET_SET_ROOMLIST
+    PacketBuffer const* SetRoomList::Write()
+    {
+        for (auto l_Itr : Rooms)
+        {
+            m_Buffer.AppendUInt32(l_Itr.RoomId);
+            m_Buffer.AppendSplit(true);
+            m_Buffer.AppendChar(l_Itr.RoomName.c_str());
+            m_Buffer.AppendSplit(true);
+            m_Buffer.AppendInt32(l_Itr.TabOrder);
+            m_Buffer.AppendSplit(true);
+            m_Buffer.AppendInt32(static_cast<int32>(l_Itr.Company));
+            m_Buffer.AppendSplit(true);
+            m_Buffer.AppendUInt32(static_cast<uint32>(l_Itr.RoomType));
+            m_Buffer.AppendSplit(true);
+            m_Buffer.AppendBool(l_Itr.NewComerRoom);
+
+            m_Buffer.AppendChar("}");
+        }
+        
+        m_Buffer.PopBack();
+
+        m_Buffer.AppendChar("#");
+        m_Buffer.AppendEndSplitter();
+
+        return &m_Buffer;
+    }
+    PacketBuffer const* RoomStatusMessage::Write(RoomStatusType p_RoomStatusType)
+    {
+        switch (p_RoomStatusType)
+        {
+            case RoomStatusType::CMD_PRIVATE_ROOM_EXIST:
+                m_Buffer.AppendChar("i");
+                break;
+            case RoomStatusType::CMD_PRIVATE_ROOM_NOT_EXIST:
+                m_Buffer.AppendChar("l");
+				break;
+        }
+
+        m_Buffer.AppendChar("#");
+        m_Buffer.AppendEndSplitter();
+
+        return &m_Buffer;
+    }
+    PacketBuffer const* PrivateRoomCreated::Write()
+    {
+        m_Buffer.AppendUInt32(RoomId);
+        m_Buffer.AppendSplit();
+        m_Buffer.AppendChar(RoomName.c_str());
+        m_Buffer.AppendSplit();
+        m_Buffer.AppendUInt32(OwnerId);
+        m_Buffer.AppendSplit();
+        m_Buffer.AppendChar(OwnerName.c_str());
+
+        m_Buffer.AppendChar("#");
+        m_Buffer.AppendEndSplitter();
+
+        return &m_Buffer;
+    }
+    PacketBuffer const* UserLogin::Write()
+    {
+        m_Buffer.AppendUInt32(UserId);
+
+        m_Buffer.AppendChar("#");
+        m_Buffer.AppendEndSplitter();
+
+        return &m_Buffer;
+    }
+    PacketBuffer const* DeleteRoom::Write()
+    {
+        m_Buffer.AppendUInt32(RoomId);
+
+        m_Buffer.AppendChar("#");
+        m_Buffer.AppendEndSplitter();
+
+        return &m_Buffer;
+    }
+    PacketBuffer const* NotRoomOwner::Write()
+    {
+        m_Buffer.AppendChar("#");
+        m_Buffer.AppendEndSplitter();
+
+        return &m_Buffer;
+    }
+    PacketBuffer const* CannotLeaveRoom::Write()
+    {
+        m_Buffer.AppendChar("#");
+        m_Buffer.AppendEndSplitter();
+
+        return &m_Buffer;
+    }
+    PacketBuffer const* RoomNameTooShort::Write()
+    {
+        m_Buffer.AppendChar("#");
+        m_Buffer.AppendEndSplitter();
+
+        return &m_Buffer;
+    }
+    PacketBuffer const* RoomNameTooLong::Write()
+    {
+        m_Buffer.AppendChar("#");
+        m_Buffer.AppendEndSplitter();
+
+        return &m_Buffer;
+    }
+    PacketBuffer const* UserInviteNotFound::Write()
+    {
+        m_Buffer.AppendChar("#");
+        m_Buffer.AppendEndSplitter();
+
+        return &m_Buffer;
+    }
+    PacketBuffer const* UserInviteNotYourRoom::Write()
+    {
+        m_Buffer.AppendChar("#");
+        m_Buffer.AppendEndSplitter();
+
+        return &m_Buffer;
+    }
+    PacketBuffer const* CannotInviteYourSelf::Write()
+    {
+        m_Buffer.AppendChar("#");
+        m_Buffer.AppendEndSplitter();
+
+        return &m_Buffer;
+    }
+    PacketBuffer const* UserJoinedInvitedRoom::Write()
+    {
+        m_Buffer.AppendChar(Username.c_str());
+
+        m_Buffer.AppendChar("#");
+        m_Buffer.AppendEndSplitter();
+
+        return &m_Buffer;
+    }
+    PacketBuffer const* UserLeftInvitedRoom::Write()
+    {
+        m_Buffer.AppendUInt32(UserId);
+        m_Buffer.AppendSplit();
+        m_Buffer.AppendChar(Username.c_str());
+        m_Buffer.AppendSplit();
+        m_Buffer.AppendUInt32(RoomId);
+
+        m_Buffer.AppendChar("#");
+        m_Buffer.AppendEndSplitter();
+
+        return &m_Buffer;
+    }
+    PacketBuffer const* RoomLimitReached::Write()
+    {
+        m_Buffer.AppendChar("#");
+        m_Buffer.AppendEndSplitter();
+
+        return &m_Buffer;
+    }
+    PacketBuffer const* CreateRoomWrongArguments::Write()
+    {
+        m_Buffer.AppendChar("#");
+        m_Buffer.AppendEndSplitter();
+
+        return &m_Buffer;
+    }
+    PacketBuffer const* UserNotExist::Write()
+    {
+        m_Buffer.AppendChar("#");
+        m_Buffer.AppendEndSplitter();
+
+        return &m_Buffer;
+    }
+    PacketBuffer const* YouWhisper::Write()
+    {
+        m_Buffer.AppendChar(Username.c_str());
+        m_Buffer.AppendSplit();
+        m_Buffer.AppendChar(Message.c_str());
+
+        m_Buffer.AppendChar("#");
+        m_Buffer.AppendEndSplitter();
+
+        return &m_Buffer;
+    }
+    PacketBuffer const* UserWhispers::Write()
+    {
+        m_Buffer.AppendChar(Username.c_str());
+        m_Buffer.AppendSplit();
+        m_Buffer.AppendChar(Message.c_str());
+
         m_Buffer.AppendChar("#");
         m_Buffer.AppendEndSplitter();
 

@@ -36,7 +36,7 @@ enum class PacketProcess
 {  
     PROCESS_WORLD_THREAD,       ///< Process Packet in Player::Update           (Thread Unsafe)
     PROCESS_MAP_THREAD,         ///< Process Packet in Map::Update              (Thread Safe)
-    PROCESS_PLAYER_THREAD       ///< Process Packet in Socket::ReadIncomingData (For non implemented packets) 
+    PROCESS_PLAYER_THREAD       ///< Process Packet in Socket::ReadIncomingData (Network Thread; For non implemented packets) 
                                 ///< TODO; Call this network thread? Because the CMS uses this to send packets
 };
 
@@ -65,6 +65,7 @@ enum ClientOpCodes : uint8
     CLIENT_PACKET_SELL_ORE              = 0x54,
     CLIENT_PACKET_ORE_PRICES            = 0x62,
     CLIENT_PACKET_COLLECT_ORE           = 0x77,
+    CLIENT_PACKET_QUEST_HUD             = 0x39,
 
     /// Web
     WEB_PACKET_CHECK_ONLINE             = 0x22,
@@ -76,6 +77,8 @@ enum ClientOpCodes : uint8
     WEB_PACKET_UPDATE_DRONES            = 0x27,
     WEB_PACKET_UPDATE_BOOSTERS          = 0x28,
     WEB_PACKET_UPDATE_CLANS             = 0x32,
+    WEB_PAKET_UPDATE_QUESTS			    = 0x2E,
+    WEB_PACKET_CLOAK					= 0x2F,
 
     CLIENT_MAX_OPCODE                   = 0x7B
 };
@@ -126,6 +129,8 @@ enum ServerOpCodes : uint8
     SERVER_PACKET_SPAWN_ORE             = 0x72,
     SERVER_PACKET_SPAWN_MINE            = 0x4C,
     SERVER_PACKET_DESPAWN_ORE           = 0x71,
+    SERVER_PACKET_MATERIAL_COLLECT_FAIL = 0x68,
+    SERVER_PACKET_QUEST_HUD			    = 0x39,
 
     /// Web Packets
     SERVER_PACKET_CHECK_ONLINE          = 0x22,

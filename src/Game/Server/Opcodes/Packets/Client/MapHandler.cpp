@@ -80,10 +80,20 @@ namespace SteerStone { namespace Game { namespace Server {
         /// Okay we can jump
         if (l_Portal)
         {
+            if (m_Player->GetLevel() < l_Portal->GetLevel())
+            {
+                m_Player->SendPacket(Server::Packets::Misc::Update().Write(Server::Packets::Misc::InfoUpdate::INFO_UPDATE_SYSTEM_MESSAGE, {
+                    "jumplevelfalse",
+                    "%",
+                    l_Portal->GetLevel()
+                }));
+                return;
+            }
+
             /// Send Packet
             Server::Packets::JumpPortal l_Packet;
-            l_Packet.MapId      = l_Portal->GetToMapId();
-            l_Packet.PortalId   = l_Portal->GetObjectGUID().GetCounter();
+            l_Packet.MapId = l_Portal->GetToMapId();
+            l_Packet.PortalId = l_Portal->GetObjectGUID().GetCounter();
             m_Player->SendPacket(l_Packet.Write());
 
             Game::Map::JumpQueueCordinates l_JumpQueueCordinates;
@@ -95,7 +105,7 @@ namespace SteerStone { namespace Game { namespace Server {
             m_Player->m_Jumping = true;
         }
         else
-            SendPacket(Packets::Misc::Update().Write(Server::Packets::Misc::InfoUpdate::INFO_UPDATE_MESSAGE, { "You are not near a portal!" }));
+            m_Player->SendSystemMessage("jumpgate_failed_no_gate");
     }
 
     /// Map Handler
@@ -217,12 +227,14 @@ namespace SteerStone { namespace Game { namespace Server {
 
         if (!l_Object)
         {
+            SendPacket(Server::Packets::MaterialCollectFail().Write());
             LOG_WARNING("Socket", "Cannot find object %0!", l_Id);
             return;
         }
 
         if (!l_Object->IsBonusBox())
         {
+            SendPacket(Server::Packets::MaterialCollectFail().Write());
             LOG_WARNING("Socket", "Attempted to loot cargo but object is not a bonus box!");
             return;
         }
@@ -230,6 +242,15 @@ namespace SteerStone { namespace Game { namespace Server {
         if (m_Player->GetCargoSpace() == 0 && l_Object->ToBonusBox()->GetBoxType() == BonusBoxType::BONUS_BOX_TYPE_CARGO)
         {
             m_Player->SendPacket(Server::Packets::Ship::CargoFull().Write());
+            return;
+        }
+
+        // Get the distance between the player and the cargo
+        float l_Distance = m_Player->GetSpline()->GetDistance(l_Object->GetSpline());
+
+        if (l_Distance > 500)
+        {
+            SendPacket(Server::Packets::MaterialCollectFail().Write());
             return;
         }
 
@@ -301,9 +322,14 @@ namespace SteerStone { namespace Game { namespace Server {
 
             if (m_Player->IsInCombat())
             {
-                m_Player->SendInfoMessage("You cannot jump while in combat!");
+                m_Player->SendSystemMessage("jump_cpu_failed_attack");
 				return;
 			}
+
+            if (m_Player->LastCombatTime() < 20)
+            {
+				m_Player->SendSystemMessage("jump_cpu_failed_attack");
+            }
 
             if (m_Player->IsJumping())
             {
@@ -317,7 +343,7 @@ namespace SteerStone { namespace Game { namespace Server {
                 {
                     if (!m_Player->GetMap()->IsLowerMap())
                     {
-                        m_Player->SendInfoMessage("Can only jump from X-4 maps");
+                        m_Player->SendSystemMessage("jump_cpu_failed_map");
 						return;
 					}
                 }
@@ -328,7 +354,7 @@ namespace SteerStone { namespace Game { namespace Server {
 
             if (l_MapId == m_Player->GetMap()->GetId())
             {
-                m_Player->SendInfoMessage("You are already on this map!");
+                m_Player->SendSystemMessage("jump_cpu_failed_ontarget");
                 return;
             }
 
@@ -350,10 +376,93 @@ namespace SteerStone { namespace Game { namespace Server {
         }
         else if (l_Type == "MIN")
         {
-            Entity::Mine* l_Mine = new Entity::Mine(m_Player);
+            if (m_Player->GetAmmo()->GetMines() <= 0)
+            {
+                // This is wrong text but cannot find the correct one
+                m_Player->SendSystemMessage("smartbomb_failed_mines");
+				return;
+            }
+
+            if (m_Player->GetAmmo()->GetMineCooldown()->OnCooldown())
+            {
+                m_Player->SendSystemMessage("mines_cooldown");
+                return;
+            }
+
+            Entity::Mine* l_Mine = new Entity::Mine(m_Player, MinesType::MINE);
             l_Mine->SetMap(m_Player->GetMap());
             l_Mine->GetSpline()->SetPosition(m_Player->GetSpline()->GetPositionX(), m_Player->GetSpline()->GetPositionY());
             l_Mine->GetMap()->Add(l_Mine);
+
+            m_Player->SetMine(-1);
+            m_Player->SendUpdateCooldown(Entity::CooldownType::COOLDOWN_TYPE_MINE);
+        }
+        else if (l_Type == "SMB")
+        {
+            if (m_Player->GetAmmo()->GetSmartBombs() <= 0)
+            {
+                if (m_Player->GetAmmo()->GetMines() < 10)
+                {
+					m_Player->SendSystemMessage("smartbomb_failed_mines");
+					return;
+				}
+
+                if (!m_Player->GetResource(Entity::Resource::RESOURCE_XENOMIT) < 100)
+                {
+					m_Player->SendSystemMessage("smartbomb_failed_xenomit");
+					return;
+				}
+            }
+
+            if (m_Player->GetAmmo()->GetSmartMineCooldown()->OnCooldown())
+            {
+                m_Player->SendSystemMessage("smartbomb_cooldown");
+                return;
+            }
+
+            Entity::Mine* l_Mine = new Entity::Mine(m_Player, MinesType::SMART_BOMB);
+            l_Mine->SetMap(m_Player->GetMap());
+            l_Mine->GetSpline()->SetPosition(m_Player->GetSpline()->GetPositionX(), m_Player->GetSpline()->GetPositionY());
+            l_Mine->GetMap()->Add(l_Mine);
+
+            m_Player->SetResource(Entity::Resource::RESOURCE_XENOMIT, -100);
+            m_Player->SetMine(-10);
+            m_Player->SendAmmoUpdate();
+            m_Player->SendUpdateCooldown(Entity::CooldownType::COOLDOWN_TYPE_SMART_MINE);
+        }
+        else if (l_Type == "ISH")
+        {
+            if (m_Player->GetAmmo()->GetInstantShields() <= 0)
+            {
+                if (m_Player->GetAmmo()->GetMines() < 10)
+                {
+                    m_Player->SendSystemMessage("instashield_failed_mines");
+                    return;
+                }
+
+                if (!m_Player->GetResource(Entity::Resource::RESOURCE_XENOMIT) < 100)
+                {
+                    m_Player->SendSystemMessage("instashield_failed_xenomit");
+                    return;
+                }
+            }
+
+            if (m_Player->GetAmmo()->GetInstantShieldCooldown()->OnCooldown())
+            {
+                m_Player->SendSystemMessage("instashield_cooldown");
+                return;
+            }
+
+            m_Player->SetResource(Entity::Resource::RESOURCE_XENOMIT, -100);
+            m_Player->SetMine(-10);
+            m_Player->SendAmmoUpdate();
+            m_Player->SendUpdateCooldown(Entity::CooldownType::COOLDOWN_TYPE_INSTANT_SHIELD);
+            m_Player->GetGrid()->SendPacketIfInSurrounding(
+                Server::Packets::Misc::Info().Write(Server::Packets::Misc::InfoType::INFO_TYPE_INSTANT_SHIELD,
+                {
+                    m_Player->GetObjectGUID().GetCounter()
+                }
+            ), m_Player, true);
         }
 	}
 
@@ -365,15 +474,30 @@ namespace SteerStone { namespace Game { namespace Server {
 
         if (!l_Object)
         {
+            SendPacket(Server::Packets::MaterialCollectFail().Write());
 			LOG_WARNING("Socket", "Cannot find object %0!", l_Id);
 			return;
 		}
 
         if (!l_Object->IsOre())
         {
+            SendPacket(Server::Packets::MaterialCollectFail().Write());
 			LOG_WARNING("Socket", "Attempted to loot ore but object is not an ore!");
 			return;
 		}
+
+        // Get the distance between the player and the ore
+        float l_Distance = m_Player->GetSpline()->GetDistance(l_Object->GetSpline());
+
+        if (l_Distance > 200)
+        {
+			SendPacket(Server::Packets::MaterialCollectFail().Write());
+			return;
+		}
+
+        m_Player->CheckQuestCondition(ConditionType::CONDITION_TYPE_COLLECT, {
+            { AttributeKeys::ATTRIBUTE_KEY_ORE_ID, static_cast<uint16>(l_Object->ToOre()->GetOreType()) }
+        });
 
 		l_Object->ToOre()->RewardCredit(m_Player);
 	}

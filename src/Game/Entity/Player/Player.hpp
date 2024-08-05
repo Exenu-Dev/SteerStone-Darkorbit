@@ -24,11 +24,14 @@
 #include "SurroundingObject.hpp"
 #include "Database/DatabaseTypes.hpp"
 #include "Inventory.hpp"
+#include "Quest.hpp"
 
 #define RADIATION_TIMER 1000
 #define CONFIG_TIMER 5000 ///< TODO; Move to config settings under player?
 #define ORE_CALCULATION_AMOUNT 500000
 #define REPAIR_BOT_TIMER 3000
+#define QUEST_UPDATE_TIMER 1000
+#define MINE_COOLDOWN 20000
 
 namespace SteerStone { namespace Game { namespace Entity {
 
@@ -36,6 +39,14 @@ namespace SteerStone { namespace Game { namespace Entity {
     class Player;
 
     typedef std::unordered_map<uint64, std::unique_ptr<SurroundingObject>> SurroundingMap;
+    typedef std::unordered_map<uint32, Quest*> QuestMap;
+
+    enum class CooldownType
+    {
+    	COOLDOWN_TYPE_MINE,
+        COOLDOWN_TYPE_SMART_MINE,
+        COOLDOWN_TYPE_INSTANT_SHIELD
+    };
 
     struct Booster
     {
@@ -70,6 +81,11 @@ namespace SteerStone { namespace Game { namespace Entity {
             return Duration <= 0;
 		}
 
+        int32 GetDuration() const
+		{
+			return Duration;
+		}
+
         /// Get Booster Type
         BoosterTypes GetBoosterType() const;
         /// Get Booster Value
@@ -83,6 +99,53 @@ namespace SteerStone { namespace Game { namespace Entity {
         int32 Duration;
 	};
 
+    struct Cooldown
+    {
+    public:
+        Cooldown()
+        {
+            m_IsOnCooldown = false;
+            m_Timer.SetInterval(0);
+        }
+
+        bool OnCooldown()
+        {
+            return m_IsOnCooldown;
+        }
+
+        bool Update(uint32 const p_Diff)
+        {
+            m_Timer.Update(p_Diff);
+
+            if (!m_Timer.Passed())
+                return false;
+
+            if (m_IsOnCooldown)
+            {
+                m_IsOnCooldown = false;
+                return true;
+            }
+
+            return false;
+		}
+
+        void StartCooldown()
+        {
+			m_Timer.Reset();
+			m_IsOnCooldown = true;
+		}
+
+        void SetCooldown(uint32 const p_Cooldown)
+        {
+			m_Timer.SetInterval(p_Cooldown);
+		}
+
+    private:
+
+        Core::Diagnostic::IntervalTimer m_Timer;
+        bool m_IsOnCooldown;
+    };
+
     /// Holds Ammo data
     struct Ammo
     {
@@ -90,7 +153,7 @@ namespace SteerStone { namespace Game { namespace Entity {
 
     public:
         /// Constructor
-        Ammo()
+        Ammo(Player* p_Player)
         {
             m_BatteryLCB10   = 0;
             m_BatteryMCB25   = 0;
@@ -105,6 +168,12 @@ namespace SteerStone { namespace Game { namespace Entity {
             m_Mines          = 0;
             m_SmartBombs     = 0;
             m_InstantShields = 0;
+
+            m_MineCooldown.SetCooldown(MINE_COOLDOWN);
+            m_SmartMineCooldown.SetCooldown(MINE_COOLDOWN);
+            m_InstantShieldCooldown.SetCooldown(MINE_COOLDOWN);
+
+            m_Player = p_Player;
         }
         /// Deconstructor
         ~Ammo()
@@ -120,6 +189,11 @@ namespace SteerStone { namespace Game { namespace Entity {
         int32 GetMCB50()   const { return m_BatteryMCB50;  }
         int32 GetUCB100()  const { return m_BatteryUCB100; }
         int32 GetSAB50()   const { return m_BatterySAB50;  }
+        int32 GetMines()   const { return m_Mines;         }
+
+        Cooldown* GetMineCooldown() { return &m_MineCooldown; }
+        Cooldown* GetSmartMineCooldown() { return &m_SmartMineCooldown; }
+        Cooldown* GetInstantShieldCooldown() { return &m_InstantShieldCooldown; }
 
         /// Get Next Available Ammo
         BatteryType GetAvailableBattery() const
@@ -156,6 +230,22 @@ namespace SteerStone { namespace Game { namespace Entity {
 
             return RocketType::ROCKET_TYPE_NONE;
         }
+        /// Get Total Batteries
+        int32 GetTotalBatteries() const
+        {
+			return m_BatteryLCB10 + m_BatteryMCB25 + m_BatteryMCB50 + m_BatteryUCB100 + m_BatterySAB50;
+		}
+        /// Get Total Rockets
+        int32 GetTotalRockets() const
+        {
+            return m_RocketR310 + m_RocketPLT2021 + m_RocketPLT2026 + m_Mines;
+        }
+
+        uint32 GetInstantShields() const;
+
+        uint32 GetSmartBombs() const;
+
+        void Update(uint32 const p_Diff);
 
     private:
         int32 m_BatteryLCB10;
@@ -171,6 +261,12 @@ namespace SteerStone { namespace Game { namespace Entity {
         int32 m_Mines;
         int32 m_SmartBombs;
         int32 m_InstantShields;
+
+        Cooldown m_MineCooldown;
+        Cooldown m_SmartMineCooldown;
+        Cooldown m_InstantShieldCooldown;
+
+        Player* m_Player;
     };
 
     /// Player Drone Info
@@ -201,6 +297,128 @@ namespace SteerStone { namespace Game { namespace Entity {
         uint16 Points;
     };
 
+    /// Lab Upgrade
+    /// Increases the player speed etc...
+    struct LabUpgrade
+    {
+    public:
+        /// Constructor
+        LabUpgrade()
+        {
+            Id              = 0;
+            Type            = "";
+			ItemType        = "";
+            Value           = 0;
+			UpgradeType     = LabUpgradeType::LAB_UPGRADE_TYPE_NONE;
+			Counter         = 0;
+            Timer.SetInterval(1000);
+        }
+
+        //////////////////////////////////////////////////////////////////////////
+        //////////////////////////////////////////////////////////////////////////
+
+        bool Update(uint32 const p_Diff)
+		{
+            Timer.Update(p_Diff);
+            if (!Timer.Passed())
+				return true;
+
+            /// The Shield and Engine runs on a timer while laser and rocket doesn't
+			if (IsShieldOrEngine() && Value > 0)
+                Value -= p_Diff;
+
+            return Value > 0;
+		}
+
+        uint32 GetId() const
+        {
+            return Id;
+		}
+
+        bool IsShieldOrEngine() const
+		{
+			return UpgradeType == LabUpgradeType::LAB_UPGRADE_TYPE_SHIELDS || UpgradeType == LabUpgradeType::LAB_UPGRADE_TYPE_ENGINES;
+		}
+
+        bool IsLaserOrRocket() const
+        {
+            return UpgradeType == LabUpgradeType::LAB_UPGRADE_TYPE_LASERS || UpgradeType == LabUpgradeType::LAB_UPGRADE_TYPE_ROCKETS;
+        }
+
+        LabUpgradeType GetLabUpgradeType() const
+		{
+			return UpgradeType;
+		}
+
+        void SetValue(int32 const p_Value)
+        {
+            /// Lasers or Rockets takes 1 unit of resource per 10 units of laser or rocket
+            if (IsLaserOrRocket())
+            {
+                Counter += p_Value;
+
+                if (Counter <= 10)
+                    return;
+            }
+
+            int32 l_Value = Value + p_Value;
+
+            if (l_Value < 0)
+				Value = 0;
+			else
+				Value = l_Value;
+        }
+
+        /// Get the value of the upgrade
+        /// This all depends on the item type and the type
+        /// Source: https://darkorbit.fandom.com/wiki/Refining_Upgrade
+        int32 GetCalculatedValue() const
+		{
+            switch (UpgradeType)
+            {
+                case LabUpgradeType::LAB_UPGRADE_TYPE_SHIELDS:
+                case LabUpgradeType::LAB_UPGRADE_TYPE_ENGINES:
+                {
+                    if (Type == "duranium")
+                        return 10;
+
+                    if (Type == "promerium")
+						return 20;
+
+                    return 1;
+                }
+                break;
+                case LabUpgradeType::LAB_UPGRADE_TYPE_ROCKETS:
+                case LabUpgradeType::LAB_UPGRADE_TYPE_LASERS:
+                {
+                    if (Type == "prometid")
+                        return 15;
+
+                    if (Type == "promerium")
+                        return 30;
+
+					return 1;
+				}
+            }
+		}
+
+        int32 GetValue() const
+        {
+			return Value;
+        }
+
+        //////////////////////////////////////////////////////////////////////////
+        //////////////////////////////////////////////////////////////////////////
+
+        uint32 Id;
+        std::string Type;
+        std::string ItemType;
+        int32 Value;
+        LabUpgradeType UpgradeType;
+        int32 Counter;
+        Core::Diagnostic::IntervalTimer Timer;
+    };
+
     /// Main entry for session in world
     class Player : public Unit
     {
@@ -229,6 +447,10 @@ namespace SteerStone { namespace Game { namespace Entity {
         void LoadDrones();
         /// Load Boosters
         void LoadBoosters();
+        /// Load Lab Upgrades
+        void LoadLabUpgrades();
+        /// Load Quests
+        void LoadQuests();
     public:
         /// Save Player details to database
         void SaveToDB();
@@ -238,8 +460,14 @@ namespace SteerStone { namespace Game { namespace Entity {
         /// Send Info Message to Player
         /// @p_Message : Message to send
         void SendInfoMessage(std::string const p_Message);
+        /// Send System Message to Player
+        /// @p_Message : Message to send
+        void SendSystemMessage(std::string const p_Message);
         /// Get Company X-1 Map Id based on Player Company
         uint32 GetX1CompanyMapId() const;
+        /// Update Speed
+        /// Informs the client the new speed
+        void SendUpdateSpeed();
     private:
         /// Return Drone Level
         /// @p_Drone : Drone
@@ -252,10 +480,16 @@ namespace SteerStone { namespace Game { namespace Entity {
         /// Update Repairing
         /// @p_Diff : Execution Time
         void UpdateRepairing(uint32 const p_Diff);
+        /// Update Cooldowns
+        /// @p_Diff : Execution Time
+        void UpdateCooldowns(uint32 const p_Diff);
+        /// Send Update Cooldown
+        /// @p_CooldownType : Cooldown Type
+        void SendUpdateCooldown(CooldownType const p_CooldownType);
     public:
         /// Update Player
         /// @p_Diff : Execution Time
-        bool Update(uint32 p_Diff);
+        bool Update(uint32 p_Diff) override;
 
         ///////////////////////////////////////////
         //              LOG BOOK
@@ -265,6 +499,18 @@ namespace SteerStone { namespace Game { namespace Entity {
         /// @p_Log : Log text
         /// @p_LogBookType : Type of Log Book
         void UpdateLogBook(std::string p_Log, LogBookType const p_LogBookType = LogBookType::LOG_BOOK_TYPE_DETAILED);
+
+        ///////////////////////////////////////////
+        //             QUESTS
+        ///////////////////////////////////////////
+        void SendQuests();
+        void SaveQuestsToDB();
+        void CheckQuestCondition(ConditionType const p_ConditionType, std::initializer_list<std::pair<AttributeKeys, std::variant<int32, std::string>>> p_List);
+        void SendUpdateQuestCondition(uint32 const p_QuestId, uint32 const p_ConditionId, std::variant<int32, std::string> const p_Value);
+        void FinishQuest(uint32 const p_QuestId);
+        void FailQuest(uint32 const p_QuestId);
+        void CancelQuest(uint32 const p_QuestId);
+        void UpdateQuests(uint32 const p_Diff);
 
         ///////////////////////////////////////////
         //             BOOSTERS
@@ -278,9 +524,35 @@ namespace SteerStone { namespace Game { namespace Entity {
         bool HasBooster(BoosterTypes const p_BoosterType) const;
         /// Get Booster Value
         /// @p_BoosterType : Booster Type
-        int32 GetBoosterValue(BoosterTypes const p_BoosterType) const;\
+        int32 GetBoosterValue(BoosterTypes const p_BoosterType) const;
+        /// Get Booster Name
+        /// @p_BoosterType : Booster Type
+        std::string GetBoosterName(BoosterTypes const p_BoosterType) const;
+        /// Get Booster Duration
+        /// @p_BoosterType : Booster Type
+        int32 GetBoosterDuration(BoosterTypes const p_BoosterType) const;
         /// Send the Boosters Packet
-        void SendBoosters();
+        /// @p_ShowLastOne: Show the last booster status message
+        void SendBoosters(bool const p_ShowLastOne = false);
+        /// Remove Booster
+        /// @p_BoosterId : Booster Id
+        void RemoveBooster(uint32 const p_BoosterId);
+
+        ///////////////////////////////////////////
+        //             LAB UPGRADES
+        ///////////////////////////////////////////
+
+        /// Update Lab Upgrades
+        /// @p_Diff : Execution Time
+        void UpdateLabUpgrades(uint32 const p_Diff);
+        /// Remove Lab Upgrade
+        /// @p_Id : Id of Lab Upgrade
+        void RemoveLabUpgrade(uint32 const p_Id);
+        /// Get Lab Upgrade
+        /// @p_LabUpgradeType : Lab Upgrade Type
+        LabUpgrade* GetLabUpgrade(LabUpgradeType const p_LabUpgradeType);
+        /// Save Lab Upgrades
+        void SaveLabUpgrades();
 
         ///////////////////////////////////////////
         //        SURROUNDING SYSTEM
@@ -289,6 +561,9 @@ namespace SteerStone { namespace Game { namespace Entity {
         /// Add Object to surrounding
         /// @p_Object : Object being added
         void AddToSurrounding(Object* p_Object);
+        /// Remove Object from surrounding
+        /// @p_Object : Object being removed
+        void RemoveFromSurrounding(Object* p_Object);
         /// Remove Object from being despawned
         /// @p_Object : Object
         void RemoveScheduleDespawn(Object* p_Object);
@@ -333,6 +608,8 @@ namespace SteerStone { namespace Game { namespace Entity {
         void ChangeConfiguration(const uint16 p_Config);
         /// Send Drone Info
         void SendDrones();
+        /// Send Cloak
+        void SendCloak();
         /// Build Drones Packet
         std::string BuildDronesString() const;
         /// Update Cargo Max Space
@@ -388,14 +665,16 @@ namespace SteerStone { namespace Game { namespace Entity {
         bool CanAutoChangeAmmo()   const     { return m_AutoChangeAmmo;   }
         bool IsRepairing()         const     { return m_Repairing;        }
         bool IsUpdateEvent()       const     { return m_UpdateEvent;      }
+        bool IsCloaked()           const     { return m_IsCloaked;        }
         uint32 GetMaxCargoSpace()  const     { return m_MaxCargoSpace;    }
         uint32 GetMaxBattery()     const     { return m_MaxBattery;       }
+        uint32 GetMaxRockets()     const     { return m_MaxRockets;       }
         uint8 GetPreset()          const     { return m_Preset;           }
         EventType GetEvent()       const     { return m_Event;            } 
         bool HasLoggedOut() const            { return m_LoggingOut;       }
         bool HasDrones()           const     { return !m_Drones.empty();  }
         bool CanRepair();
-        Ammo const* GetAmmo()      const     { return &m_Ammo;            }
+        Ammo* const GetAmmo()                { return &m_Ammo;            }
         Inventory* GetInventory()            { return &m_Inventory;       }
         std::shared_ptr<Server::GameSocket> ToSocket() { return m_Socket; }
         uint32 const GetSelectedBatteryAmmo()
@@ -473,10 +752,30 @@ namespace SteerStone { namespace Game { namespace Entity {
         }
         void UpdateExperience(uint32 p_Experience);
         void UpdateDroneExperience(Entity::Object* p_Object);
-        void SetBatteryAmmo(BatteryType const p_BatteryType, const uint32 p_Amount);
-        void SetRocketAmmo(RocketType const p_RocketType, const uint32 p_Amount);
+        void SetBatteryAmmo(BatteryType const p_BatteryType, const int32 p_Amount);
+        void SetRocketAmmo(RocketType const p_RocketType, const int32 p_Amount);
+        void SetMine(const int32 p_Amount);
         void UpdateHonor(uint32 p_Honour);
         void Repair(bool p_Repair);
+        void SetCloaked(bool const p_Cloaked) { m_IsCloaked = p_Cloaked; }
+
+        uint32 CalculateSmartBombs() const;
+        uint32 CalculateInstantShield() const;
+
+        /// Reward Credits
+        /// This will also send the reward to the client
+        void RewardCredits(int32 p_Credits);
+        /// Reward Uridium
+        /// This will also send the reward to the client
+        void RewardUridium(int32 p_Uridium);
+        /// Reward Honor
+        /// This will also send the reward to the client
+        void RewardHonor(int32 p_Honor);
+        /// Reward Experience
+        /// This will also send the reward to the client and also the level up packet if the player levels up
+        void RewardExperience(int32 p_Experience);
+
+        void ToggleCloak();
 
         /// Timers
         Core::Diagnostic::IntervalTimer IntervalLogout;
@@ -495,7 +794,6 @@ namespace SteerStone { namespace Game { namespace Entity {
         uint32 m_MaxCargoSpace;
         uint32 m_MaxBattery;
         uint32 m_MaxRockets;
-        uint32 m_CargoSpace; ///< Note: This is no longer used, this can be removed
         uint16 m_Preset;
         bool m_Premium;
 
@@ -526,6 +824,7 @@ namespace SteerStone { namespace Game { namespace Entity {
         bool m_EnableBuyFast;
         bool m_Repairing;
         bool m_UpdateEvent;
+        bool m_IsCloaked;
 
         bool m_LoggedIn;
         bool m_Jumping;
@@ -537,8 +836,11 @@ namespace SteerStone { namespace Game { namespace Entity {
         Core::Diagnostic::IntervalTimer m_RepairBotTimer;
         Core::Diagnostic::IntervalTimer m_IntervalNextSave;              ///< Save to database
         Core::Diagnostic::IntervalTimer m_IntervalRadiation;             ///< Save to database
+        Core::Diagnostic::IntervalTimer m_IntervalQuestUpdate;           ///< Update Quests
 
+        std::vector<LabUpgrade> m_LabUpgrades;                           ///< Lab Upgrades
         std::vector<Drone> m_Drones;                                     ///< Ship Drones
+        QuestMap m_Quests;                                               ///< Quests
         SurroundingMap m_Surroundings;                                   ///< Objects surrounding player
         std::shared_ptr<Server::GameSocket> m_Socket;                    ///< Socket
         Core::Database::OperatorProcessor m_OperatorProcessor;           ///< Process Asynchronous Queries

@@ -60,6 +60,10 @@ namespace SteerStone { namespace Game { namespace Map {
         /// @p_Id : Map Id
         Map::Base* GetMap(uint32 const p_Id);
 
+        /// Convert Map Name to Id
+        /// @p_MapName : Map Name
+        uint32 MapStringToId(std::string const& p_MapName);
+
         /// Update Zones
         /// @p_Diff : Execution Time
         void Update(uint32 const p_Diff);

@@ -121,6 +121,27 @@ namespace SteerStone { namespace Game { namespace Map {
         return nullptr;
     }
 
+    /// Get Map
+    /// @p_Id : Map Id
+    uint32 Manager::MapStringToId(std::string const& p_MapName)
+    {
+        if (p_MapName.empty())
+			return 0;
+
+        for (auto& l_Itr : m_Zones)
+        {
+            for (auto& l_Map : l_Itr.second->GetMaps())
+            {
+				if (l_Map.second->GetName() == p_MapName)
+					return l_Map.second->GetId();
+			}
+		}
+
+		LOG_ASSERT(false, "MapManager", "Map Name: %0 does not exist", p_MapName);
+
+		return 0;
+    }
+
     /// Update Zones
     /// @p_Diff : Execution Time
     void Manager::Update(uint32 const p_Diff)

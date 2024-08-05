@@ -164,61 +164,6 @@ enum MiscConditionType
     ON_X_3                = 21,
 };
 
-enum ConditionType
-{
-    QUESTCASE            = 0,
-    TIMER                = 1,
-    HASTE                = 2,
-    ENDURANCE            = 3,
-    COUNTDOWN            = 4,
-    COLLECT              = 5,
-    KILL_NPC             = 6,
-    DAMAGE               = 7,
-    AVOID_DAMAGE         = 8,
-    TAKE_DAMAGE          = 9,
-    AVOID_DEATH          = 10,
-    COORDINATES          = 11,
-    DISTANCE             = 12,
-    TRAVEL               = 13,
-    FUEL_SHORTAGE        = 14,
-    PROXIMITY            = 15,
-    MAP                  = 16,
-    MAP_DIVERSE          = 17,
-    EMPTY                = 18,
-    MISCELLANEOUS        = 19,
-    AMMUNITION           = 20,
-    SAVE_AMMUNITION      = 21,
-    SPEND_AMMUNITION     = 22,
-    SALVAGE              = 23,
-    STEAL                = 24,
-    KILL                 = 25,
-    DEAL_DAMAGE          = 26,
-    KILL_NPCS            = 27,
-    KILL_PLAYERS         = 28,
-    DAMAGE_NPCS          = 29,
-    DAMAGE_PLAYERS       = 30,
-    VISIT_MAP            = 31,
-    DIE                  = 32,
-    AVOID_KILL_NPC       = 33,
-    AVOID_KILL_NPCS      = 34,
-    AVOID_KILL_PLAYERS   = 35,
-    AVOID_DAMAGE_NPCS    = 36,
-    AVOID_DAMAGE_PLAYERS = 37,
-    PREVENT              = 38,
-    JUMP                 = 39,
-    AVOID_JUMP           = 40,
-    STEADINESS           = 41,
-    MULTIPLIER           = 42,
-    STAY_AWAY            = 43,
-    IN_GROUP             = 44,
-    KILL_ANY             = 45,
-    WEB                  = 46,
-    CLIENT               = 47,
-    cCARGO               = 48,
-    SELL_ORE             = 49,
-    LEVEL                = 50,
-};
-
 enum DamageType
 {
     DAMAGE_TYPE_ANY         = 0,
@@ -458,6 +403,7 @@ enum class OreResource : uint8
 
 enum class ItemTemplatesId : uint8
 {
+    ITEM_TEMPLATE_ID_LF3	    = 4,
     ITEM_TEMPLATE_ID_LCB_10     = 16,
     ITEM_TEMPLATE_ID_MCB_25     = 17,
     ITEM_TEMPLATE_ID_MCB_50     = 18,
@@ -465,12 +411,19 @@ enum class ItemTemplatesId : uint8
     ITEM_TEMPLATE_ID_R_310      = 20,
     ITEM_TEMPLATE_ID_PLT_2026   = 21,
     ITEM_TEMPLATE_ID_PLT_2021   = 22,
+    ITEM_TEMPLATE_ID_ACM_01     = 30,
     ITEM_TEMPLATE_ID_AIM_01     = 31,
     ITEM_TEMPLATE_ID_AM_CPU     = 32,
     ITEM_TEMPLATE_ID_ROK_T01    = 33,
     ITEM_TEMPLATE_ID_JP_01      = 34,
     ITEM_TEMPLATE_ID_JP_02      = 35,
     ITEM_TEMPLATE_ID_REP_1      = 36,
+    ITEM_TEMPLATE_ID_REP_2      = 37,
+    ITEM_TEMPLATE_ID_REP_3      = 38,
+    ITEM_TEMPLATE_AROL_X		= 39,
+    ITEM_TEMPLATE_CLOAK_X		= 40,
+    ITEM_TEMPLATE_SMART_BOMB	= 41,
+    ITEM_TEMPLATE_INSTANT_SHIELD = 42,
 };
 
 enum class JumpChipType : uint8
@@ -498,10 +451,132 @@ enum CompanyMapId : uint8
     COMPANY_MAP_ID_MMO_4X1      = 14,
     COMPANY_MAP_ID_MMO_4X2      = 15,
     COMPANY_MAP_ID_MMO_4X3      = 16,
+    COMPANY_MAP_ID_MMO_1X5	    = 17,
+    COMPANY_MAP_ID_MMO_1X6      = 18,
+    COMPANY_MAP_ID_MMO_1X7	    = 19,
+    COMPANY_MAP_ID_MMO_1X8	    = 20,
+    COMPANY_MAP_ID_EIC_2X5	    = 21,
+    COMPANY_MAP_ID_EIC_2X6	    = 22,
+    COMPANY_MAP_ID_EIC_2X7	    = 23,
+    COMPANY_MAP_ID_EIC_2X8	    = 24,
+    COMPANY_MAP_ID_VRU_3X5	    = 25,
+    COMPANY_MAP_ID_VRU_3X6	    = 26,
+    COMPANY_MAP_ID_VRU_3X7	    = 27,
+    COMPANY_MAP_ID_VRU_3X8	    = 28,
+    COMPANY_MAP_NOMAN_4X5	    = 29,
 
 };
 
 enum class ItemType : uint8
 {
     ITEM_TYPE_REPAIR_BOT    = 0,
+};
+
+enum class LabUpgradeType : uint8
+{
+    LAB_UPGRADE_TYPE_NONE           = 0,
+    LAB_UPGRADE_TYPE_LASERS         = 1,
+    LAB_UPGRADE_TYPE_ROCKETS        = 2,
+    LAB_UPGRADE_TYPE_SHIELDS 	    = 3,
+    LAB_UPGRADE_TYPE_ENGINES 	    = 4,
+};
+
+enum ConditionType {
+    CONDITION_TYPE_QUESTCASE = 0, //< Not used
+    CONDITION_TYPE_TIMER = 1,
+    CONDITION_TYPE_HASTE = 2,
+    CONDITION_TYPE_ENDURANCE = 3,
+    CONDITION_TYPE_COUNTDOWN = 4,
+    CONDITION_TYPE_COLLECT = 5,
+    CONDITION_TYPE_KILL_NPC = 6,
+    CONDITION_TYPE_DAMAGE = 7,
+    CONDITION_TYPE_AVOID_DAMAGE = 8,
+    CONDITION_TYPE_TAKE_DAMAGE = 9,
+    CONDITION_TYPE_AVOID_DEATH = 10,
+    CONDITION_TYPE_COORDINATES = 11,
+    CONDITION_TYPE_DISTANCE = 12,
+    CONDITION_TYPE_TRAVEL = 13,
+    CONDITION_TYPE_FUEL_SHORTAGE = 14,
+    CONDITION_TYPE_PROXIMITY = 15,
+    CONDITION_TYPE_MAP = 16,
+    CONDITION_TYPE_MAP_DIVERSE = 17,
+    CONDITION_TYPE_EMPTY = 18,
+    CONDITION_TYPE_MISCELLANEOUS = 19,
+    CONDITION_TYPE_AMMUNITION = 20,
+    CONDITION_TYPE_SAVE_AMMUNITION = 21,
+    CONDITION_TYPE_SPEND_AMMUNITION = 22,
+    CONDITION_TYPE_SALVAGE = 23,
+    CONDITION_TYPE_STEAL = 24,
+    CONDITION_TYPE_KILL = 25,
+    CONDITION_TYPE_DEAL_DAMAGE = 26,
+    CONDITION_TYPE_KILL_NPCS = 27,
+    CONDITION_TYPE_KILL_PLAYERS = 28,
+    CONDITION_TYPE_DAMAGE_NPCS = 29,
+    CONDITION_TYPE_DAMAGE_PLAYERS = 30,
+    CONDITION_TYPE_VISIT_MAP = 31,
+    CONDITION_TYPE_DIE = 32,
+    CONDITION_TYPE_AVOID_KILL_NPC = 33,
+    CONDITION_TYPE_AVOID_KILL_NPCS = 34,
+    CONDITION_TYPE_AVOID_KILL_PLAYERS = 35,
+    CONDITION_TYPE_AVOID_DAMAGE_NPCS = 36,
+    CONDITION_TYPE_AVOID_DAMAGE_PLAYERS = 37,
+    CONDITION_TYPE_PREVENT = 38,
+    CONDITION_TYPE_JUMP = 39,
+    CONDITION_TYPE_AVOID_JUMP = 40,
+    CONDITION_TYPE_STEADINESS = 41,
+    CONDITION_TYPE_MULTIPLIER = 42,
+    CONDITION_TYPE_STAY_AWAY = 43,
+    CONDITION_TYPE_IN_GROUP = 44,
+    CONDITION_TYPE_KILL_ANY = 45,
+    CONDITION_TYPE_WEB = 46,
+    CONDITION_TYPE_CLIENT = 47,
+    CONDITION_TYPE_CARGO = 48,
+    CONDITION_TYPE_SELL_ORE = 49,
+    CONDITION_TYPE_LEVEL = 50
+};
+
+enum AttributeKeys
+{
+    ATTRIBUTE_KEY_TIME_CURRENT      = 1,
+    ATTRIBUTE_KEY_TIME_TARGET       = 2,
+    ATTRIBUTE_KEY_NPC_ID            = 3,
+    ATTRIBUTE_KEY_COUNT_CURRENT     = 4,
+    ATTRIBUTE_KEY_COUNT_TARGET      = 5,
+    ATTRIBUTE_KEY_AVATAR_ID         = 6,
+    ATTRIBUTE_KEY_RADIUS            = 7,
+    ATTRIBUTE_KEY_NPC_IDS           = 8,
+    ATTRIBUTE_KEY_DAMAGE_TYPES      = 9,
+    ATTRIBUTE_KEY_SHIP_TYPES        = 10,
+    ATTRIBUTE_KEY_FACTIONS          = 11,
+    ATTRIBUTE_KEY_AVATAR_IDS        = 12,
+    ATTRIBUTE_KEY_ORE_ID            = 13,
+    ATTRIBUTE_KEY_LOOT_TYPE         = 14,
+    ATTRIBUTE_KEY_FACTION_ID        = 15,
+    ATTRIBUTE_KEY_SHIP_TYPE         = 16,
+    ATTRIBUTE_KEY_NPC_TYPE          = 17,
+    ATTRIBUTE_KEY_MAP_ID            = 18,
+    ATTRIBUTE_KEY_MAPS              = 19,
+    ATTRIBUTE_KEY_MISC_COND_TYPE    = 20,
+    ATTRIBUTE_KEY_WEB_COND_TYPE     = 21,
+    ATTRIBUTE_KEY_CLIENT_COND_TYPE  = 22,
+    ATTRIBUTE_KEY_ORE_TYPE          = 23,
+    ATTRIBUTE_KEY_DAMANGE_TYPE      = 24,
+};
+
+enum RewardType : uint8
+{
+	REWARD_TYPE_NONE                = 0,
+	REWARD_TYPE_CREDITS             = 1,
+    REWARD_TYPE_AMMUNITION          = 2,
+    REWARD_TYPE_EXPERIENCE_POINTS   = 3,
+    REWARD_TYPE_URIDIUM             = 4,
+    REWARD_TYPE_HONOUR              = 5,
+};
+
+enum AccessLevel
+{
+    ACCESS_LEVEL_PLAYER         = 0,
+    ACCESS_LEVEL_MODERATOR      = 1,
+    ACCESS_LEVEL_ADMIN          = 2,
+    ACCESS_LEVEL_DEVELOPER	    = 3,
 };

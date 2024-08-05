@@ -53,6 +53,7 @@ namespace SteerStone { namespace Game { namespace Entity {
     /// Deconstructor
     Ore::~Ore()
     {
+        Unit::CleanupsBeforeDelete();
     }
 
     //////////////////////////////////////////////////////////////////////////

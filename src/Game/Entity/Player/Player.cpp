@@ -21,13 +21,14 @@
 #include "Packets/Server/MapPackets.hpp"
 #include "Packets/Server/ShipPackets.hpp"
 #include "Packets/Server/MiscPackets.hpp"
+#include "Packets/Server/QuestPackets.hpp"
 #include "World.hpp"
+#include "QuestManager.hpp"
 #include "ObjectManager.hpp"
 #include "ClanManager.hpp"
 #include "ZoneManager.hpp"
 #include "Diagnostic/DiaStopWatch.hpp"
 #include "Utility/UtilMaths.hpp"
-#include "ZoneManager.hpp"
 
 namespace SteerStone { namespace Game { namespace Entity {
 
@@ -35,13 +36,12 @@ namespace SteerStone { namespace Game { namespace Entity {
     /// @p_GameSocket : Socket
     Player::Player(Server::GameSocket* p_GameSocket) :
         m_Socket(p_GameSocket ? p_GameSocket->Shared<Server::GameSocket>() : nullptr),
-        m_Inventory(this)
+        m_Inventory(this), m_Ammo(this)
     {
         m_Id                    = 0;
         m_SessionId.clear();
         m_Jackpot               = 0;
         m_Level                 = 0;
-        m_CargoSpace            = 0;
         m_MaxCargoSpace         = 0;
         m_MaxBattery            = 0;
         m_MaxRockets            = 0;
@@ -74,18 +74,21 @@ namespace SteerStone { namespace Game { namespace Entity {
         m_AutoChangeAmmo        = false;
         m_EnableBuyFast         = false;
         m_Repairing			    = false;
+        m_IsCloaked             = false;
 
         m_LoggedIn              = false;
         m_Jumping               = false;
         m_LoggingOut            = false;
         m_Event                 = EventType::EVENT_TYPE_NONE;
         m_AttackType            = AttackType::ATTACK_TYPE_NONE;
+        m_LabUpgrades           = {};
 
         /// Timers
         m_IntervalNextSave.SetInterval(sWorldManager->GetIntConfig(World::IntConfigs::INT_CONFIG_SAVE_PLAYER_TO_DATABASE));
         m_IntervalRadiation.SetInterval(RADIATION_TIMER);
         m_RepairBotTimer.SetInterval(REPAIR_BOT_TIMER);
         ConfigTimer.SetInterval(CONFIG_TIMER);
+        m_IntervalQuestUpdate.SetInterval(QUEST_UPDATE_TIMER);
 
         m_AttackRange           = sWorldManager->GetIntConfig(World::IntConfigs::INT_CONFIG_PLAYER_ATTACK_RANGE);
 
@@ -104,14 +107,16 @@ namespace SteerStone { namespace Game { namespace Entity {
             m_Socket = nullptr;
         }
 
+        SaveToDB();
+
         /// Empty Queue
         Server::ClientPacket* l_Packet = nullptr;
         while (m_RecievedQueue.Next(l_Packet))
             delete l_Packet;
 
-        sZoneManager->RemoveFromMap(this, true);
-        
-        SaveToDB();
+        /// TODO; Clear surroundings?
+
+        Unit::CleanupsBeforeDelete();
     }
 
     //////////////////////////////////////////////////////////////////////////
@@ -185,6 +190,8 @@ namespace SteerStone { namespace Game { namespace Entity {
             LoadShipFromDB();
             LoadBoosters();
             LoadDrones();
+            LoadLabUpgrades();
+            LoadQuests();
             m_Inventory.LoadInventory();
 
             return true;
@@ -213,7 +220,7 @@ namespace SteerStone { namespace Game { namespace Entity {
             m_MaxShield                 = l_Result[3].GetUInt32();
             m_HitPoints                 = l_Result[4].GetInt32();
             m_MaxHitPoints              = l_Result[5].GetUInt32();
-            m_CargoSpace                = l_Result[6].GetUInt32();
+            l_Result[6].GetUInt32(); ///< No longer used
             m_MaxCargoSpace             = l_Result[7].GetUInt32();
 
             SetGUID(ObjectGUID(GUIDType::Player, 0, m_Id));
@@ -292,7 +299,7 @@ namespace SteerStone { namespace Game { namespace Entity {
     void Player::LoadBoosters()
     {
         Core::Database::PreparedStatement* l_PreparedStatement = GameDatabase.GetPrepareStatement();
-        l_PreparedStatement->PrepareStatement("SELECT id, entry_id, duration FROM user_boosters WHERE user_id = ?");
+        l_PreparedStatement->PrepareStatement("SELECT id, entry_id, value FROM user_boosters WHERE user_id = ? ORDER BY created_at ASC");
         l_PreparedStatement->SetUint32(0, m_Id);
 
         std::unique_ptr<Core::Database::PreparedResultSet> l_PreparedResultSet = l_PreparedStatement->ExecuteStatement();
@@ -331,6 +338,100 @@ namespace SteerStone { namespace Game { namespace Entity {
 
 			} while (l_PreparedResultSet->GetNextRow());
 		}
+    }
+    /// Load Lab Upgrades
+    void Player::LoadLabUpgrades()
+    {
+        Core::Database::PreparedStatement* l_PreparedStatement = GameDatabase.GetPrepareStatement();
+		l_PreparedStatement->PrepareStatement("SELECT id, type, item_type, value FROM user_lab_upgrades WHERE user_id = ?");
+		l_PreparedStatement->SetUint32(0, m_Id);
+
+		std::unique_ptr<Core::Database::PreparedResultSet> l_PreparedResultSet = l_PreparedStatement->ExecuteStatement();
+
+		if (l_PreparedResultSet)
+		{
+			m_LabUpgrades.clear();
+
+			do
+			{
+				Core::Database::ResultSet* l_Result = l_PreparedResultSet->FetchResult();
+
+                LabUpgrade l_LabUpgrade;
+
+				const uint32 l_Id       = l_Result[0].GetUInt32();
+				std::string l_Type      = l_Result[1].GetString();
+                std::string l_ItemType  = l_Result[2].GetString();
+                int32 l_Value           = l_Result[3].GetInt32();
+
+				l_LabUpgrade.Id         = l_Id;
+                l_LabUpgrade.Type       = l_Type;
+				l_LabUpgrade.ItemType   = l_ItemType;
+
+                /// Cheeky way of doing this
+                /// Since we store the item type by string, change it to enum
+                /// as it's easier to work with
+                if (l_ItemType == "shields")
+                    l_LabUpgrade.UpgradeType = LabUpgradeType::LAB_UPGRADE_TYPE_SHIELDS;
+                else if (l_ItemType == "engines")
+					l_LabUpgrade.UpgradeType = LabUpgradeType::LAB_UPGRADE_TYPE_ENGINES;
+                else if (l_ItemType == "lasers")
+					l_LabUpgrade.UpgradeType = LabUpgradeType::LAB_UPGRADE_TYPE_LASERS;
+                else if (l_ItemType == "rockets")
+				    l_LabUpgrade.UpgradeType = LabUpgradeType::LAB_UPGRADE_TYPE_ROCKETS;
+                else
+                    LOG_ASSERT(false, "Player", "Unknown Lab Upgrade Type %0", l_ItemType);
+
+                if (l_LabUpgrade.IsShieldOrEngine())
+                    l_Value *= 1000; ///< Convert to milliseconds
+
+                l_LabUpgrade.Value   = l_Value;
+
+                m_LabUpgrades.push_back(l_LabUpgrade);
+
+			} while (l_PreparedResultSet->GetNextRow());
+		}
+    }
+    /// Load Quests
+    void Player::LoadQuests()
+    {
+        // Clear existing quests and delete them
+        for (auto l_Quest : m_Quests)
+			delete l_Quest.second;
+
+        m_Quests.clear();
+
+        Core::Database::PreparedStatement* l_PreparedStatement = GameDatabase.GetPrepareStatement();
+        l_PreparedStatement->PrepareStatement("SELECT id, quest_template_id, completed FROM user_quests WHERE user_id = ? AND completed = 0");
+        l_PreparedStatement->SetUint32(0, m_Id);
+
+        std::unique_ptr<Core::Database::PreparedResultSet> l_PreparedResultSet = l_PreparedStatement->ExecuteStatement();
+
+        if (l_PreparedResultSet)
+        {
+            do
+            {
+                Core::Database::ResultSet* l_Result = l_PreparedResultSet->FetchResult();
+
+                uint32 l_QuestTemplateId = l_Result[1].GetUInt32();
+
+                Game::Quest::Quest* l_Quest = sQuestManager->GetQuestById(l_QuestTemplateId);
+
+                if (!l_Quest)
+                {
+					LOG_WARNING("Player", "Failed to find quest with id %0", l_QuestTemplateId);
+					continue;
+				}
+
+                Quest* l_UserQuest = new Quest(this);
+                l_UserQuest->m_Id               = l_Result[0].GetUInt32();
+                l_UserQuest->m_Completed        = l_Result[2].GetBool();
+                l_UserQuest->m_Quest            = l_Quest;
+                l_UserQuest->LoadFromDB();
+
+                m_Quests[l_UserQuest->m_Quest->GetId()] = l_UserQuest;
+               
+            } while (l_PreparedResultSet->GetNextRow());
+        } 
     }
     /// Save Player details to database
     void Player::SaveToDB()
@@ -381,6 +482,8 @@ namespace SteerStone { namespace Game { namespace Entity {
         l_PreparedStatement->ExecuteStatement();
 
         SaveShipToDB();
+        SaveLabUpgrades();
+        SaveQuestsToDB();
         GetInventory()->SaveInventory();
     }
     /// Save Ship details to database
@@ -395,7 +498,7 @@ namespace SteerStone { namespace Game { namespace Entity {
             "rocket_plt_2026 = ?, rocket_plt_2021 = ?, mines = ?, smart_bombs = ?, instant_shields = ? WHERE user_id = ?");
 
         l_PreparedStatement->SetUint16(0,  m_ShipType);
-        l_PreparedStatement->SetUint32(1,  m_CargoSpace);
+        l_PreparedStatement->SetUint32(1,  0); ///< No longer used
         l_PreparedStatement->SetUint32(2,  m_MaxCargoSpace);
         l_PreparedStatement->SetFloat(3,   GetSpline()->GetPositionX());
         l_PreparedStatement->SetFloat(4,   GetSpline()->GetPositionY());
@@ -430,6 +533,12 @@ namespace SteerStone { namespace Game { namespace Entity {
     void Player::SendInfoMessage(std::string const p_Message)
     {
         SendPacket(Server::Packets::Misc::Update().Write(Server::Packets::Misc::InfoUpdate::INFO_UPDATE_MESSAGE, { p_Message }));
+    }
+    /// Send System Message to Player
+    /// @p_Message : Message to send
+    void Player::SendSystemMessage(std::string const p_Message)
+    {
+        SendPacket(Server::Packets::Misc::Update().Write(Server::Packets::Misc::InfoUpdate::INFO_UPDATE_SYSTEM_MESSAGE, { p_Message }));
     }
     /// Get Company X-1 Map Id based on Player Company
     uint32 Player::GetX1CompanyMapId() const
@@ -520,7 +629,16 @@ namespace SteerStone { namespace Game { namespace Entity {
         }
         /// In Radiation Zone
         else if (GetEvent() == EventType::EVENT_TYPE_RADIATION_ZONE)
-            DealDamage(this, Core::Utils::CalculatePercentage(m_IntervalRadiation.GetTick() > 5 ? 5 : m_IntervalRadiation.GetTick(), GetHitMaxPoints()), false);
+        {
+            int32 l_Damage = 10;//Core::Utils::CalculatePercentage(m_IntervalRadiation.GetTick() > 5 ? 5 : m_IntervalRadiation.GetTick(), GetHitMaxPoints());
+
+            CheckQuestCondition(ConditionType::CONDITION_TYPE_TAKE_DAMAGE, {
+                { AttributeKeys::ATTRIBUTE_KEY_DAMANGE_TYPE, static_cast<int32>(DamageType::DAMAGE_TYPE_RADIATION) },
+                { AttributeKeys::ATTRIBUTE_KEY_MISC_COND_TYPE, l_Damage }
+            });
+
+            DealDamage(this, l_Damage, false);
+        }
     }
     /// Update Repairing
     /// @p_Diff : Execution Time
@@ -564,6 +682,69 @@ namespace SteerStone { namespace Game { namespace Entity {
 
         Heal(this, l_Health);
     }
+    /// Update Cooldowns
+    /// @p_Diff : Execution Time
+    void Player::UpdateCooldowns(uint32 const p_Diff)
+    {
+        m_Ammo.Update(p_Diff);
+    }
+    /// Send Update Cooldown
+    /// @p_CooldownType : Cooldown Type
+    void Player::SendUpdateCooldown(CooldownType const p_CooldownType)
+    {
+        std::string l_CooldownType = "unknown";
+        uint32 l_CoolDownDuration = 0;
+
+        switch (p_CooldownType)
+        {
+            case CooldownType::COOLDOWN_TYPE_MINE:
+            {
+                /// We usually check out side this function, but good to double check here
+                if (m_Ammo.GetMineCooldown()->OnCooldown())
+					return;
+
+                l_CooldownType = "MIN";
+                l_CoolDownDuration = MINE_COOLDOWN / 1000;
+
+                m_Ammo.GetMineCooldown()->StartCooldown();
+
+            }
+			break;
+            case CooldownType::COOLDOWN_TYPE_SMART_MINE:
+            {
+                if (m_Ammo.GetSmartMineCooldown()->OnCooldown())
+                    return;
+
+                l_CooldownType = "SMB";
+                l_CoolDownDuration = MINE_COOLDOWN / 1000;
+
+                m_Ammo.GetSmartMineCooldown()->StartCooldown();
+            }
+            break;
+            case CooldownType::COOLDOWN_TYPE_INSTANT_SHIELD:
+            {
+                if (m_Ammo.GetInstantShieldCooldown()->OnCooldown())
+                    return;
+
+                l_CooldownType = "ISH";
+                l_CoolDownDuration = MINE_COOLDOWN / 1000;
+
+                m_Ammo.GetInstantShieldCooldown()->StartCooldown();
+            }
+            break;
+        }
+
+        SendPacket(Server::Packets::Misc::Update().Write(Server::Packets::Misc::InfoUpdate::INFO_UPDATE_COOLDOWNS, {
+            l_CooldownType,
+            l_CoolDownDuration
+        }));
+    }
+    /// Update Speed
+    /// Informs the client the new speed
+    void Player::SendUpdateSpeed()
+    {
+        SendPacket(Server::Packets::Misc::Update().Write(Server::Packets::Misc::InfoUpdate::INFO_UPDATE_SPEED, { GetSpline()->GetSpeed() }));
+    }
 
     /// Update Player
     /// @p_Diff : Execution Time
@@ -579,7 +760,10 @@ namespace SteerStone { namespace Game { namespace Entity {
                 UpdateRadiationZone(p_Diff);
                 UpdateSurroundings(p_Diff);
                 UpdateBoosters(p_Diff);
+                UpdateLabUpgrades(p_Diff);
                 UpdateRepairing(p_Diff);
+                UpdateQuests(p_Diff);
+                UpdateCooldowns(p_Diff);
 
                 Unit::Update(p_Diff);
             }
@@ -651,6 +835,350 @@ namespace SteerStone { namespace Game { namespace Entity {
     }
 
     ///////////////////////////////////////////
+    //             QUESTS
+    ///////////////////////////////////////////
+
+    void Player::SendQuests()
+    {
+        for (auto l_Itr = m_Quests.begin(); l_Itr != m_Quests.end(); l_Itr++)
+        {
+            Server::Packets::Quest::QuestHud l_Packet;
+            l_Packet.Type = Server::Packets::Quest::QuestHudTypes::QUEST_HUD_TYPE_INI;
+            Quest* l_Quest = l_Itr->second;
+
+            QuestProgressVec l_Progress = l_Quest->GetProgress();
+
+            Server::Packets::Quest::Case l_Case;
+            l_Case.Id = l_Quest->GetQuestData()->GetId();
+            l_Case.Active = true;
+            l_Case.Mandatory = false;
+            l_Case.Ordered = l_Itr->second->GetQuestData()->IsOrder() && l_Progress.size() > 1;
+
+            for (auto l_JItr = l_Progress.begin(); l_JItr != l_Progress.end(); l_JItr++)
+            {
+				Server::Packets::Quest::Condition l_Condition;
+                l_Condition.Id              = l_JItr->Id;
+                l_Condition.Completed       = l_JItr->Completed;
+                l_Condition.ConditionType   = static_cast<uint32>(l_JItr->ConditionType);
+                l_Condition.Values          = l_Itr->second->GetConditionAttributes(l_JItr->Id);
+                l_Case.Conditions.push_back(l_Condition);
+			}
+
+            l_Packet.Cases.push_back(l_Case);
+
+            SendPacket(l_Packet.Write());
+		}
+    }
+
+    /// Save Quests to Database
+    void Player::SaveQuestsToDB()
+    {
+        for (auto l_Itr = m_Quests.begin(); l_Itr != m_Quests.end(); l_Itr++)
+		{
+			l_Itr->second->SaveToDB();
+		}
+    }
+
+    void Player::CheckQuestCondition(ConditionType const p_ConditionType, std::initializer_list<std::pair<AttributeKeys, std::variant<int32, std::string>>> p_List)
+    {
+        auto GetListAttribute = [&](std::initializer_list<std::pair<AttributeKeys, std::variant<int32, std::string>>> p_List, AttributeKeys p_Attribute) -> std::variant<int32, std::string>
+            {
+                for (auto l_Itr : p_List)
+                {
+				if (l_Itr.first == p_Attribute)
+					return l_Itr.second;
+			}
+
+			return std::variant<int32, std::string>();
+		};
+
+        for (auto& l_Itr = m_Quests.begin(); l_Itr != m_Quests.end();)
+        {
+            for (auto& l_JItr : l_Itr->second->GetProgress())
+            {
+                if (l_JItr.ConditionType == p_ConditionType)
+                {
+                    if (l_Itr->second->GetQuestData()->IsOrder())
+                    {
+                        // Check if previous conditions are completed
+                        bool l_AllCompleted = true;
+
+                        for (auto l_KItr = l_Itr->second->GetProgress().begin(); l_KItr != l_Itr->second->GetProgress().end(); l_KItr++)
+                        {
+							if (l_KItr->Id == l_JItr.Id)
+								break;
+
+                            if (!l_KItr->Completed)
+                            {
+								l_AllCompleted = false;
+								break;
+							}
+						}
+
+                        if (!l_AllCompleted)
+							continue;
+                    }
+
+                    switch (p_ConditionType)
+                    {
+                        case ConditionType::CONDITION_TYPE_COLLECT:
+                        {
+                            if (std::get<int32>(l_JItr.GetAttribute(AttributeKeys::ATTRIBUTE_KEY_ORE_ID))
+								== std::get<int32>(GetListAttribute(p_List, AttributeKeys::ATTRIBUTE_KEY_ORE_ID)))
+                            {
+                                l_JItr.UpdateProgress(std::get<int32>(l_JItr.Progress) + 1);
+
+								// Check if we are above the required amount
+								if (std::get<int32>(l_JItr.Progress) >= std::get<int32>(l_JItr.GetAttribute(AttributeKeys::ATTRIBUTE_KEY_COUNT_TARGET)))
+									l_JItr.Completed = true;
+
+                                SendUpdateQuestCondition(
+                                    l_Itr->second->GetQuestData()->GetId(),
+                                    l_JItr.Id,
+                                    std::get<int32>(l_JItr.Progress)
+                                );
+                            }
+                        }
+                        break;
+                        case ConditionType::CONDITION_TYPE_KILL_NPC:
+                        {
+                            l_JItr.UpdateProgress(std::get<int32>(l_JItr.Progress) + 1);
+
+                            // Check if we need to mark this condition as completed
+                            if (std::get<int32>(l_JItr.Progress) >= std::get<int32>(l_JItr.GetAttribute(AttributeKeys::ATTRIBUTE_KEY_COUNT_TARGET)))
+                            {
+								l_JItr.Completed = true;
+                            }
+
+                            SendUpdateQuestCondition(
+                                l_Itr->second->GetQuestData()->GetId(),
+                                l_JItr.Id,
+								std::get<int32>(l_JItr.Progress)
+							);
+                        }
+                        break;
+                        case ConditionType::CONDITION_TYPE_VISIT_MAP:
+                        {
+                            std::variant<int32, std::string> l_MapId = l_JItr.GetAttribute(AttributeKeys::ATTRIBUTE_KEY_MAP_ID);
+
+                            // Check if the map id is a string
+                            if (auto l_MapIdString = std::get_if<std::string>(&l_MapId))
+                            {
+                                bool l_DynamicMap = boost::algorithm::contains(*l_MapIdString, "X-");
+
+                                if (l_DynamicMap)
+                                {
+                                    /// Replace X with the player company map id
+                                    switch (GetCompany())
+                                    {
+                                    case Company::MMO:
+                                        boost::replace_all(*l_MapIdString, "X", "1");
+                                        break;
+                                    case Company::EARTH:
+                                        boost::replace_all(*l_MapIdString, "X", "2");
+                                        break;
+                                    case Company::VRU:
+                                        boost::replace_all(*l_MapIdString, "X", "3");
+                                        break;
+                                    }
+                                }
+
+                                // Convert the map string into the map id
+                                l_MapId = sZoneManager->MapStringToId(*l_MapIdString);
+                            }
+                            else
+                                l_MapId = std::get<int32>(GetListAttribute(p_List, AttributeKeys::ATTRIBUTE_KEY_MAP_ID));
+
+                            if (*std::get_if<int32>(&l_MapId) == *std::get_if<int32>(&GetListAttribute(p_List, AttributeKeys::ATTRIBUTE_KEY_MAP_ID)))
+							{ 
+                                l_JItr.Completed = true;
+
+                                SendUpdateQuestCondition(
+                                    l_Itr->second->GetQuestData()->GetId(),
+                                    l_JItr.Id,
+                                    l_MapId
+                                );
+                            }
+                        }
+                        break;
+                        case ConditionType::CONDITION_TYPE_TAKE_DAMAGE:
+                        {
+                            DamageType l_DamageType = static_cast<DamageType>(std::get<int32>(GetListAttribute(p_List, AttributeKeys::ATTRIBUTE_KEY_DAMANGE_TYPE)));
+
+                            if (static_cast<DamageType>(std::get<int32>(l_JItr.GetAttribute(AttributeKeys::ATTRIBUTE_KEY_DAMANGE_TYPE)))
+                                == l_DamageType
+                            )
+                            {
+                                l_JItr.UpdateProgress(std::get<int32>(l_JItr.Progress) + std::get<int32>(GetListAttribute(p_List, AttributeKeys::ATTRIBUTE_KEY_MISC_COND_TYPE)));
+
+                                // Check if we are above the required damage
+                                if (std::get<int32>(l_JItr.Progress) >= std::get<int32>(l_JItr.GetAttribute(AttributeKeys::ATTRIBUTE_KEY_COUNT_TARGET)))
+                                    l_JItr.Completed = true;				
+
+                                SendUpdateQuestCondition(
+                                    l_Itr->second->GetQuestData()->GetId(),
+                                    l_JItr.Id,
+                                    std::get<int32>(l_JItr.Progress)
+                                );
+
+                            }
+                        }
+                        break;
+                        case ConditionType::CONDITION_TYPE_TIMER:
+                        {
+							l_JItr.UpdateProgress(std::get<int32>(l_JItr.Progress) + std::get<int32>(GetListAttribute(p_List, AttributeKeys::ATTRIBUTE_KEY_MISC_COND_TYPE)));
+
+							// Check if we've completed all conditions within the timer
+                            if (std::get<int32>(l_JItr.Progress) >= std::get<int32>(l_JItr.GetAttribute(AttributeKeys::ATTRIBUTE_KEY_COUNT_TARGET)))
+                            {
+                                bool l_AllCompleted = true;
+
+                                for (auto l_KItr = l_Itr->second->GetProgress().begin(); l_KItr != l_Itr->second->GetProgress().end(); l_KItr++)
+                                {
+                                    if (l_KItr->Id != l_JItr.Id)
+                                    {
+                                        if (!l_KItr->Completed)
+                                        {
+                                            l_AllCompleted = false;
+                                            break;
+                                        }
+                                    }
+                                }
+
+                                if (l_AllCompleted)
+									l_JItr.Completed = true;
+                            }
+
+                            SendUpdateQuestCondition(
+								l_Itr->second->GetQuestData()->GetId(),
+								l_JItr.Id,
+								(std::get<int32>(l_JItr.GetAttribute(AttributeKeys::ATTRIBUTE_KEY_TIME_TARGET)) - std::get<int32>(l_JItr.Progress)) * 1000
+							);
+						}
+                    }
+                }
+            }
+
+            // Has all conditions been completed?
+            bool l_AllCompleted = true;
+
+            for (auto& l_JItr : l_Itr->second->GetProgress())
+            {
+                // We don't want to check for timer conditions
+                if (!l_JItr.Completed && l_JItr.ConditionType != ConditionType::CONDITION_TYPE_TIMER)
+                {
+					l_AllCompleted = false;
+					break;
+				}
+			}
+
+            if (l_AllCompleted)
+            {
+                FinishQuest(l_Itr->second->GetQuestData()->GetId());
+
+                // Remove quest from map
+                delete m_Quests[l_Itr->second->GetQuestData()->GetId()];
+
+                l_Itr = m_Quests.erase(l_Itr);
+            }
+			else
+				l_Itr++;
+        }
+    }
+
+    void Player::SendUpdateQuestCondition(uint32 const p_QuestId, uint32 const p_ConditionId, std::variant<int32, std::string> const p_Value)
+    {
+        Server::Packets::Quest::QuestHud l_Packet;
+        l_Packet.Type = Server::Packets::Quest::QUEST_HUD_TYPE_UPDATE;
+
+        Server::Packets::Quest::UpdateCondition l_UpdateCondition;
+        l_UpdateCondition.QuestId = p_QuestId;
+        l_UpdateCondition.Id = p_ConditionId;
+        l_UpdateCondition.Value = p_Value;
+        l_UpdateCondition.Visibility = 1;
+        l_UpdateCondition.ActivityState = 1;
+        l_Packet.Update = l_UpdateCondition;
+
+        SendPacket(l_Packet.Write());
+    }
+
+    void Player::FinishQuest(uint32 const p_QuestId)
+    {
+        if (m_Quests.find(p_QuestId) == m_Quests.end())
+            return;
+
+        Quest* l_Quest = m_Quests[p_QuestId];
+        l_Quest->Finish();
+
+        Server::Packets::Quest::QuestHud l_Packet;
+        l_Packet.Type = Server::Packets::Quest::QUEST_HUD_TYPE_FINISH;
+
+        Server::Packets::Quest::QuestFinish l_FinishQuest;
+        l_FinishQuest.QuestId = l_Quest->GetQuestData()->GetId();
+
+        l_Packet.Finish = l_FinishQuest;
+
+        SendPacket(l_Packet.Write());
+    }
+
+    void Player::FailQuest(uint32 const p_QuestId)
+    {
+        if (m_Quests.find(p_QuestId) == m_Quests.end())
+			return;
+
+		Quest* l_Quest = m_Quests[p_QuestId];
+		l_Quest->Fail();
+
+		Server::Packets::Quest::QuestHud l_Packet;
+		l_Packet.Type = Server::Packets::Quest::QUEST_HUD_TYPE_FAIL;
+
+		Server::Packets::Quest::QuestFail l_FailQuest;
+		l_FailQuest.QuestId = l_Quest->GetQuestData()->GetId();
+		l_Packet.Fail = l_FailQuest;
+
+		SendPacket(l_Packet.Write());
+    }
+
+    void Player::CancelQuest(uint32 const p_QuestId)
+    {
+        if (m_Quests.find(p_QuestId) == m_Quests.end())
+			return;
+
+        Quest* l_Quest = m_Quests[p_QuestId];
+
+        Server::Packets::Quest::QuestHud l_Packet;
+        l_Packet.Type = Server::Packets::Quest::QUEST_HUD_TYPE_CANCEL;
+
+        Server::Packets::Quest::CancelQuest l_CancelQuest;
+        l_CancelQuest.QuestId = l_Quest->GetQuestData()->GetId();
+
+        l_Packet.Cancel = l_CancelQuest;
+
+        SendPacket(l_Packet.Write());
+
+        l_Quest->Cancel();
+
+        /// Delete quest and remove from map
+        delete m_Quests[p_QuestId];
+        m_Quests.erase(p_QuestId);
+
+        // Load the new quests
+        SaveToDB();
+        LoadQuests();
+        SendQuests();
+    }
+
+    void Player::UpdateQuests(uint32 const p_Diff)
+    {
+        m_IntervalQuestUpdate.Update(p_Diff);
+
+        if (!m_IntervalQuestUpdate.Passed())
+			return;
+
+        CheckQuestCondition(ConditionType::CONDITION_TYPE_TIMER, { { AttributeKeys::ATTRIBUTE_KEY_MISC_COND_TYPE, 1 } });
+    }
+
+    ///////////////////////////////////////////
     //             BOOSTERS
     ///////////////////////////////////////////
 
@@ -669,16 +1197,9 @@ namespace SteerStone { namespace Game { namespace Entity {
             else
             {
                 l_Itr = m_Boosters.erase(l_Itr);
-                l_Updated = true;
+                RemoveBooster(l_Itr->Id);
             }
 		}
-
-        if (l_Updated)
-        {
-            SendBoosters();
-            /// Save player to database
-            SaveToDB();
-        }
     }
     /// Check to see if the player has a booster
     /// @p_BoosterType : Booster Type
@@ -705,8 +1226,31 @@ namespace SteerStone { namespace Game { namespace Entity {
         /// TODO; Show what booster is missing
         LOG_ASSERT(false, "Player", "Player %0 does not have a booster of type");
     }
+    /// Get Booster Name
+    /// @p_BoosterType : Booster Type
+    std::string Player::GetBoosterName(BoosterTypes const p_BoosterType) const
+    {
+        for (auto const& l_Booster : m_Boosters)
+		{
+            if (l_Booster.GetBoosterType() == p_BoosterType)
+                return l_Booster.GetItemTemplate()->Name;
+		}
+    }
+    /// Get Booster Duration
+    /// @p_BoosterType : Booster Type
+    int32 Player::GetBoosterDuration(BoosterTypes const p_BoosterType) const
+    {
+        for (auto const& l_Booster : m_Boosters)
+		{
+			if (l_Booster.GetBoosterType() == p_BoosterType)
+				return l_Booster.GetDuration();
+		}
+
+		/// TODO; Show what booster is missing
+		LOG_ASSERT(false, "Player", "Player %0 does not have a booster of type");
+    }
     /// Send the Boosters Packet
-    void Player::SendBoosters()
+    void Player::SendBoosters(bool const p_ShowLastOne/* = false*/)
     {
         /// Notes
         /// Packet is sent in the following format
@@ -716,20 +1260,124 @@ namespace SteerStone { namespace Game { namespace Entity {
 
         std::vector<int32> l_Boosters;
 
+        auto SendBoosterFound = [this](uint32 l_I) {
+            SendPacket(Server::Packets::Misc::Update().Write(Server::Packets::Misc::InfoUpdate::INFO_UPDATE_SYSTEM_MESSAGE, {
+                "booster_found",
+                "%BOOSTERNAME%",
+                GetBoosterName(static_cast<BoosterTypes>(l_I)),
+                "%HOURS%",
+                GetBoosterDuration(static_cast<BoosterTypes>(l_I))
+                }));
+            };
+
         for (int l_I = static_cast<uint8>(BoosterTypes::BOOSTER_TYPE_XP_B01); l_I < static_cast<uint8>(BoosterTypes::MAX_BOOSTER); l_I++)
         {
             if (HasBooster(static_cast<BoosterTypes>(l_I)))
-				l_Boosters.push_back(GetBoosterValue(static_cast<BoosterTypes>(l_I)));
+            {
+                if (!p_ShowLastOne)
+                    SendBoosterFound(l_I);
+
+                l_Boosters.push_back(GetBoosterValue(static_cast<BoosterTypes>(l_I)));
+            }
             else
                 l_Boosters.push_back(0);
 		}
 
         for (auto const& l_Booster : l_Boosters)
-			l_BoosterString += std::to_string(l_Booster) + "/";
+        {
+            l_BoosterString += std::to_string(l_Booster) + "/";
+        }
+
+        if (p_ShowLastOne)
+        {
+            // Get the last booster
+            SendBoosterFound(static_cast<uint32>(m_Boosters.back().GetBoosterType()));
+        }
 
         l_BoosterString.pop_back();
 
         SendPacket(Server::Packets::Misc::Update().Write(Server::Packets::Misc::InfoUpdate::INFO_UPDATE_BOOSTERS, { l_BoosterString }));
+    }
+
+    /// Remove Booster
+    /// @p_BoosterId : Booster Id
+    void Player::RemoveBooster(uint32 const p_BoosterId)
+    {
+        Core::Database::PreparedStatement* l_PreparedStatement = GameDatabase.GetPrepareStatement();
+        l_PreparedStatement->PrepareStatement("DELETE FROM user_boosters WHERE id = ?");
+        l_PreparedStatement->SetUint32(0, p_BoosterId);
+        l_PreparedStatement->ExecuteStatement();
+
+        /// Also update the player
+        SendBoosters();
+        SaveToDB();
+    }
+
+    ///////////////////////////////////////////
+    //             LAB UPGRADES
+    ///////////////////////////////////////////
+
+    /// Update Lab Upgrades
+    /// @p_Diff : Execution Time
+    void Player::UpdateLabUpgrades(uint32 const p_Diff)
+    {
+        for (auto l_Itr = m_LabUpgrades.begin(); l_Itr != m_LabUpgrades.end();)
+        {
+            if (l_Itr->Update(p_Diff))
+                l_Itr++;
+            else
+            {
+                /// Expired, remove from player
+                RemoveLabUpgrade(l_Itr->Id);
+                l_Itr = m_LabUpgrades.erase(l_Itr);
+            }
+        }
+    }
+    /// Remove Lab Upgrade
+    /// @p_Id : Id of Lab Upgrade
+    void Player::RemoveLabUpgrade(uint32 const p_Id)
+    {
+        Core::Database::PreparedStatement* l_PreparedStatement = GameDatabase.GetPrepareStatement();
+        l_PreparedStatement->PrepareStatement("DELETE FROM user_lab_upgrades WHERE id = ?");
+        l_PreparedStatement->SetUint32(0, p_Id);
+        l_PreparedStatement->ExecuteStatement();
+
+        /// Also update the player
+        SaveToDB();
+        /// Also recalculate user inventory stats
+        GetInventory()->CalculateStats();
+    }
+
+    /// Get Lab Upgrade
+    /// @p_LabUpgradeType : Lab Upgrade Type
+    LabUpgrade* Player::GetLabUpgrade(LabUpgradeType const p_LabUpgradeType)
+    {
+        for (auto& l_LabUpgrade : m_LabUpgrades)
+		{
+			if (l_LabUpgrade.GetLabUpgradeType() == p_LabUpgradeType)
+				return &l_LabUpgrade;
+		}
+
+        return nullptr;
+    }
+
+    /// Save Lab Upgrades
+    void Player::SaveLabUpgrades()
+    {
+		for (auto const& l_LabUpgrade : m_LabUpgrades)
+		{
+            Core::Database::PreparedStatement* l_PreparedStatement = GameDatabase.GetPrepareStatement();
+			l_PreparedStatement->PrepareStatement("UPDATE user_lab_upgrades SET value = ? WHERE id = ?");
+
+            float l_Value = l_LabUpgrade.GetValue();
+
+            if (l_LabUpgrade.IsShieldOrEngine())
+                l_Value /= 1000; ///< Convert to seconds
+
+            l_PreparedStatement->SetInt32(0, std::round(l_Value));
+			l_PreparedStatement->SetUint32(1, l_LabUpgrade.GetId());
+			l_PreparedStatement->ExecuteStatement();
+		}
     }
 
     ///////////////////////////////////////////
@@ -743,6 +1391,17 @@ namespace SteerStone { namespace Game { namespace Entity {
         auto l_Itr = m_Surroundings.find(p_Object->GetGUID());
         if (l_Itr == m_Surroundings.end())
             m_Surroundings[p_Object->GetGUID()] = std::make_unique<SurroundingObject>(p_Object, this);
+    }
+    /// Remove Object from surrounding
+    /// @p_Object : Object being removed
+    void Player::RemoveFromSurrounding(Object* p_Object)
+    {
+        auto l_Itr = m_Surroundings.find(p_Object->GetGUID());
+        if (l_Itr != m_Surroundings.end())
+        {
+            l_Itr->second->Despawn(true);
+            m_Surroundings.erase(l_Itr);
+        }
     }
     /// Remove Object from being despawned
     /// @p_Object : Object
@@ -946,8 +1605,8 @@ namespace SteerStone { namespace Game { namespace Entity {
         l_RocketMineAmmoPacket.RocketPLT2021  = m_Ammo.m_RocketPLT2021;
         l_RocketMineAmmoPacket.RocketPLT2026  = m_Ammo.m_RocketPLT2026;
         l_RocketMineAmmoPacket.Mines          = m_Ammo.m_Mines;
-        l_RocketMineAmmoPacket.SmartBombs     = m_Ammo.m_SmartBombs;
-        l_RocketMineAmmoPacket.InstantShields = m_Ammo.m_InstantShields;
+        l_RocketMineAmmoPacket.SmartBombs     = m_Ammo.GetSmartBombs();
+        l_RocketMineAmmoPacket.InstantShields = m_Ammo.GetInstantShields();
         SendPacket(l_RocketMineAmmoPacket.Write());
 
         Server::Packets::Ship::UpdateBatteryAmmo l_BatteryAmmoPacket;
@@ -981,7 +1640,7 @@ namespace SteerStone { namespace Game { namespace Entity {
             return; 
         }
 
-        SendPacket(Server::Packets::Misc::Update().Write(Server::Packets::Misc::InfoUpdate::INFO_UPDATE_MESSAGE, { "You cannot change config yet!" }));
+        SendPacket(Server::Packets::Misc::Update().Write(Server::Packets::Misc::InfoUpdate::INFO_UPDATE_SYSTEM_MESSAGE, { "config_change_failed_time" }));
     }
     /// On Trade Ore
     /// @p_ResourceId : Resource Id which we are trading
@@ -1019,7 +1678,6 @@ namespace SteerStone { namespace Game { namespace Entity {
 
         m_Credits += l_CreditsRewarded;
         m_Resources[p_ResourceId] -= p_OreAmount;
-        m_CargoSpace += p_OreAmount;
 
         SendPacket(Server::Packets::Misc::Reward().Write(Server::Packets::Misc::RewardType::REWARD_TYPE_CREDIT, { l_CreditsRewarded, m_Credits }));
         
@@ -1032,18 +1690,27 @@ namespace SteerStone { namespace Game { namespace Entity {
         if (!m_Drones.size())
             return;
 
-        SendPacket(Server::Packets::Misc::Update().Write(Server::Packets::Misc::InfoUpdate::INFO_UPDATE_DRONES, { GetObjectGUID().GetCounter(), BuildDronesString() }));
+        SendPacket(Server::Packets::Misc::Info().Write(Server::Packets::Misc::InfoType::INFO_TYPE_DRONES, { GetObjectGUID().GetCounter(), BuildDronesString() }));
+    }
+    /// Send Cloak
+    void Player::SendCloak()
+    {
+        GetMap()->SendPacketToNearByGridsIfInSurrounding(Server::Packets::Misc::Info().Write(Server::Packets::Misc::InfoType::INFO_TYPE_INVISIBLE, {
+            GetObjectGUID().GetCounter(),
+            (bool)IsCloaked()
+        }), this, true);
     }
     /// Build Drones Packet
     std::string Player::BuildDronesString() const
     {
-        uint32 l_DroneGroupCount = m_Drones.size() <= 4 ? 3 : 3;
-
         std::string l_Drones;
+        uint32 l_DroneCount = m_Drones.size();
+
+        // Determine the number of drone groups
+        uint32 l_DroneGroupCount = (l_DroneCount <= 4) ? 1 : 3;
 
         uint32 l_Counter = 0;
-
-        /// TODO: This could be optimized/cleaner - but for now it will be fine
+        uint32 l_GroupCounter = 0;
 
         for (auto l_Itr : m_Drones)
         {
@@ -1054,73 +1721,31 @@ namespace SteerStone { namespace Game { namespace Entity {
             else if (l_Itr.Type == DroneType::DRONE_TYPE_IRIS)
                 l_DroneLevel += 20;
 
-            if (m_Drones.size() <= 4)
+            if (l_Counter == 0)
             {
-                if (l_Counter == 0)
-                {
-                    l_Drones = "0/" + std::to_string(m_Drones.size()) + '-' + std::to_string(l_DroneLevel) + ",";
-                }
-                else
-                {
-                    l_Drones += "0-" + std::to_string(l_DroneLevel) + ",";
-                }
+                l_Drones = std::to_string(l_DroneGroupCount) + "/" + std::to_string((l_DroneCount <= 4) ? l_DroneCount : (l_DroneCount <= 8 ? (l_DroneCount == 5 || l_DroneCount == 7 ? 1 : 2) : 4)) + "-" + std::to_string(l_DroneLevel) + ",";
             }
-            else if (m_Drones.size() >= 5 && m_Drones.size() <= 6)
+            else if (l_Counter < l_DroneCount - 1)
             {
-                if (l_Counter == 0)
-                {
-                    uint32 l_GroupDroneQuantity = m_Drones.size() == 5 ? 1 : 2;
-                    l_Drones = "3/" + std::to_string(l_GroupDroneQuantity) + '-' + std::to_string(l_DroneLevel) + ",";
-                }
-                else if (l_Counter == 1)
-                {
-                    l_Drones += "0-" + std::to_string(l_DroneLevel) + ",";
-                }
-                else if (l_Counter == 2)
-                {
-                    l_Drones += "0/4-" + std::to_string(l_DroneLevel) + ",";
-                }
-                else
-                {
-                    l_Drones += "0-" + std::to_string(l_DroneLevel) + ",";
-                }
+                l_Drones += std::to_string((l_Counter % 2 == 0 && l_DroneGroupCount == 3 && l_Counter != 1) ? l_GroupCounter++ : 0) + "-" + std::to_string(l_DroneLevel) + ",";
             }
-            else if (m_Drones.size() >= 7 && m_Drones.size() <= 8)
+            else
             {
-                if (l_Counter == 0)
-                {
-                    uint32 l_GroupDroneQuantity = m_Drones.size() == 7 ? 1 : 2;
-                    l_Drones = "3/" + std::to_string(l_GroupDroneQuantity) + '-' + std::to_string(l_DroneLevel) + ",";
-                }
-                else if (l_Counter == 1)
-                {
-                    l_Drones += "0-" + std::to_string(l_DroneLevel) + ",";
-                }
-                else if (l_Counter == 2)
-                {
-                    l_Drones += "0/4-" + std::to_string(l_DroneLevel) + ",";
-                }
-                else if (l_Counter <= 5) {
-                    l_Drones += "0-" + std::to_string(l_DroneLevel) + ",";
-                }
-                else if (l_Counter == 6)
-                {
-                    uint32 l_GroupDroneQuantity = m_Drones.size() == 7 ? 1 : 2;
-                    l_Drones += "2/" + std::to_string(l_GroupDroneQuantity) + '-' + std::to_string(l_DroneLevel) + ",";
-                }
-                else
-                {
-                    l_Drones += "0-" + std::to_string(l_DroneLevel) + ",";
-                }
+                l_Drones += std::to_string(l_GroupCounter) + "-" + std::to_string(l_DroneLevel) + ",";
             }
 
             l_Counter++;
         }
 
-        l_Drones += '0';
+        // Trim the last comma and add final zero as per the string format rules
+        if (!l_Drones.empty())
+            l_Drones.pop_back(); // Remove the last comma
+
+        l_Drones += "/0";
 
         return l_Drones;
     }
+
     /// Update Cargo Max Space
     void Player::UpdateMaxCargoSpace()
     {
@@ -1237,19 +1862,19 @@ namespace SteerStone { namespace Game { namespace Entity {
         JumpChipType l_JumpChipType = GetInventory()->GetJumpChipType();
 
         SendPacket(Server::Packets::Misc::Update().Write(Server::Packets::Misc::InfoUpdate::INFO_UPDATE_EXTRAS_INFO, {
-            1, ///< Weird Icon
-            0, ///< Portable Trade Ore
-            static_cast<uint8>(l_JumpChipType),
-            0,
-            GetInventory()->GetRepairBot() != nullptr ? true : false,
-            0,
-            7,
-            8,
-            0, ///< Multiplier
-            0,
-            0, ///< AIM CPU
-            0, ///< ROCKET CPU Automatically fires
-            0, ///< Cloak CPU
+            1, ///< updateDroneCpuIndicator (3)
+            0, ///< diploscan Portable Trade Ore (4)
+            static_cast<uint8>(l_JumpChipType), // jump_cpu_id (5)
+            0, // (6)
+            GetInventory()->GetRepairBot() != nullptr ? true : false, // (7)
+            0, // hm7_drone_on_board(8)
+            7, // rt_doubbler (9)
+            GetInventory()->HasSmartBomb(), // smartbomb_cpu_on_board (10)
+            GetInventory()->HasInstantShield(), // instashield_cpu_on_board (11)
+            0, // mine_turbo_level (12)
+            0, ///< AIM CPU (aiming_cpu_level) (13)
+            GetInventory()->HasAutoRocket(), ///< ROCKET CPU Automatically fires; TODO arol_cpu_on_board (14)
+            0, ///< Cloak CPU, cloak_cpu_on_board (15)
         }));
 
         if (l_JumpChipType == JumpChipType::JUMP_CHIP_TYPE_NONE)
@@ -1707,7 +2332,7 @@ namespace SteerStone { namespace Game { namespace Entity {
     /// Set Battery Ammo
     ///@p_BatteryType : Battery Type
     ///@p_Amount : Amount to add
-    void Player::SetBatteryAmmo(BatteryType const p_BatteryType, const uint32 p_Amount)
+    void Player::SetBatteryAmmo(BatteryType const p_BatteryType, const int32 p_Amount)
     {
         switch (p_BatteryType)
         {
@@ -1751,12 +2376,15 @@ namespace SteerStone { namespace Game { namespace Entity {
                 break;
         }
 
+        if (LabUpgrade* l_LabUpgrade = GetLabUpgrade(LabUpgradeType::LAB_UPGRADE_TYPE_LASERS))
+            l_LabUpgrade->SetValue(p_Amount);
+
         SendAmmoUpdate();
     }
     /// Set Rocket Ammo
     ///@p_RocketType : Rocket Type
     ///@p_Amount : Amount to add
-    void Player::SetRocketAmmo(RocketType const p_RocketType, const uint32 p_Amount)
+    void Player::SetRocketAmmo(RocketType const p_RocketType, const int32 p_Amount)
     {
         switch (p_RocketType)
         {
@@ -1787,7 +2415,19 @@ namespace SteerStone { namespace Game { namespace Entity {
             break;
         }
 
+        if (LabUpgrade* l_LabUpgrade = GetLabUpgrade(LabUpgradeType::LAB_UPGRADE_TYPE_ROCKETS))
+            l_LabUpgrade->SetValue(p_Amount);
+
         SendAmmoUpdate();
+    }
+    void Player::SetMine(const int32 p_Amount)
+    {
+        m_Ammo.m_Mines += p_Amount;
+
+		if (m_Ammo.m_Mines <= 0)
+			m_Ammo.m_Mines = 0;
+
+		SendAmmoUpdate();
     }
     /// Update Honor
     /// @p_Honor : Honor to Update
@@ -1809,6 +2449,83 @@ namespace SteerStone { namespace Game { namespace Entity {
         // then trigger the station again but this time we are repairing
         SetUpdateEvent(true);
     }
+    uint32 Player::CalculateSmartBombs() const
+    {
+        if (!m_Inventory.HasSmartBomb())
+            return 0;
+
+        uint32 l_Xenomit = GetResource(Resource::RESOURCE_XENOMIT);
+        uint32 l_Mines = m_Ammo.GetMines();
+        uint32 l_SmartBombs = 0;
+
+        while (l_Xenomit >= 100 && l_Mines >= 1)
+        {
+            l_Xenomit -= 100;
+            l_Mines -= 1;
+            l_SmartBombs += 1;
+        }
+
+        return l_SmartBombs;
+    }
+    uint32 Player::CalculateInstantShield() const
+    {
+        if (!m_Inventory.HasInstantShield())
+            return 0;
+
+        uint32 l_Xenomit = GetResource(Resource::RESOURCE_XENOMIT);
+        uint32 l_Mines = m_Ammo.GetMines();
+        uint32 l_SmartBombs = 0;
+
+        while (l_Xenomit >= 100 && l_Mines >= 1)
+        {
+            l_Xenomit -= 100;
+            l_Mines -= 1;
+            l_SmartBombs += 1;
+        }
+
+        return l_SmartBombs;
+    }
+    /// Reward Credits
+    /// This will also send the reward to the client
+    void Player::RewardCredits(int32 p_Credits)
+    {
+        UpdateCredits(p_Credits);
+
+		SendPacket(Server::Packets::Misc::Reward().Write(Server::Packets::Misc::RewardType::REWARD_TYPE_CREDIT, { p_Credits, m_Credits }));
+    }
+    /// Reward Uridium
+    /// This will also send the reward to the client
+    void Player::RewardUridium(int32 p_Uridium)
+    {
+		UpdateUridium(p_Uridium);
+
+        SendPacket(Server::Packets::Misc::Reward().Write(Server::Packets::Misc::RewardType::REWARD_TYPE_URIDIUM, { p_Uridium, m_Uridium }));
+    }
+    /// Reward Honor
+    /// This will also send the reward to the client
+    void Player::RewardHonor(int32 p_Honor)
+    {
+        UpdateHonor(p_Honor);
+
+		SendPacket(Server::Packets::Misc::Reward().Write(Server::Packets::Misc::RewardType::REWARD_TYPE_HONOUR, { p_Honor, m_Honor }));
+    }
+    /// Reward Experience
+    /// This will also send the reward to the client and also the level up packet if the player levels up
+    void Player::RewardExperience(int32 p_Experience)
+    {
+		UpdateExperience(p_Experience);
+
+        SendPacket(Server::Packets::Misc::Reward().Write(Server::Packets::Misc::RewardType::REWARD_TYPE_EXPERIENCE, { p_Experience, m_Experience, m_Level }));
+	}
+
+    void Player::ToggleCloak()
+    {
+        if (IsCloaked())
+            SendSystemMessage("msg_uncloaked");
+
+        SetCloaked(!IsCloaked());
+        SendCloak();
+    }
 
     ///////////////////////////////////////////
     //        BOOSTERS
@@ -1824,6 +2541,22 @@ namespace SteerStone { namespace Game { namespace Entity {
     {
         return BoosterItemTemplate->Value != 0 ? BoosterItemTemplate->Value : BoosterItemTemplate->ValuePercentage;
 	}
+    uint32 Ammo::GetInstantShields() const
+    {
+        return m_Player->CalculateInstantShield();
+    }
+    uint32 Ammo::GetSmartBombs() const
+    {
+        return m_Player->CalculateSmartBombs();
+    }
+    void Ammo::Update(uint32 const p_Diff)
+    {
+        if (m_MineCooldown.Update(p_Diff))
+            m_Player->SendPacket(Server::Packets::Misc::Update().Write(Server::Packets::Misc::InfoUpdate::INFO_CLEAR_COOLDOWNS, { "MIN" }));
+
+        if (m_SmartMineCooldown.Update(p_Diff))
+            m_Player->SendPacket(Server::Packets::Misc::Update().Write(Server::Packets::Misc::InfoUpdate::INFO_CLEAR_COOLDOWNS, { "SMB" }));
+    }
 }   ///< namespace Entity
 }   ///< namespace Game
 }   ///< namespace Steerstone

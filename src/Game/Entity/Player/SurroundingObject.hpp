@@ -63,7 +63,8 @@ namespace SteerStone { namespace Game { namespace Entity {
         bool IsScheduledForDespawn() const;
 
         /// Despawn Object
-        bool Despawn();
+        /// @p_Force : Force Despawn
+        bool Despawn(bool p_Force = false);
 
     //////////////////////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////////////////////

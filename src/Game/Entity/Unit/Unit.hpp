@@ -91,19 +91,22 @@ namespace SteerStone { namespace Game { namespace Entity {
 
         /// Update
         /// @p_Diff : Execution Time
-        void Update(uint32 const p_Diff);
+        bool Update(uint32 const p_Diff);
 
         ///////////////////////////////////////////
         //             ATTACK SYSTEM
         ///////////////////////////////////////////
         /// Attack
         /// @p_Victim : Victim we are attacking
-        void Attack(Unit* p_Victim, AttackType const p_AttackType = AttackType::ATTACK_TYPE_LASER);
+        /// @p_AttackType : Type of attack
+        void Attack(Unit* p_Victim, AttackType p_AttackType = AttackType::ATTACK_TYPE_LASER);
         /// Can Attack Target
-        /// @p_Victim : Victim
+        /// @p_VictimLastCombatTime : Victim
         bool CanAttackTarget(Unit* p_Victim);
         /// Is In Combat
         bool IsInCombat() const;
+        /// Last Time In Combat (in seconds)
+        uint32 LastCombatTime() const { return m_LastTimeAttacked / 1000; }
         /// Update Attack
         /// @p_Diff : Execution Time
         void AttackerStateUpdate(uint32 const p_Diff);
@@ -142,6 +145,9 @@ namespace SteerStone { namespace Game { namespace Entity {
         /// @p_Hit : Whether the attack is a hit or not
         void SendLaserAttack(bool const p_Hit);
 
+        /// Cleanup Before Delete
+        void CleanupsBeforeDelete();
+
     private:
         /// Send Rocket Attack
         /// @p_Diff : Diff counter
@@ -154,13 +160,34 @@ namespace SteerStone { namespace Game { namespace Entity {
         ///////////////////////////////////////////
 
     public:
+        void SetTarget(Unit* p_Target)
+        {
+            m_Target = p_Target; 
+            m_TargetGUID = p_Target->GetGUID();
+            m_Target->SetAttackers(this);
+        }
+        void RemoveAllAttackers()
+        {
+            /// We need to copy otherwise we will be erasing while iterating
+            /// As Cancel Attack will remove the attacker from the list
+            std::set<Unit*> l_Attackers = m_Attackers;
+            for (auto l_Attacker : l_Attackers)
+                l_Attacker->CancelAttack();
 
-        void SetTarget(Unit* p_Target)          { m_Target = p_Target; m_TargetGUID = p_Target->GetGUID();  }
+            m_Attackers.clear();
+        }
+        void ClearTarget()
+        {
+            m_Target = nullptr;
+            m_TargetGUID = 0;
+        }
         bool HasTarget()                        { return m_Target != nullptr;                               }
         Unit* GetTarget()                       { return m_Target;                                          }
         Unit const* GetTarget() const           { return m_Target;                                          }
         uint64 GetTargetGUID() const            { return m_TargetGUID;                                      }
-        void ClearTarget()                      { m_Target = nullptr; m_TargetGUID = 0;                     }
+        void SetAttackers(Unit* p_Attacker)     { m_Attackers.insert(p_Attacker);                           }
+        void AddAttacker(Unit* p_Attacker)      { m_Attackers.insert(p_Attacker);                           }
+        void RemoveAttacker(Unit* p_Attacker)   { m_Attackers.erase(p_Attacker);                            }
 
         ///////////////////////////////////////////
         //            GETTERS/SETTERS
@@ -197,6 +224,13 @@ namespace SteerStone { namespace Game { namespace Entity {
 
             return m_Resources[p_Index];
         }
+        uint32 GetResourceTotal() const
+        {
+			uint32 l_Total = 0;
+			for (uint32 i = 0; i < MAX_RESOURCE_COUNTER; ++i)
+				l_Total += m_Resources[i];
+			return l_Total;
+		}
         uint32 GetResourceCreditPrice(uint32 const p_Index) const
         {
             if (p_Index > MAX_RESOURCE_COUNTER)
@@ -246,13 +280,13 @@ namespace SteerStone { namespace Game { namespace Entity {
         {
             m_MinDamage         = p_MinDamage;
             m_MaxDamage         = p_MaxDamage;
-            GetSpline()->SetSpeed(GetSpline()->GetSpeed() + p_Speed);
+            GetSpline()->SetSpeed(p_Speed);
             m_MaxShield         = p_Shield;
             m_Shield            = p_Shield;
             m_ShieldResistance  = p_ShieldResistance;
             m_HitChance		 = p_HitChance;
         }
-        void SetResource(uint32 const p_Index, uint32 const p_Resource);
+        void SetResource(uint32 const p_Index, int32 const p_Resource);
         void SetInRadiationZone(bool const p_InRadiation) { m_InRadiationZone = p_InRadiation; }
         void SetClan(Clan::Base* p_Clan) { m_Clan = p_Clan; }
 
@@ -299,6 +333,7 @@ namespace SteerStone { namespace Game { namespace Entity {
 
         Clan::Base* m_Clan;
 
+        std::set<Unit*> m_Attackers;
         Unit* m_Target;
         uint64 m_TargetGUID;
 

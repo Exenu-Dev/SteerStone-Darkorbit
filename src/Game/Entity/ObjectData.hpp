@@ -68,6 +68,7 @@ namespace SteerStone { namespace Game { namespace Entity {
         uint32 Entry;
         std::string Name;
         uint16 Type;
+        uint16 ShipId;
         uint16 WeaponState;
         int32 HitPoints;
         int32 Shield;
@@ -109,6 +110,7 @@ namespace SteerStone { namespace Game { namespace Entity {
             ToMapId         = 0;
             ToPositionX     = 0;
             ToPositionY     = 0;
+            Level           = 0;
         }
 
         //////////////////////////////////////////////////////////////////////////
@@ -124,6 +126,7 @@ namespace SteerStone { namespace Game { namespace Entity {
         uint32 ToMapId;
         float ToPositionX;
         float ToPositionY;
+        uint16 Level;
     };
     
     struct StationTemplate

@@ -170,10 +170,15 @@ namespace SteerStone { namespace Game { namespace Map {
         uint32 GetMapSizeX()    const { return m_MapSizeX;      }
         uint32 GetMapSizeY()    const { return m_MapSizeY;      }
 
+        /// Get all the players on the map
+        std::vector<Entity::Player*> GetPlayers();
+
         std::string GetName()
         {
             switch (m_Id)
             {
+                case CompanyMapId::COMPANY_MAP_ID_MMO_1X1:
+					return "1-1";
                 case CompanyMapId::COMPANY_MAP_ID_MMO_1X2:
 				    return "1-2";
                 case CompanyMapId::COMPANY_MAP_ID_MMO_1X3:
@@ -198,6 +203,36 @@ namespace SteerStone { namespace Game { namespace Map {
 					return "3-4";
                 case CompanyMapId::COMPANY_MAP_ID_NOMAN_4X4:
 					return "4-4";
+                case CompanyMapId::COMPANY_MAP_ID_MMO_4X1:
+					return "4-1";
+                case CompanyMapId::COMPANY_MAP_ID_MMO_4X2:
+                    return "4-2";
+                case CompanyMapId::COMPANY_MAP_ID_MMO_4X3:
+                    return "4-3";
+                case CompanyMapId::COMPANY_MAP_ID_MMO_1X5:
+                    return "1-5";
+                case CompanyMapId::COMPANY_MAP_ID_MMO_1X6:
+                    return "1-6";
+                case CompanyMapId::COMPANY_MAP_ID_MMO_1X7:
+					return "1-7";
+                case CompanyMapId::COMPANY_MAP_ID_MMO_1X8:
+					return "1-8";
+                case CompanyMapId::COMPANY_MAP_ID_EIC_2X6:
+                    return "2-6";
+                case CompanyMapId::COMPANY_MAP_ID_EIC_2X7:
+					return "2-7";
+                case CompanyMapId::COMPANY_MAP_ID_EIC_2X8:
+                    return "2-8";
+                case CompanyMapId::COMPANY_MAP_ID_VRU_3X5:
+					return "3-5";
+                case CompanyMapId::COMPANY_MAP_ID_VRU_3X6:
+                    return "3-6";
+                case CompanyMapId::COMPANY_MAP_ID_VRU_3X7:
+					return "3-7";
+                case CompanyMapId::COMPANY_MAP_ID_VRU_3X8:
+                    return "3-8";
+                case CompanyMapId::COMPANY_MAP_NOMAN_4X5:
+					return "4-5";
                 default:
                     return "Unknown";
             }

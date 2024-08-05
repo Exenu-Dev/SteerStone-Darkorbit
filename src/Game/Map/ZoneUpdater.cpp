@@ -106,9 +106,6 @@ namespace SteerStone { namespace Game { namespace Map {
             m_Tasks.push_back(sThreadManager->PushTask(Core::Utils::StringBuilder("ZONE_WORKER_THREAD_%0", l_I), Core::Threading::TaskType::Normal, 0, std::bind(&ZoneUpdater::WorkerThread, this)));
             m_Activated = true;
         }
-
-        if (p_WorkerCount)
-            m_Activated = true;
     }
 
     /// Is MultiThreading Active

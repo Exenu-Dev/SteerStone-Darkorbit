@@ -39,15 +39,41 @@ enum class PacketProcess
 enum ClientOpCodes
 {
     CLIENT_PACKET_LOG_IN        = 0xD7,
-    CLIENT_PACKET_SEND_MESSAGE  = 0x86
+    CLIENT_PACKET_SEND_MESSAGE  = 0x86,
+    CLIENT_PACKKET_PONG         = 0xD1,
+    CLIENT_PACKET_CHANGE_ROOM   = 0xDC,
 };
 
 enum ServerOpCodes
 {
-    SERVER_PACKET_SEND_MESSAGE        = 0x61,
-    SERVER_PACKET_SEND_SYSTEM_MESSAGE = 0x64,
-    SERVER_PACKET_SEND_ADMIN_MESSAGE  = 0x6A,
-    SERVER_PACKET_SEND_PING           = 0x65
+    SERVER_PACKET_USER_LOGIN		        = 0x01,
+    SERVER_PACKET_SEND_MESSAGE              = 0x61,
+    SERVER_PACKET_SEND_SYSTEM_MESSAGE       = 0x64,
+    SERVER_PACKET_SEND_ADMIN_MESSAGE        = 0x6A,
+    SERVER_PACKET_SEND_PING                 = 0x65,
+    SERVER_PACKET_SEND_BAN_MESSAGE          = 0x66,
+    SERVER_PACKET_SEND_IP_BAN_MESSAGE       = 0x67,
+    SERVER_PACKET_SEND_BAN_USER             = 0x68,
+    SERVER_PACKET_SEND_DEVELOPER_MESSAGE    = 0x69,
+    SERVER_PACKET_KICK_USER                 = 0x6B,
+    SERVER_PACKET_SET_ROOMLIST		        = 0x6C,
+    SERVER_PACKET_ROOM_STATUS_MESSAGE       = 0x6D,
+    SERVER_PACKET_PRIVATE_ROOM_CREATED      = 0x6E,
+    SERVER_PACKET_DELETE_ROOM			    = 0x6F,
+    SERVER_PACKET_NOT_ROOM_OWNER			= 0x70,
+    SERVER_PACKET_CANNOT_LEAVE_ROOM			= 0x71,
+    SERVER_PACKET_ROOM_NAME_TOO_SHORT	    = 0x72,
+    SERVER_PACKET_ROOM_NAME_TOO_LONG 	    = 0x73,
+    SERVER_PACKET_ROOM_INVITE_USER_NOT_FOUND = 0x74,
+    SERVER_PACKET_ROOM_INVITE_NOT_YOUR_ROOM = 0x75,
+    SERVER_PACKET_ROOM_CANNOT_INVITE_YOURSELF = 0x76,
+    SERVER_PACKET_USER_JOINED_INVITED_ROOM  = 0x77,
+    SERVER_PACKET_USER_LEFT_INVITED_ROOM	= 0x78, 
+    SERVER_PACKET_NO_MORE_PRIVATE_ROOMS		= 0x79,
+    SERVER_PACKET_CREATE_ROOM_WRONG_ARGUMENTS = 0x7A,
+    SERVER_PACKET_USER_DOES_NOT_EXIST		= 0x7B,
+    SERVER_PACKET_YOU_WHISPER			    = 0x7C,
+    SERVER_PACKET_USER_WHISPERS_YOU		    = 0x7D,
 };
 
 namespace SteerStone { namespace Chat { namespace Server {
@@ -84,6 +110,8 @@ namespace SteerStone { namespace Chat { namespace Server {
             /// Get Server Packet
             /// @p_Id : Id of server packet we are searching for
             OpcodeHandler const& GetServerPacket(const uint64& Id);
+
+            std::string GetServerPacketHeader(uint64 const p_OpCode);
 
         //////////////////////////////////////////////////////////////////////////
         //////////////////////////////////////////////////////////////////////////

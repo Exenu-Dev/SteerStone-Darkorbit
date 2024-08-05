@@ -44,7 +44,7 @@ namespace SteerStone { namespace Game { namespace Entity {
     /// Deconstructor
     BonusBox::~BonusBox()
     {
-        sZoneManager->RemoveFromMap(this, true);
+        Unit::CleanupsBeforeDelete();
     }
 
     //////////////////////////////////////////////////////////////////////////
@@ -56,10 +56,9 @@ namespace SteerStone { namespace Game { namespace Entity {
 
     /// Update
     /// @p_Diff : Execution Time
-    void BonusBox::Update(uint32 const p_Diff)
+    bool BonusBox::Update(uint32 const p_Diff)
     {
-        if (NeedToBeUpdated())
-            SetNeedToBeUpdated(false);
+        Object::Update(p_Diff);
 
         m_IntervalFriendlyCargo.Update(p_Diff);
         if (m_IntervalFriendlyCargo.Passed(true))
@@ -69,6 +68,8 @@ namespace SteerStone { namespace Game { namespace Entity {
 
             m_IsFriendlyCargo = false;
         }
+
+        return true;
     }
 
     /// Reward Credit on kill

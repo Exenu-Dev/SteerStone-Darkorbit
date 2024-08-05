@@ -21,6 +21,8 @@
 #include "Core/Core.hpp"
 #include "GameFlags.hpp"
 #include "json.hpp"
+#include "GameFlags.hpp"
+#include "json.hpp"
 
 namespace SteerStone { namespace Game { namespace Entity {
 

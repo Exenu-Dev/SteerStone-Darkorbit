@@ -64,6 +64,8 @@ namespace SteerStone { namespace Game { namespace Map {
         /// @p_Id : Map Id
         Map::Base* GetMap(uint32 const p_Id) const;
 
+        std::unordered_map<uint32, Map::Base*> const& GetMaps() const { return m_Maps; }
+
         /// Add to Map
         /// @p_Object : Object being added to map
         void AddObject(Entity::Object* p_Object);

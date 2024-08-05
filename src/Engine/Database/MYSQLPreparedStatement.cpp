@@ -33,9 +33,7 @@ namespace SteerStone { namespace Core { namespace Database {
         #endif
 
         m_Connection = nullptr;
-
-        for (uint32 l_I = 0; l_I < MAX_PREPARED_STATEMENTS; l_I++)
-            m_Statements[l_I] = nullptr;
+        m_Statement = nullptr;
     }
     /// Deconstructor
     MYSQLPreparedStatement::~MYSQLPreparedStatement()
@@ -80,9 +78,7 @@ namespace SteerStone { namespace Core { namespace Database {
                 l_Logged = true;
             }
 
-            /// Set up prepare statements
-            for (uint32 l_I = 0; l_I < MAX_PREPARED_STATEMENTS; l_I++)
-                m_Statements[l_I] = new PreparedStatement(shared_from_this());
+            m_Statement = new PreparedStatement(shared_from_this());
 
             mysql_set_character_set(m_Connection, "utf8");
 

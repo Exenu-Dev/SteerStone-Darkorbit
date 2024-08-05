@@ -21,6 +21,7 @@
 #include "json.hpp"
 #include "Singleton/Singleton.hpp"
 
+#include "Room.hpp"
 #include "Commands/Handler.hpp"
 
 #define CHAT_SLEEP_TIMER 60
@@ -47,22 +48,47 @@ namespace SteerStone { namespace Chat { namespace Channel {
         /// @p_Username : Username of player
         Entity::Player* FindPlayerByUsername(const std::string p_Username);
 
+        /// Load the standard default rooms
+        void LoadRooms();
+
+        /// Get Standard Rooms Based on Company
+        /// @p_Company : Company
+        std::map<uint32, Room*> GetStandardRoomsBasedOnCompany(const Company p_Company);
+
+        /// Get Room by Id
+        /// @p_Id : Room Id
+        Room* GetRoomById(const uint16 p_Id);
+
+        /// Check to see if room exists by name
+        /// @p_Name : Room Name
+        bool RoomExistsByName(const std::string p_Name);
+
+        /// Add Room
+        /// @p_Room : Room to add
+        void AddRoom(Room* p_Room);
+
+        /// Remove Room
+        /// @p_Id : Room Id
+        void RemoveRoom(const uint16 p_Id);
+
+        /// Update Rooms
+        /// This is to find out if the room is empty, if so, then remove the room
+        /// @p_Diff : Time Diff
+        void UpdateRooms(uint32 const p_Diff);
+
+        /// Generate Room Id
+        uint16 GenerateRoomId();
+
         /// Update the Chat
         ///@ p_Diff : Time Diff
         void Update(uint32 const p_Diff);
         /// Stop World Updating
         bool StopWorld() const;
 
-        /// Send Message
-        ///@ p_Player : Player who is sending the message
-        ///@ p_Message: Message to send
-        ///@ p_RoomId: Room Id to send to
-        void SendMessageToRoom(Entity::Player const* p_Player, std::string const p_Message, uint16 const p_RoomId);
-
         /// Process Incoming Command
         ///@ p_Input : Command to process
         ///@ p_Player : Player who is sending the command
-        void ProcessCommand(const std::string& p_Input, Entity::Player const* p_Player);
+        void ProcessCommand(const std::string& p_Input, Entity::Player* p_Player);
 
         /// Add Process Command
         ///@ p_Id : Player Id
@@ -95,6 +121,7 @@ namespace SteerStone { namespace Chat { namespace Channel {
     private:
         PlayerSet m_Players;
         static volatile bool s_StopChat;                                   ///< Stop Chat Updating
+        std::map<uint32, Room*> m_Rooms;                                   ///< Rooms
         Commands::Handler* m_CommandsHandler;                              ///< Commands Handler
     };
 }   ///< namespace Channel

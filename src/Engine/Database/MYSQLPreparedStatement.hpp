@@ -77,7 +77,7 @@ namespace SteerStone { namespace Core { namespace Database {
 
     private:
         MYSQL* m_Connection;                                       ///< MYSQL Connection
-        PreparedStatement* m_Statements[MAX_PREPARED_STATEMENTS];  ///< Prepared Statements storage
+        PreparedStatement* m_Statement;                            ///< Statement
         Base* m_Base;                                              ///< Database
     };
 

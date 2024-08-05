@@ -33,9 +33,12 @@ namespace SteerStone { namespace Chat { namespace Server {
 
         public:
             /// Constructor
-            ServerPacket(char const* p_Header) 
+            ServerPacket(const char* p_Header, bool p_AppendSplit = true) 
             {
                 m_Buffer.AppendChar(p_Header);
+
+                if (p_AppendSplit)
+                    m_Buffer.AppendChar("%");
             }
             /// Deconstructor
             ~ServerPacket() {}

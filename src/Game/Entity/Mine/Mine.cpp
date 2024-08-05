@@ -30,18 +30,24 @@
 namespace SteerStone { namespace Game { namespace Entity {
 
     /// Constructor
-    Mine::Mine(Player* p_Owner)
+    Mine::Mine(Player* p_Owner, MinesType const p_MineType)
     {
         SetType(Type::OBJECT_TYPE_MINE);
         SetGUID(ObjectGUID(GUIDType::Mine));
 
-        m_Timer.SetInterval(MINE_MCB_TIMER);
+        if (p_MineType == MinesType::MINE)
+            m_Timer.SetInterval(MINE_MCB_TIMER);
+		else if (p_MineType == MinesType::SMART_BOMB)
+            /// Denotates the moment the smart bomb is created
+			m_Timer.SetInterval(0);
 
+        m_MineType = p_MineType;
         m_Owner = p_Owner;
     }
     /// Deconstructor
     Mine::~Mine()
     {
+        Unit::CleanupsBeforeDelete();
     }
 
     //////////////////////////////////////////////////////////////////////////
@@ -51,10 +57,14 @@ namespace SteerStone { namespace Game { namespace Entity {
     //                GENERAL
     ///////////////////////////////////////////
 
-    void Mine::Update(uint32 const p_Diff)
+    bool Mine::Update(uint32 const p_Diff)
     {
+        Object::Update(p_Diff);
+
         if (CanExplode(p_Diff))
             Explode();
+
+        return true;
     }
 
     /// Check if mine can explode
@@ -72,12 +82,43 @@ namespace SteerStone { namespace Game { namespace Entity {
         {
             if (Core::Utils::IsInCircleRadius(GetSpline()->GetPositionX(), GetSpline()->GetPositionY(), l_Itr.second->GetSpline()->GetPositionX(), l_Itr.second->GetSpline()->GetPositionY(), 200))
             {
-                if (l_Itr.second->IsPlayer())
-                    DealDamage(l_Itr.second->ToUnit(), 1000, false);
+                if (l_Itr.second->IsPlayer() && m_Owner != l_Itr.second)
+                {
+                    uint32 l_Damage = 1000;
+
+                    if (m_MineType == MinesType::SMART_BOMB)
+                    {
+                        /// 20% damage of players current health
+                        l_Damage = Core::Utils::CalculatePercentage(l_Itr.second->ToPlayer()->GetHitPoints(), 20);
+                    }
+
+                    DealDamage(l_Itr.second->ToUnit(), l_Damage, false);
+                }
 			}
         }
 
-        GetGrid()->SendPacketIfInSurrounding(Server::Packets::Misc::Update().Write(Server::Packets::Misc::InfoUpdate::INFO_UPDATE_MINE_MIN, { GetObjectGUID().GetCounter() }), this);
+        Server::Packets::Misc::Reward l_Reward;
+
+        // Yeah this is weird, the packet to detonate the mine is in the reward packet
+        switch (m_MineType)
+        {
+            case MinesType::MINE:
+            {
+                m_Owner->SendPacket(Server::Packets::Misc::Reward().Write(Server::Packets::Misc::RewardType::REWARD_TYPE_MINE, { 1 }));
+            }
+            break;
+            case MinesType::SMART_BOMB:
+            {
+                m_Owner->GetGrid()->SendPacketIfInSurrounding(Server::Packets::Misc::Info().Write(
+                    Server::Packets::Misc::InfoType::INFO_TYPE_SMART_MINE,
+                    {
+                        m_Owner->GetObjectGUID().GetCounter()
+                    }
+                ), this, true);
+            }
+            break;
+        }
+
         SetScheduleForDelete(true);
 	}
 

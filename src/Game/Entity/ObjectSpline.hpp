@@ -67,13 +67,14 @@ namespace SteerStone { namespace Game { namespace Entity {
         float GetPlannedPositionX() const { return m_PlannedPositionX;   }
         float GetPlannedPositionY() const { return m_PlannedPositionY;   }
         float GetOrientation()      const { return m_Orientation;        }
-        bool IsMoving()             const { return m_Moving;             }
+        bool IsMoving()             const;
         uint32 GetDestinationTime() const { return m_TimeForDestination; }
         uint32 GetLastTimeCalled()  const { return m_LastCalled;         }
 
         void SetPosition(float const p_PositionX, float const p_PositionY, float const p_PlannedPositionX = 0.0f, float const p_PlannedPositionY = 0.0f) { m_PositionX = p_PositionX; m_PositionY = p_PositionY; if (p_PlannedPositionX) m_PlannedPositionX = p_PlannedPositionX;     if (p_PlannedPositionY) m_PlannedPositionY = p_PlannedPositionY; }
-        void SetIsMoving(bool const p_Moving) { m_Moving = p_Moving; }
-        void SetSpeed(uint32 const p_Speed)   { m_Speed = p_Speed;   }
+        void SetSpeed(uint32 const p_Speed);
+        float GetDistance(Spline* const p_Spline);
+        std::pair<float, float> PositionInCircleRadius(float const p_Radius = 360);
 
     //////////////////////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////////////////////

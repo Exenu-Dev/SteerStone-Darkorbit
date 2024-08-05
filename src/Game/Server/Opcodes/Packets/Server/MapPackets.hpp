@@ -236,6 +236,22 @@ namespace SteerStone { namespace Game { namespace Server { namespace Packets {
         uint32 Id;
     };
 
+    /// SERVER_PACKET_MATERIAL_COLLECT_FAIL packet builder
+    class MaterialCollectFail final : public ServerPacket
+    {
+    public:
+        /// Constructor 
+        MaterialCollectFail() : ServerPacket(ServerOpCodes::SERVER_PACKET_MATERIAL_COLLECT_FAIL)
+        {
+        }
+
+        //////////////////////////////////////////////////////////////////////////
+        //////////////////////////////////////////////////////////////////////////
+
+        /// Write the packet
+        PacketBuffer const* Write();
+    };
+
 }   ///< Packets
 }   ///< Server
 }   ///< Game

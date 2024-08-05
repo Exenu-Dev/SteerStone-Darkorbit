@@ -45,6 +45,9 @@ namespace SteerStone { namespace Game { namespace World {
 		/// @p_Player : Player to teleport
 		/// @p_Arguments : Arguments for the command
 		void Teleport(Entity::Player* p_Player, nlohmann::json const& p_Arguments);
+		/// Speed Player
+		/// @p_Player : Player to speed
+		void Speed(Entity::Player* p_Player, nlohmann::json const& p_Arguments);
 
 		/// Kick Player
 		/// @p_Player : Player to kick

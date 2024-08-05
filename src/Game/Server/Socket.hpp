@@ -142,7 +142,11 @@ namespace SteerStone { namespace Game { namespace Server {
 
             /// Debug Handler
             /// @p_ClientPacket : Packet recieved from client
-            void HandleDebugInitializePlayer(ClientPacket* p_Packet);   
+            void HandleDebugInitializePlayer(ClientPacket* p_Packet);
+
+            /// Quest Handler
+            /// @p_ClientPacket : Packet recieved from client
+            void HandleQuestHUD(ClientPacket* p_Packet);
 
             /// Web Handler
             /// @p_ClientPacket : Packet recieved from Web
@@ -171,6 +175,12 @@ namespace SteerStone { namespace Game { namespace Server {
             /// Web Handler
             /// @p_ClientPacket : Packet recieved from Web
             void HandleUpdateClans(ClientPacket* p_Packet);
+            /// Web Handler
+            /// @p_ClientPacket : Packet recieved from Web
+            void HandleUpdateQuests(ClientPacket* p_Packet);
+            /// Web Handler
+            /// @p_ClientPacket : Packet recieved from Web
+            void HandleCloak(ClientPacket* p_Packet);
 
             /// Pointer to Player
             Entity::Player* ToPlayer();

@@ -37,7 +37,7 @@ namespace SteerStone { namespace Game { namespace Entity {
 
     public:
         /// Constructor
-        Mine(Player * p_Owner);
+        Mine(Player * p_Owner, MinesType const p_MineType);
         /// Deconstructor
         ~Mine();
 
@@ -50,7 +50,7 @@ namespace SteerStone { namespace Game { namespace Entity {
 
         /// Update
         /// @p_Diff : Execution Time
-        void Update(uint32 const p_Diff);
+        bool Update(uint32 const p_Diff) override;
 
         /// Check if mine can explode
         /// @p_Diff : Execution Time
@@ -68,6 +68,7 @@ namespace SteerStone { namespace Game { namespace Entity {
 
     private:
         Core::Diagnostic::IntervalTimer m_Timer;
+        MinesType m_MineType;
         Player* m_Owner;
     };
 

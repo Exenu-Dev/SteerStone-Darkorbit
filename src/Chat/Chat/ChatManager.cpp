@@ -23,10 +23,12 @@
 #include <ctime>
 
 #include "Utility/UtilMaths.hpp"
+#include "Utility/UtilRandom.hpp"
 
 #include "ChatManager.hpp"
 #include "Database/DatabaseTypes.hpp"
 #include "Packets/Server/ChatPacket.hpp"
+
 
 namespace SteerStone { namespace Chat { namespace Channel {
 
@@ -39,6 +41,8 @@ namespace SteerStone { namespace Chat { namespace Channel {
     Base::Base()
     {
         m_CommandsHandler = new Commands::Handler();
+
+        LoadRooms();
     }
     /// Deconstructor
     Base::~Base()
@@ -81,6 +85,139 @@ namespace SteerStone { namespace Chat { namespace Channel {
 
 		return nullptr;
 	}
+    /// Load the standard default rooms
+    void Base::LoadRooms()
+    {
+        m_Rooms[RoomId::ROOM_ID_GLOBAL]         = new Room(RoomId::ROOM_ID_GLOBAL, "Global", 1, Company::NOMAD, RoomType::ROOM_TYPE_NORMAL);
+        m_Rooms[RoomId::ROOM_ID_MMO]            = new Room(RoomId::ROOM_ID_MMO, "MMO", 2, Company::MMO, RoomType::ROOM_TYPE_NORMAL);
+        m_Rooms[RoomId::ROOM_ID_EIC]            = new Room(RoomId::ROOM_ID_EIC, "EIC", 2, Company::EARTH, RoomType::ROOM_TYPE_NORMAL);
+        m_Rooms[RoomId::ROOM_ID_VRU]            = new Room(RoomId::ROOM_ID_VRU, "VRU", 2, Company::VRU, RoomType::ROOM_TYPE_NORMAL);
+        m_Rooms[RoomId::ROOM_ID_CLAN_SEARCH]    = new Room(RoomId::ROOM_ID_CLAN_SEARCH, "Clan Search", 3, Company::NOMAD, RoomType::ROOM_TYPE_CLAN);
+    }
+
+    /// Get Standard Rooms Based on Company
+    /// @p_Company : Company
+    std::map<uint32, Room*> Base::GetStandardRoomsBasedOnCompany(const Company p_Company)
+    {
+        std::map<uint32, Room*> l_Rooms;
+
+        switch (p_Company)
+        {
+            case Company::EARTH:
+            {
+                l_Rooms[RoomId::ROOM_ID_EIC] = GetRoomById(RoomId::ROOM_ID_EIC);
+			}
+			break;
+			case Company::MMO:
+            {
+                l_Rooms[RoomId::ROOM_ID_MMO] = GetRoomById(RoomId::ROOM_ID_MMO);
+			}
+			break;
+			case Company::VRU:
+            {
+                l_Rooms[RoomId::ROOM_ID_VRU] = GetRoomById(RoomId::ROOM_ID_VRU);
+			}
+			break;
+            default:
+                LOG_WARNING("Chat", "Company not found.");
+        }
+
+        l_Rooms[RoomId::ROOM_ID_GLOBAL] = GetRoomById(RoomId::ROOM_ID_GLOBAL);
+
+        return l_Rooms;
+    }
+
+    /// Get Room by Id
+    /// @p_Id : Room Id
+    Room* Base::GetRoomById(const uint16 p_Id)
+    {
+        auto l_Itr = m_Rooms.find(p_Id);
+        if (l_Itr != m_Rooms.end())
+			return l_Itr->second;
+
+        return nullptr;
+    }
+
+    /// Check to see if room exists by name
+    /// @p_Name : Room Name
+    bool Base::RoomExistsByName(const std::string p_Name)
+    {
+        for (auto l_Itr : m_Rooms)
+        {
+			if (l_Itr.second->GetName() == p_Name)
+				return true;
+		}
+
+        return false;
+    }
+
+    /// Add Room
+    /// @p_Room : Room to add
+    void Base::AddRoom(Room* p_Room)
+    {
+        m_Rooms[p_Room->GetId()] = p_Room;
+    }
+    /// Remove Room
+    /// @p_Id : Room Id
+    void Base::RemoveRoom(const uint16 p_Id)
+    {
+        auto l_Itr = m_Rooms.find(p_Id);
+        if (l_Itr != m_Rooms.end())
+        {
+			Room* l_Room = l_Itr->second;
+
+            for (auto l_JItr : l_Room->GetRoomPlayers())
+                l_JItr.second->LeaveRoom(l_Room->GetId());
+
+            l_Room->SetScheduledForDeletion(true);
+		}
+    }
+    /// Update Rooms
+    /// This is to find out if the room is empty, if so, then remove the room
+    /// @p_Diff : Time Diff
+    void Base::UpdateRooms(uint32 const p_Diff)
+    {
+        for (auto l_Itr = m_Rooms.begin(); l_Itr != m_Rooms.end();)
+        {
+            if (l_Itr->second->IsPrivateRoom())
+            {
+                if (l_Itr->second->GetRoomPlayers().empty())
+                {
+                    delete l_Itr->second;
+                    l_Itr = m_Rooms.erase(l_Itr);
+                    continue;
+                }
+            }
+
+            if (l_Itr->second->IsScheduledForDeletion())
+            {
+                for (auto l_JItr : l_Itr->second->GetRoomPlayers())
+					l_JItr.second->m_Rooms.erase(l_JItr.second->m_Rooms.find(l_Itr->second->GetId()));
+
+                delete l_Itr->second;
+				l_Itr = m_Rooms.erase(l_Itr);
+				continue;
+			}
+
+            l_Itr->second->Update(p_Diff);
+            ++l_Itr;
+		}
+    }
+    /// Generate Room Id
+    uint16 Base::GenerateRoomId()
+    {
+        uint16 l_RoomId = 0;
+
+        while (true)
+        {
+			l_RoomId = Core::Utils::UInt32Random(1000, 9999);
+
+			if (m_Rooms.find(l_RoomId) == m_Rooms.end())
+				break;
+		}
+
+		return l_RoomId;
+    }
 
     /// Update the chat
     ///@ p_Diff : Time Diff
@@ -91,6 +228,7 @@ namespace SteerStone { namespace Chat { namespace Channel {
         {
             if (!(*l_Itr)->ToSocket() || (*l_Itr)->ToSocket()->IsClosed())
             {
+                delete *l_Itr;
                 l_Itr = m_Players.erase(l_Itr);
             }
             else
@@ -106,6 +244,8 @@ namespace SteerStone { namespace Chat { namespace Channel {
 				++l_Itr;
             }
         }
+
+        UpdateRooms(p_Diff);
     }
     /// Stop World Updating
     bool Base::StopWorld() const
@@ -113,40 +253,10 @@ namespace SteerStone { namespace Chat { namespace Channel {
         return s_StopChat;
     }
 
-    /// Send Message
-    ///@ p_Player : Player who is sending the message
-    ///@ p_Message : Message to send
-    ///@ p_RoomId: Room Id to send to
-    void Base::SendMessageToRoom(Entity::Player const* p_Player, std::string const p_Message, uint16 const p_RoomId)
-    {
-        for (auto l_Itr : m_Players)
-        {
-            if (l_Itr->IsInRoom(p_RoomId))
-            {
-                if (p_Player->IsAdmin())
-                {
-                    Server::Packets::SendAdminMessage l_Packet;
-                    l_Packet.RoomId = p_RoomId;
-                    l_Packet.Username = p_Player->GetUsername();
-                    l_Packet.Message = p_Message;
-                    l_Itr->SendPacket(l_Packet.Write());
-                }
-                else
-                {
-                    Server::Packets::SendMessageToRoom l_Packet;
-                    l_Packet.RoomId = p_RoomId;
-                    l_Packet.Username = p_Player->GetUsername();
-                    l_Packet.Message = p_Message;
-                    l_Itr->SendPacket(l_Packet.Write());
-                }
-            }
-        }
-    }
-
     /// Process Incoming Command
     ///@ p_Input : Command to process
     ///@ p_Player : Player who is sending the command
-    void Base::ProcessCommand(const std::string& p_Input, Entity::Player const* p_Player)
+    void Base::ProcessCommand(const std::string& p_Input, Entity::Player* p_Player)
     {
         m_CommandsHandler->HandleInput(p_Input , p_Player);
     }
@@ -167,10 +277,12 @@ namespace SteerStone { namespace Chat { namespace Channel {
     }
 
     /// Send System Message
+    /// This just uses the Admin Message Packet
+    /// Probably Wrong
     /// @p_Message : System Message
     void Base::SendSystemMessage(const std::string p_Message)
     {
-        Server::Packets::SystemMessage l_SystemMessagePacket;
+        Server::Packets::DeveloperMessage l_SystemMessagePacket;
         l_SystemMessagePacket.Message = p_Message;
 
         for (auto l_Itr : m_Players)

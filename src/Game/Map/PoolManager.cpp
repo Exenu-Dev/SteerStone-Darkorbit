@@ -97,6 +97,7 @@ namespace SteerStone { namespace Game { namespace Map {
                         {
                             Entity::Mob* l_Mob          = new Entity::Mob();
                             l_Mob->m_Entry              = l_MobTemplate->Entry;
+                            l_Mob->m_ShipId			    = l_MobTemplate->ShipId;
                             l_Mob->m_ShipType           = l_MobTemplate->Type;
                             l_Mob->m_WeaponState        = l_MobTemplate->WeaponState;
                             l_Mob->m_HitPoints          = l_MobTemplate->HitPoints;

@@ -80,6 +80,8 @@ namespace SteerStone { namespace Game { namespace Server {
 
         Entity::Player* l_Player = sWorldManager->FindPlayer(l_PlayerId);
 
+        nlohmann::json l_Json;
+
         if (l_Player)
         {
             if (l_Player->GetEvent() == EventType::EVENT_TYPE_STATION && !l_Player->IsInCombat())
@@ -87,10 +89,27 @@ namespace SteerStone { namespace Game { namespace Server {
                 /// Reload our inventory
                 l_Player->GetInventory()->LoadInventory();
                 l_Player->GetInventory()->CalculateStats();
+                l_Player->UpdateExtrasInfo();
 
                 l_Player->SendHealthAndShield();
+
+                l_Json["status"] = "success";
+                l_Json["message"] = "Inventory updated";
             }
+			else
+			{
+				l_Json["status"] = "error";
+				l_Json["message"] = "You're not in a station or in combat but inventory was updated";
+			}
         }
+		else
+		{
+			l_Json["status"] = "error";
+			l_Json["message"] = "Failed to find player " + std::to_string(l_PlayerId);
+			LOG_WARNING("Web", "Failed to find player %0", l_PlayerId);
+		}
+
+		Write(l_Json.dump().c_str(), l_Json.dump().length(), true);
     }
     /// Web Handler
     /// @p_ClientPacket : Packet recieved from Web
@@ -99,7 +118,7 @@ namespace SteerStone { namespace Game { namespace Server {
         uint32 l_PlayerId = p_Packet->ReadUInt32();
 
         Entity::Player* l_Player = sWorldManager->FindPlayer(l_PlayerId);
-        char l_CanEquip = '0';
+        nlohmann::json l_Json;
 
         if (l_Player)
         {
@@ -113,26 +132,46 @@ namespace SteerStone { namespace Game { namespace Server {
                 {
                     int32 l_CargoSpaceGained = l_ShipTemplate->Cargo - l_Player->m_MaxCargoSpace;
 
-                    l_Player->m_HitPoints = l_ShipTemplate->HitPoints;
+                    if (l_Player->m_HitPoints > l_ShipTemplate->HitPoints)
+						l_Player->m_HitPoints = l_ShipTemplate->HitPoints;
+
                     l_Player->m_ShipType = l_ShipTemplate->Entry;
+                    l_Player->m_MaxHitPoints = l_ShipTemplate->HitPoints;
                     l_Player->m_MaxRockets = l_ShipTemplate->Rockets;
+                    l_Player->m_MaxBattery = l_ShipTemplate->Ammo;
                     l_Player->m_MaxCargoSpace = l_ShipTemplate->Cargo;
-                    l_Player->m_CargoSpace += l_CargoSpaceGained;
 
                     l_Player->SaveShipToDB();
                     l_Player->SendInitializeShip();
                     l_Player->SendMapUpdate();
+                    l_Player->GetInventory()->LoadInventory();
+                    l_Player->GetInventory()->CalculateStats();
+                    l_Player->SendHealthAndShield();
+                    l_Player->SendAmmoUpdate();
+                    l_Player->SetNeedToBeUpdated(true);
                     l_Player->GetMap()->SendConstantObjects(l_Player);
-
-                    l_CanEquip = '1';
+                    l_Player->SaveToDB();
                 }
 
                 // Also update the drones
                 l_Player->SendDrones();
+                l_Json["status"] = "success";
+                l_Json["message"] = "Ship updated";
+            }
+            else
+            {
+				l_Json["status"] = "error";
+                l_Json["message"] = "You're not in a station or in combat.";
             }
         }
+        else
+        {
+			l_Json["status"] = "error";
+			l_Json["message"] = "Failed to find player " + std::to_string(l_PlayerId);
+			LOG_WARNING("Web", "Failed to find player %0", l_PlayerId);
+        }
 
-        Write(&l_CanEquip, sizeof(l_CanEquip));
+        Write(l_Json.dump().c_str(), l_Json.dump().length(), true);
     }
     /// Web Handler
     /// @p_ClientPacket : Packet recieved from Web
@@ -140,14 +179,35 @@ namespace SteerStone { namespace Game { namespace Server {
     {
 		uint32 l_PlayerId = p_Packet->ReadUInt32();
 
+        nlohmann::json l_Json;
+
 		Entity::Player* l_Player = sWorldManager->FindPlayer(l_PlayerId);
-		char l_CanEquip = '1';
+
+        if (!l_Player)
+        {
+			l_Json["status"] = "error";
+			l_Json["message"] = "Failed to find player " + std::to_string(l_PlayerId);
+			LOG_WARNING("Web", "Failed to find player %0", l_PlayerId);
+			Write(l_Json.dump().c_str(), l_Json.dump().length(), true);
+			return;
+		}
 
         if (l_Player)
             if (l_Player->GetEvent() == EventType::EVENT_TYPE_STATION && !l_Player->IsInCombat())
+            {
+                l_Player->LoadDrones();
 				l_Player->SendDrones();
+			}
+			else
+			{
+				l_Json["status"] = "error";
+				l_Json["message"] = "You're not in a station or in combat.";
+            }
 
-		Write(&l_CanEquip, sizeof(l_CanEquip));
+        l_Json["status"] = "success";
+		l_Json["message"] = "Drones updated";
+
+		Write(l_Json.dump().c_str(), l_Json.dump().length(), true);
 	}
     /// Web Handler
     /// @p_ClientPacket : Packet recieved from Web
@@ -165,9 +225,43 @@ namespace SteerStone { namespace Game { namespace Server {
             uint32 l_Amount = p_Packet->ReadUInt32();
             const Entity::ItemTemplate* l_ItemTemplate = sObjectManager->GetItemTemplate(l_EntryId);
 
-            if (l_ItemTemplate) {
-                // TODO; Need a better method of detecting what ammo is being updated
-                // As checking by name is not a good idea as this could change
+            if (l_ItemTemplate)
+            {
+
+                switch (l_ItemTemplate->Id)
+                {
+                    case static_cast<uint8>(ItemTemplatesId::ITEM_TEMPLATE_ID_LCB_10):
+                    case static_cast<uint8>(ItemTemplatesId::ITEM_TEMPLATE_ID_MCB_25):
+                    case static_cast<uint8>(ItemTemplatesId::ITEM_TEMPLATE_ID_MCB_50):
+                    case static_cast<uint8>(ItemTemplatesId::ITEM_TEMPLATE_ID_SAB_50):
+                    {
+                        if (l_Player->GetAmmo()->GetTotalBatteries() + l_Amount > l_Player->GetMaxBattery())
+                        {
+                            l_Player->SendSystemMessage("ammobuy_fail_space");
+                            l_Json["status"] = "error";
+                            l_Json["message"] = "You can't buy more than your ship can hold";
+                            Write(l_Json.dump().c_str(), l_Json.dump().length(), true);
+                            return;
+                        }
+                    }
+                    break;
+                    case static_cast<uint8>(ItemTemplatesId::ITEM_TEMPLATE_ID_R_310):
+                    case static_cast<uint8>(ItemTemplatesId::ITEM_TEMPLATE_ID_PLT_2021):
+                    case static_cast<uint8>(ItemTemplatesId::ITEM_TEMPLATE_ID_PLT_2026):
+                    case static_cast<uint8>(ItemTemplatesId::ITEM_TEMPLATE_ID_ACM_01):
+                    {
+                        if (l_Player->GetAmmo()->GetTotalRockets() + l_Amount > l_Player->GetMaxRockets())
+                        {
+							l_Player->SendSystemMessage("ammobuy_fail_space");
+							l_Json["status"] = "error";
+							l_Json["message"] = "You can't buy more than your ship can hold";
+							Write(l_Json.dump().c_str(), l_Json.dump().length(), true);
+							return;
+						}
+                    }
+					break;
+                }
+
                 if (l_ItemTemplate->Id == static_cast<uint8>(ItemTemplatesId::ITEM_TEMPLATE_ID_LCB_10))
                     l_Player->SetBatteryAmmo(BatteryType::BATTERY_TYPE_LCB10, l_Amount);
                 else if (l_ItemTemplate->Id == static_cast<uint8>(ItemTemplatesId::ITEM_TEMPLATE_ID_MCB_25))
@@ -182,19 +276,25 @@ namespace SteerStone { namespace Game { namespace Server {
                     l_Player->SetRocketAmmo(RocketType::ROCKET_TYPE_PLT_2021, l_Amount);
                 else if (l_ItemTemplate->Id == static_cast<uint8>(ItemTemplatesId::ITEM_TEMPLATE_ID_PLT_2026))
                     l_Player->SetRocketAmmo(RocketType::ROCKET_TYPE_PLT_2026, l_Amount);
+                else if (l_ItemTemplate->Id == static_cast<uint16>(ItemTemplatesId::ITEM_TEMPLATE_ID_ACM_01))
+					l_Player->SetMine(l_Amount);
+
+                l_Player->SaveToDB();
 
                 l_Json["status"] = "success";
                 l_Json["message"] = "Ammo updated";
             }
             else
             {
-                l_Json["error"] = "Failed to find Item Template for " + std::to_string(l_EntryId);
+                l_Json["status"] = "error";
+                l_Json["message"] = "Failed to find Item Template for " + std::to_string(l_EntryId);
                 LOG_WARNING("Web", "Failed to find Item Template for %0", l_EntryId);
             }
         }
         else
         {
-			l_Json["error"] = "Failed to find player " + std::to_string(l_PlayerId);
+            l_Json["status"] = "error";
+			l_Json["message"] = "Failed to find player " + std::to_string(l_PlayerId);
 			LOG_WARNING("Web", "Failed to find player %0", l_PlayerId);
 		}
 
@@ -211,7 +311,7 @@ namespace SteerStone { namespace Game { namespace Server {
         if (l_Player)
         {
             l_Player->LoadBoosters();
-            l_Player->SendBoosters();
+            l_Player->SendBoosters(true);
 		}
 
         nlohmann::json l_Json;
@@ -232,6 +332,70 @@ namespace SteerStone { namespace Game { namespace Server {
 
         Write(l_Json.dump().c_str(), l_Json.dump().length(), true);
 	}
+    /// Web Handler
+    /// @p_ClientPacket : Packet recieved from Web
+    void GameSocket::HandleUpdateQuests(ClientPacket* p_Packet)
+    {
+		uint32 l_PlayerId = p_Packet->ReadUInt32();
+        std::string l_Type = p_Packet->ReadString();
+
+		Entity::Player* l_Player = sWorldManager->FindPlayer(l_PlayerId);
+
+		nlohmann::json l_Json;
+
+        if (l_Player)
+        {
+            if (l_Type == "new" || l_Type == "update")
+            {
+                l_Player->SaveQuestsToDB();
+                l_Player->LoadQuests();
+                l_Player->SendQuests();
+
+                l_Json["status"] = "success";
+                l_Json["message"] = "Quests updated";
+            }
+            else if (l_Type == "abandoned")
+            {
+                uint32 l_QuestId = p_Packet->ReadUInt32();
+
+                l_Player->CancelQuest(l_QuestId);
+
+                l_Json["status"] = "success";
+                l_Json["message"] = "Quest abandoned";
+            }
+		}
+        else
+        {
+			l_Json["status"] = "error";
+			l_Json["message"] = "Failed to find player " + std::to_string(l_PlayerId);
+			LOG_WARNING("Web", "Failed to find player %0", l_PlayerId);
+		}
+
+		Write(l_Json.dump().c_str(), l_Json.dump().length(), true);
+	}
+    void GameSocket::HandleCloak(ClientPacket* p_Packet)
+    {
+        uint32 l_PlayerId = p_Packet->ReadUInt32();
+
+        Entity::Player* l_Player = sWorldManager->FindPlayer(l_PlayerId);
+
+        nlohmann::json l_Json;
+
+        if (l_Player)
+        {
+            l_Player->ToggleCloak();
+            l_Json["status"] = "success";
+            l_Json["message"] = "Cloak toggled";
+		}
+        else
+        {
+			l_Json["status"] = "error";
+			l_Json["message"] = "Failed to find player " + std::to_string(l_PlayerId);
+			LOG_WARNING("Web", "Failed to find player %0", l_PlayerId);
+		}
+
+        Write(l_Json.dump().c_str(), l_Json.dump().length(), true);
+    }
 }   ///< namespace Server
 }   ///< namespace Game
 }   ///< namespace SteerStone

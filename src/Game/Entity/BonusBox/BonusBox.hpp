@@ -53,7 +53,7 @@ namespace SteerStone { namespace Game { namespace Entity {
         
         /// Update
         /// @p_Diff : Execution Time
-        void Update(uint32 const p_Diff);
+        bool Update(uint32 const p_Diff) override;
 
         /// Reward Credit on loot
         /// @p_Player : Player being rewarded

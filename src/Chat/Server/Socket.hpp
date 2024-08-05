@@ -62,9 +62,15 @@ namespace SteerStone { namespace Chat { namespace Server {
             /// Handle Login Handler
             /// @p_ClientPacket : Packet recieved from client
             void HandleLogin(ClientPacket* p_Packet);
+            /// Handle Pong Handler
+            /// @p_ClientPacket : Packet recieved from client
+            void HandlePong(ClientPacket* p_Packet);
             /// Handle Send Message
             /// @p_ClientPacket : Packet recieved from client
             void HandleSendMessage(ClientPacket* p_Packet);
+            /// Handle Change Room
+            /// @p_ClientPacket : Packet recieved from client
+            void HandleChangeRoom(ClientPacket* p_Packet);
 
 
         //////////////////////////////////////////////////////////////////////////

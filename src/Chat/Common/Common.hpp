@@ -22,9 +22,9 @@
 
 #define PING_TIMER 25000
 
-enum class Company : uint16
+enum class Company : int16
 {
-    NOMAD       = 0,
+    NOMAD       = -1,
     MMO         = 1,
     EARTH       = 2,
     VRU         = 3,
@@ -55,4 +55,29 @@ enum Rank
     BASIC_GENERAL     = 19,
     GENERAL           = 20,
     ADMIN             = 21,
+};
+
+enum AccessLevel
+{
+    ACCESS_LEVEL_PLAYER         = 0,
+    ACCESS_LEVEL_MODERATOR      = 1,
+    ACCESS_LEVEL_ADMIN          = 2,
+    ACCESS_LEVEL_DEVELOPER	    = 3,
+};
+
+enum RoomType
+{
+    ROOM_TYPE_NORMAL            = 0,
+    ROOM_TYPE_PRIVATE           = 1,
+    ROOM_TYPE_CLAN              = 2,
+    ROOM_TYPE_SUPPORT		    = 3,
+};
+
+enum RoomId
+{
+	ROOM_ID_GLOBAL              = 1,
+	ROOM_ID_MMO 			    = 2,
+    ROOM_ID_EIC 			    = 3,
+    ROOM_ID_VRU 			    = 4,
+    ROOM_ID_CLAN_SEARCH 		= 5,
 };

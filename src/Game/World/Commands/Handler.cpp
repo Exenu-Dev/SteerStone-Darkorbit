@@ -10,6 +10,7 @@ namespace SteerStone { namespace Game { namespace World {
 		m_Commands["teleport"] = std::bind(&Handler::Teleport, this, std::placeholders::_1, std::placeholders::_2);
 		m_Commands["save"] = std::bind(&Handler::Save, this, std::placeholders::_1, std::placeholders::_2);
 		m_Commands["kick"] = std::bind(&Handler::Kick, this, std::placeholders::_1, std::placeholders::_2);
+		m_Commands["speed"] = std::bind(&Handler::Speed, this, std::placeholders::_1, std::placeholders::_2);
 	}
 
 	/// Deconstructor
@@ -60,6 +61,13 @@ namespace SteerStone { namespace Game { namespace World {
 		p_Player->Teleport(l_MapId);
 
 		p_Player->SendInfoMessage("You will be teleported in 5 seconds");
+	}
+	/// Speed Player
+	/// @p_Player : Player to speed
+	void Handler::Speed(Entity::Player* p_Player, nlohmann::json const& p_Arguments)
+	{
+		p_Player->GetSpline()->SetSpeed(p_Arguments[0].get<uint64_t>());
+		p_Player->SendInfoMessage("Speed set to " + std::to_string(p_Arguments[0].get<uint64_t>()));
 	}
 	/// Kick Player
 	/// @p_Player : Player to kick

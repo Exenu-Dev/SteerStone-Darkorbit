@@ -19,54 +19,45 @@
 #pragma once
 #include <PCH/Precompiled.hpp>
 #include "Core/Core.hpp"
-#include "Unit.hpp"
+#include "Singleton/Singleton.hpp"
+#include "Quest/Quest.hpp"
 #include "GameFlags.hpp"
 
-#define PORTAL_RADIUS 500.0f
+namespace SteerStone { namespace Game { namespace Quest {
+    class Quest;
+} ///< namespace Quest
+} ///< namespace Game
+} ///< namespace SteerStone
 
-namespace SteerStone { namespace Game { namespace Entity {
+namespace SteerStone { namespace Game { namespace Global {
+    typedef std::unordered_map<uint32, Game::Quest::Quest*> QuestMap;
 
-    /// Portal
-    class Portal : public Unit
+    /// Quest Manager
+    class QuestManager
     {
-    public:
-        friend class Map::Base;
-
-    public:
-        /// Constructor
-        Portal();
-        /// Deconstructor
-        ~Portal();
+        SINGLETON_P_D(QuestManager);
 
         //////////////////////////////////////////////////////////////////////////
         //////////////////////////////////////////////////////////////////////////
 
-        /// Is Object near Portal
-        /// @p_Object : Object being checked
-        bool IsInPortalRadius(Entity::Object* p_Object);
+    public:
+        /// Load Quests
+        void LoadQuests();
 
-        /// Getters Functions
-        uint32 GetId()         const { return m_Id;          }
-        Company GetCompany()   const { return m_CompanyId;   }
-        PortalType GetType()   const { return m_Type;        }
-        uint32 GetToMapId()    const { return m_ToMapId;     }
-        float GetToPositionX() const { return m_ToPositionX; }
-        float GetToPositionY() const { return m_ToPositionY; }
-        uint16 GetLevel()      const { return m_Level;       }
+        /// Get the quest by Id
+        /// @p_Id : The quest Id
+        Game::Quest::Quest* const GetQuestById(uint32 const p_Id) const;
 
         //////////////////////////////////////////////////////////////////////////
         //////////////////////////////////////////////////////////////////////////
 
     private:
-        uint32 m_Id;
-        Company m_CompanyId;
-        PortalType m_Type;
-        uint32 m_ToMapId;
-        float m_ToPositionX;
-        float m_ToPositionY;
-        uint16 m_Level;
+        /// Quest Map
+		QuestMap m_Quest;
     };
 
-}   ///< namespace Entity
+}   ///< namespace Global
 }   ///< namespace Game
 }   ///< namespace Steerstone
+
+#define sQuestManager SteerStone::Game::Global::QuestManager::GetSingleton()

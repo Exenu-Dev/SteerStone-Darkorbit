@@ -43,6 +43,9 @@ namespace SteerStone { namespace Game { namespace Server { namespace Packets { n
         case InfoUpdate::INFO_UPDATE_MESSAGE:
             l_Type = "STD";
             break;
+        case InfoUpdate::INFO_UPDATE_SYSTEM_MESSAGE:
+			l_Type = "STM";
+			break;
         case InfoUpdate::INFO_UPDATE_SET_SHIELD:
             l_Type = "SHD";
 			break;
@@ -64,21 +67,18 @@ namespace SteerStone { namespace Game { namespace Server { namespace Packets { n
         case InfoUpdate::INFO_UPDATE_CPU_JUMP_CHIP:
             l_Type = "CPU";
 			break;
-        case InfoUpdate::INFO_UPDATE_DRONES:
-            l_Type = "d";
-            break;
-        case InfoUpdate::INFO_UPDATE_GREY_OPPONENT:
-            l_Type = "LSH";
-            break;
-        case InfoUpdate::INFO_UPDATE_UNGREY_OPPONENT:
-            l_Type = "USH";
-            break;
         case InfoUpdate::INFO_UPDATE_MINE_SMB:
             l_Type = "SMB";
             break;
-        case InfoUpdate::INFO_UPDATE_MINE_MIN:
-            l_Type = "MIN";
-            break;
+        case InfoUpdate::INFO_UPDATE_SPEED:
+            l_Type = "v";
+			break;
+        case InfoUpdate::INFO_UPDATE_COOLDOWNS:
+            l_Type = "CLD";
+			break;
+        case InfoUpdate::INFO_CLEAR_COOLDOWNS:
+            l_Type = "CLR";
+			break;
         }
 
         m_Buffer.AppendChar(l_Type.c_str());
@@ -133,6 +133,9 @@ namespace SteerStone { namespace Game { namespace Server { namespace Packets { n
         case RewardType::REWARD_TYPE_BATTERY:
             l_Type = "BAT";
 			break;
+        case RewardType::REWARD_TYPE_MINE:
+			l_Type = "MIN";
+			break;
         }
 
         m_Buffer.AppendChar(l_Type.c_str());
@@ -154,6 +157,52 @@ namespace SteerStone { namespace Game { namespace Server { namespace Packets { n
     /// SERVER_PACKET_CROSS_HAIR
     PacketBuffer const* CrossHair::Write()
     {
+        m_Buffer.AppendEndSplitter();
+        m_Buffer.AppendCarriage();
+
+        return &m_Buffer;
+    }
+
+    /// SERVER_PACKET_MISC_INFO
+    PacketBuffer const* Info::Write(InfoType p_InfoType, std::initializer_list<std::variant<int32, std::string>> p_Storage)
+    {
+        std::string l_Type;
+
+        switch (p_InfoType)
+        {
+        case InfoType::INFO_TYPE_DRONES:
+			l_Type = "d";
+			break;
+        case InfoType::INFO_TYPE_GREY_OPPONENT:
+            l_Type = "LSH";
+            break;
+        case InfoType::INFO_TYPE_UNGREY_OPPONENT:
+            l_Type = "USH";
+            break;
+        case InfoType::INFO_TYPE_RECEIVE_BOOSTER:
+			l_Type = "fbo";
+			break;
+        case InfoType::INFO_TYPE_INVISIBLE:
+			l_Type = "INV";
+			break;
+        case InfoType::INFO_TYPE_SMART_MINE:
+            l_Type = "SMB";
+            break;
+        case InfoType::INFO_TYPE_INSTANT_SHIELD:
+            l_Type = "ISH";
+			break;
+        }
+
+        m_Buffer.AppendChar(l_Type.c_str());
+
+        for (auto& l_Itr : p_Storage)
+        {
+            if (auto l_Value = std::get_if<std::string>(&l_Itr))
+                m_Buffer.AppendChar(l_Value->c_str());
+            else if (auto l_Value = std::get_if<int32>(&l_Itr))
+                m_Buffer.AppendInt32(*l_Value);
+        }
+
         m_Buffer.AppendEndSplitter();
         m_Buffer.AppendCarriage();
 

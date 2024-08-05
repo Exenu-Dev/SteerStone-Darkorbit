@@ -129,6 +129,7 @@ namespace SteerStone { namespace Game { namespace Map {
             l_Portal->m_ToMapId         = l_Itr->ToMapId;
             l_Portal->m_ToPositionX     = l_Itr->ToPositionX;
             l_Portal->m_ToPositionY     = l_Itr->ToPositionY;
+            l_Portal->m_Level		    = l_Itr->Level;
             l_Portal->SetName(l_Itr->Name);
             l_Portal->SetMap(this);
             l_Portal->GetSpline()->SetPosition(l_Itr->PositionX, l_Itr->PositionY);
@@ -333,6 +334,9 @@ namespace SteerStone { namespace Game { namespace Map {
     /// @p_SendPacket : Send Despawn Packet
     void Base::Remove(Entity::Object* p_Object, bool p_SendPacket)
     {
+        for (auto l_Itr : GetPlayers())
+            l_Itr->RemoveFromSurrounding(p_Object);
+
         if ((std::get<0>(p_Object->GetGridIndex()) > GRID_CELLS - 1 || std::get<0>(p_Object->GetGridIndex()) < 0)
             || std::get<1>(p_Object->GetGridIndex()) > GRID_CELLS - 1 || std::get<1>(p_Object->GetGridIndex()) < 0)
         {
@@ -489,6 +493,9 @@ namespace SteerStone { namespace Game { namespace Map {
             l_Itr->first->ToPlayer()->SendDrones();
             l_Itr->first->ToPlayer()->SendAmmoUpdate();
             l_Itr->first->ToPlayer()->SendAccountRank();
+            l_Itr->first->ToPlayer()->CheckQuestCondition(ConditionType::CONDITION_TYPE_VISIT_MAP, {
+                { AttributeKeys::ATTRIBUTE_KEY_MAP_ID, l_Itr->second.second.MapId }
+            });
 
             /// Must be called after we send initial login packets
             sZoneManager->AddToMap(l_Itr->first);
@@ -585,6 +592,19 @@ namespace SteerStone { namespace Game { namespace Map {
                 p_Object->ToPlayer()->SendPacket(l_Packet.Write());
             }
         }
+    }
+    /// Get all the players on the map
+    std::vector<Entity::Player*> Base::GetPlayers()
+    {
+        std::vector<Entity::Player*> l_Players;
+
+        for (uint32 l_X = 0; l_X < GRID_CELLS; l_X++)
+            for (uint32 l_Y = 0; l_Y < GRID_CELLS; l_Y++)
+                for (auto l_Itr : m_Grids[l_X][l_Y]->GetObjects())
+					if (l_Itr.second->IsPlayer())
+						l_Players.push_back(l_Itr.second->ToPlayer());
+
+		return l_Players;
     }
 
     //////////////////////////////////////////////////////////////////////////

@@ -89,7 +89,7 @@ namespace SteerStone { namespace Core { namespace Threading {
     {
         int64 l_Elapsed = m_TaskStopWatch.GetElapsed();
 
-        //LOG_INFO("task", "timer %0, internval %1, diff %2", m_TaskTimer, GetTaskPeriod(), l_Elapsed);
+        // LOG_INFO("task", "timer %0, internval %1, diff %2", m_TaskTimer, GetTaskPeriod(), l_Elapsed);
 
         m_TaskTimer       -= l_Elapsed;
         m_TaskLastDiffTime = l_Elapsed;
@@ -104,18 +104,18 @@ namespace SteerStone { namespace Core { namespace Threading {
         m_TaskStopWatch.Reset();
         bool l_Result = true;
 
-      //  try
-        //{
+        try
+        {
             l_Result = TaskExecute();
-       // }
-        //catch (std::exception p_Exception)
-       // {
-       //     LOG_ERROR("TheTask", R"LOG(Exception in task "%0", details : \n%1)LOG", m_TaskName, p_Exception.what());
-       // }
-       // catch (...)
-       // {
-       //     LOG_ERROR("TheTask", R"LOG(UNKWNOWN Exception in task "%0")LOG", m_TaskName);
-      //  }
+        }
+        catch (std::exception p_Exception)
+        {
+            LOG_ERROR("TheTask", R"LOG(Exception in task "%0", details : \n%1)LOG", m_TaskName, p_Exception.what());
+        }
+        catch (...)
+        {
+            LOG_ERROR("TheTask", R"LOG(UNKWNOWN Exception in task "%0")LOG", m_TaskName);
+        }
 
         m_TaskTotalRunTime += m_TaskStopWatch.GetElapsed();
         m_TaskTotalRunCount++;

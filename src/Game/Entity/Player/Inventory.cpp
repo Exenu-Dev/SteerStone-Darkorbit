@@ -16,10 +16,12 @@
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include "Server/MiscPackets.hpp"
 #include "Player.hpp"
 #include "Inventory.hpp"
 #include "ObjectManager.hpp"
 #include "Common.hpp"
+#include "Utility/UtilMaths.hpp"
 
 #include "Database/DatabaseTypes.hpp"
 
@@ -134,11 +136,13 @@ namespace SteerStone { namespace Game { namespace Entity {
     /// Calculate player stats
     void Inventory::CalculateStats()
     {
+        const Entity::ShipTemplate* l_ShipTemplate = sObjectManager->GetShipTemplate(m_Player->GetShipType());
+
         uint32 l_Damage             = 0;
-        uint32 l_Speed              = 0;
+        uint32 l_Speed              = l_ShipTemplate->Speed;
         uint32 l_Shield             = 0;
         uint32 l_ShieldResistence   = 0;
-        uint32 l_ShipWeaponCount    = Common::GetWeaponCountByShip(m_Player->GetShipType());
+        uint32 l_ShipWeaponCount    = l_ShipTemplate->Lasers;
         uint32 l_LF3WeaponCount     = 0;
         float  l_HitChance          = HIT_CHANCE;
         m_WeaponCount               = 0;
@@ -150,7 +154,7 @@ namespace SteerStone { namespace Game { namespace Entity {
             {
                 l_Damage += l_Itr.GetItemTemplate()->Value;
                 /// TODO; Don't check against name as this could change and would break
-                if (l_Itr.GetItemTemplate()->Name == "LF-3")
+                if (l_Itr.GetItemTemplate()->Id == static_cast<uint32>(ItemTemplatesId::ITEM_TEMPLATE_ID_LF3))
                     l_LF3WeaponCount++;
 
                 m_WeaponCount++;
@@ -180,6 +184,12 @@ namespace SteerStone { namespace Game { namespace Entity {
                 }
 			}
         }
+
+        if (LabUpgrade* l_LabUpgrade = m_Player->GetLabUpgrade(LabUpgradeType::LAB_UPGRADE_TYPE_ENGINES))
+            l_Speed += Core::Utils::CalculatePercentage(l_Speed, l_LabUpgrade->GetCalculatedValue());
+
+        if (LabUpgrade* l_LabUpgrade = m_Player->GetLabUpgrade(LabUpgradeType::LAB_UPGRADE_TYPE_SHIELDS))
+			l_Shield += Core::Utils::CalculatePercentage(l_Shield, l_LabUpgrade->GetCalculatedValue());
 
         m_Player->SetStats(l_Damage, l_Damage, l_Speed, l_Shield, l_ShieldResistence, l_HitChance);
 
@@ -214,12 +224,48 @@ namespace SteerStone { namespace Game { namespace Entity {
 
         return false;
     }
+    /// Check to see if player has a smart bomb cpu
+    bool Inventory::HasSmartBomb() const
+    {
+        for (auto l_Itr : m_Items)
+        {
+            if (l_Itr.IsExtra() && l_Itr.GetItemTemplate()->Id == static_cast<uint32>(ItemTemplatesId::ITEM_TEMPLATE_SMART_BOMB))
+                return true;
+        }
+
+        return false;
+    }
+    /// Check to see if player has instant shield
+    bool Inventory::HasInstantShield() const
+    { 
+        for (auto l_Itr : m_Items)
+        {
+            if (l_Itr.IsExtra() && l_Itr.GetItemTemplate()->Id == static_cast<uint32>(ItemTemplatesId::ITEM_TEMPLATE_INSTANT_SHIELD))
+                return true;
+        }
+
+        return false;
+    }
+    bool Inventory::HasAutoRocket() const
+    {
+        for (auto l_Itr : m_Items)
+        {
+			if (l_Itr.IsExtra() && l_Itr.GetItemTemplate()->Id == static_cast<uint32>(ItemTemplatesId::ITEM_TEMPLATE_AROL_X))
+				return true;
+		}
+
+        return false;
+    }
     /// Get Repair Bot
     Item* Inventory::GetRepairBot() const
     {
         for (auto l_Itr : m_Items)
         {
-			if (l_Itr.IsExtra() && l_Itr.GetItemTemplate()->Id == static_cast<uint32>(ItemTemplatesId::ITEM_TEMPLATE_ID_REP_1))
+			if (l_Itr.IsExtra() && (
+                l_Itr.GetItemTemplate()->Id == static_cast<uint32>(ItemTemplatesId::ITEM_TEMPLATE_ID_REP_1) ||
+                l_Itr.GetItemTemplate()->Id == static_cast<uint32>(ItemTemplatesId::ITEM_TEMPLATE_ID_REP_2) ||
+                l_Itr.GetItemTemplate()->Id == static_cast<uint32>(ItemTemplatesId::ITEM_TEMPLATE_ID_REP_3)
+            ))
 				return const_cast<Item*>(&l_Itr);
         }
 
@@ -300,6 +346,12 @@ namespace SteerStone { namespace Game { namespace Entity {
                 if (m_Player->GetSelectedBatteryAmmo() != l_BatteryType)
                     return;
 
+                if (m_Player->GetAmmo()->GetTotalBatteries() >= m_Player->GetMaxBattery())
+                {
+                    m_Player->SendSystemMessage("ammobuy_fail_space");
+                    return;
+                }
+
                 ItemTemplate const* l_ItemTemplate = sObjectManager->GetItemTemplate(l_AmmoId);
 
                 LOG_ASSERT(l_ItemTemplate, "Inventory", "Cannot find ammo with id: %0", l_AmmoId);
@@ -312,7 +364,7 @@ namespace SteerStone { namespace Game { namespace Entity {
 
                     if (l_Price > m_Player->GetCredits())
                     {
-						m_Player->SendInfoMessage("Cannot use auto ammo, not enough credits!");
+						m_Player->SendSystemMessage("ammobuy_fail_cre");
                         return;
 					}
 
@@ -324,7 +376,7 @@ namespace SteerStone { namespace Game { namespace Entity {
 
                     if (l_Price > m_Player->GetUridium())
                     {
-                        m_Player->SendInfoMessage("Cannot use auto ammo, not enough uridium!");
+                        m_Player->SendSystemMessage("ammobuy_fail_uri");
                         return;
                     }
 
@@ -333,7 +385,11 @@ namespace SteerStone { namespace Game { namespace Entity {
 
                 m_Player->SetBatteryAmmo(l_BatteryType, AUTO_AMMO_UNITS);
 
-                m_Player->SendInfoMessage("Brought auto ammo for: " + l_ItemTemplate->Name);
+                m_Player->SendPacket(Server::Packets::Misc::Update().Write(Server::Packets::Misc::InfoUpdate::INFO_UPDATE_SYSTEM_MESSAGE, {
+                    "ttip_ammobuy",
+                    "%TYPE%",
+                    l_ItemTemplate->Name,
+                }));
 			}
 		}
     }

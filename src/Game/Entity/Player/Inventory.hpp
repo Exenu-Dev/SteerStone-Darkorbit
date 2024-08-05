@@ -60,6 +60,12 @@ namespace SteerStone { namespace Game { namespace Entity {
         bool HasAutoAmmo() const;
         /// Check to see if player has a jump chip
         bool HasJumpChip() const;
+        /// Check to see if player has a smart bomb cpu
+        bool HasSmartBomb() const;
+        /// Check to see if player has smart shield
+        bool HasInstantShield() const;
+        /// Check to see if player has auto rocket
+        bool HasAutoRocket() const;
         /// Get Repair Bot
         Item* GetRepairBot() const;
         /// Get Jump Chip

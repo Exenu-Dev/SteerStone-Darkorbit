@@ -63,7 +63,7 @@ namespace SteerStone { namespace Game { namespace Server {
         StoreClientPacket(ClientOpCodes::CLIENT_PACKET_SELECT_TARGET,     "CLIENT_PACKET_SELECT_TARGET",      PacketStatus::STATUS_LOGGED_IN,      PacketProcess::PROCESS_MAP_THREAD,    &GameSocket::HandleSelectTarget        );
         StoreClientPacket(ClientOpCodes::CLIENT_PACKET_LASER_SHOOT ,      "CLIENT_PACKET_LASER_SHOOT",        PacketStatus::STATUS_LOGGED_IN,      PacketProcess::PROCESS_MAP_THREAD,    &GameSocket::HandleLaserShoot          );
         StoreClientPacket(ClientOpCodes::CLIENT_PACKET_ABORT_LASER,       "CLIENT_PACKET_ABORT_LASER",        PacketStatus::STATUS_LOGGED_IN,      PacketProcess::PROCESS_MAP_THREAD,    &GameSocket::HandleAbortLaser          );
-        StoreClientPacket(ClientOpCodes::CLIENT_PACKET_LOG_OUT,           "CLIENT_PACKET_LOG_OUT",            PacketStatus::STATUS_LOGGED_IN,      PacketProcess::PROCESS_WORLD_THREAD,  &GameSocket::HandleLogout              );
+        StoreClientPacket(ClientOpCodes::CLIENT_PACKET_LOG_OUT,           "CLIENT_PACKET_LOG_OUT",            PacketStatus::STATUS_LOGGED_IN,      PacketProcess::PROCESS_MAP_THREAD,    &GameSocket::HandleLogout              );
         StoreClientPacket(ClientOpCodes::CLIENT_PACKET_CANCEL_LOG_OUT,    "CLIENT_PACKET_CANCEL_LOG_OUT",     PacketStatus::STATUS_LOGGED_IN,      PacketProcess::PROCESS_WORLD_THREAD,  &GameSocket::HandleCancelLogout        );
         StoreClientPacket(ClientOpCodes::CLIENT_PACKET_LOOT_CARGO,        "CLIENT_PACKET_LOOT_CARGO",         PacketStatus::STATUS_LOGGED_IN,      PacketProcess::PROCESS_MAP_THREAD,    &GameSocket::HandleLootCargo           );
         StoreClientPacket(ClientOpCodes::CLIENT_PACKET_UPDATE_SETTINGS,   "CLIENT_PACKET_UPDATE_SETTINGS",    PacketStatus::STATUS_LOGGED_IN,      PacketProcess::PROCESS_PLAYER_THREAD, &GameSocket::HandleUpdateSettings      );
@@ -74,6 +74,7 @@ namespace SteerStone { namespace Game { namespace Server {
         StoreClientPacket(ClientOpCodes::CLIENT_PACKET_ORE_PRICES,        "CLIENT_PACKET_ORE_PRICES",         PacketStatus::STATUS_LOGGED_IN,      PacketProcess::PROCESS_PLAYER_THREAD, &GameSocket::HandleOrePrices           );
         StoreClientPacket(ClientOpCodes::CLIENT_PACKET_SELL_ORE,          "CLIENT_PACKET_SELL_ORE",           PacketStatus::STATUS_LOGGED_IN,      PacketProcess::PROCESS_PLAYER_THREAD, &GameSocket::HandleSellOre             );
         StoreClientPacket(ClientOpCodes::CLIENT_PACKET_COLLECT_ORE,       "CLIENT_PACKET_COLLECT_ORE",        PacketStatus::STATUS_LOGGED_IN,      PacketProcess::PROCESS_MAP_THREAD,    &GameSocket::HandleLootOre             );
+        StoreClientPacket(ClientOpCodes::CLIENT_PACKET_QUEST_HUD,         "CLIENT_PACKET_QUEST_HUD",          PacketStatus::STATUS_LOGGED_IN,      PacketProcess::PROCESS_MAP_THREAD,    &GameSocket::HandleQuestHUD            );
 
         //////////////////////////////////////////////////////////////////////////
         //////////////////////////////////////////////////////////////////////////
@@ -87,6 +88,8 @@ namespace SteerStone { namespace Game { namespace Server {
         StoreClientPacket(ClientOpCodes::WEB_PACKET_UPDATE_DRONES,         "WEB_PACKET_UPDATE_DRONES",        PacketStatus::STATUS_WEB,           PacketProcess::PROCESS_PLAYER_THREAD, &GameSocket::HandleUpdateDrones         );
         StoreClientPacket(ClientOpCodes::WEB_PACKET_UPDATE_BOOSTERS,       "WEB_PACKET_UPDATE_BOOSTERS",      PacketStatus::STATUS_WEB,           PacketProcess::PROCESS_PLAYER_THREAD, &GameSocket::HandleUpdateBoosters       );
         StoreClientPacket(ClientOpCodes::WEB_PACKET_UPDATE_CLANS,          "WEB_PACKET_UPDATE_CLANS",         PacketStatus::STATUS_WEB,           PacketProcess::PROCESS_MAP_THREAD,    &GameSocket::HandleUpdateClans          );
+        StoreClientPacket(ClientOpCodes::WEB_PAKET_UPDATE_QUESTS,          "WEB_PAKET_UPDATE_QUESTS",         PacketStatus::STATUS_WEB,           PacketProcess::PROCESS_MAP_THREAD,    &GameSocket::HandleUpdateQuests         );
+        StoreClientPacket(ClientOpCodes::WEB_PACKET_CLOAK,                 "WEB_PACKET_CLOAK",                PacketStatus::STATUS_WEB,           PacketProcess::PROCESS_MAP_THREAD,    &GameSocket::HandleCloak                );
 
 
         //////////////////////////////////////////////////////////////////////////
@@ -134,6 +137,8 @@ namespace SteerStone { namespace Game { namespace Server {
         StoreServerPacket(ServerOpCodes::SERVER_PACKET_SPAWN_ORE,           "SERVER_PACKET_SPAWN_ORE",              &GameSocket::HandleServer);
         StoreServerPacket(ServerOpCodes::SERVER_PACKET_SPAWN_MINE,          "SERVER_PACKET_SPAWN_MINE",             &GameSocket::HandleServer);
         StoreServerPacket(ServerOpCodes::SERVER_PACKET_DESPAWN_ORE,         "SERVER_PACKET_DESPAWN_ORE",            &GameSocket::HandleServer);
+        StoreServerPacket(ServerOpCodes::SERVER_PACKET_MATERIAL_COLLECT_FAIL, "SERVER_PACKET_MATERIAL_COLLECT_FAIL", &GameSocket::HandleServer);
+        StoreServerPacket(ServerOpCodes::SERVER_PACKET_QUEST_HUD,           "SERVER_PACKET_QUEST_HUD",              &GameSocket::HandleServer);
 
         /// Web Packets
         StoreServerPacket(ServerOpCodes::SERVER_PACKET_CHECK_ONLINE,        "SERVER_PACKET_CHECK_ONLINE",           &GameSocket::HandleServer);
